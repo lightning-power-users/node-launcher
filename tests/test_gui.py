@@ -11,3 +11,12 @@ def test_launchTestnetBitcoinQtNodeButton_works(qtbot):
     launch_widget = LaunchWidget(node_launcher)
     qtbot.mouseClick(launch_widget.launchTestnetBitcoinQtNodeButton, Qt.LeftButton)
     node_launcher.launchTestnetBitcoinQtNode.assert_called_once()
+
+
+def test_launchMainnetBitcoinQtNodeButton_works(qtbot):
+    node_launcher = MagicMock()
+    node_launcher.launchMainnetBitcoinQtNode = MagicMock(return_value=None)
+    launch_widget = LaunchWidget(node_launcher)
+    qtbot.mouseClick(launch_widget.launchMainnetBitcoinQtNodeButton, Qt.LeftButton)
+    node_launcher.launchMainnetBitcoinQtNode.assert_called_once()
+

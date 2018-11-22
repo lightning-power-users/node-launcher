@@ -1,4 +1,4 @@
-from PySide2 import QtCore, QtWidgets, QtGui
+from PySide2 import QtWidgets
 
 
 class LaunchWidget(QtWidgets.QWidget):
