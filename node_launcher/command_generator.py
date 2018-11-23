@@ -4,7 +4,7 @@ from string import ascii_lowercase, digits
 from typing import List
 
 from node_launcher.constants import BITCOIN_QT_PATH
-from node_launcher.networking_configuration import NetworkingConfiguration
+from node_launcher.port_configuration import PortConfiguration
 
 
 class CommandGenerator(object):
@@ -13,10 +13,10 @@ class CommandGenerator(object):
         self.bitcoin_rpc_user = 'user'
         self.bitcoin_rpc_password = ''.join(choice(ascii_lowercase + digits)
                                             for _ in range(16))
-        self.testnet = NetworkingConfiguration()
-        self.mainnet = NetworkingConfiguration()
+        self.testnet = PortConfiguration()
+        self.mainnet = PortConfiguration()
 
-    def bitcoin_qt(self, n: NetworkingConfiguration) -> List[str]:
+    def bitcoin_qt(self, n: PortConfiguration) -> List[str]:
         command = [
             BITCOIN_QT_PATH[self.operating_system],
             '-prune=600',
@@ -41,7 +41,7 @@ class CommandGenerator(object):
     def lnd_binary(self) -> str:
         return ''
 
-    def lnd(self, n: NetworkingConfiguration) -> List[str]:
+    def lnd(self, n: PortConfiguration) -> List[str]:
         return [
             self.lnd_binary(),
             '--debuglevel=info',

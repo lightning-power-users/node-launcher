@@ -25,7 +25,7 @@ def get_zmq_port():
     return get_port(18500)
 
 
-class NetworkingConfiguration(object):
+class PortConfiguration(object):
     def __init__(self):
         self.zmq_block_port = get_zmq_port()
         self.zmq_tx_port = get_zmq_port()
