@@ -38,3 +38,11 @@ class CommandGenerator(object):
             '-zmqpubrawblock=tcp://127.0.0.1:18503',
             '-zmqpubrawtx=tcp://127.0.0.1:18504'
         ]
+
+    def lnd(self) -> List[str]:
+        .\lnd.exe --bitcoin.active --bitcoin.testnet --bitcoin.node=bitcoind --bitcoind.rpchost=127.0.0.1 --bitcoind.rpcuser=test_user --bitcoind.rpcpass=YOURPASSWORD --bitcoind.zmqpubrawblock=tcp://127.0.0.1:18501 --bitcoind.zmqpubrawtx=tcp://127.0.0.1:18502 --debuglevel=info --rpclisten=localhost:10010 --restlisten=0.0.0.0:8081 --listen=0.0.0.0:9736
+
+    def testnet_lnd(self) -> List[str]:
+        return self.lnd() + [
+
+        ]
