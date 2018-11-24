@@ -20,3 +20,6 @@ class TestCommandGenerator(object):
 
     def test_testnet_lnd(self, command_generator):
         assert len(command_generator.testnet_lnd())
+
+    def test_mainnet_lnd(self, command_generator):
+        assert len(command_generator.mainnet_lnd())

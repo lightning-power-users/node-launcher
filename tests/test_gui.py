@@ -10,8 +10,9 @@ from node_launcher.gui.launch_widget import LaunchWidget
 def mock_node_launcher():
     node_launcher = MagicMock()
     node_launcher.launchTestnetBitcoinQtNode = MagicMock(return_value=None)
-    node_launcher.launchTestnetLndNode = MagicMock(return_value=None)
     node_launcher.launchMainnetBitcoinQtNode = MagicMock(return_value=None)
+    node_launcher.launchTestnetLndNode = MagicMock(return_value=None)
+    node_launcher.launchMainnetLndNode = MagicMock(return_value=None)
     return node_launcher
 
 
@@ -36,3 +37,8 @@ class TestGui(object):
         qtbot.mouseClick(launch_widget.launchTestnetLndNodeButton,
                          Qt.LeftButton)
         launch_widget.node_launcher.launchTestnetLndNode.assert_called_once()
+
+    def test_launchMainnetLndNodeButton(self, qtbot, launch_widget):
+        qtbot.mouseClick(launch_widget.launchMainnetLndNodeButton,
+                         Qt.LeftButton)
+        launch_widget.node_launcher.launchMainnetLndNode.assert_called_once()

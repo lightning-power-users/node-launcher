@@ -11,6 +11,7 @@ def mock_command_generator():
     command_generator.testnet_bitcoin_qt = MagicMock(return_value=None)
     command_generator.mainnet_bitcoin_qt = MagicMock(return_value=None)
     command_generator.testnet_lnd = MagicMock(return_value=None)
+    command_generator.mainnet_lnd = MagicMock(return_value=None)
     return command_generator
 
 
@@ -47,3 +48,7 @@ class TestNodeLauncher(object):
     def test_launchMainnetBitcoinQtNode(self, node_launcher):
         node_launcher.launchMainnetBitcoinQtNode()
         node_launcher.command_generator.mainnet_bitcoin_qt.assert_called_once()
+
+    def test_launchMainnetLndNode(self, node_launcher):
+        node_launcher.launchMainnetLndNode()
+        node_launcher.command_generator.mainnet_lnd.assert_called_once()

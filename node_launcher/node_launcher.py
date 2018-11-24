@@ -39,3 +39,7 @@ class NodeLauncher(object):
     def launchTestnetLndNode(self):
         result = self.launch_terminal(self.command_generator.testnet_lnd())
         return result
+
+    def launchMainnetLndNode(self):
+        result = self.launch_terminal(self.command_generator.mainnet_lnd())
+        return result

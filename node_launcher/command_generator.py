@@ -27,8 +27,8 @@ class CommandGenerator(object):
 
     def testnet_bitcoin_qt(self) -> List[str]:
         return self.bitcoin_qt(self.testnet) + [
-                   '-testnet=1',
-               ]
+            '-testnet=1',
+        ]
 
     def mainnet_bitcoin_qt(self) -> List[str]:
         return self.bitcoin_qt(self.mainnet)
@@ -53,4 +53,9 @@ class CommandGenerator(object):
     def testnet_lnd(self) -> List[str]:
         return self.lnd(self.testnet) + [
             '--bitcoin.testnet'
+        ]
+
+    def mainnet_lnd(self) -> List[str]:
+        return self.lnd(self.testnet) + [
+            '--bitcoin.mainnet'
         ]
