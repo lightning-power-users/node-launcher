@@ -25,17 +25,17 @@ class TestNetworkingConfiguration(object):
     def test_is_port_in_use(self, used_port):
         assert is_port_in_use(used_port)
 
-    def test_zmq_block_port(self, port_configuration):
-        assert not is_port_in_use(port_configuration.zmq_block_port)
+    def test_zmq_block(self, port_configuration):
+        assert not is_port_in_use(port_configuration.zmq_block)
 
-    def test_zmq_tx_port(self, port_configuration):
-        assert not is_port_in_use(port_configuration.zmq_tx_port)
+    def test_zmq_tx(self, port_configuration):
+        assert not is_port_in_use(port_configuration.zmq_tx)
 
-    def test_rest_port(self, port_configuration):
-        assert not is_port_in_use(port_configuration.rest_port)
+    def test_rest(self, port_configuration):
+        assert not is_port_in_use(port_configuration.rest)
 
-    def test_node_port(self, port_configuration):
-        assert not is_port_in_use(port_configuration.node_port)
+    def test_node(self, port_configuration):
+        assert not is_port_in_use(port_configuration.node)
 
-    def test_rpc_port(self, port_configuration):
-        assert not is_port_in_use(port_configuration.grpc_port)
+    def test_grpc(self, port_configuration):
+        assert not is_port_in_use(port_configuration.grpc)

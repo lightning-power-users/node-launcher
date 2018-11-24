@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from node_launcher.node_launcher import NodeLauncher
+from node_launcher.node_launcher import NodeLauncher, launch, launch_terminal
 
 
 @pytest.fixture
@@ -16,9 +16,23 @@ def mock_command_generator():
 
 @pytest.fixture
 def node_launcher(mock_command_generator):
-    launch_function = MagicMock()
-    node_launcher = NodeLauncher(mock_command_generator, launch_function)
+    launch_fn = MagicMock()
+    launch_terminal_fn = MagicMock()
+    node_launcher = NodeLauncher(mock_command_generator,
+                                 launch_fn,
+                                 launch_terminal_fn)
     return node_launcher
+
+
+def test_launch():
+    result = launch(['echo', 'hello'])
+    assert result.pid
+
+
+@pytest.mark.slow
+def test_launch_terminal():
+    result = launch_terminal(['echo', 'hello'])
+    assert result is None
 
 
 class TestNodeLauncher(object):

@@ -1,3 +1,4 @@
 PySide2
 PyTest
 pytest-qt
+requests

@@ -10,6 +10,9 @@
 
 `pytest tests`
 
+To include tests with network calls to GitHub:
+`pytest tests --run_slow`
+
 # Running
 
 `python run.py`

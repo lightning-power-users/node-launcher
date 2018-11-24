@@ -1,32 +1,27 @@
 import platform
-from random import choice
-from string import ascii_lowercase, digits
 from typing import List
 
-from node_launcher.constants import BITCOIN_QT_PATH
-from node_launcher.port_configuration import PortConfiguration
+from node_launcher.configuration import Configuration
 
 
 class CommandGenerator(object):
-    def __init__(self):
+    def __init__(self, testnet_conf, mainnet_conf):
         self.operating_system = platform.system()
-        self.bitcoin_rpc_user = 'user'
-        self.bitcoin_rpc_password = ''.join(choice(ascii_lowercase + digits)
-                                            for _ in range(16))
-        self.testnet = PortConfiguration()
-        self.mainnet = PortConfiguration()
+        self.testnet = testnet_conf
+        self.mainnet = mainnet_conf
 
-    def bitcoin_qt(self, n: PortConfiguration) -> List[str]:
+    @staticmethod
+    def bitcoin_qt(n: Configuration) -> List[str]:
         command = [
-            BITCOIN_QT_PATH[self.operating_system],
+            n.dir.bitcoin_qt(),
             '-prune=600',
             '-txindex=0',
             '-server=1',
             '-disablewallet=1',
-            f'-rpcuser={self.bitcoin_rpc_user}',
-            f'-rpcpassword={self.bitcoin_rpc_password}',
-            f'-zmqpubrawblock=tcp://127.0.0.1:{n.zmq_block_port}',
-            f'-zmqpubrawtx=tcp://127.0.0.1:{n.zmq_tx_port}'
+            f'-rpcuser={n.bitcoin_rpc_user}',
+            f'-rpcpassword={n.bitcoin_rpc_password}',
+            f'-zmqpubrawblock=tcp://127.0.0.1:{n.ports.zmq_block}',
+            f'-zmqpubrawtx=tcp://127.0.0.1:{n.ports.zmq_tx}'
         ]
         return command
 
@@ -38,23 +33,21 @@ class CommandGenerator(object):
     def mainnet_bitcoin_qt(self) -> List[str]:
         return self.bitcoin_qt(self.mainnet)
 
-    def lnd_binary(self) -> str:
-        return ''
-
-    def lnd(self, n: PortConfiguration) -> List[str]:
+    @staticmethod
+    def lnd(n: Configuration) -> List[str]:
         return [
-            self.lnd_binary(),
+            n.dir.lnd(),
             '--debuglevel=info',
             '--bitcoin.active',
             '--bitcoin.node=bitcoind',
             '--bitcoind.rpchost=127.0.0.1',
-            '--bitcoind.rpcuser=test_user',
-            f'--bitcoind.rpcpass={self.bitcoin_rpc_password}',
-            f'--bitcoind.zmqpubrawblock=tcp://127.0.0.1:{n.zmq_block_port}',
-            f'--bitcoind.zmqpubrawtx=tcp://127.0.0.1:{n.zmq_tx_port}',
-            f'--rpclisten=localhost:{n.grpc_port}',
-            f'--restlisten=0.0.0.0:{n.rest_port}',
-            f'--listen=0.0.0.0:{n.node_port}'
+            f'--bitcoind.rpcuser={n.bitcoin_rpc_user}',
+            f'--bitcoind.rpcpass={n.bitcoin_rpc_password}',
+            f'--bitcoind.zmqpubrawblock=tcp://127.0.0.1:{n.ports.zmq_block}',
+            f'--bitcoind.zmqpubrawtx=tcp://127.0.0.1:{n.ports.zmq_tx}',
+            f'--rpclisten=localhost:{n.ports.grpc}',
+            f'--restlisten=0.0.0.0:{n.ports.rest}',
+            f'--listen=0.0.0.0:{n.ports.node}'
         ]
 
     def testnet_lnd(self) -> List[str]:
