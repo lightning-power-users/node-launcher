@@ -179,3 +179,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 
+!/run.spec
