@@ -2,9 +2,11 @@ from PySide2 import QtWidgets
 from PySide2.QtGui import QPixmap
 from PySide2.QtWidgets import QLabel
 
+from node_launcher.assets.asset_access import AssetAccess
+
 
 class LaunchWidget(QtWidgets.QWidget):
-    def __init__(self, node_launcher):
+    def __init__(self, node_launcher, asset_access=AssetAccess()):
         super().__init__()
         self.node_launcher = node_launcher
 
@@ -17,7 +19,8 @@ class LaunchWidget(QtWidgets.QWidget):
 
         testnet_layout = QtWidgets.QVBoxLayout()
         testnet_image = QLabel(self)
-        testnet_pixmap = QPixmap('node_launcher/gui/bitcoin-testnet.png')
+        testnet_pixmap = QPixmap(
+            asset_access.get_asset_full_path('bitcoin-testnet.png'))
         testnet_image.setPixmap(testnet_pixmap)
         testnet_layout.addWidget(testnet_image)
         testnet_layout.addWidget(self.launchTestnetBitcoinQtNodeButton)
@@ -29,7 +32,8 @@ class LaunchWidget(QtWidgets.QWidget):
 
         mainnet_layout = QtWidgets.QVBoxLayout()
         mainnet_image = QLabel(self)
-        mainnet_pixmap = QPixmap('node_launcher/gui/bitcoin.png')
+        mainnet_pixmap = QPixmap(
+            asset_access.get_asset_full_path('bitcoin.png'))
         mainnet_image.setPixmap(mainnet_pixmap)
         mainnet_layout.addWidget(mainnet_image)
         mainnet_layout.addWidget(self.launchMainnetBitcoinQtNodeButton)
@@ -41,8 +45,11 @@ class LaunchWidget(QtWidgets.QWidget):
 
         self.setLayout(self.grid)
 
-        self.launchTestnetBitcoinQtNodeButton.clicked.connect(self.node_launcher.launchTestnetBitcoinQtNode)
-        self.launchTestnetLndNodeButton.clicked.connect(self.node_launcher.launchTestnetLndNode)
-        self.launchMainnetBitcoinQtNodeButton.clicked.connect(self.node_launcher.launchMainnetBitcoinQtNode)
-        self.launchMainnetLndNodeButton.clicked.connect(self.node_launcher.launchMainnetLndNode)
-
+        self.launchTestnetBitcoinQtNodeButton.clicked.connect(
+            self.node_launcher.launchTestnetBitcoinQtNode)
+        self.launchTestnetLndNodeButton.clicked.connect(
+            self.node_launcher.launchTestnetLndNode)
+        self.launchMainnetBitcoinQtNodeButton.clicked.connect(
+            self.node_launcher.launchMainnetBitcoinQtNode)
+        self.launchMainnetLndNodeButton.clicked.connect(
+            self.node_launcher.launchMainnetLndNode)
