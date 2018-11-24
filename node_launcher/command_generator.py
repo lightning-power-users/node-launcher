@@ -14,6 +14,7 @@ class CommandGenerator(object):
     def bitcoin_qt(n: Configuration) -> List[str]:
         command = [
             n.dir.bitcoin_qt(),
+            f'-datadir={n.dir.bitcoin_data()}',
             '-prune=600',
             '-txindex=0',
             '-server=1',
@@ -37,6 +38,7 @@ class CommandGenerator(object):
     def lnd(n: Configuration) -> List[str]:
         return [
             n.dir.lnd(),
+            f'--lnddir="{n.dir.lnd_data()}"',
             '--debuglevel=info',
             '--bitcoin.active',
             '--bitcoin.node=bitcoind',

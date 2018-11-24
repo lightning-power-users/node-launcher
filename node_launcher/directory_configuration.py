@@ -73,6 +73,12 @@ class DirectoryConfiguration(object):
 
         return data
 
+    def bitcoin_data(self) -> str:
+        d = os.path.join(self.data(), 'bitcoin_pruned')
+        if not os.path.exists(d):
+            os.mkdir(d)
+        return d
+
     def bitcoin_qt(self) -> str:
         return BITCOIN_QT_PATH[self.operating_system]
 
@@ -89,3 +95,9 @@ class DirectoryConfiguration(object):
                                           self.lnd_version,
                                           self.operating_system)
         return lnd
+
+    def lnd_data(self):
+        d = os.path.join(self.lnd_directory(), 'data')
+        if not os.path.exists(d):
+            os.mkdir(d)
+        return d

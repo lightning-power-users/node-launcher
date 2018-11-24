@@ -41,5 +41,11 @@ class TestDirectoryConfiguration(object):
     def test_data_directory(self, directory_configuration):
         assert os.path.isdir(directory_configuration.data())
 
-    def test_bitcoin_qt_binary_file(self, directory_configuration):
+    def test_bitcoin_qt(self, directory_configuration):
         assert os.path.isfile(directory_configuration.bitcoin_qt())
+
+    def test_lnd(self):
+        # This will be slow the first time it is run to download LND
+        # and when there are new releases
+        directory_configuration = DirectoryConfiguration('testnet', pruned=True)
+        assert os.path.isfile(directory_configuration.lnd())
