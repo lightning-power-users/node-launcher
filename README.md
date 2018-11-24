@@ -1,3 +1,15 @@
+# Node Launcher
+
+1. Creates a node launcher data directory 
+    * macOS: `~/Library/Application Support/Node Launcher/`
+    * Windows: `%localappdata%/Node\ Launcher/`
+    * Linux: `~/.node_launcher`
+2. Finds available ports for Bitcoin and LND, testnet and mainnet
+3. When launched, nodes use the node launcher data directory, not the default data directories
+4. Nodes are pruned by default and take up to 8 GB of disk space
+5. Pruning still requires downloading data, so make sure you can handle downloading ~300 GB of data
+
+
 # Development
 
 0. `git clone https://github.com/PierreRochard/node-launcher && cd node-launcher`
@@ -19,4 +31,4 @@ To include tests with network calls to GitHub:
 
 macOS:
 
-`pyinstaller --windowed --onefile  run.spec`
+`pyinstaller run.spec`
