@@ -58,6 +58,6 @@ class CommandGenerator(object):
         ]
 
     def mainnet_lnd(self) -> List[str]:
-        return self.lnd(self.testnet) + [
+        return self.lnd(self.mainnet) + [
             '--bitcoin.mainnet'
         ]
