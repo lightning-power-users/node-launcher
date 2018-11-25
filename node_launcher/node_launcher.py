@@ -13,7 +13,6 @@ def launch(command: List[str]):
 def launch_terminal(command: List[str]):
     command[0] = '"' + command[0] + '"'
     cmd = ' '.join(command)
-    cmd_bytes = base64.b64encode(cmd.encode())
     operating_system = platform.system()
     if operating_system == 'Darwin':
         with NamedTemporaryFile(suffix='-lnd.command', delete=False) as f:
@@ -22,16 +21,10 @@ def launch_terminal(command: List[str]):
             subprocess.call(['chmod', 'u+x', f.name])
             subprocess.Popen(['open', '-W', f.name], close_fds=True)
     elif operating_system == 'Windows':
-        arguments = ' '.join(command[1:])
-        file_contents = f"""
-$process = [System.Diagnostics.Process]::Start("{command[0]}", "{arguments}")
-$process.WaitForExit()
-        """
-        with NamedTemporaryFile(suffix='-lnd.ps1', delete=False) as f:
-            f.write(file_contents.encode('utf-8'))
+        with NamedTemporaryFile(suffix='-lnd.bat', delete=False) as f:
+            f.write(cmd.encode('utf-8'))
             f.flush()
-           # subprocess.call(['chmod', 'u+x', f.name])
-            subprocess.Popen(['powershell', '-noexit', '-File', f.name], creationflags=subprocess.DETACHED_PROCESS,
+            subprocess.Popen(['powershell', '-Command', f.name], creationflags=subprocess.DETACHED_PROCESS,
                              close_fds=False, shell=True)
 
 
