@@ -6,15 +6,17 @@ from node_launcher.configuration import Configuration
 
 class CommandGenerator(object):
     def __init__(self, testnet_conf, mainnet_conf):
-        self.operating_system = platform.system()
+        self.operating_system = platform.system().lower()
         self.testnet = testnet_conf
         self.mainnet = mainnet_conf
 
-    @staticmethod
-    def bitcoin_qt(n: Configuration) -> List[str]:
+    def bitcoin_qt(self, n: Configuration) -> List[str]:
+        dir_arg = f'-datadir={n.dir.bitcoin_data()}'
+        if self.operating_system == 'windows':
+            dir_arg = f'-datadir="{n.dir.bitcoin_data()}"'
         command = [
             n.dir.bitcoin_qt(),
-            f'-datadir={n.dir.bitcoin_data()}',
+            dir_arg,
             '-prune=600',
             '-txindex=0',
             '-server=1',
@@ -37,7 +39,7 @@ class CommandGenerator(object):
     def lnd(self, n: Configuration) -> List[str]:
         dir_arg = f'--lnddir="{n.dir.lnd_data()}"'
         if self.operating_system == 'windows':
-            dir_arg = f'--lnddir=`"{n.dir.lnd_data()}`"'
+            dir_arg = f'--lnddir="{n.dir.lnd_data()}"'
         return [
             n.dir.lnd(),
             dir_arg,

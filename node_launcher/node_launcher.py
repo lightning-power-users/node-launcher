@@ -1,12 +1,24 @@
-import base64
 import platform
-import subprocess
+from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP, Popen, call, PIPE
 from tempfile import NamedTemporaryFile
 from typing import List
 
 
 def launch(command: List[str]):
-    result = subprocess.Popen(command, close_fds=True, shell=True)
+    operating_system = platform.system()
+    if operating_system == 'Windows':
+        command[0] = '"' + command[0] + '"'
+        cmd = ' '.join(command)
+        with NamedTemporaryFile(suffix='-btc.bat', delete=False) as f:
+            f.write(cmd.encode('utf-8'))
+            f.flush()
+            result = Popen(['start', 'powershell', '-noexit', '-windowstyle', 'hidden', '-Command', f.name],
+                           stdin=PIPE, stdout=PIPE, stderr=PIPE,
+                           creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
+                           close_fds=True, shell=True)
+    else:
+        result = Popen(command, close_fds=True, shell=True)
+
     return result
 
 
@@ -18,14 +30,16 @@ def launch_terminal(command: List[str]):
         with NamedTemporaryFile(suffix='-lnd.command', delete=False) as f:
             f.write(f'#!/bin/sh\n{cmd}\n'.encode('utf-8'))
             f.flush()
-            subprocess.call(['chmod', 'u+x', f.name])
-            subprocess.Popen(['open', '-W', f.name], close_fds=True)
+            call(['chmod', 'u+x', f.name])
+            Popen(['open', '-W', f.name], close_fds=True)
     elif operating_system == 'Windows':
         with NamedTemporaryFile(suffix='-lnd.bat', delete=False) as f:
             f.write(cmd.encode('utf-8'))
             f.flush()
-            subprocess.Popen(['powershell', '-Command', f.name], creationflags=subprocess.DETACHED_PROCESS,
-                             close_fds=False, shell=True)
+            Popen(['start', 'powershell', '-noexit', '-Command', f.name],
+                  stdin=PIPE, stdout=PIPE, stderr=PIPE,
+                  creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
+                  close_fds=True, shell=True)
 
 
 class NodeLauncher(object):
