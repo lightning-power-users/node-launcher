@@ -34,11 +34,13 @@ class CommandGenerator(object):
     def mainnet_bitcoin_qt(self) -> List[str]:
         return self.bitcoin_qt(self.mainnet)
 
-    @staticmethod
-    def lnd(n: Configuration) -> List[str]:
+    def lnd(self, n: Configuration) -> List[str]:
+        dir_arg = f'--lnddir="{n.dir.lnd_data()}"'
+        if self.operating_system == 'windows':
+            dir_arg = f'--lnddir=`"{n.dir.lnd_data()}`"'
         return [
             n.dir.lnd(),
-            f'--lnddir="{n.dir.lnd_data()}"',
+            dir_arg,
             '--debuglevel=info',
             '--bitcoin.active',
             '--bitcoin.node=bitcoind',

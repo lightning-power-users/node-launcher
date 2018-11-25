@@ -1,6 +1,7 @@
 import os
 import platform
 import tarfile
+import zipfile
 
 import requests
 
@@ -13,12 +14,15 @@ def lnd_release_name(release_tag, operating_system):
 
 def download_url(release_tag: str, operating_system: str = 'darwin'):
     lnd_url = 'https://github.com/lightningnetwork/lnd/'
+    suffix = '.tar.gz'
+    if operating_system == 'windows':
+        suffix = '.zip'
     dl_url = ''.join([
         lnd_url,
         'releases/download/',
         f'{release_tag}/',
         lnd_release_name(release_tag, operating_system),
-        '.tar.gz'
+        suffix
     ])
     return dl_url
 
@@ -37,8 +41,12 @@ def download_and_extract_lnd(data_directory: str,
             if chunk:
                 f.write(chunk)
 
-    with tarfile.open(destination_file) as tar:
-        tar.extractall(path=data_directory)
+    if operating_system == 'windows':
+        with zipfile.ZipFile(destination_file) as zip_file:
+            zip_file.extractall(path=data_directory)
+    else:
+        with tarfile.open(destination_file) as tar:
+            tar.extractall(path=data_directory)
 
 
 def get_latest_lnd_release():
@@ -55,7 +63,7 @@ class DirectoryConfiguration(object):
                  override_data=None):
         self.network = network
         self.pruned = pruned
-        self.operating_system = platform.system()
+        self.operating_system = platform.system().lower()
         self.lnd_version = lnd_release_fn()
         self.lnd_release_name = lnd_release_name(self.lnd_version,
                                                  self.operating_system)
@@ -90,6 +98,8 @@ class DirectoryConfiguration(object):
 
     def lnd(self) -> str:
         lnd = os.path.join(self.lnd_directory(), self.lnd_release_name, 'lnd')
+        if self.operating_system == 'windows':
+            lnd += '.exe'
         if not os.path.isfile(lnd):
             self.download_and_extract_lnd(self.lnd_directory(),
                                           self.lnd_version,

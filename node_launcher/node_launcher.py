@@ -1,3 +1,4 @@
+import base64
 import platform
 import subprocess
 from tempfile import NamedTemporaryFile
@@ -5,13 +6,14 @@ from typing import List
 
 
 def launch(command: List[str]):
-    result = subprocess.Popen(command, close_fds=True)
+    result = subprocess.Popen(command, close_fds=True, shell=True)
     return result
 
 
 def launch_terminal(command: List[str]):
     command[0] = '"' + command[0] + '"'
     cmd = ' '.join(command)
+    cmd_bytes = base64.b64encode(cmd.encode())
     operating_system = platform.system()
     if operating_system == 'Darwin':
         with NamedTemporaryFile(suffix='-lnd.command', delete=False) as f:
@@ -19,6 +21,15 @@ def launch_terminal(command: List[str]):
             f.flush()
             subprocess.call(['chmod', 'u+x', f.name])
             subprocess.Popen(['open', '-W', f.name], close_fds=True)
+    elif operating_system == 'Windows':
+#         arguments = []
+#         for arg in command[1:]:
+#             if ' ' in
+#         file_contents = f"""
+# $process = [System.Diagnostics.Process]::Start("{command[0]}", "-a -s -f1`"d:\some directory\with blanks in a path\fileVCCS.iss`"")
+# $process.WaitForExit()
+#         """
+#         subprocess.Popen(['powershell', '-noexit', '-EncodedCommand', cmd_bytes.decode('ascii')], creationflags=subprocess.DETACHED_PROCESS, close_fds=False, shell=True)
 
 
 class NodeLauncher(object):

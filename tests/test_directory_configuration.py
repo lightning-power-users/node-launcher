@@ -48,4 +48,6 @@ class TestDirectoryConfiguration(object):
         # This will be slow the first time it is run to download LND
         # and when there are new releases
         directory_configuration = DirectoryConfiguration('testnet', pruned=True)
-        assert os.path.isfile(directory_configuration.lnd())
+        lnd_executable = directory_configuration.lnd()
+        print(lnd_executable)
+        assert os.path.isfile(lnd_executable)

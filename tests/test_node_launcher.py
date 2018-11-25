@@ -1,3 +1,4 @@
+import platform
 from unittest.mock import MagicMock
 
 import pytest
@@ -26,13 +27,19 @@ def node_launcher(mock_command_generator):
 
 
 def test_launch():
-    result = launch(['echo', 'hello'])
+    if platform.system() == 'Windows':
+        result = launch(['set', 'path'])
+    else:
+        result = launch(['echo', 'hello'])
     assert result.pid
 
 
 @pytest.mark.slow
 def test_launch_terminal():
-    result = launch_terminal(['echo', 'hello'])
+    if platform.system() == 'Windows':
+        result = launch_terminal(['set', 'path'])
+    else:
+        result = launch_terminal(['echo', 'hello'])
     assert result is None
 
 
