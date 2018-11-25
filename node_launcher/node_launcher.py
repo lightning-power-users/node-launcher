@@ -50,18 +50,18 @@ class NodeLauncher(object):
         self.launch = launch_fn
         self.launch_terminal = launch_terminal_fn
 
-    def launchTestnetBitcoinQtNode(self):
+    def testnet_bitcoin_qt_node(self):
         result = self.launch(self.command_generator.testnet_bitcoin_qt())
         return result
 
-    def launchMainnetBitcoinQtNode(self):
+    def mainnet_bitcoin_qt_node(self):
         result = self.launch(self.command_generator.mainnet_bitcoin_qt())
         return result
 
-    def launchTestnetLndNode(self):
+    def testnet_lnd_node(self):
         result = self.launch_terminal(self.command_generator.testnet_lnd())
         return result
 
-    def launchMainnetLndNode(self):
+    def mainnet_lnd_node(self):
         result = self.launch_terminal(self.command_generator.mainnet_lnd())
         return result

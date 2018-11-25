@@ -3,17 +3,22 @@ from PySide2.QtGui import QPixmap
 from PySide2.QtWidgets import QLabel
 
 from node_launcher.assets.asset_access import AssetAccess
+from node_launcher.node_launcher import NodeLauncher
 
 
 class LaunchWidget(QtWidgets.QWidget):
-    def __init__(self, node_launcher, asset_access=AssetAccess()):
+    node_launcher: NodeLauncher
+
+    def __init__(self,
+                 node_launcher: NodeLauncher,
+                 asset_access: AssetAccess = AssetAccess()):
         super().__init__()
         self.node_launcher = node_launcher
 
-        self.launchTestnetBitcoinQtNodeButton = QtWidgets.QPushButton('Bitcoin')
-        self.launchTestnetLndNodeButton = QtWidgets.QPushButton('LND')
-        self.launchMainnetBitcoinQtNodeButton = QtWidgets.QPushButton('Bitcoin')
-        self.launchMainnetLndNodeButton = QtWidgets.QPushButton('LND')
+        self.testnet_bitcoin_qt_node_button = QtWidgets.QPushButton('Bitcoin')
+        self.testnet_lnd_node_button = QtWidgets.QPushButton('LND')
+        self.mainnet_bitcoin_qt_node_button = QtWidgets.QPushButton('Bitcoin')
+        self.mainnet_lnd_node_button = QtWidgets.QPushButton('LND')
 
         self.grid = QtWidgets.QGridLayout()
 
@@ -23,8 +28,8 @@ class LaunchWidget(QtWidgets.QWidget):
             asset_access.get_asset_full_path('bitcoin-testnet.png'))
         testnet_image.setPixmap(testnet_pixmap)
         testnet_layout.addWidget(testnet_image)
-        testnet_layout.addWidget(self.launchTestnetBitcoinQtNodeButton)
-        testnet_layout.addWidget(self.launchTestnetLndNodeButton)
+        testnet_layout.addWidget(self.testnet_bitcoin_qt_node_button)
+        testnet_layout.addWidget(self.testnet_lnd_node_button)
         testnet_layout.addStretch(1)
         testnet_group_box = QtWidgets.QGroupBox('testnet')
         testnet_group_box.setLayout(testnet_layout)
@@ -36,8 +41,8 @@ class LaunchWidget(QtWidgets.QWidget):
             asset_access.get_asset_full_path('bitcoin.png'))
         mainnet_image.setPixmap(mainnet_pixmap)
         mainnet_layout.addWidget(mainnet_image)
-        mainnet_layout.addWidget(self.launchMainnetBitcoinQtNodeButton)
-        mainnet_layout.addWidget(self.launchMainnetLndNodeButton)
+        mainnet_layout.addWidget(self.mainnet_bitcoin_qt_node_button)
+        mainnet_layout.addWidget(self.mainnet_lnd_node_button)
         mainnet_layout.addStretch(1)
         mainnet_group_box = QtWidgets.QGroupBox('mainnet')
         mainnet_group_box.setLayout(mainnet_layout)
@@ -45,11 +50,11 @@ class LaunchWidget(QtWidgets.QWidget):
 
         self.setLayout(self.grid)
 
-        self.launchTestnetBitcoinQtNodeButton.clicked.connect(
-            self.node_launcher.launchTestnetBitcoinQtNode)
-        self.launchTestnetLndNodeButton.clicked.connect(
-            self.node_launcher.launchTestnetLndNode)
-        self.launchMainnetBitcoinQtNodeButton.clicked.connect(
-            self.node_launcher.launchMainnetBitcoinQtNode)
-        self.launchMainnetLndNodeButton.clicked.connect(
-            self.node_launcher.launchMainnetLndNode)
+        self.testnet_bitcoin_qt_node_button.clicked.connect(
+            self.node_launcher.testnet_bitcoin_qt_node)
+        self.testnet_lnd_node_button.clicked.connect(
+            self.node_launcher.testnet_lnd_node)
+        self.mainnet_bitcoin_qt_node_button.clicked.connect(
+            self.node_launcher.mainnet_bitcoin_qt_node)
+        self.mainnet_lnd_node_button.clicked.connect(
+            self.node_launcher.mainnet_lnd_node)

@@ -1,4 +1,3 @@
-import platform
 from unittest.mock import MagicMock
 
 import pytest
@@ -18,13 +17,13 @@ def mock_command_generator():
 
 
 @pytest.fixture
-def node_launcher(mock_command_generator):
+def mocked_node_launcher(mock_command_generator):
     launch_fn = MagicMock()
     launch_terminal_fn = MagicMock()
-    node_launcher = NodeLauncher(mock_command_generator,
-                                 launch_fn,
-                                 launch_terminal_fn)
-    return node_launcher
+    mocked_node_launcher = NodeLauncher(mock_command_generator,
+                                        launch_fn,
+                                        launch_terminal_fn)
+    return mocked_node_launcher
 
 
 def test_launch():
@@ -44,19 +43,19 @@ def test_launch_terminal():
     assert result is None
 
 
-class TestNodeLauncher(object):
-    def test_launchTestnetBitcoinQtNode(self, node_launcher):
-        node_launcher.launchTestnetBitcoinQtNode()
-        node_launcher.command_generator.testnet_bitcoin_qt.assert_called_once()
+class TestNodeLauncherUnitTests(object):
+    def test_testnet_bitcoin_qt_node(self, mocked_node_launcher: NodeLauncher):
+        mocked_node_launcher.testnet_bitcoin_qt_node()
+        mocked_node_launcher.command_generator.testnet_bitcoin_qt.assert_called_once()
 
-    def test_launchTestnetLndNode(self, node_launcher):
-        node_launcher.launchTestnetLndNode()
-        node_launcher.command_generator.testnet_lnd.assert_called_once()
+    def test_mainnet_bitcoin_qt_node(self, mocked_node_launcher: NodeLauncher):
+        mocked_node_launcher.mainnet_bitcoin_qt_node()
+        mocked_node_launcher.command_generator.mainnet_bitcoin_qt.assert_called_once()
 
-    def test_launchMainnetBitcoinQtNode(self, node_launcher):
-        node_launcher.launchMainnetBitcoinQtNode()
-        node_launcher.command_generator.mainnet_bitcoin_qt.assert_called_once()
+    def test_testnet_lnd_node(self, mocked_node_launcher: NodeLauncher):
+        mocked_node_launcher.testnet_lnd_node()
+        mocked_node_launcher.command_generator.testnet_lnd.assert_called_once()
 
-    def test_launchMainnetLndNode(self, node_launcher):
-        node_launcher.launchMainnetLndNode()
-        node_launcher.command_generator.mainnet_lnd.assert_called_once()
+    def test_mainnet_lnd_node(self, mocked_node_launcher: NodeLauncher):
+        mocked_node_launcher.mainnet_lnd_node()
+        mocked_node_launcher.command_generator.mainnet_lnd.assert_called_once()

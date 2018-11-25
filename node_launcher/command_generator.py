@@ -10,9 +10,9 @@ class CommandGenerator(object):
         self.mainnet = mainnet_conf
 
     def bitcoin_qt(self, n: Configuration) -> List[str]:
-        dir_arg = f'-datadir={n.dir.bitcoin_data()}'
-        if OPERATING_SYSTEM == WINDOWS:
-            dir_arg = f'-datadir="{n.dir.bitcoin_data()}"'
+        # dir_arg = f'-datadir={n.dir.bitcoin_data()}'
+        # if OPERATING_SYSTEM == WINDOWS:
+        dir_arg = f'-datadir="{n.dir.bitcoin_data()}"'
         command = [
             n.dir.bitcoin_qt(),
             dir_arg,
@@ -33,7 +33,9 @@ class CommandGenerator(object):
         ]
 
     def mainnet_bitcoin_qt(self) -> List[str]:
-        return self.bitcoin_qt(self.mainnet)
+        return self.bitcoin_qt(self.mainnet) + [
+            '-testnet=0',
+        ]
 
     def lnd(self, n: Configuration) -> List[str]:
         dir_arg = f'--lnddir="{n.dir.lnd_data()}"'

@@ -8,8 +8,8 @@ from node_launcher.constants import (
     DATA_PATH,
     BITCOIN_QT_PATH,
     WINDOWS,
-    OPERATING_SYSTEM
-)
+    OPERATING_SYSTEM,
+    TARGET_RELEASE)
 
 
 def lnd_release_name(release_tag):
@@ -55,7 +55,10 @@ def download_and_extract_lnd(data_directory: str, release_tag: str):
 def get_latest_lnd_release():
     github_url = 'https://api.github.com'
     lnd_url = github_url + '/repos/lightningnetwork/lnd/releases'
-    release = requests.get(lnd_url).json()[0]
+    response = requests.get(lnd_url)
+    if response.status_code == 403:
+        return TARGET_RELEASE
+    release = response.json()[0]
     return release['tag_name']
 
 

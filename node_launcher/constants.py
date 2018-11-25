@@ -7,6 +7,9 @@ class OperatingSystem(object):
     def __init__(self, name: str):
         self.name = name.lower()
 
+    def __str__(self):
+        return self.name
+
     def __hash__(self):
         return hash(self.name)
 
@@ -36,3 +39,5 @@ DATA_PATH: Dict[OperatingSystem, str] = {
 }
 
 OPERATING_SYSTEM = OperatingSystem(platform.system())
+
+TARGET_RELEASE = 'v0.5.1-beta-rc1'

@@ -4,17 +4,17 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from node_launcher.constants import TARGET_RELEASE
 from node_launcher.directory_configuration import (
     DirectoryConfiguration,
     get_latest_lnd_release,
-    download_and_extract_lnd)
-
-target_release = 'v0.5.1-beta-rc1'
+    download_and_extract_lnd
+)
 
 
 @pytest.fixture
 def directory_configuration():
-    lnd_release_fn = MagicMock(return_value=target_release)
+    lnd_release_fn = MagicMock(return_value=TARGET_RELEASE)
     lnd_dl_fn = MagicMock()
     directory_configuration = DirectoryConfiguration('testnet', pruned=True,
                                                      lnd_release_fn=lnd_release_fn,
@@ -24,7 +24,7 @@ def directory_configuration():
 
 @pytest.fixture
 def test_get_latest_lnd_release():
-    assert get_latest_lnd_release() == target_release
+    assert get_latest_lnd_release() == TARGET_RELEASE
 
 
 @pytest.mark.slow
@@ -32,8 +32,7 @@ def test_download_and_extract_lnd(directory_configuration: DirectoryConfiguratio
     with tempfile.TemporaryDirectory() as tmpdirname:
         directory_configuration.override_data = tmpdirname
         download_and_extract_lnd(directory_configuration.lnd_directory(),
-                                 directory_configuration.lnd_version,
-                                 directory_configuration.operating_system)
+                                 directory_configuration.lnd_version)
         assert os.path.isfile(directory_configuration.lnd())
 
 
