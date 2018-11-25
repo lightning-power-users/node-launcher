@@ -22,14 +22,17 @@ def launch_terminal(command: List[str]):
             subprocess.call(['chmod', 'u+x', f.name])
             subprocess.Popen(['open', '-W', f.name], close_fds=True)
     elif operating_system == 'Windows':
-#         arguments = []
-#         for arg in command[1:]:
-#             if ' ' in
-#         file_contents = f"""
-# $process = [System.Diagnostics.Process]::Start("{command[0]}", "-a -s -f1`"d:\some directory\with blanks in a path\fileVCCS.iss`"")
-# $process.WaitForExit()
-#         """
-#         subprocess.Popen(['powershell', '-noexit', '-EncodedCommand', cmd_bytes.decode('ascii')], creationflags=subprocess.DETACHED_PROCESS, close_fds=False, shell=True)
+        arguments = ' '.join(command[1:])
+        file_contents = f"""
+$process = [System.Diagnostics.Process]::Start("{command[0]}", "{arguments}")
+$process.WaitForExit()
+        """
+        with NamedTemporaryFile(suffix='-lnd.ps1', delete=False) as f:
+            f.write(file_contents.encode('utf-8'))
+            f.flush()
+           # subprocess.call(['chmod', 'u+x', f.name])
+            subprocess.Popen(['powershell', '-noexit', '-File', f.name], creationflags=subprocess.DETACHED_PROCESS,
+                             close_fds=False, shell=True)
 
 
 class NodeLauncher(object):
