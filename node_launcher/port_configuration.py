@@ -9,7 +9,7 @@ def is_port_in_use(port):
         try:
             s.bind(('127.0.0.1', port))
         except socket.error as e:
-            if e.errno == errno.EADDRINUSE:
+            if e.errno == errno.EADDRINUSE or e.errno == 10013:
                 return True
             raise
         return False

@@ -2,6 +2,7 @@
 1. Bitcoin Core https://bitcoincore.org/en/download/
 2. ~300 GB of download bandwidth
 3. ~7 GB of disk space
+4. Python 3.7
 
 # Node Launcher
 
@@ -18,7 +19,7 @@
 # Development
 
 0. `git clone https://github.com/PierreRochard/node-launcher && cd node-launcher`
-1. Setup a Python 3.6+ virtual environment
+1. Setup a Python 3.7+ virtual environment
 2. `python -m pip install --index-url=http://download.qt.io/snapshots/ci/pyside/5.11/latest pyside2 --trusted-host download.qt.io`
 3. `pip install -r requirements.txt`
 4. `python setup.py develop`
@@ -34,6 +35,6 @@ To include tests with network calls to GitHub:
 
 # Packaging
 
-macOS:
+macOS: `pyinstaller run-mac.spec`
 
-`pyinstaller run.spec`
+Windows: `pyinstaller run-windows.spec` (only works on Windows 7)
