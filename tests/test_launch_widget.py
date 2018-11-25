@@ -24,21 +24,21 @@ def launch_widget(mock_node_launcher) -> LaunchWidget:
 
 class TestGuiUnitTests(object):
     def test_testnet_bitcoin_qt_node_button(self, qtbot, launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.testnet_bitcoin_qt_node_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.bitcoin_qt_button,
                          Qt.LeftButton)
         launch_widget.node_launcher.testnet_bitcoin_qt_node.assert_called_once()
 
     def test_mainnet_bitcoin_qt_node_button(self, qtbot, launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.mainnet_bitcoin_qt_node_button,
+        qtbot.mouseClick(launch_widget.mainnet_group_box.bitcoin_qt_button,
                          Qt.LeftButton)
         launch_widget.node_launcher.mainnet_bitcoin_qt_node.assert_called_once()
 
     def test_testnet_lnd_node_button(self, qtbot, launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.testnet_lnd_node_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.lnd_button,
                          Qt.LeftButton)
         launch_widget.node_launcher.testnet_lnd_node.assert_called_once()
 
     def test_mainnet_lnd_node_button(self, qtbot, launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.mainnet_lnd_node_button,
+        qtbot.mouseClick(launch_widget.mainnet_group_box.lnd_button,
                          Qt.LeftButton)
         launch_widget.node_launcher.mainnet_lnd_node.assert_called_once()

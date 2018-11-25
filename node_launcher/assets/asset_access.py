@@ -17,3 +17,6 @@ class AssetAccess(object):
         if not os.path.isfile(asset_path):
             raise Exception(f'{asset_path} not found')
         return asset_path
+
+
+asset_access = AssetAccess()
