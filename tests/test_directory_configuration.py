@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from node_launcher.constants import TARGET_RELEASE
+from node_launcher.constants import TARGET_RELEASE, DATA_PATH, OPERATING_SYSTEM
 from node_launcher.directory_configuration import (
     DirectoryConfiguration,
     get_latest_lnd_release,
@@ -39,6 +39,7 @@ def test_download_and_extract_lnd(directory_configuration: DirectoryConfiguratio
 class TestDirectoryConfiguration(object):
     def test_data_directory(self, directory_configuration):
         assert os.path.isdir(directory_configuration.data())
+        assert directory_configuration.data() == DATA_PATH[OPERATING_SYSTEM]
 
     def test_bitcoin_qt(self, directory_configuration):
         assert os.path.isfile(directory_configuration.bitcoin_qt())

@@ -12,7 +12,9 @@ class CommandGenerator(object):
     def bitcoin_qt(self, n: Configuration) -> List[str]:
         # dir_arg = f'-datadir={n.dir.bitcoin_data()}'
         # if OPERATING_SYSTEM == WINDOWS:
-        dir_arg = f'-datadir="{n.dir.bitcoin_data()}"'
+        dir_arg = f'-datadir={n.dir.bitcoin_data()}'
+        if OPERATING_SYSTEM == WINDOWS:
+            dir_arg = f'-datadir="{n.dir.bitcoin_data()}"'
         command = [
             n.dir.bitcoin_qt(),
             dir_arg,

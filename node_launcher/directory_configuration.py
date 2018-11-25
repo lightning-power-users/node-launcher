@@ -76,7 +76,7 @@ class DirectoryConfiguration(object):
 
     def data(self) -> str:
         if self.override_data is None:
-            data = DATA_PATH[WINDOWS]
+            data = DATA_PATH[OPERATING_SYSTEM]
         else:
             data = self.override_data
 

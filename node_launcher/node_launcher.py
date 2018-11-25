@@ -18,7 +18,7 @@ def launch(command: List[str]):
                            creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
                            close_fds=True, shell=True)
     else:
-        result = Popen(command, close_fds=True, shell=True)
+        result = Popen(command, close_fds=True, shell=False)
 
     return result
 
