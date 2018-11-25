@@ -1,5 +1,5 @@
 import platform
-from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP, Popen, call, PIPE
+from subprocess import Popen, call, PIPE
 from tempfile import NamedTemporaryFile
 from typing import List
 
@@ -7,6 +7,7 @@ from typing import List
 def launch(command: List[str]):
     operating_system = platform.system()
     if operating_system == 'Windows':
+        from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
         command[0] = '"' + command[0] + '"'
         cmd = ' '.join(command)
         with NamedTemporaryFile(suffix='-btc.bat', delete=False) as f:
@@ -33,6 +34,7 @@ def launch_terminal(command: List[str]):
             call(['chmod', 'u+x', f.name])
             Popen(['open', '-W', f.name], close_fds=True)
     elif operating_system == 'Windows':
+        from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
         with NamedTemporaryFile(suffix='-lnd.bat', delete=False) as f:
             f.write(cmd.encode('utf-8'))
             f.flush()
