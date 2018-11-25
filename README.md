@@ -1,3 +1,8 @@
+# Requirements
+1. Bitcoin Core https://bitcoincore.org/en/download/
+2. ~300 GB of download bandwidth
+3. ~7 GB of disk space
+
 # Node Launcher
 
 1. Creates a node launcher data directory 
