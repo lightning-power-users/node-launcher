@@ -3,6 +3,12 @@
 2. ~300 GB of download bandwidth
 3. ~7 GB of disk space
 4. Python 3.7
+5. Windows, macOS, or Linux
+
+# Install 
+
+Download and open the latest release for your operating system: 
+https://github.com/PierreRochard/node-launcher/releases
 
 # Node Launcher
 
