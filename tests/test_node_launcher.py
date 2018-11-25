@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from node_launcher.constants import WINDOWS, OPERATING_SYSTEM
 from node_launcher.node_launcher import NodeLauncher, launch, launch_terminal
 
 
@@ -27,7 +28,7 @@ def node_launcher(mock_command_generator):
 
 
 def test_launch():
-    if platform.system() == 'Windows':
+    if OPERATING_SYSTEM == WINDOWS:
         result = launch(['set', 'path'])
     else:
         result = launch(['echo', 'hello'])
@@ -36,7 +37,7 @@ def test_launch():
 
 @pytest.mark.slow
 def test_launch_terminal():
-    if platform.system() == 'Windows':
+    if OPERATING_SYSTEM == WINDOWS:
         result = launch_terminal(['set', 'path'])
     else:
         result = launch_terminal(['echo', 'hello'])

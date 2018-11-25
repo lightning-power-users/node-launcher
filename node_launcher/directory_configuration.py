@@ -1,35 +1,38 @@
 import os
-import platform
 import tarfile
 import zipfile
 
 import requests
 
-from node_launcher.constants import DATA_PATH, BITCOIN_QT_PATH
+from node_launcher.constants import (
+    DATA_PATH,
+    BITCOIN_QT_PATH,
+    WINDOWS,
+    OPERATING_SYSTEM
+)
 
 
-def lnd_release_name(release_tag, operating_system):
-    return f'lnd-{operating_system}-amd64-{release_tag}'
+def lnd_release_name(release_tag):
+    return f'lnd-{OPERATING_SYSTEM}-amd64-{release_tag}'
 
 
-def download_url(release_tag: str, operating_system: str = 'darwin'):
+def download_url(release_tag: str):
     lnd_url = 'https://github.com/lightningnetwork/lnd/'
     suffix = '.tar.gz'
-    if operating_system == 'windows':
+    if OPERATING_SYSTEM == WINDOWS:
         suffix = '.zip'
     dl_url = ''.join([
         lnd_url,
         'releases/download/',
         f'{release_tag}/',
-        lnd_release_name(release_tag, operating_system),
+        lnd_release_name(release_tag),
         suffix
     ])
     return dl_url
 
 
-def download_and_extract_lnd(data_directory: str,
-                             release_tag: str, operating_system: str):
-    url = download_url(release_tag, operating_system)
+def download_and_extract_lnd(data_directory: str, release_tag: str):
+    url = download_url(release_tag)
     file_name = url.split('/')[-1]
     destination_file = os.path.join(data_directory, file_name)
     if not os.path.exists(data_directory):
@@ -41,7 +44,7 @@ def download_and_extract_lnd(data_directory: str,
             if chunk:
                 f.write(chunk)
 
-    if operating_system == 'windows':
+    if OPERATING_SYSTEM == WINDOWS:
         with zipfile.ZipFile(destination_file) as zip_file:
             zip_file.extractall(path=data_directory)
     else:
@@ -63,16 +66,14 @@ class DirectoryConfiguration(object):
                  override_data=None):
         self.network = network
         self.pruned = pruned
-        self.operating_system = platform.system().lower()
         self.lnd_version = lnd_release_fn()
-        self.lnd_release_name = lnd_release_name(self.lnd_version,
-                                                 self.operating_system)
+        self.lnd_release_name = lnd_release_name(self.lnd_version)
         self.download_and_extract_lnd = lnd_dl_fn
         self.override_data = override_data
 
     def data(self) -> str:
         if self.override_data is None:
-            data = DATA_PATH[self.operating_system]
+            data = DATA_PATH[WINDOWS]
         else:
             data = self.override_data
 
@@ -88,7 +89,7 @@ class DirectoryConfiguration(object):
         return d
 
     def bitcoin_qt(self) -> str:
-        return BITCOIN_QT_PATH[self.operating_system]
+        return BITCOIN_QT_PATH[OPERATING_SYSTEM]
 
     def lnd_directory(self):
         d = os.path.join(self.data(), 'lnd')
@@ -98,12 +99,11 @@ class DirectoryConfiguration(object):
 
     def lnd(self) -> str:
         lnd = os.path.join(self.lnd_directory(), self.lnd_release_name, 'lnd')
-        if self.operating_system == 'windows':
+        if OPERATING_SYSTEM == WINDOWS:
             lnd += '.exe'
         if not os.path.isfile(lnd):
             self.download_and_extract_lnd(self.lnd_directory(),
-                                          self.lnd_version,
-                                          self.operating_system)
+                                          self.lnd_version)
         return lnd
 
     def lnd_data(self):

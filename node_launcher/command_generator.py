@@ -1,18 +1,17 @@
-import platform
 from typing import List
 
 from node_launcher.configuration import Configuration
+from node_launcher.constants import WINDOWS, OPERATING_SYSTEM
 
 
 class CommandGenerator(object):
     def __init__(self, testnet_conf, mainnet_conf):
-        self.operating_system = platform.system().lower()
         self.testnet = testnet_conf
         self.mainnet = mainnet_conf
 
     def bitcoin_qt(self, n: Configuration) -> List[str]:
         dir_arg = f'-datadir={n.dir.bitcoin_data()}'
-        if self.operating_system == 'windows':
+        if OPERATING_SYSTEM == WINDOWS:
             dir_arg = f'-datadir="{n.dir.bitcoin_data()}"'
         command = [
             n.dir.bitcoin_qt(),
@@ -38,7 +37,7 @@ class CommandGenerator(object):
 
     def lnd(self, n: Configuration) -> List[str]:
         dir_arg = f'--lnddir="{n.dir.lnd_data()}"'
-        if self.operating_system == 'windows':
+        if OPERATING_SYSTEM == WINDOWS:
             dir_arg = f'--lnddir="{n.dir.lnd_data()}"'
         return [
             n.dir.lnd(),

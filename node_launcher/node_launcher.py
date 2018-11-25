@@ -1,12 +1,12 @@
-import platform
 from subprocess import Popen, call, PIPE
 from tempfile import NamedTemporaryFile
 from typing import List
 
+from node_launcher.constants import DARWIN, WINDOWS, OPERATING_SYSTEM
+
 
 def launch(command: List[str]):
-    operating_system = platform.system()
-    if operating_system == 'Windows':
+    if OPERATING_SYSTEM == WINDOWS:
         from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
         command[0] = '"' + command[0] + '"'
         cmd = ' '.join(command)
@@ -26,14 +26,13 @@ def launch(command: List[str]):
 def launch_terminal(command: List[str]):
     command[0] = '"' + command[0] + '"'
     cmd = ' '.join(command)
-    operating_system = platform.system()
-    if operating_system == 'Darwin':
+    if OPERATING_SYSTEM == DARWIN:
         with NamedTemporaryFile(suffix='-lnd.command', delete=False) as f:
             f.write(f'#!/bin/sh\n{cmd}\n'.encode('utf-8'))
             f.flush()
             call(['chmod', 'u+x', f.name])
             Popen(['open', '-W', f.name], close_fds=True)
-    elif operating_system == 'Windows':
+    elif OPERATING_SYSTEM == WINDOWS:
         from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
         with NamedTemporaryFile(suffix='-lnd.bat', delete=False) as f:
             f.write(cmd.encode('utf-8'))
