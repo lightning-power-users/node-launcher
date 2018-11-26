@@ -54,3 +54,16 @@ class TestBitcoinConfiguration(object):
         assert bitcoin_configuration.datadir == BITCOIN_DATA_PATH[
             OPERATING_SYSTEM]
         assert os.path.exists(bitcoin_configuration.datadir)
+
+    @staticmethod
+    def test_prune(bitcoin_configuration: BitcoinConfiguration):
+        assert bitcoin_configuration.prune == bitcoin_configuration.should_prune()
+
+    @staticmethod
+    def test_set_prune(bitcoin_configuration: BitcoinConfiguration):
+        bitcoin_configuration.prune = True
+        pruned = BitcoinConfiguration(bitcoin_configuration.configuration_path)
+        assert pruned.prune
+        bitcoin_configuration.prune = False
+        unpruned = BitcoinConfiguration(bitcoin_configuration.configuration_path)
+        assert not unpruned.prune

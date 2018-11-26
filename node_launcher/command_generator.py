@@ -1,32 +1,16 @@
-import math
-import os
-from shutil import disk_usage
 from typing import List
 
 from node_launcher.configuration import Configuration
 from node_launcher.constants import WINDOWS, OPERATING_SYSTEM
-from node_launcher.utilities import get_dir_size
 
 
 class CommandGenerator(object):
-    def __init__(self, testnet_conf, mainnet_conf):
+    def __init__(self, testnet_conf: Configuration, mainnet_conf: Configuration):
         self.testnet = testnet_conf
         self.mainnet = mainnet_conf
 
-    def should_prune(self) -> bool:
-        _, _, free_bytes = disk_usage(
-            os.path.realpath(self.mainnet.dir.bitcoin_data_path))
-        bitcoin_bytes = get_dir_size(self.mainnet.dir.bitcoin_data_path)
-        free_bytes += bitcoin_bytes
-        gigabyte = 1000000000
-        free_gb = math.floor(free_bytes / gigabyte)
-        bitcoin_gb = math.ceil(bitcoin_bytes / gigabyte)
-        if free_gb < 300 and bitcoin_gb > 10:
-            raise Exception('Un-pruned bitcoin chain data '
-                            'but not enough space to finish IBD')
-        return free_gb < 300
-
-    def bitcoin_qt(self, n: Configuration) -> List[str]:
+    @staticmethod
+    def bitcoin_qt(n: Configuration) -> List[str]:
         dir_arg = f'-datadir={n.dir.bitcoin_data_path}'
         if OPERATING_SYSTEM == WINDOWS:
             dir_arg = f'-datadir="{n.dir.bitcoin_data_path}"'
@@ -40,7 +24,7 @@ class CommandGenerator(object):
             f'-zmqpubrawblock=tcp://127.0.0.1:{n.ports.zmq_block}',
             f'-zmqpubrawtx=tcp://127.0.0.1:{n.ports.zmq_tx}'
         ]
-        if self.should_prune():
+        if n.bitcoin.prune:
             command += [
                 '-prune=600',
                 '-txindex=0'
