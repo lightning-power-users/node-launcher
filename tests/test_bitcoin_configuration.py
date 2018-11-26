@@ -6,16 +6,21 @@ import pytest
 from node_launcher.configuration.bitcoin_configuration import (
     BitcoinConfiguration
 )
+from node_launcher.constants import (
+    BITCOIN_DATA_PATH,
+    OPERATING_SYSTEM
+)
 
 
 @pytest.fixture
 def bitcoin_configuration():
     with NamedTemporaryFile(suffix='-bitcoin.conf', delete=False) as f:
         bitcoin_configuration = BitcoinConfiguration(f.name)
+    bitcoin_configuration.write_property('test_property', 'test_value')
     return bitcoin_configuration
 
 
-class BitcoinConfigurationTests(object):
+class TestBitcoinConfiguration(object):
     @staticmethod
     def test_configuration_path(bitcoin_configuration: BitcoinConfiguration):
         assert bitcoin_configuration.configuration_path.endswith('bitcoin.conf')
@@ -31,3 +36,21 @@ class BitcoinConfigurationTests(object):
         with open(bitcoin_configuration.configuration_path, 'r') as f:
             lines = f.readlines()
             lines[0].endswith('Node Launcher')
+
+    @staticmethod
+    def test_write_property(bitcoin_configuration: BitcoinConfiguration):
+        bitcoin_configuration.write_property('test_write_property', 'test_write_value')
+        with open(bitcoin_configuration.configuration_path, 'r') as f:
+            data = f.read()
+            assert 'test_write_property=test_write_value' in data
+
+    @staticmethod
+    def test_read_property(bitcoin_configuration: BitcoinConfiguration):
+        result = bitcoin_configuration.read_property('test_property')
+        assert result == 'test_value'
+
+    @staticmethod
+    def test_datadir(bitcoin_configuration: BitcoinConfiguration):
+        assert bitcoin_configuration.datadir == BITCOIN_DATA_PATH[
+            OPERATING_SYSTEM]
+        assert os.path.exists(bitcoin_configuration.datadir)
