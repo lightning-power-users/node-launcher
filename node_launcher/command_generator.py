@@ -11,9 +11,9 @@ class CommandGenerator(object):
 
     @staticmethod
     def bitcoin_qt(n: Configuration) -> List[str]:
-        dir_arg = f'-datadir={n.dir.bitcoin_data_path}'
+        dir_arg = f'-datadir={n.bitcoin.datadir}'
         if OPERATING_SYSTEM == WINDOWS:
-            dir_arg = f'-datadir="{n.dir.bitcoin_data_path}"'
+            dir_arg = f'-datadir="{n.bitcoin.datadir}"'
         command = [
             n.dir.bitcoin_qt,
             dir_arg,

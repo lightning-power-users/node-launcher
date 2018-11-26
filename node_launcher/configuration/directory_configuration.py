@@ -47,13 +47,6 @@ class DirectoryConfiguration(object):
         return data
 
     @property
-    def bitcoin_data_path(self) -> str:
-        d = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
-        if not os.path.exists(d):
-            os.mkdir(d)
-        return d
-
-    @property
     def lnd_data_path(self) -> str:
         d = LND_DATA_PATH[OPERATING_SYSTEM]
         if not os.path.exists(d):
