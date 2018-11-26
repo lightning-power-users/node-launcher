@@ -9,7 +9,7 @@ from node_launcher.constants import (
     NODE_LAUNCHER_DATA_PATH,
     OPERATING_SYSTEM
 )
-from node_launcher.directory_configuration import (
+from node_launcher.configuration.directory_configuration import (
     DirectoryConfiguration
 )
 

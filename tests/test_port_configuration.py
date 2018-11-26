@@ -1,6 +1,6 @@
 import pytest
 
-from node_launcher.port_configuration import (
+from node_launcher.configuration.port_configuration import (
     PortConfiguration,
     is_port_in_use
 )

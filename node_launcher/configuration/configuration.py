@@ -1,8 +1,8 @@
 from random import choice
 from string import ascii_lowercase, digits
 
-from node_launcher.directory_configuration import DirectoryConfiguration
-from node_launcher.port_configuration import PortConfiguration
+from node_launcher.configuration.directory_configuration import DirectoryConfiguration
+from node_launcher.configuration.port_configuration import PortConfiguration
 
 
 class Configuration(object):
