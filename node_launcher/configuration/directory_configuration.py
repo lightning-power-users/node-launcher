@@ -10,7 +10,6 @@ from node_launcher.constants import (
     WINDOWS,
     OPERATING_SYSTEM,
     TARGET_RELEASE,
-    BITCOIN_DATA_PATH,
     LND_DATA_PATH
 )
 
