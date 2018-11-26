@@ -22,6 +22,12 @@ https://github.com/PierreRochard/node-launcher/releases
 5. Pruning still requires downloading data, so make sure you can handle downloading ~300 GB of data
 
 
+![macos_dark](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/dark_macos.png)
+
+![macos](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/macos.jpg)
+
+![windows](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/windows.jpg)
+
 # Development
 
 0. `git clone https://github.com/PierreRochard/node-launcher && cd node-launcher`
