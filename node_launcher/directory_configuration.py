@@ -32,7 +32,8 @@ class DirectoryConfiguration(object):
         self.download_and_extract_lnd = lnd_dl_fn
         self.override_data = override_data
         self.lnd_binaries = os.path.join(self.data(), 'lnd')
-        self.lnd_binary_directory = os.path.join(self.lnd_binaries, self.lnd_release_name)
+        self.lnd_binary_directory = os.path.join(self.lnd_binaries,
+                                                 self.lnd_release_name)
 
     def data(self) -> str:
         if self.override_data is None:
