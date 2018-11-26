@@ -33,6 +33,11 @@ exe = EXE(pyz,
           runtime_tmpdir=None,
           console=False )
 app = BUNDLE(exe,
-             name='run.app',
-             icon=None,
-             bundle_identifier=None)
+             name='Lightning Power.app',
+             icon='./AppIcon.icns',
+             bundle_identifier=None,
+             info_plist={
+                         'NSPrincipleClass': 'NSApplication',
+                         'NSAppleScriptEnabled': False
+                 }
+                         )
