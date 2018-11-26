@@ -13,4 +13,4 @@ class Configuration(object):
         self.network = network
         self.pruned = pruned
         self.ports = PortConfiguration()
-        self.dir = DirectoryConfiguration(network, pruned)
+        self.dir = DirectoryConfiguration()

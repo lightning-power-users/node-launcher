@@ -9,14 +9,15 @@ class CommandGenerator(object):
         self.testnet = testnet_conf
         self.mainnet = mainnet_conf
 
-    def bitcoin_qt(self, n: Configuration) -> List[str]:
+    @staticmethod
+    def bitcoin_qt(n: Configuration) -> List[str]:
         # dir_arg = f'-datadir={n.dir.bitcoin_data()}'
         # if OPERATING_SYSTEM == WINDOWS:
-        dir_arg = f'-datadir={n.dir.bitcoin_data()}'
+        dir_arg = f'-datadir={n.dir.bitcoin_data_path}'
         if OPERATING_SYSTEM == WINDOWS:
-            dir_arg = f'-datadir="{n.dir.bitcoin_data()}"'
+            dir_arg = f'-datadir="{n.dir.bitcoin_data_path}"'
         command = [
-            n.dir.bitcoin_qt(),
+            n.dir.bitcoin_qt,
             dir_arg,
             '-prune=600',
             '-txindex=0',
@@ -39,12 +40,13 @@ class CommandGenerator(object):
             '-testnet=0',
         ]
 
-    def lnd(self, n: Configuration) -> List[str]:
-        dir_arg = f'--lnddir="{n.dir.lnd_data()}"'
+    @staticmethod
+    def lnd(n: Configuration) -> List[str]:
+        dir_arg = f'--lnddir="{n.dir.lnd_data_path}"'
         if OPERATING_SYSTEM == WINDOWS:
-            dir_arg = f'--lnddir="{n.dir.lnd_data()}"'
+            dir_arg = f'--lnddir="{n.dir.lnd_data_path}"'
         return [
-            n.dir.lnd(),
+            n.dir.lnd,
             dir_arg,
             '--debuglevel=info',
             '--bitcoin.active',

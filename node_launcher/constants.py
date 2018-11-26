@@ -1,4 +1,5 @@
 import os
+from os.path import expanduser
 import platform
 from typing import Dict
 
@@ -39,20 +40,19 @@ BITCOIN_QT_PATH: Dict[OperatingSystem, str] = {
 }
 
 NODE_LAUNCHER_DATA_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: os.path.expanduser(
-        '~/Library/Application Support/Node Launcher/'),
-    LINUX: os.path.expanduser('~/.node_launcher'),
+    DARWIN: expanduser('~/Library/Application Support/Node Launcher/'),
+    LINUX: expanduser('~/.node_launcher'),
     WINDOWS: os.path.join(LOCALAPPDATA, 'Node Launcher')
 }
 
 LND_DATA_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: '~/Library/Application Support/Lnd/',
-    LINUX: '~/.lnd/',
+    DARWIN: expanduser('~/Library/Application Support/Lnd/'),
+    LINUX: expanduser('~/.lnd/'),
     WINDOWS: os.path.join(LOCALAPPDATA, 'lnd')
 }
 
 BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: os.path.expanduser('~/Library/Application Support/Bitcoin/'),
-    LINUX: os.path.expanduser('~/.bitcoin'),
+    DARWIN: expanduser('~/Library/Application Support/Bitcoin/'),
+    LINUX: expanduser('~/.bitcoin'),
     WINDOWS: os.path.join(APPDATA, 'Bitcoin')
 }
