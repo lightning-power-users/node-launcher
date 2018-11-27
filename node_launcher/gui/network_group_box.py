@@ -13,9 +13,10 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
         layout.addWidget(ImageLabel(f'bitcoin-{group_name}.png'))
         layout.addStretch(1)
 
+        self.error_message = QErrorMessage(self)
         self.bitcoin_qt_button = QtWidgets.QPushButton('Bitcoin')
         bitcoin_qt_launcher = getattr(node_launcher, f'{group_name}_bitcoin_qt_node')
-        self.bitcoin_qt_button.clicked.connect(lambda: self.on_click(bitcoin_qt_launcher))
+        self.bitcoin_qt_button.clicked.connect(lambda: self.on_bitcoin_qt_click(bitcoin_qt_launcher))
         layout.addWidget(self.bitcoin_qt_button)
 
         self.lnd_button = QtWidgets.QPushButton('LND')
@@ -25,9 +26,8 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
 
         self.setLayout(layout)
 
-    def on_click(self, fn):
+    def on_bitcoin_qt_click(self, fn):
         try:
             fn()
         except BitcoinNotInstalledException:
-            error_message = QErrorMessage(self)
-            error_message.showMessage('Please install Bitcoin https://bitcoincore.org/en/download/')
+            self.error_message.showMessage('Please install Bitcoin https://bitcoincore.org/en/download/')
