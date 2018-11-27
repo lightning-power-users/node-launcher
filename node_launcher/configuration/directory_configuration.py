@@ -31,10 +31,6 @@ class DirectoryConfiguration(object):
         self.lnd_release_name = f'lnd-{OPERATING_SYSTEM}-amd64-{self.lnd_release}'
         self.download_and_extract_lnd = lnd_dl_fn
         self.override_data = override_data
-        self.lnd_binary_directory = os.path.join(self.lnd_binaries,
-                                                 self.lnd_release_name)
-        if not os.path.exists(self.lnd_binary_directory):
-            os.mkdir(self.lnd_binary_directory)
 
     @property
     def data(self) -> str:
@@ -49,8 +45,16 @@ class DirectoryConfiguration(object):
         return data
 
     @property
-    def lnd_binaries(self) -> str:
+    def lnd_binaries_directory(self) -> str:
         path = os.path.join(self.data, 'lnd')
+        if not os.path.exists(path):
+            os.mkdir(path)
+        return path
+
+    @property
+    def lnd_binary_directory(self) -> str:
+        path = os.path.join(self.lnd_binaries_directory,
+                            self.lnd_release_name)
         if not os.path.exists(path):
             os.mkdir(path)
         return path
@@ -71,7 +75,7 @@ class DirectoryConfiguration(object):
 
     @property
     def lnd(self) -> str:
-        lnd = os.path.join(self.lnd_binaries, self.lnd_release_name, 'lnd')
+        lnd = os.path.join(self.lnd_binary_directory, 'lnd')
         if OPERATING_SYSTEM == WINDOWS:
             lnd += '.exe'
         if not os.path.isfile(lnd):
@@ -96,16 +100,11 @@ class DirectoryConfiguration(object):
         return dl_url
 
     def _download_and_extract_lnd(self):
-
-        if not os.path.exists(self.lnd_binary_directory):
-            os.mkdir(self.lnd_binary_directory)
-
         url = self.download_url()
-
         response = requests.get(url, stream=True)
-
         file_name = url.split('/')[-1]
-        destination_file = os.path.join(self.lnd_binary_directory, file_name)
+
+        destination_file = os.path.join(self.lnd_binaries_directory, file_name)
         with open(destination_file, 'wb') as f:
             for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
@@ -113,10 +112,10 @@ class DirectoryConfiguration(object):
 
         if OPERATING_SYSTEM == WINDOWS:
             with zipfile.ZipFile(destination_file) as zip_file:
-                zip_file.extractall(path=self.lnd_binaries)
+                zip_file.extractall(path=self.lnd_binaries_directory)
         else:
             with tarfile.open(destination_file) as tar:
-                tar.extractall(path=self.lnd_binaries)
+                tar.extractall(path=self.lnd_binaries_directory)
 
     @staticmethod
     def _get_latest_lnd_release():
