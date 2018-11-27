@@ -12,6 +12,7 @@ from node_launcher.constants import (
     TARGET_RELEASE,
     LND_DATA_PATH
 )
+from node_launcher.exceptions import BitcoinNotInstalledException
 
 
 class DirectoryConfiguration(object):
@@ -30,10 +31,12 @@ class DirectoryConfiguration(object):
         self.lnd_release_name = f'lnd-{OPERATING_SYSTEM}-amd64-{self.lnd_release}'
         self.download_and_extract_lnd = lnd_dl_fn
         self.override_data = override_data
-        self.lnd_binaries = os.path.join(self.data(), 'lnd')
         self.lnd_binary_directory = os.path.join(self.lnd_binaries,
                                                  self.lnd_release_name)
+        if not os.path.exists(self.lnd_binary_directory):
+            os.mkdir(self.lnd_binary_directory)
 
+    @property
     def data(self) -> str:
         if self.override_data is None:
             data = NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM]
@@ -46,6 +49,13 @@ class DirectoryConfiguration(object):
         return data
 
     @property
+    def lnd_binaries(self) -> str:
+        path = os.path.join(self.data, 'lnd')
+        if not os.path.exists(path):
+            os.mkdir(path)
+        return path
+
+    @property
     def lnd_data_path(self) -> str:
         d = LND_DATA_PATH[OPERATING_SYSTEM]
         if not os.path.exists(d):
@@ -54,7 +64,10 @@ class DirectoryConfiguration(object):
 
     @property
     def bitcoin_qt(self) -> str:
-        return BITCOIN_QT_PATH[OPERATING_SYSTEM]
+        path = BITCOIN_QT_PATH[OPERATING_SYSTEM]
+        if not os.path.isfile(path):
+            raise BitcoinNotInstalledException()
+        return path
 
     @property
     def lnd(self) -> str:

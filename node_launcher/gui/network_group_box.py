@@ -1,8 +1,9 @@
 from PySide2 import QtWidgets
 from PySide2.QtWidgets import QErrorMessage
 
+from node_launcher.exceptions import BitcoinNotInstalledException
 from node_launcher.gui.image_label import ImageLabel
-from node_launcher.node_launcher import NodeLauncher, BitcoinNotInstalledException
+from node_launcher.node_launcher import NodeLauncher
 
 
 class NetworkGroupBox(QtWidgets.QGroupBox):

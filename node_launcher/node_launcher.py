@@ -1,4 +1,3 @@
-import os
 from subprocess import Popen, call, PIPE
 from tempfile import NamedTemporaryFile
 from typing import List
@@ -6,14 +5,7 @@ from typing import List
 from node_launcher.constants import DARWIN, WINDOWS, OPERATING_SYSTEM
 
 
-class BitcoinNotInstalledException(Exception):
-    pass
-
-
 def launch(command: List[str]):
-    if not os.path.isfile(command[0]):
-        raise BitcoinNotInstalledException()
-
     if OPERATING_SYSTEM == WINDOWS:
         from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
         command[0] = '"' + command[0] + '"'

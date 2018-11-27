@@ -1,0 +1,2 @@
+class BitcoinNotInstalledException(BaseException):
+    pass

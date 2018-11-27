@@ -12,6 +12,7 @@ from node_launcher.constants import (
 from node_launcher.configuration.directory_configuration import (
     DirectoryConfiguration
 )
+from node_launcher.exceptions import BitcoinNotInstalledException
 
 
 @pytest.fixture
@@ -29,12 +30,16 @@ class TestDirectoryConfiguration(object):
         assert directory_configuration._get_latest_lnd_release() == TARGET_RELEASE
 
     def test_data_directory(self, directory_configuration):
-        assert os.path.isdir(directory_configuration.data())
-        assert directory_configuration.data() == NODE_LAUNCHER_DATA_PATH[
+        assert os.path.isdir(directory_configuration.data)
+        assert directory_configuration.data == NODE_LAUNCHER_DATA_PATH[
             OPERATING_SYSTEM]
 
     def test_bitcoin_qt(self, directory_configuration):
-        assert os.path.isfile(directory_configuration.bitcoin_qt)
+        try:
+            path = directory_configuration.bitcoin_qt
+        except BitcoinNotInstalledException:
+            return True
+        assert os.path.isfile(path)
 
     def test_lnd(self):
         # This will be slow the first time it is run to download LND
