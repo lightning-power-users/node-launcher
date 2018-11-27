@@ -32,3 +32,17 @@ exe = EXE(pyz,
           upx=True,
           runtime_tmpdir=None,
           console=False )
+
+exe = EXE(pyz,
+          a.scripts,
+          a.binaries,
+          a.zipfiles,
+          a.datas,
+          [],
+          name='Lightning Power Debug',
+          debug=True,
+          bootloader_ignore_signals=False,
+          strip=False,
+          upx=True,
+          runtime_tmpdir=None,
+          console=True )

@@ -83,7 +83,9 @@ class BitcoinConfiguration(object):
     @configuration_path.setter
     def configuration_path(self, configuration_path: str):
         self.__configuration_path = configuration_path
-
+        parent_directory = os.path.join(self.configuration_path, os.pardir)
+        if not os.path.isdir(parent_directory):
+            os.mkdir(parent_directory)
         if not os.path.isfile(self.configuration_path):
             self.generate_file()
 

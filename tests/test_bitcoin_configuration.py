@@ -1,5 +1,5 @@
 import os
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 import pytest
 
@@ -21,6 +21,13 @@ def bitcoin_configuration():
 
 
 class TestBitcoinConfiguration(object):
+    @staticmethod
+    def test_configuration_path_no_directory(bitcoin_configuration: BitcoinConfiguration):
+        with TemporaryDirectory() as tmpdirname:
+            os.rmdir(tmpdirname)
+            bitcoin_configuration.configuration_path = os.path.join(tmpdirname, 'bitcoin.conf')
+            assert os.path.isfile(bitcoin_configuration.configuration_path)
+
     @staticmethod
     def test_configuration_path(bitcoin_configuration: BitcoinConfiguration):
         assert bitcoin_configuration.configuration_path.endswith('bitcoin.conf')
