@@ -20,6 +20,7 @@ if __name__ == "__main__":
     )
     node_launcher = NodeLauncher(command_generator)
     widget = LaunchWidget(node_launcher)
+
     widget.show()
 
     sys.exit(app.exec_())
