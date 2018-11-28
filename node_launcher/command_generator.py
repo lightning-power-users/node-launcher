@@ -5,6 +5,9 @@ from node_launcher.constants import WINDOWS, OPERATING_SYSTEM
 
 
 class CommandGenerator(object):
+    mainnet: Configuration
+    testnet: Configuration
+
     def __init__(self, testnet_conf: Configuration, mainnet_conf: Configuration):
         self.testnet = testnet_conf
         self.mainnet = mainnet_conf

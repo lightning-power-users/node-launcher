@@ -2,6 +2,7 @@ from subprocess import Popen, call, PIPE
 from tempfile import NamedTemporaryFile
 from typing import List
 
+from node_launcher.command_generator import CommandGenerator
 from node_launcher.constants import DARWIN, WINDOWS, OPERATING_SYSTEM
 
 
@@ -44,6 +45,8 @@ def launch_terminal(command: List[str]):
 
 
 class NodeLauncher(object):
+    command_generator: CommandGenerator
+
     def __init__(self, command_generator, launch_fn=launch,
                  launch_terminal_fn=launch_terminal):
         self.command_generator = command_generator

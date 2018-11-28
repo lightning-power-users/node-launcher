@@ -50,7 +50,7 @@ BITCOIN_QT_PATH: Dict[OperatingSystem, str] = {
 LND_DATA_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Lnd/'),
     LINUX: expanduser('~/.lnd/'),
-    WINDOWS: os.path.join(LOCALAPPDATA, 'lnd')
+    WINDOWS: os.path.join(LOCALAPPDATA, 'Lnd')
 }
 
 BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
