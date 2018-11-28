@@ -1,8 +1,10 @@
 # Requirements
-1. Bitcoin Core https://bitcoincore.org/en/download/
-2. ~300 GB of download bandwidth
-3. ~7 GB of disk space (~300 GB if you want the Bitcoin transaction index, makes for a faster LND)
-4. Windows, macOS (please submit a pull request if you want to add Linux support! Next year is the Year of Desktop Linux...)
+1. ~300 GB of download bandwidth
+2. ~7 GB of disk space (~300 GB if you want the Bitcoin transaction index, makes for a faster LND)
+3. Windows or macOS
+
+Please submit a pull request if you want to add Linux support! Next year is the Year of Desktop Linux...
+
 
 # Install 
 
@@ -15,8 +17,8 @@ https://github.com/PierreRochard/node-launcher/releases
     * macOS: `~/Library/Application Support/Node Launcher/`
     * Windows: `%localappdata%/Node\ Launcher/`
 2. Finds available ports for Bitcoin and LND, testnet and mainnet
-3. When launched, nodes use the node launcher data directory, not the default data directories
-4. If you don't have >300 GB of disk space free, it will fall back to pruned.
+3. When launched, Bitcoin nodes use the `datadir` directory specified in `bitcoin.conf` (or the default data directory)
+4. If you don't have >300 GB of disk space free, Bitcoin nodes will fall back to pruned
 5. Pruning still requires downloading data, so make sure you can handle downloading ~300 GB of data
 
 
@@ -47,4 +49,4 @@ To include tests with network calls to GitHub:
 
 macOS: `pyinstaller run-mac.spec`
 
-Windows: `pyinstaller run-windows.spec` (only works on Windows 7)
+Windows: `pyinstaller run-windows.spec` (pyinstaller packaging only works on Windows 7)
