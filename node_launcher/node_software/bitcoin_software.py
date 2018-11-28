@@ -1,7 +1,6 @@
 import os
 
 from node_launcher.constants import TARGET_BITCOIN_RELEASE, OPERATING_SYSTEM, WINDOWS, DARWIN
-from node_launcher.exceptions import LinuxNotSupportedException
 from node_launcher.node_software.node_software import NodeSoftwareABC
 
 
@@ -37,7 +36,7 @@ class BitcoinSoftware(NodeSoftwareABC):
         elif OPERATING_SYSTEM == DARWIN:
             os_name = 'osx64'
         else:
-            raise LinuxNotSupportedException()
+            raise Exception(f'{OPERATING_SYSTEM} is not supported')
         return f'bitcoin-{self.release_version}-{os_name}'
 
     @property

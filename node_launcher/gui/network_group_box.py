@@ -1,7 +1,9 @@
+import sys
+
 from PySide2 import QtWidgets
 from PySide2.QtWidgets import QErrorMessage
 
-from node_launcher.exceptions import BitcoinNotInstalledException
+from node_launcher.constants import LINUX, OPERATING_SYSTEM
 from node_launcher.gui.image_label import ImageLabel
 from node_launcher.node_launcher import NodeLauncher
 
@@ -15,20 +17,25 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
         layout.addStretch(1)
 
         self.error_message = QErrorMessage(self)
+        if OPERATING_SYSTEM == LINUX:
+            self.error_message.showMessage('Linux is not supported, please submit a pull request! '
+                                           'https://github.com/PierreRochard/node-launcher')
+            sys.exit(0)
+
         self.bitcoin_qt_button = QtWidgets.QPushButton('Bitcoin')
         bitcoin_qt_launcher = getattr(node_launcher, f'{group_name}_bitcoin_qt_node')
-        self.bitcoin_qt_button.clicked.connect(lambda: self.on_bitcoin_qt_click(bitcoin_qt_launcher))
+
+        # noinspection PyUnresolvedReferences
+        self.bitcoin_qt_button.clicked.connect(bitcoin_qt_launcher)
+
         layout.addWidget(self.bitcoin_qt_button)
 
         self.lnd_button = QtWidgets.QPushButton('LND')
         lnd_launcher = getattr(node_launcher, f'{group_name}_lnd_node')
+
+        # noinspection PyUnresolvedReferences
         self.lnd_button.clicked.connect(lnd_launcher)
+
         layout.addWidget(self.lnd_button)
 
         self.setLayout(layout)
-
-    def on_bitcoin_qt_click(self, fn):
-        try:
-            fn()
-        except BitcoinNotInstalledException:
-            self.error_message.showMessage('Please install Bitcoin https://bitcoincore.org/en/download/')

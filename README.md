@@ -2,7 +2,7 @@
 1. Bitcoin Core https://bitcoincore.org/en/download/
 2. ~300 GB of download bandwidth
 3. ~7 GB of disk space (~300 GB if you want the Bitcoin transaction index, makes for a faster LND)
-4. Windows, macOS, or Linux
+4. Windows, macOS (please submit a pull request if you want to add Linux support! Next year is the Year of Desktop Linux...)
 
 # Install 
 
@@ -14,7 +14,6 @@ https://github.com/PierreRochard/node-launcher/releases
 1. Creates a node launcher data directory 
     * macOS: `~/Library/Application Support/Node Launcher/`
     * Windows: `%localappdata%/Node\ Launcher/`
-    * Linux: `~/.node_launcher`
 2. Finds available ports for Bitcoin and LND, testnet and mainnet
 3. When launched, nodes use the node launcher data directory, not the default data directories
 4. If you don't have >300 GB of disk space free, it will fall back to pruned.

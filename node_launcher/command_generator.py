@@ -63,8 +63,8 @@ class CommandGenerator(object):
             f'--bitcoind.zmqpubrawblock=tcp://127.0.0.1:{n.ports.zmq_block}',
             f'--bitcoind.zmqpubrawtx=tcp://127.0.0.1:{n.ports.zmq_tx}',
             f'--rpclisten=localhost:{n.ports.grpc}',
-            f'--restlisten=0.0.0.0:{n.ports.rest}',
-            f'--listen=0.0.0.0:{n.ports.node}'
+            f'--restlisten=127.0.0.1:{n.ports.rest}',
+            f'--listen=127.0.0.1:{n.ports.node}'
         ]
 
     def testnet_lnd(self) -> List[str]:

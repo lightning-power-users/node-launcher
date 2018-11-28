@@ -17,7 +17,7 @@ DESCRIPTION = 'Launch Bitcoin and Lightning nodes on mainnet and testnet.'
 URL = 'https://github.com/pierre_rochard/node-launcher'
 EMAIL = 'pierre@rochard.org'
 AUTHOR = 'Pierre Rochard'
-REQUIRES_PYTHON = '>=3.6.0'
+REQUIRES_PYTHON = '>=3.7.0'
 VERSION = None
 
 # What packages are required for this module to be executed?

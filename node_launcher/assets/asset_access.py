@@ -3,6 +3,7 @@ import sys
 
 
 class AssetAccess(object):
+    # noinspection PyUnresolvedReferences,PyProtectedMember
     def __init__(self):
         if getattr(sys, 'frozen', False):
             self.assets_directory = os.path.join(sys._MEIPASS, 'assets')
