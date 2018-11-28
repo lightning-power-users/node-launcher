@@ -9,7 +9,7 @@ from node_launcher.constants import (
     BITCOIN_QT_PATH,
     WINDOWS,
     OPERATING_SYSTEM,
-    TARGET_RELEASE,
+    TARGET_LND_RELEASE,
     LND_DATA_PATH
 )
 from node_launcher.exceptions import BitcoinNotInstalledException
@@ -123,6 +123,6 @@ class DirectoryConfiguration(object):
         lnd_url = github_url + '/repos/lightningnetwork/lnd/releases'
         response = requests.get(lnd_url)
         if response.status_code == 403:
-            return TARGET_RELEASE
+            return TARGET_LND_RELEASE
         release = response.json()[0]
         return release['tag_name']

@@ -3,7 +3,7 @@ from os.path import expanduser
 import platform
 from typing import Dict
 
-TARGET_RELEASE = 'v0.5.1-beta-rc1'
+TARGET_LND_RELEASE = 'v0.5.1-beta-rc1'
 
 
 class OperatingSystem(object):

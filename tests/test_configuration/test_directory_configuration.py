@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from node_launcher.constants import (
-    TARGET_RELEASE,
+    TARGET_LND_RELEASE,
     NODE_LAUNCHER_DATA_PATH,
     OPERATING_SYSTEM
 )
@@ -17,7 +17,7 @@ from node_launcher.exceptions import BitcoinNotInstalledException
 
 @pytest.fixture
 def directory_configuration():
-    lnd_release_fn = MagicMock(return_value=TARGET_RELEASE)
+    lnd_release_fn = MagicMock(return_value=TARGET_LND_RELEASE)
     lnd_dl_fn = MagicMock()
     directory_configuration = DirectoryConfiguration(lnd_release_fn=lnd_release_fn,
                                                      lnd_dl_fn=lnd_dl_fn)
@@ -27,7 +27,7 @@ def directory_configuration():
 # noinspection PyProtectedMember
 class TestDirectoryConfiguration(object):
     def test_get_latest_lnd_release(self, directory_configuration):
-        assert directory_configuration._get_latest_lnd_release() == TARGET_RELEASE
+        assert directory_configuration._get_latest_lnd_release() == TARGET_LND_RELEASE
 
     def test_data_directory(self, directory_configuration):
         assert os.path.isdir(directory_configuration.data)
