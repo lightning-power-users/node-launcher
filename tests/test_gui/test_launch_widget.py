@@ -3,7 +3,11 @@ from unittest.mock import MagicMock
 import pytest
 from PySide2.QtCore import Qt
 
+from node_launcher.command_generator import CommandGenerator
+from node_launcher.configuration import Configuration
+from node_launcher.configuration.bitcoin_configuration import BitcoinConfiguration
 from node_launcher.gui.launch_widget import LaunchWidget
+from node_launcher.node_launcher import NodeLauncher
 
 
 @pytest.fixture
@@ -42,3 +46,18 @@ class TestGuiUnitTests(object):
         qtbot.mouseClick(launch_widget.mainnet_group_box.lnd_button,
                          Qt.LeftButton)
         launch_widget.node_launcher.mainnet_lnd_node.assert_called_once()
+
+    @pytest.mark.slow
+    def test_reveal(self, qtbot):
+        bitcoin_mainnet_conf = BitcoinConfiguration()
+        bitcoin_testnet_conf = BitcoinConfiguration()
+        command_generator = CommandGenerator(
+            testnet_conf=Configuration('testnet', bitcoin_testnet_conf),
+            mainnet_conf=Configuration('mainnet', bitcoin_mainnet_conf)
+        )
+        node_launcher = NodeLauncher(command_generator)
+        launch_widget = LaunchWidget(node_launcher)
+        qtbot.mouseClick(launch_widget.mainnet_group_box.show_macaroons_button,
+                         Qt.LeftButton)
+        qtbot.mouseClick(launch_widget.testnet_group_box.show_macaroons_button,
+                         Qt.LeftButton)
