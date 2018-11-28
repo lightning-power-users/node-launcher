@@ -15,7 +15,7 @@ class CommandGenerator(object):
         if OPERATING_SYSTEM == WINDOWS:
             dir_arg = f'-datadir="{n.bitcoin.datadir}"'
         command = [
-            n.dir.bitcoin_qt,
+            n.dir.bitcoin.bitcoin_qt,
             dir_arg,
             '-server=1',
             '-disablewallet=1',
@@ -52,7 +52,7 @@ class CommandGenerator(object):
         if OPERATING_SYSTEM == WINDOWS:
             dir_arg = f'--lnddir="{n.dir.lnd_data_path}"'
         return [
-            n.dir.lnd,
+            n.dir.lnd.lnd,
             dir_arg,
             '--debuglevel=info',
             '--bitcoin.active',
