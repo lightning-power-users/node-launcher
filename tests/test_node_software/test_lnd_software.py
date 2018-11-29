@@ -24,6 +24,10 @@ class TestLndSoftware(object):
     def test_lnd(self, lnd_software: LndSoftware):
         assert os.path.isfile(lnd_software.lnd)
 
+    @pytest.mark.slow
+    def test_lncli(self, lnd_software: LndSoftware):
+        assert os.path.isfile(lnd_software.lncli)
+
     def test_release_version(self, lnd_software: LndSoftware):
         assert lnd_software.release_version == TARGET_LND_RELEASE
 

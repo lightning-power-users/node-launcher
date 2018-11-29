@@ -42,3 +42,11 @@ class TestCommandGenerator(object):
 
     def test_mainnet_lnd(self, command_generator):
         assert len(command_generator.mainnet_lnd())
+
+    def test_testnet_lncli(self, command_generator):
+        testnet_lncli = command_generator.testnet_lncli()
+        assert testnet_lncli
+
+    def test_mainnet_lncli(self, command_generator):
+        mainnet_lncli = command_generator.mainnet_lncli()
+        assert mainnet_lncli

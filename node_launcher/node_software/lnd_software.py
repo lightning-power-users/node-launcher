@@ -16,6 +16,10 @@ class LndSoftware(NodeSoftwareABC):
         return self.executable_path('lnd')
 
     @property
+    def lncli(self) -> str:
+        return self.executable_path('lncli')
+
+    @property
     def download_name(self) -> str:
         return f'lnd-{OPERATING_SYSTEM}-amd64-{self.release_version}'
 

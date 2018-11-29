@@ -1,7 +1,8 @@
+from pathlib import Path
 from typing import List
 
 from node_launcher.configuration import Configuration
-from node_launcher.constants import WINDOWS, OPERATING_SYSTEM
+from node_launcher.constants import WINDOWS, OPERATING_SYSTEM, LND_DATA_PATH
 
 
 class CommandGenerator(object):
@@ -51,12 +52,9 @@ class CommandGenerator(object):
 
     @staticmethod
     def lnd(n: Configuration) -> List[str]:
-        dir_arg = f'--lnddir="{n.dir.lnd_data_path}"'
-        if OPERATING_SYSTEM == WINDOWS:
-            dir_arg = f'--lnddir="{n.dir.lnd_data_path}"'
         return [
             n.dir.lnd.lnd,
-            dir_arg,
+            f'--lnddir="{n.dir.lnd_data_path}"',
             '--debuglevel=info',
             '--bitcoin.active',
             '--bitcoin.node=bitcoind',
@@ -79,3 +77,24 @@ class CommandGenerator(object):
         return self.lnd(self.mainnet) + [
             '--bitcoin.mainnet'
         ]
+
+    @staticmethod
+    def lncli(n: Configuration):
+        base_command = [
+            f'"{n.dir.lnd.lncli}"',
+        ]
+        if n.ports.grpc != 10009:
+            base_command.append(f'--rpcserver=localhost:{n.ports.grpc}')
+        if n.network != 'mainnnet':
+            base_command.append(f'--network={n.network}')
+        if n.dir.lnd_data_path != LND_DATA_PATH[OPERATING_SYSTEM]:
+            base_command.append(f'--lnddir="{n.dir.lnd_data_path}"')
+            base_command.append(f'--macaroonpath="{n.dir.macaroon_path(n.network)}"')
+            base_command.append(f'--tlscertpath="{n.dir.tls_cert_path}"')
+        return base_command
+
+    def testnet_lncli(self) -> List[str]:
+        return self.lncli(self.testnet)
+
+    def mainnet_lncli(self) -> List[str]:
+        return self.lncli(self.mainnet)
