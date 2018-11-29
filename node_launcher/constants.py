@@ -4,7 +4,7 @@ import platform
 from typing import Dict
 
 TARGET_BITCOIN_RELEASE = 'v0.17.0.1'
-TARGET_LND_RELEASE = 'v0.5.1-beta-rc1'
+TARGET_LND_RELEASE = 'v0.5.1-beta'
 
 
 class OperatingSystem(object):

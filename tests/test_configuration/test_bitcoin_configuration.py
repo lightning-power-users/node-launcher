@@ -74,3 +74,16 @@ class TestBitcoinConfiguration(object):
         bitcoin_configuration.prune = False
         unpruned = BitcoinConfiguration(bitcoin_configuration.configuration_path)
         assert not unpruned.prune
+
+    @staticmethod
+    def test_rpcuser(bitcoin_configuration: BitcoinConfiguration):
+        assert bitcoin_configuration.rpcuser
+
+    @staticmethod
+    def test_set_rpcuser(bitcoin_configuration: BitcoinConfiguration):
+        bitcoin_configuration.rpcuser = 'test_user'
+        changed = BitcoinConfiguration(bitcoin_configuration.configuration_path)
+        assert changed.rpcuser == 'test_user'
+        bitcoin_configuration.rpcuser = 'test_user_2'
+        changed_again = BitcoinConfiguration(bitcoin_configuration.configuration_path)
+        assert changed_again.rpcuser == 'test_user_2'

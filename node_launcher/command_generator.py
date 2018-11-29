@@ -22,8 +22,8 @@ class CommandGenerator(object):
             dir_arg,
             '-server=1',
             '-disablewallet=1',
-            f'-rpcuser={n.bitcoin_rpc_user}',
-            f'-rpcpassword={n.bitcoin_rpc_password}',
+            f'-rpcuser={n.bitcoin.rpcuser}',
+            f'-rpcpassword={n.bitcoin.rpcpassword}',
             f'-zmqpubrawblock=tcp://127.0.0.1:{n.ports.zmq_block}',
             f'-zmqpubrawtx=tcp://127.0.0.1:{n.ports.zmq_tx}'
         ]
@@ -61,8 +61,8 @@ class CommandGenerator(object):
             '--bitcoin.active',
             '--bitcoin.node=bitcoind',
             '--bitcoind.rpchost=127.0.0.1',
-            f'--bitcoind.rpcuser={n.bitcoin_rpc_user}',
-            f'--bitcoind.rpcpass={n.bitcoin_rpc_password}',
+            f'--bitcoind.rpcuser={n.bitcoin.rpcuser}',
+            f'--bitcoind.rpcpass={n.bitcoin.rpcpassword}',
             f'--bitcoind.zmqpubrawblock=tcp://127.0.0.1:{n.ports.zmq_block}',
             f'--bitcoind.zmqpubrawtx=tcp://127.0.0.1:{n.ports.zmq_tx}',
             f'--rpclisten=localhost:{n.ports.grpc}',

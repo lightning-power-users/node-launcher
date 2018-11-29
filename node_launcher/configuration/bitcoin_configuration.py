@@ -4,23 +4,17 @@ from shutil import disk_usage
 from typing import Optional
 
 from node_launcher.constants import BITCOIN_DATA_PATH, OPERATING_SYSTEM
-from node_launcher.utilities import get_dir_size
+from node_launcher.utilities import get_dir_size, get_random_password
 
 
 class BitcoinConfiguration(object):
     def __init__(self, configuration_path: str = None):
-        if configuration_path is None:
-            configuration_path = os.path.join(BITCOIN_DATA_PATH[OPERATING_SYSTEM], 'bitcoin.conf')
-        self.configuration_path = configuration_path
-        self.datadir = self.read_property('datadir')
-        if self.datadir is None:
-            self.datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
-
-        self.prune = self.read_property('prune')
-        if self.prune is None:
-            self.prune = self.should_prune()
-        else:
-            self.prune = bool(self.prune)
+        self.configuration_path = None
+        self.datadir: str = None
+        self.prune: bool = None
+        self.rpcuser: str = None
+        self.rpcpassword: str = None
+        self.configuration_path: str = configuration_path
 
     def should_prune(self) -> bool:
         _, _, free_bytes = disk_usage(os.path.realpath(self.datadir))
@@ -78,10 +72,15 @@ class BitcoinConfiguration(object):
 
     @property
     def configuration_path(self) -> str:
+        configuration_path = self.__configuration_path
+        if configuration_path is None:
+            self.__configuration_path = os.path.join(BITCOIN_DATA_PATH[OPERATING_SYSTEM], 'bitcoin.conf')
         return self.__configuration_path
 
     @configuration_path.setter
     def configuration_path(self, configuration_path: str):
+        if configuration_path is None:
+            configuration_path = os.path.join(BITCOIN_DATA_PATH[OPERATING_SYSTEM], 'bitcoin.conf')
         self.__configuration_path = configuration_path
         parent_directory = os.path.abspath(os.path.join(self.configuration_path, os.pardir))
         if not os.path.isdir(parent_directory):
@@ -90,16 +89,21 @@ class BitcoinConfiguration(object):
             self.generate_file()
 
     @property
-    def datadir(self) -> Optional[str]:
-        try:
-            return self.__datadir
-        except AttributeError:
-            return None
+    def datadir(self) -> str:
+        datadir = self.read_property('datadir')
+        if datadir is None:
+            datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
+            self.write_property('datadir', datadir)
+        self.__datadir = datadir
+        return datadir
 
     @datadir.setter
     def datadir(self, new_datadir: str):
         if new_datadir is None:
-            self.__datadir = None
+            new_datadir = self.read_property('datadir')
+            if new_datadir is None:
+                new_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
+            self.__datadir = new_datadir
             return
 
         old_datadir = self.datadir
@@ -110,16 +114,20 @@ class BitcoinConfiguration(object):
             self.write_property('datadir', new_datadir)
 
     @property
-    def prune(self) -> Optional[bool]:
-        try:
-            return self.__prune
-        except AttributeError:
-            return None
+    def prune(self) -> bool:
+        prune = self.read_property('prune')
+        if prune is None:
+            prune = self.should_prune()
+            self.write_property('prune', str(int(prune)))
+            self.write_property('txindex', str(int(not prune)))
+        self.__prune = bool(int(prune))
+        return self.__prune
 
     @prune.setter
     def prune(self, new_prune: bool):
         if new_prune is None:
-            self.__prune = None
+            new_prune = self.read_property('prune')
+            self.__prune = new_prune
             return
         new_prune = bool(int(new_prune))
         old_prune = self.prune
@@ -127,3 +135,43 @@ class BitcoinConfiguration(object):
             self.__prune = new_prune
             self.write_property('prune', str(int(new_prune)))
             self.write_property('txindex', str(int(not new_prune)))
+
+    @property
+    def rpcuser(self) -> str:
+        rpcuser = self.read_property('rpcuser')
+        if rpcuser is None:
+            rpcuser = 'default_user'
+            self.write_property('rpcuser', rpcuser)
+        self.__rpcuser = rpcuser
+        return self.__rpcuser
+
+    @rpcuser.setter
+    def rpcuser(self, new_rpcuser: str):
+        if new_rpcuser is None:
+            self.__rpcuser = None
+            return
+
+        old_rpcuser = self.rpcuser
+        if new_rpcuser != old_rpcuser:
+            self.__rpcuser = new_rpcuser
+            self.write_property('rpcuser', new_rpcuser)
+
+    @property
+    def rpcpassword(self) -> str:
+        rpcpassword = self.read_property('rpcpassword')
+        if rpcpassword is None:
+            rpcpassword = get_random_password()
+            self.write_property('rpcpassword', rpcpassword)
+        self.__rpcpassword = rpcpassword
+        return rpcpassword
+
+    @rpcpassword.setter
+    def rpcpassword(self, new_rpcpassword: str):
+        if new_rpcpassword is None:
+            self.__rpcpassword = None
+            return
+
+        old_rpcpassword = self.rpcpassword
+        if new_rpcpassword != old_rpcpassword:
+            self.__rpcpassword = new_rpcpassword
+            self.write_property('rpcpassword', new_rpcpassword)
