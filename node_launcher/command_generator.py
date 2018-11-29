@@ -99,7 +99,7 @@ class CommandGenerator(object):
         return self.lncli(self.mainnet)
 
     def testnet_rest_url(self) -> str:
-        return f'https://127.0.0.1:{self.testnet.ports.rest}'
+        return f'https://localhost:{self.testnet.ports.rest}'
 
     def mainnet_rest_url(self) -> str:
-        return f'https://127.0.0.1:{self.mainnet.ports.rest}'
+        return f'https://localhost:{self.mainnet.ports.rest}'
