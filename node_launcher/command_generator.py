@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import List
 
 from node_launcher.configuration import Configuration
@@ -85,7 +84,7 @@ class CommandGenerator(object):
         ]
         if n.ports.grpc != 10009:
             base_command.append(f'--rpcserver=localhost:{n.ports.grpc}')
-        if n.network != 'mainnnet':
+        if n.network != 'mainnet':
             base_command.append(f'--network={n.network}')
         if n.dir.lnd_data_path != LND_DATA_PATH[OPERATING_SYSTEM]:
             base_command.append(f'--lnddir="{n.dir.lnd_data_path}"')

@@ -1,25 +1,27 @@
 from PySide2 import QtWidgets
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QLabel
+from PySide2.QtWidgets import QGridLayout
 
+from node_launcher.gui.advertisement_label import AdvertisementLabel
 from node_launcher.gui.network_group_box import NetworkGroupBox
+from node_launcher.node_launcher import NodeLauncher
 
 
 class LaunchWidget(QtWidgets.QWidget):
-    def __init__(self, node_launcher):
+    mainnet_group_box: NetworkGroupBox
+    testnet_group_box: NetworkGroupBox
+    grid: QGridLayout
+    node_launcher: NodeLauncher
+
+    def __init__(self, node_launcher: NodeLauncher):
         super().__init__()
         self.node_launcher = node_launcher
-        self.grid = QtWidgets.QGridLayout()
+
+        self.advertisement_label = AdvertisementLabel(self)
         self.testnet_group_box = NetworkGroupBox('testnet', self.node_launcher)
         self.mainnet_group_box = NetworkGroupBox('mainnet', self.node_launcher)
-        lpu_advertisement = 'Want a real mainnet Bitcoin faucet? Join the ' \
-                            '<a href="https://www.lightningpowerusers.com/">Lighting Power Users</a>'
-        advertisement_label = QLabel(self)
-        advertisement_label.setOpenExternalLinks(True)
-        advertisement_label.setFixedHeight(advertisement_label.height() * 2)
-        advertisement_label.setText(lpu_advertisement)
-        advertisement_label.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
-        self.grid.addWidget(advertisement_label, 1, 1, 1, 2)
+
+        self.grid = QtWidgets.QGridLayout()
+        self.grid.addWidget(self.advertisement_label, 1, 1, 1, 2)
         self.grid.addWidget(self.testnet_group_box, 2, 1)
         self.grid.addWidget(self.mainnet_group_box, 2, 2)
         self.setLayout(self.grid)
