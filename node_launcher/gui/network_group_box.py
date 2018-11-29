@@ -47,6 +47,12 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
 
         layout.addWidget(HorizontalLine())
 
+        # Copy REST API URL button
+        self.rest_url_copy_button = QtWidgets.QPushButton('Copy LND REST Address')
+        # noinspection PyUnresolvedReferences
+        self.rest_url_copy_button.clicked.connect(self.copy_rest_url)
+        layout.addWidget(self.rest_url_copy_button)
+
         # Show Macaroons button
         self.show_macaroons_button = QtWidgets.QPushButton('Show Macaroons')
         # noinspection PyUnresolvedReferences
@@ -55,6 +61,7 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
 
         # Copy lncli command button
         self.lncli_copy_button = QtWidgets.QPushButton('Copy lncli Command')
+        # noinspection PyUnresolvedReferences
         self.lncli_copy_button.clicked.connect(self.copy_lncli_command)
         layout.addWidget(self.lncli_copy_button)
 
@@ -73,3 +80,7 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
     def copy_lncli_command(self):
         command = getattr(self.node_launcher.command_generator, f'{self.network}_lncli')()
         QClipboard().setText(' '.join(command))
+
+    def copy_rest_url(self):
+        rest_url = getattr(self.node_launcher.command_generator, f'{self.network}_rest_url')()
+        QClipboard().setText(rest_url)
