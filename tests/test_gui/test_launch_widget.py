@@ -2,6 +2,8 @@ from unittest.mock import MagicMock
 
 import pytest
 from PySide2.QtCore import Qt
+from PySide2.QtGui import QClipboard
+from PySide2.QtTest import QTest
 
 from node_launcher.command_generator import CommandGenerator
 from node_launcher.configuration import Configuration
@@ -18,6 +20,19 @@ def mock_node_launcher():
     node_launcher.testnet_lnd_node = MagicMock(return_value=None)
     node_launcher.mainnet_lnd_node = MagicMock(return_value=None)
     return node_launcher
+
+
+@pytest.fixture
+def integration_launch_widget():
+    bitcoin_mainnet_conf = BitcoinConfiguration()
+    bitcoin_testnet_conf = BitcoinConfiguration()
+    command_generator = CommandGenerator(
+        testnet_conf=Configuration('testnet', bitcoin_testnet_conf),
+        mainnet_conf=Configuration('mainnet', bitcoin_mainnet_conf)
+    )
+    node_launcher = NodeLauncher(command_generator)
+    launch_widget = LaunchWidget(node_launcher)
+    return launch_widget
 
 
 @pytest.fixture
@@ -47,17 +62,21 @@ class TestGuiUnitTests(object):
                          Qt.LeftButton)
         launch_widget.node_launcher.mainnet_lnd_node.assert_called_once()
 
-    @pytest.mark.slow
-    def test_reveal(self, qtbot):
-        bitcoin_mainnet_conf = BitcoinConfiguration()
-        bitcoin_testnet_conf = BitcoinConfiguration()
-        command_generator = CommandGenerator(
-            testnet_conf=Configuration('testnet', bitcoin_testnet_conf),
-            mainnet_conf=Configuration('mainnet', bitcoin_mainnet_conf)
-        )
-        node_launcher = NodeLauncher(command_generator)
-        launch_widget = LaunchWidget(node_launcher)
-        qtbot.mouseClick(launch_widget.mainnet_group_box.show_macaroons_button,
+    def test_testnet_lncli_copy_button(self, qtbot: QTest, integration_launch_widget: LaunchWidget):
+        qtbot.mouseClick(integration_launch_widget.testnet_group_box.lncli_copy_button,
                          Qt.LeftButton)
-        qtbot.mouseClick(launch_widget.testnet_group_box.show_macaroons_button,
+        command = integration_launch_widget.node_launcher.command_generator.testnet_lncli()
+        assert QClipboard().text() == ' '.join(command)
+
+    def test_mainnet_lncli_copy_button(self, qtbot: QTest, integration_launch_widget: LaunchWidget):
+        qtbot.mouseClick(integration_launch_widget.mainnet_group_box.lncli_copy_button,
+                         Qt.LeftButton)
+        command = integration_launch_widget.node_launcher.command_generator.mainnet_lncli()
+        assert QClipboard().text() == ' '.join(command)
+
+    @pytest.mark.slow
+    def test_reveal(self, qtbot: QTest, integration_launch_widget: LaunchWidget):
+        qtbot.mouseClick(integration_launch_widget.mainnet_group_box.show_macaroons_button,
+                         Qt.LeftButton)
+        qtbot.mouseClick(integration_launch_widget.testnet_group_box.show_macaroons_button,
                          Qt.LeftButton)
