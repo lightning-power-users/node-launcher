@@ -1,7 +1,7 @@
 from typing import List
 
 from node_launcher.configuration import Configuration
-from node_launcher.constants import WINDOWS, OPERATING_SYSTEM, LND_DATA_PATH
+from node_launcher.constants import OPERATING_SYSTEM, LND_DATA_PATH, IS_WINDOWS
 
 
 class CommandGenerator(object):
@@ -15,7 +15,7 @@ class CommandGenerator(object):
     @staticmethod
     def bitcoin_qt(n: Configuration) -> List[str]:
         dir_arg = f'-datadir={n.bitcoin.datadir}'
-        if OPERATING_SYSTEM == WINDOWS:
+        if IS_WINDOWS:
             dir_arg = f'-datadir="{n.bitcoin.datadir}"'
         command = [
             n.dir.bitcoin.bitcoin_qt,

@@ -29,6 +29,8 @@ LINUX: OperatingSystem = OperatingSystem('linux')
 WINDOWS: OperatingSystem = OperatingSystem('windows')
 OPERATING_SYSTEM = OperatingSystem(platform.system())
 
+IS_WINDOWS = OPERATING_SYSTEM == WINDOWS
+
 # Only relevant for Windows
 LOCALAPPDATA = os.path.abspath(os.environ.get('LOCALAPPDATA', ''))
 APPDATA = os.path.abspath(os.environ.get('APPDATA', ''))
@@ -63,3 +65,5 @@ LPU_ADVERTISEMENT = 'Want a real mainnet Bitcoin faucet? Join the ' \
                     '<a href="https://www.lightningpowerusers.com/">' \
                     'Lighting Power Users' \
                     '</a>'
+
+GIGABYTE = 1000000000

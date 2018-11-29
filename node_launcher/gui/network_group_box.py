@@ -6,7 +6,7 @@ from PySide2 import QtWidgets
 from PySide2.QtGui import QClipboard
 from PySide2.QtWidgets import QErrorMessage
 
-from node_launcher.constants import LINUX, OPERATING_SYSTEM, DARWIN, WINDOWS
+from node_launcher.constants import LINUX, OPERATING_SYSTEM, DARWIN, IS_WINDOWS
 from node_launcher.gui.horizontal_line import HorizontalLine
 from node_launcher.gui.image_label import ImageLabel
 from node_launcher.node_launcher import NodeLauncher
@@ -72,7 +72,7 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
         macaroons_path = os.path.join(lnd_data_path, 'data', 'chain', 'bitcoin', self.network)
         if OPERATING_SYSTEM == DARWIN:
             subprocess.call(['open', '-R', macaroons_path])
-        elif OPERATING_SYSTEM == WINDOWS:
+        elif IS_WINDOWS:
             subprocess.call(f'explorer "{macaroons_path}"', shell=True)
         else:
             raise NotImplementedError(f'reveal method has not been implemented for {OPERATING_SYSTEM}')

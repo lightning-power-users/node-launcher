@@ -6,7 +6,7 @@ from typing import Optional
 
 import requests
 
-from node_launcher.constants import NODE_LAUNCHER_DATA_PATH, OPERATING_SYSTEM, WINDOWS
+from node_launcher.constants import NODE_LAUNCHER_DATA_PATH, OPERATING_SYSTEM, IS_WINDOWS
 
 
 class NodeSoftwareABC(ABC):
@@ -34,7 +34,7 @@ class NodeSoftwareABC(ABC):
     @property
     def download_compressed_name(self) -> str:
         name = self.download_name
-        if OPERATING_SYSTEM == WINDOWS:
+        if IS_WINDOWS:
             suffix = '.zip'
         else:
             suffix = '.tar.gz'
@@ -66,7 +66,7 @@ class NodeSoftwareABC(ABC):
 
     def executable_path(self, name):
         executable = os.path.join(self.bin_path, name)
-        if OPERATING_SYSTEM == WINDOWS:
+        if IS_WINDOWS:
             executable += '.exe'
         if not os.path.isfile(executable):
             self.download()
@@ -81,7 +81,7 @@ class NodeSoftwareABC(ABC):
                     f.write(chunk)
 
     def extract(self):
-        if OPERATING_SYSTEM == WINDOWS:
+        if IS_WINDOWS:
             with zipfile.ZipFile(self.download_compressed_path) as zip_file:
                 zip_file.extractall(path=self.downloads_directory_path)
         else:
