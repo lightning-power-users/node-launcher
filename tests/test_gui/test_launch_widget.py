@@ -74,6 +74,18 @@ class TestGuiUnitTests(object):
         command = integration_launch_widget.node_launcher.command_generator.mainnet_lncli()
         assert QClipboard().text() == ' '.join(command)
 
+    def test_testnet_rest_url_copy_button(self, qtbot: QTest, integration_launch_widget: LaunchWidget):
+        qtbot.mouseClick(integration_launch_widget.testnet_group_box.rest_url_copy_button,
+                         Qt.LeftButton)
+        rest_url = integration_launch_widget.node_launcher.command_generator.testnet_rest_url()
+        assert QClipboard().text() == rest_url
+
+    def test_mainnet_rest_url_copy_button(self, qtbot: QTest, integration_launch_widget: LaunchWidget):
+        qtbot.mouseClick(integration_launch_widget.mainnet_group_box.rest_url_copy_button,
+                         Qt.LeftButton)
+        rest_url = integration_launch_widget.node_launcher.command_generator.mainnet_rest_url()
+        assert QClipboard().text() == rest_url
+
     @pytest.mark.slow
     def test_reveal(self, qtbot: QTest, integration_launch_widget: LaunchWidget):
         qtbot.mouseClick(integration_launch_widget.mainnet_group_box.show_macaroons_button,
