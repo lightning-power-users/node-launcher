@@ -69,3 +69,11 @@ class TestBitcoinConfiguration(object):
         bitcoin_configuration.file.rpcuser = 'test_user_2'
         changed_again = ConfigurationFile(bitcoin_configuration.file.path)
         assert changed_again.rpcuser == 'test_user_2'
+
+    @staticmethod
+    def test_autoconfigure_datadir(bitcoin_configuration: BitcoinConfiguration):
+        datadir = bitcoin_configuration.file.datadir
+        prune = bitcoin_configuration.file.prune
+        txindex = bitcoin_configuration.file.txindex
+        assert datadir
+        assert prune != txindex
