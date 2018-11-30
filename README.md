@@ -23,7 +23,7 @@ https://github.com/PierreRochard/node-launcher/releases
 
 ![macos](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/macos.png)
 
-![windows](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/windows.jpg)
+![windows](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/windows.png)
 
 # Development
 
