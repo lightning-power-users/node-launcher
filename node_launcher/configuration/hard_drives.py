@@ -24,8 +24,8 @@ class HardDrives(object):
 
     @staticmethod
     def get_gb(path: str) -> int:
-        _, _, free_bytes, _ = psutil.disk_usage(path)
-        free_gb = math.floor(free_bytes / GIGABYTE)
+        capacity, used, free, percent = psutil.disk_usage(path)
+        free_gb = math.floor(free / GIGABYTE)
         return free_gb
 
     def list_partitions(self) -> List[Partition]:
@@ -60,7 +60,7 @@ class HardDrives(object):
             bitcoin_bytes = 0
         free_gb = math.floor(free_bytes / GIGABYTE)
         bitcoin_gb = math.ceil(bitcoin_bytes / GIGABYTE)
-        if free_gb < 300 and bitcoin_gb > 10:
+        if free_gb < 250 and bitcoin_gb > 10:
             raise Exception('Un-pruned bitcoin chain data '
                             'but not enough space to finish IBD')
-        return free_gb < 300
+        return free_gb < 250
