@@ -29,8 +29,9 @@ class HardDrives(object):
         return free_gb
 
     def list_partitions(self) -> List[Partition]:
+        ps = psutil.disk_partitions()
+        partition_paths = [p.mountpoint for p in ps if 'removable' not in p.opts]
         partitions = []
-        partition_paths = [p.mountpoint for p in psutil.disk_partitions()]
         for path in partition_paths:
             free_gb = self.get_gb(path)
             partitions.append(Partition(path, free_gb), )

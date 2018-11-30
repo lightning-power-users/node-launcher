@@ -25,7 +25,7 @@ def command_generator():
 class TestCommandGenerator(object):
     def test_bitcoin_qt(self, command_generator):
         command = command_generator.bitcoin_qt(command_generator.mainnet)
-        assert command[1].startswith('-datadir=/')
+        assert command[1].startswith('-datadir=')
 
     def test_testnet_bitcoin_qt(self, command_generator):
         command = command_generator.testnet_bitcoin_qt()
