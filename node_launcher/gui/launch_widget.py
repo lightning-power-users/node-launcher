@@ -3,6 +3,7 @@ from PySide2.QtWidgets import QGridLayout
 
 from node_launcher.gui.advertisement_label import AdvertisementLabel
 from node_launcher.gui.data_directory import DataDirectoryBox
+from node_launcher.gui.horizontal_line import HorizontalLine
 from node_launcher.gui.network_group_box import NetworkGroupBox
 from node_launcher.node_launcher import NodeLauncher
 

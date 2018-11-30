@@ -32,6 +32,7 @@ WINDOWS: OperatingSystem = OperatingSystem('windows')
 OPERATING_SYSTEM = OperatingSystem(platform.system())
 
 IS_WINDOWS = OPERATING_SYSTEM == WINDOWS
+IS_MACOS = OPERATING_SYSTEM == DARWIN
 
 # Only relevant for Windows
 LOCALAPPDATA = os.path.abspath(os.environ.get('LOCALAPPDATA', ''))
@@ -63,7 +64,7 @@ BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(APPDATA, 'Bitcoin')
 }
 
-LPU_ADVERTISEMENT = 'Want a real mainnet Bitcoin faucet? Join the ' \
+LPU_ADVERTISEMENT = 'Need help? Want a real mainnet Bitcoin faucet? Join the ' \
                     '<a href="https://www.lightningpowerusers.com/">' \
                     'Lighting Power Users' \
                     '</a>'
