@@ -46,12 +46,6 @@ NODE_LAUNCHER_DATA_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(LOCALAPPDATA, 'Node Launcher')
 }
 
-BITCOIN_QT_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: '/Applications/Bitcoin-Qt.app/Contents/MacOS/Bitcoin-Qt',
-    LINUX: 'bitcoind',
-    WINDOWS: os.path.join(PROGRAMS, 'Bitcoin', 'bitcoin-qt.exe')
-}
-
 LND_DATA_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Lnd/'),
     LINUX: expanduser('~/.lnd/'),

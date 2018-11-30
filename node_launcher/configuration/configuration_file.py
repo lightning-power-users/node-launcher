@@ -9,7 +9,7 @@ exceptions = ['path']
 class ConfigurationFile(object):
     def __init__(self, path):
         self.path = path
-        parent = os.path.join(path, pardir)
+        parent = os.path.abspath(os.path.join(path, pardir))
         if not isdir(parent):
             os.mkdir(parent)
         if not isfile(self.path):

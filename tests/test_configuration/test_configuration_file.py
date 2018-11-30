@@ -1,6 +1,5 @@
-import os
 from os.path import isfile
-from tempfile import TemporaryFile
+from tempfile import NamedTemporaryFile
 
 import pytest
 
@@ -9,7 +8,7 @@ from node_launcher.configuration.configuration_file import ConfigurationFile
 
 @pytest.fixture
 def configuration_file():
-    with TemporaryFile(suffix='.conf', delete=True) as f:
+    with NamedTemporaryFile(suffix='.conf', delete=True) as f:
         name = f.name
     configuration_file = ConfigurationFile(name)
     return configuration_file

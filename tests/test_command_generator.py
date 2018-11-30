@@ -6,7 +6,7 @@ from node_launcher.command_generator import CommandGenerator
 from node_launcher.configuration import Configuration
 from node_launcher.configuration.bitcoin_configuration import \
     BitcoinConfiguration
-from node_launcher.constants import OPERATING_SYSTEM, DARWIN, BITCOIN_QT_PATH
+from node_launcher.constants import OPERATING_SYSTEM, DARWIN
 
 
 @pytest.fixture
@@ -25,9 +25,7 @@ def command_generator():
 class TestCommandGenerator(object):
     def test_bitcoin_qt(self, command_generator):
         command = command_generator.bitcoin_qt(command_generator.mainnet)
-        if OPERATING_SYSTEM == DARWIN:
-            assert command[0] == BITCOIN_QT_PATH[OPERATING_SYSTEM]
-            assert command[1].startswith('-datadir=/')
+        assert command[1].startswith('-datadir=/')
 
     def test_testnet_bitcoin_qt(self, command_generator):
         command = command_generator.testnet_bitcoin_qt()
