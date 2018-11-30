@@ -21,10 +21,7 @@ https://github.com/PierreRochard/node-launcher/releases
 4. If you don't have >300 GB of disk space free, Bitcoin nodes will fall back to pruned
 5. Pruning still requires downloading data, so make sure you can handle downloading ~300 GB of data
 
-
-![macos_dark](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/dark_macos.png)
-
-![macos](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/macos.jpg)
+![macos](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/macos.png)
 
 ![windows](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/windows.jpg)
 

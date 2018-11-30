@@ -6,7 +6,6 @@ from node_launcher.command_generator import CommandGenerator
 from node_launcher.configuration import Configuration
 from node_launcher.configuration.bitcoin_configuration import \
     BitcoinConfiguration
-from node_launcher.constants import OPERATING_SYSTEM, DARWIN
 
 
 @pytest.fixture
