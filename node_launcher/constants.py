@@ -3,6 +3,8 @@ from os.path import expanduser
 import platform
 from typing import Dict
 
+NODE_LAUNCHER_RELEASE = (4, 0, 0)
+
 TARGET_BITCOIN_RELEASE = 'v0.17.0.1'
 TARGET_LND_RELEASE = 'v0.5.1-beta'
 
@@ -28,6 +30,9 @@ DARWIN: OperatingSystem = OperatingSystem('darwin')
 LINUX: OperatingSystem = OperatingSystem('linux')
 WINDOWS: OperatingSystem = OperatingSystem('windows')
 OPERATING_SYSTEM = OperatingSystem(platform.system())
+
+IS_WINDOWS = OPERATING_SYSTEM == WINDOWS
+IS_MACOS = OPERATING_SYSTEM == DARWIN
 
 # Only relevant for Windows
 LOCALAPPDATA = os.path.abspath(os.environ.get('LOCALAPPDATA', ''))
@@ -59,7 +64,9 @@ BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(APPDATA, 'Bitcoin')
 }
 
-LPU_ADVERTISEMENT = 'Want a real mainnet Bitcoin faucet? Join the ' \
+LPU_ADVERTISEMENT = 'Need help? Want a real mainnet Bitcoin faucet? Join the ' \
                     '<a href="https://www.lightningpowerusers.com/">' \
                     'Lighting Power Users' \
                     '</a>'
+
+GIGABYTE = 1000000000

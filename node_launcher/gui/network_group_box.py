@@ -6,10 +6,11 @@ from PySide2 import QtWidgets
 from PySide2.QtGui import QClipboard
 from PySide2.QtWidgets import QErrorMessage
 
-from node_launcher.constants import LINUX, OPERATING_SYSTEM, DARWIN, WINDOWS
+from node_launcher.constants import LINUX, OPERATING_SYSTEM, DARWIN, IS_WINDOWS
 from node_launcher.gui.horizontal_line import HorizontalLine
 from node_launcher.gui.image_label import ImageLabel
 from node_launcher.node_launcher import NodeLauncher
+from node_launcher.utilities import reveal
 
 
 class NetworkGroupBox(QtWidgets.QGroupBox):
@@ -30,6 +31,8 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
             self.error_message.showMessage('Linux is not supported, please submit a pull request! '
                                            'https://github.com/PierreRochard/node-launcher')
             sys.exit(0)
+
+        layout.addWidget(HorizontalLine())
 
         # Bitcoin-Qt button
         self.bitcoin_qt_button = QtWidgets.QPushButton('Launch Bitcoin')
@@ -68,19 +71,16 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
         self.setLayout(layout)
 
     def reveal_macaroons(self):
-        lnd_data_path = getattr(self.node_launcher.command_generator, self.network).dir.lnd_data_path
-        macaroons_path = os.path.join(lnd_data_path, 'data', 'chain', 'bitcoin', self.network)
-        if OPERATING_SYSTEM == DARWIN:
-            subprocess.call(['open', '-R', macaroons_path])
-        elif OPERATING_SYSTEM == WINDOWS:
-            subprocess.call(f'explorer "{macaroons_path}"', shell=True)
-        else:
-            raise NotImplementedError(f'reveal method has not been implemented for {OPERATING_SYSTEM}')
+        macaroons_path = getattr(self.node_launcher.command_generator,
+                                 self.network).dir.macaroon_path(self.network)
+        reveal(macaroons_path)
 
     def copy_lncli_command(self):
-        command = getattr(self.node_launcher.command_generator, f'{self.network}_lncli')()
+        command = getattr(self.node_launcher.command_generator,
+                          f'{self.network}_lncli')()
         QClipboard().setText(' '.join(command))
 
     def copy_rest_url(self):
-        rest_url = getattr(self.node_launcher.command_generator, f'{self.network}_rest_url')()
+        rest_url = getattr(self.node_launcher.command_generator,
+                           f'{self.network}_rest_url')()
         QClipboard().setText(rest_url)

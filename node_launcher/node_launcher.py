@@ -3,11 +3,11 @@ from tempfile import NamedTemporaryFile
 from typing import List
 
 from node_launcher.command_generator import CommandGenerator
-from node_launcher.constants import DARWIN, WINDOWS, OPERATING_SYSTEM
+from node_launcher.constants import DARWIN, IS_WINDOWS, OPERATING_SYSTEM
 
 
 def launch(command: List[str]):
-    if OPERATING_SYSTEM == WINDOWS:
+    if IS_WINDOWS:
         from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
         command[0] = '"' + command[0] + '"'
         cmd = ' '.join(command)
@@ -33,7 +33,7 @@ def launch_terminal(command: List[str]):
             f.flush()
             call(['chmod', 'u+x', f.name])
             Popen(['open', '-W', f.name], close_fds=True)
-    elif OPERATING_SYSTEM == WINDOWS:
+    elif IS_WINDOWS:
         from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
         with NamedTemporaryFile(suffix='-lnd.bat', delete=False) as f:
             f.write(cmd.encode('utf-8'))

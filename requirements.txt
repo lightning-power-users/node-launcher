@@ -1,3 +1,4 @@
+psutil
 pyinstaller
 PySide2
 PyTest

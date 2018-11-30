@@ -1,7 +1,7 @@
 from typing import List
 
 from node_launcher.configuration import Configuration
-from node_launcher.constants import WINDOWS, OPERATING_SYSTEM, LND_DATA_PATH
+from node_launcher.constants import OPERATING_SYSTEM, LND_DATA_PATH, IS_WINDOWS
 
 
 class CommandGenerator(object):
@@ -14,20 +14,20 @@ class CommandGenerator(object):
 
     @staticmethod
     def bitcoin_qt(n: Configuration) -> List[str]:
-        dir_arg = f'-datadir={n.bitcoin.datadir}'
-        if OPERATING_SYSTEM == WINDOWS:
-            dir_arg = f'-datadir="{n.bitcoin.datadir}"'
+        dir_arg = f'-datadir={n.bitcoin.file.datadir}'
+        if IS_WINDOWS:
+            dir_arg = f'-datadir="{n.bitcoin.file.datadir}"'
         command = [
             n.dir.bitcoin.bitcoin_qt,
             dir_arg,
             '-server=1',
             '-disablewallet=1',
-            f'-rpcuser={n.bitcoin.rpcuser}',
-            f'-rpcpassword={n.bitcoin.rpcpassword}',
+            f'-rpcuser={n.bitcoin.file.rpcuser}',
+            f'-rpcpassword={n.bitcoin.file.rpcpassword}',
             f'-zmqpubrawblock=tcp://127.0.0.1:{n.ports.zmq_block}',
             f'-zmqpubrawtx=tcp://127.0.0.1:{n.ports.zmq_tx}'
         ]
-        if n.bitcoin.prune:
+        if n.bitcoin.file.prune:
             command += [
                 '-prune=600',
                 '-txindex=0'
@@ -58,8 +58,8 @@ class CommandGenerator(object):
             '--bitcoin.active',
             '--bitcoin.node=bitcoind',
             '--bitcoind.rpchost=127.0.0.1',
-            f'--bitcoind.rpcuser={n.bitcoin.rpcuser}',
-            f'--bitcoind.rpcpass={n.bitcoin.rpcpassword}',
+            f'--bitcoind.rpcuser={n.bitcoin.file.rpcuser}',
+            f'--bitcoind.rpcpass={n.bitcoin.file.rpcpassword}',
             f'--bitcoind.zmqpubrawblock=tcp://127.0.0.1:{n.ports.zmq_block}',
             f'--bitcoind.zmqpubrawtx=tcp://127.0.0.1:{n.ports.zmq_tx}',
             f'--rpclisten=localhost:{n.ports.grpc}',

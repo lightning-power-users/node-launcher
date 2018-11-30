@@ -1,3 +1,3 @@
-VERSION = (1, 0, 0)
+from node_launcher.constants import NODE_LAUNCHER_RELEASE
 
-__version__ = '.'.join(map(str, VERSION))
+__version__ = '.'.join(map(str, NODE_LAUNCHER_RELEASE))

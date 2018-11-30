@@ -6,6 +6,7 @@ import pytest
 from node_launcher.configuration.bitcoin_configuration import (
     BitcoinConfiguration
 )
+from node_launcher.configuration.configuration_file import ConfigurationFile
 from node_launcher.constants import (
     BITCOIN_DATA_PATH,
     OPERATING_SYSTEM
@@ -16,74 +17,63 @@ from node_launcher.constants import (
 def bitcoin_configuration():
     with NamedTemporaryFile(suffix='-bitcoin.conf', delete=False) as f:
         bitcoin_configuration = BitcoinConfiguration(f.name)
-    bitcoin_configuration.write_property('test_property', 'test_value')
     return bitcoin_configuration
 
 
 class TestBitcoinConfiguration(object):
     @staticmethod
-    def test_configuration_path_no_directory(bitcoin_configuration: BitcoinConfiguration):
+    def test_configuration_path_no_directory():
         with TemporaryDirectory() as tmpdirname:
             os.rmdir(tmpdirname)
-            bitcoin_configuration.configuration_path = os.path.join(tmpdirname, 'bitcoin.conf')
-            assert os.path.isfile(bitcoin_configuration.configuration_path)
+            configuration_path = os.path.join(tmpdirname, 'bitcoin.conf')
+            bitcoin_configuration = BitcoinConfiguration(configuration_path)
+            assert os.path.isfile(bitcoin_configuration.file.path)
 
     @staticmethod
     def test_configuration_path(bitcoin_configuration: BitcoinConfiguration):
-        assert bitcoin_configuration.configuration_path.endswith('bitcoin.conf')
-        assert os.path.isfile(bitcoin_configuration.configuration_path)
-
-    @staticmethod
-    def test_generate_file(bitcoin_configuration: BitcoinConfiguration):
-        with NamedTemporaryFile(suffix='-bitcoin.conf', delete=True) as f:
-            bitcoin_configuration.configuration_path = f.name
-        assert not os.path.isfile(bitcoin_configuration.configuration_path)
-        bitcoin_configuration.generate_file()
-        assert os.path.isfile(bitcoin_configuration.configuration_path)
-        with open(bitcoin_configuration.configuration_path, 'r') as f:
-            lines = f.readlines()
-            lines[0].endswith('Node Launcher')
-
-    @staticmethod
-    def test_write_property(bitcoin_configuration: BitcoinConfiguration):
-        bitcoin_configuration.write_property('test_write_property', 'test_write_value')
-        with open(bitcoin_configuration.configuration_path, 'r') as f:
-            data = f.read()
-            assert 'test_write_property=test_write_value' in data
-
-    @staticmethod
-    def test_read_property(bitcoin_configuration: BitcoinConfiguration):
-        result = bitcoin_configuration.read_property('test_property')
-        assert result == 'test_value'
+        assert bitcoin_configuration.file.path.endswith('bitcoin.conf')
+        assert os.path.isfile(bitcoin_configuration.file.path)
 
     @staticmethod
     def test_datadir(bitcoin_configuration: BitcoinConfiguration):
-        assert bitcoin_configuration.datadir == BITCOIN_DATA_PATH[
+        assert bitcoin_configuration.file.datadir == BITCOIN_DATA_PATH[
             OPERATING_SYSTEM]
-        assert os.path.exists(bitcoin_configuration.datadir)
+        assert os.path.exists(bitcoin_configuration.file.datadir)
 
     @staticmethod
     def test_prune(bitcoin_configuration: BitcoinConfiguration):
-        assert bitcoin_configuration.prune == bitcoin_configuration.should_prune()
+        datadir = bitcoin_configuration.file.datadir
+        should_prune = bitcoin_configuration.hard_drives.should_prune(datadir, True)
+        assert bitcoin_configuration.file.prune == should_prune
 
     @staticmethod
     def test_set_prune(bitcoin_configuration: BitcoinConfiguration):
-        bitcoin_configuration.prune = True
-        pruned = BitcoinConfiguration(bitcoin_configuration.configuration_path)
+        bitcoin_configuration.set_prune(True)
+        pruned = ConfigurationFile(bitcoin_configuration.file.path)
         assert pruned.prune
-        bitcoin_configuration.prune = False
-        unpruned = BitcoinConfiguration(bitcoin_configuration.configuration_path)
+        assert not pruned.txindex
+        bitcoin_configuration.set_prune(False)
+        unpruned = ConfigurationFile(bitcoin_configuration.file.path)
         assert not unpruned.prune
+        assert unpruned.txindex
 
     @staticmethod
     def test_rpcuser(bitcoin_configuration: BitcoinConfiguration):
-        assert bitcoin_configuration.rpcuser
+        assert bitcoin_configuration.file.rpcuser
 
     @staticmethod
     def test_set_rpcuser(bitcoin_configuration: BitcoinConfiguration):
-        bitcoin_configuration.rpcuser = 'test_user'
-        changed = BitcoinConfiguration(bitcoin_configuration.configuration_path)
+        bitcoin_configuration.file.rpcuser = 'test_user'
+        changed = ConfigurationFile(bitcoin_configuration.file.path)
         assert changed.rpcuser == 'test_user'
-        bitcoin_configuration.rpcuser = 'test_user_2'
-        changed_again = BitcoinConfiguration(bitcoin_configuration.configuration_path)
+        bitcoin_configuration.file.rpcuser = 'test_user_2'
+        changed_again = ConfigurationFile(bitcoin_configuration.file.path)
         assert changed_again.rpcuser == 'test_user_2'
+
+    @staticmethod
+    def test_autoconfigure_datadir(bitcoin_configuration: BitcoinConfiguration):
+        datadir = bitcoin_configuration.file.datadir
+        prune = bitcoin_configuration.file.prune
+        txindex = bitcoin_configuration.file.txindex
+        assert datadir
+        assert prune != txindex
