@@ -23,6 +23,10 @@ def get_random_password() -> str:
 
 def reveal(path: str):
     if IS_MACOS:
+        contents = os.listdir(path)
+        contents.sort()
+        if contents:
+            path = os.path.join(path, contents[0])
         subprocess.call(['open', '-R', path])
     elif IS_WINDOWS:
         subprocess.call(f'explorer "{Path(path)}"', shell=True)
