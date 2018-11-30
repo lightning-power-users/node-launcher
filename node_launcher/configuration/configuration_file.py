@@ -15,7 +15,7 @@ class ConfigurationFile(object):
         if not isfile(self.path):
             with open(self.path, 'w') as f:
                 f.write('# Auto-Generated Configuration File\n\n')
-                f.write(f'# Node Launcher version {NODE_LAUNCHER_RELEASE[0]}\n\n')
+                f.write(f'# Node Launcher version {NODE_LAUNCHER_RELEASE}\n\n')
                 f.flush()
 
     def __getattr__(self, name):
