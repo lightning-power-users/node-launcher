@@ -40,6 +40,8 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
                                                           self.datadir,
                                                           QFileDialog.ShowDirsOnly
                                                           | QFileDialog.DontResolveSymlinks)
+        if not data_directory:
+            return
         if not os.path.isdir(data_directory):
             self.error_message.showMessage('Directory does not exist, please try again!')
         self.command_generator.testnet.bitcoin.file.datadir = data_directory
