@@ -1,11 +1,13 @@
 from PySide2 import QtWidgets
-from PySide2.QtWidgets import QGridLayout
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QGridLayout, QMessageBox
 
+from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
 from node_launcher.gui.advertisement_label import AdvertisementLabel
 from node_launcher.gui.data_directory import DataDirectoryBox
-from node_launcher.gui.horizontal_line import HorizontalLine
 from node_launcher.gui.network_group_box import NetworkGroupBox
 from node_launcher.node_launcher import NodeLauncher
+from node_launcher.node_software.launcher_software import LauncherSoftware
 
 
 class LaunchWidget(QtWidgets.QWidget):
@@ -17,6 +19,8 @@ class LaunchWidget(QtWidgets.QWidget):
     def __init__(self, node_launcher: NodeLauncher):
         super().__init__()
         self.node_launcher = node_launcher
+        self.message_box = QMessageBox(self)
+        self.message_box.setTextFormat(Qt.RichText)
 
         self.advertisement_label = AdvertisementLabel(self)
         self.data_directory_group_box = DataDirectoryBox(self.node_launcher.command_generator)
@@ -29,3 +33,12 @@ class LaunchWidget(QtWidgets.QWidget):
         self.grid.addWidget(self.testnet_group_box, 3, 1)
         self.grid.addWidget(self.mainnet_group_box, 3, 2)
         self.setLayout(self.grid)
+
+        latest_version = LauncherSoftware().get_latest_release_version()
+        if latest_version != NODE_LAUNCHER_RELEASE:
+            self.message_box.setText(UPGRADE)
+            self.message_box.setInformativeText(
+                f'Your version: {NODE_LAUNCHER_RELEASE}\n'
+                f'New version: {latest_version}'
+            )
+            self.message_box.exec_()
