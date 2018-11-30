@@ -31,6 +31,8 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
                                            'https://github.com/PierreRochard/node-launcher')
             sys.exit(0)
 
+        layout.addWidget(HorizontalLine())
+
         # Bitcoin-Qt button
         self.bitcoin_qt_button = QtWidgets.QPushButton('Launch Bitcoin')
         bitcoin_qt_launcher = getattr(node_launcher, f'{network}_bitcoin_qt_node')
