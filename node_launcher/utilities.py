@@ -1,5 +1,6 @@
 import os
 import subprocess
+from pathlib import Path
 from random import choice
 from string import ascii_lowercase, digits
 
@@ -24,6 +25,6 @@ def reveal(path: str):
     if IS_MACOS:
         subprocess.call(['open', '-R', path])
     elif IS_WINDOWS:
-        subprocess.call(f'explorer "{path}"', shell=True)
+        subprocess.call(f'explorer "{Path(path)}"', shell=True)
     else:
         raise NotImplementedError(f'reveal method has not been implemented for {OPERATING_SYSTEM}')
