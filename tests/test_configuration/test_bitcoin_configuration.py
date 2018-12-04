@@ -16,7 +16,8 @@ from node_launcher.constants import (
 @pytest.fixture
 def bitcoin_configuration():
     with NamedTemporaryFile(suffix='-bitcoin.conf', delete=False) as f:
-        bitcoin_configuration = BitcoinConfiguration(f.name)
+        bitcoin_configuration = BitcoinConfiguration(network='testnet',
+                                                     configuration_path=f.name)
     return bitcoin_configuration
 
 
@@ -26,7 +27,8 @@ class TestBitcoinConfiguration(object):
         with TemporaryDirectory() as tmpdirname:
             os.rmdir(tmpdirname)
             configuration_path = os.path.join(tmpdirname, 'bitcoin.conf')
-            bitcoin_configuration = BitcoinConfiguration(configuration_path)
+            bitcoin_configuration = BitcoinConfiguration(network='testnet',
+                                                         configuration_path=configuration_path)
             assert os.path.isfile(bitcoin_configuration.file.path)
 
     @staticmethod
@@ -43,7 +45,8 @@ class TestBitcoinConfiguration(object):
     @staticmethod
     def test_prune(bitcoin_configuration: BitcoinConfiguration):
         datadir = bitcoin_configuration.file.datadir
-        should_prune = bitcoin_configuration.hard_drives.should_prune(datadir, True)
+        should_prune = bitcoin_configuration.hard_drives.should_prune(datadir,
+                                                                      True)
         assert bitcoin_configuration.file.prune == should_prune
 
     @staticmethod
@@ -77,3 +80,9 @@ class TestBitcoinConfiguration(object):
         txindex = bitcoin_configuration.file.txindex
         assert datadir
         assert prune != txindex
+
+    def test_detect_zmq_ports(self,
+                              bitcoin_configuration: BitcoinConfiguration):
+        result = bitcoin_configuration.detect_zmq_ports()
+        assert bitcoin_configuration.zmq_block_port < bitcoin_configuration.zmq_tx_port
+        assert isinstance(result, bool)

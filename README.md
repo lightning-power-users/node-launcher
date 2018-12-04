@@ -47,3 +47,8 @@ To include tests with network calls to GitHub:
 macOS: `pyinstaller run-mac.spec`
 
 Windows: `pyinstaller run-windows.spec` (pyinstaller packaging only works on Windows 7)
+
+
+# Generate LND Bindings
+
+https://github.com/lightningnetwork/lnd/blob/master/docs/grpc/python.md

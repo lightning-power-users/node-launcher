@@ -40,7 +40,7 @@ def test_launch_terminal():
         result = launch_terminal(['set', 'path'])
     else:
         result = launch_terminal(['echo', 'hello'])
-    assert result is None
+    assert result
 
 
 class TestNodeLauncherUnitTests(object):

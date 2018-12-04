@@ -21,9 +21,11 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
         self.datadir_label.setFixedHeight(50)
 
         self.show_directory_button = QtWidgets.QPushButton('Show Directory')
-        self.show_directory_button.clicked.connect(lambda: reveal(self.datadir))
+        # noinspection PyUnresolvedReferences
+        self.show_directory_button.clicked.connect(self.reveal_datadir)
 
         self.select_directory_button = QtWidgets.QPushButton('Select Directory')
+        # noinspection PyUnresolvedReferences
         self.select_directory_button.clicked.connect(self.file_dialog)
 
         layout = QtWidgets.QGridLayout()
@@ -45,5 +47,13 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
         if not os.path.isdir(data_directory):
             self.error_message.showMessage('Directory does not exist, please try again!')
         self.command_generator.testnet.bitcoin.file.datadir = data_directory
+        self.command_generator.mainnet.bitcoin.set_prune()
         self.datadir = data_directory
         self.datadir_label.setText(data_directory)
+
+    def reveal_datadir(self):
+        try:
+            reveal(self.datadir)
+        except (NotADirectoryError, FileNotFoundError):
+            self.error_message.showMessage(f'{self.datadir} not found')
+            return

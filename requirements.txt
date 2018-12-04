@@ -1,3 +1,6 @@
+grpcio
+grpcio-tools
+googleapis-common-protos
 psutil
 pyinstaller
 PySide2

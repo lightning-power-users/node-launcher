@@ -1,19 +1,17 @@
 from node_launcher.configuration.bitcoin_configuration import \
     BitcoinConfiguration
-from node_launcher.configuration.directory_configuration import DirectoryConfiguration
-from node_launcher.configuration.port_configuration import PortConfiguration
-from node_launcher.node_software.bitcoin_software import BitcoinSoftware
-from node_launcher.node_software.lnd_software import LndSoftware
+from node_launcher.configuration.lnd_configuration import LndConfiguration
 
 
 class Configuration(object):
-    dir: DirectoryConfiguration
 
-    def __init__(self, network: str, bitcoin_configuration: BitcoinConfiguration):
+    bitcoin: BitcoinConfiguration
+    lnd: LndConfiguration
+    network: str
+
+    def __init__(self, network: str,
+                 bitcoin_configuration: BitcoinConfiguration,
+                 lnd_configuration: LndConfiguration):
         self.network = network
-        self.ports = PortConfiguration()
-        bitcoin_software = BitcoinSoftware()
-        lnd_software = LndSoftware()
-        self.dir = DirectoryConfiguration(bitcoin_software=bitcoin_software,
-                                          lnd_software=lnd_software)
+        self.lnd = lnd_configuration
         self.bitcoin = bitcoin_configuration

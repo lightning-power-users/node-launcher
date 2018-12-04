@@ -165,3 +165,5 @@ venv.bak/
 !/run.spec
 !/run-windows.spec
 !/run-mac.spec
+/node_launcher/lnd_client/rpc.proto
+/node_launcher/lnd_client/googleapis
