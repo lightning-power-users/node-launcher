@@ -1,7 +1,7 @@
 from typing import List
 
 from node_launcher.configuration import Configuration
-from node_launcher.constants import OPERATING_SYSTEM, LND_DATA_PATH, IS_WINDOWS
+from node_launcher.constants import OPERATING_SYSTEM, LND_DIR_PATH, IS_WINDOWS
 
 
 class CommandGenerator(object):
@@ -18,14 +18,14 @@ class CommandGenerator(object):
         if IS_WINDOWS:
             dir_arg = f'-datadir="{n.bitcoin.file.datadir}"'
         command = [
-            n.dir.bitcoin.bitcoin_qt,
+            n.bitcoin.software.bitcoin_qt,
             dir_arg,
             '-server=1',
             '-disablewallet=1',
             f'-rpcuser={n.bitcoin.file.rpcuser}',
             f'-rpcpassword={n.bitcoin.file.rpcpassword}',
-            f'-zmqpubrawblock=tcp://127.0.0.1:{n.ports.zmq_block}',
-            f'-zmqpubrawtx=tcp://127.0.0.1:{n.ports.zmq_tx}'
+            f'-zmqpubrawblock=tcp://127.0.0.1:{n.bitcoin.zmq_block_port}',
+            f'-zmqpubrawtx=tcp://127.0.0.1:{n.bitcoin.zmq_tx_port}'
         ]
         if n.bitcoin.file.prune:
             command += [
@@ -52,19 +52,19 @@ class CommandGenerator(object):
     @staticmethod
     def lnd(n: Configuration) -> List[str]:
         return [
-            n.dir.lnd.lnd,
-            f'--lnddir="{n.dir.lnd_data_path}"',
+            n.lnd.software.lnd,
+            f'--lnddir="{n.lnd.lnddir}"',
             '--debuglevel=info',
             '--bitcoin.active',
             '--bitcoin.node=bitcoind',
             '--bitcoind.rpchost=127.0.0.1',
             f'--bitcoind.rpcuser={n.bitcoin.file.rpcuser}',
             f'--bitcoind.rpcpass={n.bitcoin.file.rpcpassword}',
-            f'--bitcoind.zmqpubrawblock=tcp://127.0.0.1:{n.ports.zmq_block}',
-            f'--bitcoind.zmqpubrawtx=tcp://127.0.0.1:{n.ports.zmq_tx}',
-            f'--rpclisten=localhost:{n.ports.grpc}',
-            f'--restlisten=127.0.0.1:{n.ports.rest}',
-            f'--listen=127.0.0.1:{n.ports.node}'
+            f'--bitcoind.zmqpubrawblock=tcp://127.0.0.1:{n.bitcoin.zmq_block_port}',
+            f'--bitcoind.zmqpubrawtx=tcp://127.0.0.1:{n.bitcoin.zmq_tx_port}',
+            f'--rpclisten=localhost:{n.lnd.grpc_port}',
+            f'--restlisten=127.0.0.1:{n.lnd.rest_port}',
+            f'--listen=127.0.0.1:{n.lnd.node_port}'
         ]
 
     def testnet_lnd(self) -> List[str]:
@@ -80,16 +80,16 @@ class CommandGenerator(object):
     @staticmethod
     def lncli(n: Configuration):
         base_command = [
-            f'"{n.dir.lnd.lncli}"',
+            f'"{n.lnd.software.lncli}"',
         ]
-        if n.ports.grpc != 10009:
-            base_command.append(f'--rpcserver=localhost:{n.ports.grpc}')
+        if n.lnd.grpc_port != 10009:
+            base_command.append(f'--rpcserver=localhost:{n.lnd.grpc_port}')
         if n.network != 'mainnet':
             base_command.append(f'--network={n.network}')
-        if n.dir.lnd_data_path != LND_DATA_PATH[OPERATING_SYSTEM]:
-            base_command.append(f'--lnddir="{n.dir.lnd_data_path}"')
-            base_command.append(f'--macaroonpath="{n.dir.macaroon_path(n.network)}"')
-            base_command.append(f'--tlscertpath="{n.dir.tls_cert_path}"')
+        if n.lnd.lnddir != LND_DIR_PATH[OPERATING_SYSTEM]:
+            base_command.append(f'--lnddir="{n.lnd.lnddir}"')
+            base_command.append(f'--macaroonpath="{n.lnd.macaroon_path}"')
+            base_command.append(f'--tlscertpath="{n.lnd.tls_cert_path}"')
         return base_command
 
     def testnet_lncli(self) -> List[str]:
@@ -99,7 +99,7 @@ class CommandGenerator(object):
         return self.lncli(self.mainnet)
 
     def testnet_rest_url(self) -> str:
-        return f'https://localhost:{self.testnet.ports.rest}'
+        return f'https://localhost:{self.testnet.lnd.rest_port}'
 
     def mainnet_rest_url(self) -> str:
-        return f'https://localhost:{self.mainnet.ports.rest}'
+        return f'https://localhost:{self.mainnet.lnd.rest_port}'

@@ -46,7 +46,7 @@ NODE_LAUNCHER_DATA_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(LOCALAPPDATA, 'Node Launcher')
 }
 
-LND_DATA_PATH: Dict[OperatingSystem, str] = {
+LND_DIR_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Lnd/'),
     LINUX: expanduser('~/.lnd/'),
     WINDOWS: os.path.join(LOCALAPPDATA, 'Lnd')
@@ -60,7 +60,7 @@ BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
 
 LPU_ADVERTISEMENT = 'Need help? Want a real mainnet Bitcoin faucet? Join the ' \
                     '<a href="https://www.lightningpowerusers.com/">' \
-                    'Lighting Power Users' \
+                    'Lightning Power Users' \
                     '</a>'
 
 UPGRADE = 'Please download the latest version of the Node Launcher: ' \
