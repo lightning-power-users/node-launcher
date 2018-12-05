@@ -3,7 +3,7 @@ from os.path import expanduser
 import platform
 from typing import Dict
 
-NODE_LAUNCHER_RELEASE = '.'.join(map(str, (5, 0, 1)))
+NODE_LAUNCHER_RELEASE = '.'.join(map(str, (5, 0, 2)))
 
 TARGET_BITCOIN_RELEASE = 'v0.17.0.1'
 TARGET_LND_RELEASE = 'v0.5.1-beta'
@@ -69,3 +69,11 @@ UPGRADE = 'Please download the latest version of the Node Launcher: ' \
                     '</a>'
 
 GIGABYTE = 1000000000
+
+if IS_WINDOWS:
+    from keyring.backends.Windows import WinVaultKeyring
+    keyring = WinVaultKeyring()
+
+if IS_MACOS:
+    from keyring.backends.OS_X import Keyring
+    keyring = Keyring()

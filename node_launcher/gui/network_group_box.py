@@ -1,13 +1,13 @@
 import sys
 import time
 
-import keyring
+
 from PySide2 import QtWidgets
 from PySide2.QtGui import QClipboard
 from PySide2.QtWidgets import QErrorMessage, QInputDialog, QLineEdit
 from grpc._channel import _Rendezvous
 
-from node_launcher.constants import LINUX, OPERATING_SYSTEM
+from node_launcher.constants import LINUX, OPERATING_SYSTEM, keyring
 from node_launcher.gui.horizontal_line import HorizontalLine
 from node_launcher.gui.image_label import ImageLabel
 from node_launcher.gui.seed_dialog import SeedDialog
@@ -141,7 +141,7 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
             self.node_launcher.unlock_wallet(network=self.network,
                                              wallet_password=password)
             keyring.set_password(
-                service_name=f'lnd_{self.network}_wallet_password',
+                service=f'lnd_{self.network}_wallet_password',
                 username=str(time.time()),
                 password=password)
         except _Rendezvous as e:
@@ -178,15 +178,15 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
 
             timestamp = str(time.time())
             keyring.set_password(
-                service_name=f'lnd_{self.network}_wallet_password',
+                service=f'lnd_{self.network}_wallet_password',
                 username=timestamp,
                 password=new_wallet_password)
-            keyring.set_password(service_name=f'lnd_{self.network}_seed',
+            keyring.set_password(service=f'lnd_{self.network}_seed',
                                  username=timestamp,
                                  password=seed_text)
             if seed_password is not None:
                 keyring.set_password(
-                    service_name=f'lnd_{self.network}_seed_password',
+                    service=f'lnd_{self.network}_seed_password',
                     username=timestamp,
                     password=seed_password)
 
@@ -227,15 +227,15 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
 
             timestamp = str(time.time())
             keyring.set_password(
-                service_name=f'lnd_{self.network}_wallet_password',
+                service=f'lnd_{self.network}_wallet_password',
                 username=timestamp,
                 password=new_wallet_password)
-            keyring.set_password(service_name=f'lnd_{self.network}_seed',
+            keyring.set_password(service=f'lnd_{self.network}_seed',
                                  username=timestamp,
                                  password=seed)
             if seed_password is not None:
                 keyring.set_password(
-                    service_name=f'lnd_{self.network}_seed_password',
+                    service=f'lnd_{self.network}_seed_password',
                     username=timestamp,
                     password=seed_password)
 
