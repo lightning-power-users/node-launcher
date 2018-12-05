@@ -69,3 +69,11 @@ UPGRADE = 'Please download the latest version of the Node Launcher: ' \
                     '</a>'
 
 GIGABYTE = 1000000000
+
+if IS_WINDOWS:
+    from keyring.backends.Windows import WinVaultKeyring
+    keyring = WinVaultKeyring()
+
+if IS_MACOS:
+    from keyring.backends.OS_X import Keyring
+    keyring = Keyring()
