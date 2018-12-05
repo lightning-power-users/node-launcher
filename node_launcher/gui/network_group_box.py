@@ -63,12 +63,12 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
         self.unlock_wallet_button.clicked.connect(self.unlock_wallet)
         layout.addWidget(self.unlock_wallet_button)
 
-        # Initialize wallet button
-        self.initialize_wallet_button = QtWidgets.QPushButton(
-            'Initialize Wallet')
+        # Create wallet button
+        self.create_wallet_button = QtWidgets.QPushButton(
+            'Create Wallet')
         # noinspection PyUnresolvedReferences
-        self.initialize_wallet_button.clicked.connect(self.initialize_wallet)
-        layout.addWidget(self.initialize_wallet_button)
+        self.create_wallet_button.clicked.connect(self.create_wallet)
+        layout.addWidget(self.create_wallet_button)
 
         # Recover wallet button
         self.recover_wallet_button = QtWidgets.QPushButton('Recover Wallet')
@@ -149,17 +149,17 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
             self.error_message.showMessage(e._state.details)
             return
 
-    def initialize_wallet(self):
+    def create_wallet(self):
         try:
             new_wallet_password, ok = QInputDialog.getText(self.password_dialog,
-                                                           f'Initialize {self.network} LND Wallet',
+                                                           f'Create {self.network} LND Wallet',
                                                            'New Wallet Password',
                                                            QLineEdit.Password)
             if not ok:
                 return
 
             seed_password, ok = QInputDialog.getText(self.password_dialog,
-                                                     f'Initialize {self.network} LND Wallet',
+                                                     f'Create {self.network} LND Wallet',
                                                      'New Seed Password (Optional)',
                                                      QLineEdit.Password)
             if not ok:
@@ -203,14 +203,14 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
     def recover_wallet(self):
         try:
             new_wallet_password, ok = QInputDialog.getText(self.password_dialog,
-                                                           f'Restore {self.network} LND Wallet',
+                                                           f'Recover {self.network} LND Wallet',
                                                            'New Wallet Password',
                                                            QLineEdit.Password)
             if not ok:
                 return
 
             seed_password, ok = QInputDialog.getText(self.password_dialog,
-                                                     f'Restore {self.network} LND Wallet',
+                                                     f'Recover {self.network} LND Wallet',
                                                      'Seed Password (Optional)',
                                                      QLineEdit.Password)
             if not ok:
@@ -219,7 +219,7 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
                 seed_password = None
 
             seed, ok = QInputDialog.getText(self.password_dialog,
-                                            f'Initialize {self.network} LND Wallet',
+                                            f'Recover {self.network} LND Wallet',
                                             'Seed')
             if not ok:
                 return
