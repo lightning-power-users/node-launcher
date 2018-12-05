@@ -61,7 +61,7 @@ class LndClient(object):
         request.wallet_password = wallet_password.encode('latin1')
         request.cipher_seed_mnemonic.extend(seed)
         if seed_password is not None:
-            request.aezeed_passphrase = seed_password
+            request.aezeed_passphrase = seed_password.encode('latin1')
         if recovery_window is not None:
             request.recovery_window = recovery_window
         response = self.wallet_unlocker().InitWallet(request)

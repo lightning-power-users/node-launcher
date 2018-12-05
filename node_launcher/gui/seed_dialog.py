@@ -16,6 +16,7 @@ class SeedDialog(QDialog):
 
         self.print_button = QPushButton('Print')
         self.layout.addWidget(self.print_button)
+        # noinspection PyUnresolvedReferences
         self.print_button.clicked.connect(self.print)
 
         self.setLayout(self.layout)
