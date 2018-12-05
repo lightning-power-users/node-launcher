@@ -1,5 +1,7 @@
+import time
 from unittest.mock import MagicMock
 
+import keyring
 from PySide2.QtCore import Qt
 from PySide2.QtTest import QTest
 
@@ -13,3 +15,14 @@ class TestSeedDialog(object):
         qtbot.mouseClick(launch_widget.testnet_group_box.initialize_wallet_button,
                          Qt.LeftButton)
 
+    def test_keyring(self):
+        timestamp = str(time.time())
+
+        keyring.set_password(service_name='test_entry',
+                             username=timestamp,
+                             password='test_password')
+        password = keyring.get_password(service_name='test_entry',
+                                        username=timestamp)
+        assert password == 'test_password'
+        keyring.delete_password(service_name='test_entry',
+                                username=timestamp)

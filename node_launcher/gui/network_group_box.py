@@ -1,5 +1,7 @@
 import sys
+import time
 
+import keyring
 from PySide2 import QtWidgets
 from PySide2.QtGui import QClipboard
 from PySide2.QtWidgets import QErrorMessage, QInputDialog, QLineEdit
@@ -136,7 +138,11 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
             return
         try:
             self.node_launcher.unlock_wallet(network=self.network, wallet_password=password)
+            keyring.set_password(service_name=f'lnd_{self.network}_wallet_password',
+                                 username=str(time.time()),
+                                 password=password)
         except _Rendezvous as e:
+            # noinspection PyProtectedMember
             self.error_message.showMessage(e._state.details)
             return
 
@@ -165,6 +171,18 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
             seed_dialog = SeedDialog()
             seed_dialog.text.setText(seed_text)
             seed_dialog.show()
+
+            timestamp = str(time.time())
+            keyring.set_password(service_name=f'lnd_{self.network}_wallet_password',
+                                 username=timestamp,
+                                 password=new_wallet_password)
+            keyring.set_password(service_name=f'lnd_{self.network}_seed',
+                                 username=timestamp,
+                                 password=seed_text)
+            keyring.set_password(service_name=f'lnd_{self.network}_seed_password',
+                                 username=timestamp,
+                                 password=seed_password)
+
             self.node_launcher.initialize_wallet(network=self.network,
                                                  wallet_password=new_wallet_password,
                                                  seed=generate_seed_response,
@@ -199,6 +217,17 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
             if not ok:
                 return
             seed_list = seed.split(' ')
+
+            timestamp = str(time.time())
+            keyring.set_password(service_name=f'lnd_{self.network}_wallet_password',
+                                 username=timestamp,
+                                 password=new_wallet_password)
+            keyring.set_password(service_name=f'lnd_{self.network}_seed',
+                                 username=timestamp,
+                                 password=seed)
+            keyring.set_password(service_name=f'lnd_{self.network}_seed_password',
+                                 username=timestamp,
+                                 password=seed_password)
 
             self.node_launcher.initialize_wallet(network=self.network,
                                                  wallet_password=new_wallet_password,

@@ -1,6 +1,7 @@
 grpcio
 grpcio-tools
 googleapis-common-protos
+keyring
 psutil
 pyinstaller
 PySide2
