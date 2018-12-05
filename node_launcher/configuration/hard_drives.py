@@ -24,7 +24,10 @@ class HardDrives(object):
 
     @staticmethod
     def get_gb(path: str) -> int:
-        capacity, used, free, percent = psutil.disk_usage(path)
+        try:
+            capacity, used, free, percent = psutil.disk_usage(path)
+        except PermissionError:
+            return 0
         free_gb = math.floor(free / GIGABYTE)
         return free_gb
 
