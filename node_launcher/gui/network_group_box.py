@@ -64,7 +64,8 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
         layout.addWidget(self.unlock_wallet_button)
 
         # Initialize wallet button
-        self.initialize_wallet_button = QtWidgets.QPushButton('Initialize Wallet')
+        self.initialize_wallet_button = QtWidgets.QPushButton(
+            'Initialize Wallet')
         # noinspection PyUnresolvedReferences
         self.initialize_wallet_button.clicked.connect(self.initialize_wallet)
         layout.addWidget(self.initialize_wallet_button)
@@ -137,10 +138,12 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
         if not ok:
             return
         try:
-            self.node_launcher.unlock_wallet(network=self.network, wallet_password=password)
-            keyring.set_password(service_name=f'lnd_{self.network}_wallet_password',
-                                 username=str(time.time()),
-                                 password=password)
+            self.node_launcher.unlock_wallet(network=self.network,
+                                             wallet_password=password)
+            keyring.set_password(
+                service_name=f'lnd_{self.network}_wallet_password',
+                username=str(time.time()),
+                password=password)
         except _Rendezvous as e:
             # noinspection PyProtectedMember
             self.error_message.showMessage(e._state.details)
@@ -163,8 +166,9 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
                 return
             if not seed_password:
                 seed_password = None
-            generate_seed_response = self.node_launcher.generate_seed(network=self.network,
-                                                                      seed_password=seed_password)
+            generate_seed_response = self.node_launcher.generate_seed(
+                network=self.network,
+                seed_password=seed_password)
 
             seed_text = ''.join([f'{index + 1}: {value}\n' for index, value
                                  in enumerate(generate_seed_response)])
@@ -173,15 +177,18 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
             seed_dialog.show()
 
             timestamp = str(time.time())
-            keyring.set_password(service_name=f'lnd_{self.network}_wallet_password',
-                                 username=timestamp,
-                                 password=new_wallet_password)
+            keyring.set_password(
+                service_name=f'lnd_{self.network}_wallet_password',
+                username=timestamp,
+                password=new_wallet_password)
             keyring.set_password(service_name=f'lnd_{self.network}_seed',
                                  username=timestamp,
                                  password=seed_text)
-            keyring.set_password(service_name=f'lnd_{self.network}_seed_password',
-                                 username=timestamp,
-                                 password=seed_password)
+            if seed_password is not None:
+                keyring.set_password(
+                    service_name=f'lnd_{self.network}_seed_password',
+                    username=timestamp,
+                    password=seed_password)
 
             self.node_launcher.initialize_wallet(network=self.network,
                                                  wallet_password=new_wallet_password,
@@ -219,15 +226,18 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
             seed_list = seed.split(' ')
 
             timestamp = str(time.time())
-            keyring.set_password(service_name=f'lnd_{self.network}_wallet_password',
-                                 username=timestamp,
-                                 password=new_wallet_password)
+            keyring.set_password(
+                service_name=f'lnd_{self.network}_wallet_password',
+                username=timestamp,
+                password=new_wallet_password)
             keyring.set_password(service_name=f'lnd_{self.network}_seed',
                                  username=timestamp,
                                  password=seed)
-            keyring.set_password(service_name=f'lnd_{self.network}_seed_password',
-                                 username=timestamp,
-                                 password=seed_password)
+            if seed_password is not None:
+                keyring.set_password(
+                    service_name=f'lnd_{self.network}_seed_password',
+                    username=timestamp,
+                    password=seed_password)
 
             self.node_launcher.initialize_wallet(network=self.network,
                                                  wallet_password=new_wallet_password,
