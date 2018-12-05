@@ -75,6 +75,13 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
 
         layout.addWidget(HorizontalLine())
 
+        # Copy gRPC API URL button
+        self.grpc_url_copy_button = QtWidgets.QPushButton(
+            'Copy LND gRPC Address')
+        # noinspection PyUnresolvedReferences
+        self.grpc_url_copy_button.clicked.connect(self.copy_grpc_url)
+        layout.addWidget(self.grpc_url_copy_button)
+
         # Copy REST API URL button
         self.rest_url_copy_button = QtWidgets.QPushButton(
             'Copy LND REST Address')
@@ -113,6 +120,11 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
     def copy_rest_url(self):
         rest_url = getattr(self.node_launcher.command_generator,
                            f'{self.network}_rest_url')()
+        QClipboard().setText(rest_url)
+
+    def copy_grpc_url(self):
+        rest_url = getattr(self.node_launcher.command_generator,
+                           f'{self.network}_grpc_url')()
         QClipboard().setText(rest_url)
 
     def unlock_wallet(self):

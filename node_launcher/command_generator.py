@@ -103,3 +103,9 @@ class CommandGenerator(object):
 
     def mainnet_rest_url(self) -> str:
         return f'https://localhost:{self.mainnet.lnd.rest_port}'
+
+    def testnet_grpc_url(self) -> str:
+        return f'localhost:{self.testnet.lnd.grpc_port}'
+
+    def mainnet_grpc_url(self) -> str:
+        return f'localhost:{self.mainnet.lnd.grpc_port}'
