@@ -1,17 +1,22 @@
 import os
 
 from node_launcher.constants import TARGET_BITCOIN_RELEASE, OPERATING_SYSTEM, DARWIN, IS_WINDOWS
-from node_launcher.node_software.node_software import NodeSoftwareABC
+from node_launcher.services.node_software import NodeSoftwareABC
 
 
 class BitcoinSoftware(NodeSoftwareABC):
+    release_version = None
+
     def __init__(self, override_directory: str = None):
         super().__init__(override_directory)
         self.github_team = 'bitcoin'
         self.github_repo = 'bitcoin'
-        self.release_version = self.get_latest_release_version()
         if self.release_version is None:
-            self.release_version = TARGET_BITCOIN_RELEASE
+            latest = self.get_latest_release_version()
+            if latest is None:
+                self.release_version = TARGET_BITCOIN_RELEASE
+            else:
+                self.release_version = latest
         self.release_version = self.release_version.replace('v', '')
 
     @property
@@ -46,4 +51,3 @@ class BitcoinSoftware(NodeSoftwareABC):
             f'/bitcoin-core-{self.release_version}' \
             f'/{self.download_compressed_name}'
         return download_url
-#

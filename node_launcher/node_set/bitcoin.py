@@ -1,16 +1,18 @@
 import os
-from typing import Optional
+from subprocess import Popen, PIPE
+from tempfile import NamedTemporaryFile
+from typing import Optional, List
 
 import psutil
 
-from node_launcher.configuration.configuration_file import ConfigurationFile
-from node_launcher.configuration.hard_drives import HardDrives
-from node_launcher.constants import BITCOIN_DATA_PATH, OPERATING_SYSTEM
-from node_launcher.node_software.bitcoin_software import BitcoinSoftware
+from node_launcher.services.bitcoin_software import BitcoinSoftware
+from node_launcher.services.configuration_file import ConfigurationFile
+from node_launcher.constants import BITCOIN_DATA_PATH, OPERATING_SYSTEM, IS_WINDOWS
+from node_launcher.services.hard_drives import HardDrives
 from node_launcher.utilities import get_random_password, get_zmq_port
 
 
-class BitcoinConfiguration(object):
+class Bitcoin(object):
     file: ConfigurationFile
     hard_drives: HardDrives
     process: Optional[psutil.Process]
@@ -18,15 +20,11 @@ class BitcoinConfiguration(object):
     zmq_block_port: int
     zmq_tx_port: int
 
-    def __init__(self, network: str, configuration_path: str = None):
-        if configuration_path is None:
-            configuration_path = os.path.join(BITCOIN_DATA_PATH[OPERATING_SYSTEM],
-                                              'bitcoin.conf')
-
-        self.file = ConfigurationFile(configuration_path)
+    def __init__(self, network: str, configuration_file_path: str):
+        self.network = network
         self.hard_drives = HardDrives()
         self.software = BitcoinSoftware()
-        self.network = network
+        self.file = ConfigurationFile(configuration_file_path)
         self.process = self.find_running_node()
 
         if self.file.rpcuser is None:
@@ -90,3 +88,57 @@ class BitcoinConfiguration(object):
         self.zmq_block_port = min(ports)
         self.zmq_tx_port = max(ports)
         return True
+
+    def bitcoin_qt(self) -> List[str]:
+        dir_arg = f'-datadir={self.file.datadir}'
+        if IS_WINDOWS:
+            dir_arg = f'-datadir="{self.file.datadir}"'
+        command = [
+            self.software.bitcoin_qt,
+            dir_arg,
+            '-server=1',
+            '-disablewallet=1',
+            f'-rpcuser={self.file.rpcuser}',
+            f'-rpcpassword={self.file.rpcpassword}',
+            f'-zmqpubrawblock=tcp://127.0.0.1:{self.zmq_block_port}',
+            f'-zmqpubrawtx=tcp://127.0.0.1:{self.zmq_tx_port}'
+        ]
+        if self.file.prune:
+            command += [
+                '-prune=600',
+                '-txindex=0'
+            ]
+        else:
+            command += [
+                '-prune=0',
+                '-txindex=1'
+            ]
+        if self.network == 'testnet':
+            command += [
+                '-testnet=1',
+            ]
+        else:
+            command += [
+                '-testnet=0',
+            ]
+        return command
+
+    def launch(self):
+        command = self.bitcoin_qt()
+        if IS_WINDOWS:
+            from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
+            command[0] = '"' + command[0] + '"'
+            cmd = ' '.join(command)
+            with NamedTemporaryFile(suffix='-btc.bat', delete=False) as f:
+                f.write(cmd.encode('utf-8'))
+                f.flush()
+                result = Popen(
+                    ['start', 'powershell', '-noexit', '-windowstyle', 'hidden',
+                     '-Command', f.name],
+                    stdin=PIPE, stdout=PIPE, stderr=PIPE,
+                    creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
+                    close_fds=True, shell=True)
+        else:
+            result = Popen(command, close_fds=True, shell=False)
+
+        return result

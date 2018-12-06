@@ -1,37 +1,33 @@
 import sys
 import time
 
-
 from PySide2 import QtWidgets
 from PySide2.QtGui import QClipboard
 from PySide2.QtWidgets import QErrorMessage, QInputDialog, QLineEdit
 from grpc._channel import _Rendezvous
 
+from node_launcher.node_set import NodeSet
 from node_launcher.constants import LINUX, OPERATING_SYSTEM, keyring
 from node_launcher.gui.horizontal_line import HorizontalLine
 from node_launcher.gui.image_label import ImageLabel
 from node_launcher.gui.seed_dialog import SeedDialog
-from node_launcher.lnd_client.lnd_client import LndClient
-from node_launcher.node_launcher import NodeLauncher
 from node_launcher.utilities import reveal
 
 
 class NetworkGroupBox(QtWidgets.QGroupBox):
-    lnd_client: LndClient
-    network: str
-    node_launcher: NodeLauncher
+    node_set: NodeSet
 
-    def __init__(self, network: str, node_launcher: NodeLauncher):
+    def __init__(self, network: str = 'mainnet'):
         super().__init__(network)
-        self.network = network
-        self.node_launcher = node_launcher
         self.password_dialog = QInputDialog(self)
+        self.error_message = QErrorMessage(self)
+
+        self.node_set = NodeSet(network)
 
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(ImageLabel(f'bitcoin-{network}.png'))
         layout.addStretch(1)
 
-        self.error_message = QErrorMessage(self)
         if OPERATING_SYSTEM == LINUX:
             self.error_message.showMessage(
                 'Linux is not supported, please submit a pull request! '
@@ -42,17 +38,14 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
 
         # Bitcoin-Qt button
         self.bitcoin_qt_button = QtWidgets.QPushButton('Launch Bitcoin')
-        bitcoin_qt_launcher = getattr(node_launcher,
-                                      f'{network}_bitcoin_qt_node')
         # noinspection PyUnresolvedReferences
-        self.bitcoin_qt_button.clicked.connect(bitcoin_qt_launcher)
+        self.bitcoin_qt_button.clicked.connect(self.node_set.bitcoin.launch)
         layout.addWidget(self.bitcoin_qt_button)
 
         # LND button
         self.lnd_button = QtWidgets.QPushButton('Launch LND')
-        lnd_launcher = getattr(node_launcher, f'{network}_lnd_node')
         # noinspection PyUnresolvedReferences
-        self.lnd_button.clicked.connect(lnd_launcher)
+        self.lnd_button.clicked.connect(self.node_set.lnd.launch)
         layout.addWidget(self.lnd_button)
 
         layout.addWidget(HorizontalLine())
@@ -107,41 +100,32 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
         self.setLayout(layout)
 
     def reveal_macaroons(self):
-        macaroons_path = getattr(self.node_launcher.command_generator,
-                                 self.network).lnd.macaroon_path
         try:
-            reveal(macaroons_path)
+            reveal(self.node_set.lnd.macaroon_path)
         except (FileNotFoundError, NotADirectoryError):
-            self.error_message.showMessage(f'{macaroons_path} not found')
+            self.error_message.showMessage(f'{self.node_set.lnd.macaroon_path} not found')
             return
 
     def copy_lncli_command(self):
-        command = getattr(self.node_launcher.command_generator,
-                          f'{self.network}_lncli')()
-        QClipboard().setText(' '.join(command))
+        QClipboard().setText(' '.join(self.node_set.lnd.lncli))
 
     def copy_rest_url(self):
-        rest_url = getattr(self.node_launcher.command_generator,
-                           f'{self.network}_rest_url')()
-        QClipboard().setText(rest_url)
+        QClipboard().setText(self.node_set.lnd.rest_url)
 
     def copy_grpc_url(self):
-        rest_url = getattr(self.node_launcher.command_generator,
-                           f'{self.network}_grpc_url')()
-        QClipboard().setText(rest_url)
+        QClipboard().setText(self.node_set.lnd.grpc_url)
 
     def unlock_wallet(self):
         password, ok = QInputDialog.getText(self.password_dialog,
-                                            f'Unlock {self.network} LND Wallet',
+                                            f'Unlock {self.node_set.network} LND Wallet',
                                             'Wallet Password',
                                             QLineEdit.Password)
         if not ok:
             return
         try:
-            self.node_launcher.unlock_wallet(network=self.network,
-                                             wallet_password=password)
+            self.node_set.lnd_client.unlock(wallet_password=password)
             keyring.set_password(
-                service=f'lnd_{self.network}_wallet_password',
+                service=f'lnd_{self.node_set.network}_wallet_password',
                 username=str(time.time()),
                 password=password)
         except _Rendezvous as e:
@@ -152,22 +136,21 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
     def create_wallet(self):
         try:
             new_wallet_password, ok = QInputDialog.getText(self.password_dialog,
-                                                           f'Create {self.network} LND Wallet',
+                                                           f'Create {self.node_set.network} LND Wallet',
                                                            'New Wallet Password',
                                                            QLineEdit.Password)
             if not ok:
                 return
 
             seed_password, ok = QInputDialog.getText(self.password_dialog,
-                                                     f'Create {self.network} LND Wallet',
+                                                     f'Create {self.node_set.network} LND Wallet',
                                                      'New Seed Password (Optional)',
                                                      QLineEdit.Password)
             if not ok:
                 return
             if not seed_password:
                 seed_password = None
-            generate_seed_response = self.node_launcher.generate_seed(
-                network=self.network,
+            generate_seed_response = self.node_set.lnd_client.generate_seed(
                 seed_password=seed_password)
 
             seed_text = ''.join([f'{index + 1}: {value}\n' for index, value
@@ -178,22 +161,21 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
 
             timestamp = str(time.time())
             keyring.set_password(
-                service=f'lnd_{self.network}_wallet_password',
+                service=f'lnd_{self.node_set.network}_wallet_password',
                 username=timestamp,
                 password=new_wallet_password)
-            keyring.set_password(service=f'lnd_{self.network}_seed',
+            keyring.set_password(service=f'lnd_{self.node_set.network}_seed',
                                  username=timestamp,
                                  password=seed_text)
             if seed_password is not None:
                 keyring.set_password(
-                    service=f'lnd_{self.network}_seed_password',
+                    service=f'lnd_{self.node_set.network}_seed_password',
                     username=timestamp,
                     password=seed_password)
 
-            self.node_launcher.initialize_wallet(network=self.network,
-                                                 wallet_password=new_wallet_password,
-                                                 seed=generate_seed_response,
-                                                 seed_password=seed_password)
+            self.node_set.lnd_client.initialize_wallet(wallet_password=new_wallet_password,
+                                                       seed=generate_seed_response,
+                                                       seed_password=seed_password)
 
         except _Rendezvous as e:
             # noinspection PyProtectedMember
@@ -203,14 +185,14 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
     def recover_wallet(self):
         try:
             new_wallet_password, ok = QInputDialog.getText(self.password_dialog,
-                                                           f'Recover {self.network} LND Wallet',
+                                                           f'Recover {self.node_set.network} LND Wallet',
                                                            'New Wallet Password',
                                                            QLineEdit.Password)
             if not ok:
                 return
 
             seed_password, ok = QInputDialog.getText(self.password_dialog,
-                                                     f'Recover {self.network} LND Wallet',
+                                                     f'Recover {self.node_set.network} LND Wallet',
                                                      'Seed Password (Optional)',
                                                      QLineEdit.Password)
             if not ok:
@@ -219,7 +201,7 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
                 seed_password = None
 
             seed, ok = QInputDialog.getText(self.password_dialog,
-                                            f'Recover {self.network} LND Wallet',
+                                            f'Recover {self.node_set.network} LND Wallet',
                                             'Seed')
             if not ok:
                 return
@@ -227,23 +209,22 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
 
             timestamp = str(time.time())
             keyring.set_password(
-                service=f'lnd_{self.network}_wallet_password',
+                service=f'lnd_{self.node_set.network}_wallet_password',
                 username=timestamp,
                 password=new_wallet_password)
-            keyring.set_password(service=f'lnd_{self.network}_seed',
+            keyring.set_password(service=f'lnd_{self.node_set.network}_seed',
                                  username=timestamp,
                                  password=seed)
             if seed_password is not None:
                 keyring.set_password(
-                    service=f'lnd_{self.network}_seed_password',
+                    service=f'lnd_{self.node_set.network}_seed_password',
                     username=timestamp,
                     password=seed_password)
 
-            self.node_launcher.initialize_wallet(network=self.network,
-                                                 wallet_password=new_wallet_password,
-                                                 seed=seed_list,
-                                                 seed_password=seed_password,
-                                                 recovery_window=10000)
+            self.node_set.lnd_client.initialize_wallet(wallet_password=new_wallet_password,
+                                                       seed=seed_list,
+                                                       seed_password=seed_password,
+                                                       recovery_window=10000)
         except _Rendezvous as e:
             # noinspection PyProtectedMember
             self.error_message.showMessage(e._state.details)

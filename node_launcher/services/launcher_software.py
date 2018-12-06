@@ -1,5 +1,5 @@
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
-from node_launcher.node_software.node_software import NodeSoftware
+from node_launcher.services.node_software import NodeSoftware
 
 
 class LauncherSoftware(NodeSoftware):

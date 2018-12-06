@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from node_launcher.constants import TARGET_LND_RELEASE
-from node_launcher.node_software.lnd_software import LndSoftware
+from node_launcher.services.lnd_software import LndSoftware
 
 
 def mock_get_latest_release_version(*args):
