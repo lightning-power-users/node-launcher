@@ -4,7 +4,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 from node_launcher.constants import TARGET_BITCOIN_RELEASE, OPERATING_SYSTEM, WINDOWS
-from node_launcher.node_software.bitcoin_software import BitcoinSoftware
+from node_launcher.services.bitcoin_software import BitcoinSoftware
 
 
 def mock_get_latest_release_version(*args):

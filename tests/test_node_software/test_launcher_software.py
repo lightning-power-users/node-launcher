@@ -1,7 +1,7 @@
 import pytest
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
-from node_launcher.node_software.launcher_software import LauncherSoftware
+from node_launcher.services.launcher_software import LauncherSoftware
 
 
 @pytest.fixture

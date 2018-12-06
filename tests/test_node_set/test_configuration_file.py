@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 
-from node_launcher.configuration.configuration_file import ConfigurationFile
+from node_launcher.services.configuration_file import ConfigurationFile
 
 
 @pytest.fixture

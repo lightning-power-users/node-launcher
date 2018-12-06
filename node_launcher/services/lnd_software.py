@@ -1,15 +1,22 @@
 from node_launcher.constants import TARGET_LND_RELEASE, OPERATING_SYSTEM
-from node_launcher.node_software.node_software import NodeSoftwareABC
+from node_launcher.services.node_software import NodeSoftwareABC
 
 
 class LndSoftware(NodeSoftwareABC):
+    release_version = None
+
     def __init__(self, override_directory: str = None):
         super().__init__(override_directory)
         self.github_team = 'lightningnetwork'
         self.github_repo = 'lnd'
-        self.release_version = self.get_latest_release_version()
+
+        # Allows us to do only one network call
         if self.release_version is None:
-            self.release_version = TARGET_LND_RELEASE
+            latest = self.get_latest_release_version()
+            if latest is None:
+                self.release_version = TARGET_LND_RELEASE
+            else:
+                self.release_version = latest
 
     @property
     def lnd(self) -> str:

@@ -8,22 +8,22 @@ import grpc
 from grpc._plugin_wrapping import (_AuthMetadataContext,
                                    _AuthMetadataPluginCallback)
 
-import node_launcher.lnd_client.rpc_pb2 as ln
-import node_launcher.lnd_client.rpc_pb2_grpc as lnrpc
-from node_launcher.configuration import Configuration
+import node_launcher.node_set.lnd_client.rpc_pb2 as ln
+import node_launcher.node_set.lnd_client.rpc_pb2_grpc as lnrpc
+from node_launcher.node_set.lnd import Lnd
 
 os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
 
 
 class LndClient(object):
-    def __init__(self, configuration: Configuration):
-        self.c = configuration
-        lnd_tls_cert_path = os.path.join(self.c.lnd.lnddir, 'tls.cert')
+    def __init__(self, lnd: Lnd):
+        self.lnd = lnd
+        lnd_tls_cert_path = os.path.join(self.lnd.lnddir, 'tls.cert')
         self.lnd_tls_cert = open(lnd_tls_cert_path, 'rb').read()
         self.cert_credentials = grpc.ssl_channel_credentials(self.lnd_tls_cert)
 
     def wallet_unlocker(self):
-        grpc_channel = grpc.secure_channel(f'localhost:{self.c.lnd.grpc_port}',
+        grpc_channel = grpc.secure_channel(f'localhost:{self.lnd.grpc_port}',
                                            credentials=self.cert_credentials)
         return lnrpc.WalletUnlockerStub(grpc_channel)
 
@@ -31,7 +31,7 @@ class LndClient(object):
     def metadata_callback(self,
                           context: _AuthMetadataPluginCallback,
                           callback: _AuthMetadataContext):
-        admin_macaroon_path = os.path.join(self.c.lnd.macaroon_path, 'admin.macaroon')
+        admin_macaroon_path = os.path.join(self.lnd.macaroon_path, 'admin.macaroon')
         with open(admin_macaroon_path, 'rb') as f:
             macaroon_bytes = f.read()
             macaroon = codecs.encode(macaroon_bytes, 'hex')
@@ -42,7 +42,7 @@ class LndClient(object):
         auth_credentials = grpc.metadata_call_credentials(self.metadata_callback)
         credentials = grpc.composite_channel_credentials(self.cert_credentials,
                                                          auth_credentials)
-        grpc_channel = grpc.secure_channel(f'localhost:{self.c.lnd.grpc_port}',
+        grpc_channel = grpc.secure_channel(f'localhost:{self.lnd.grpc_port}',
                                            credentials)
         return lnrpc.LightningStub(grpc_channel)
 

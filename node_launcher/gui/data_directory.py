@@ -4,17 +4,19 @@ from PySide2 import QtWidgets
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QLabel, QFileDialog, QErrorMessage
 
-from node_launcher.command_generator import CommandGenerator
+from node_launcher.node_set.node_set import NodeSet
 from node_launcher.utilities import reveal
 
 
 class DataDirectoryBox(QtWidgets.QGroupBox):
-    def __init__(self, command_generator: CommandGenerator):
+    node_set: NodeSet
+
+    def __init__(self, node_set: NodeSet):
         super().__init__('Bitcoin Data Directory')
         self.error_message = QErrorMessage(self)
 
-        self.command_generator = command_generator
-        self.datadir = self.command_generator.testnet.bitcoin.file.datadir
+        self.node_set = node_set
+        self.datadir = self.node_set.bitcoin.file.datadir
         self.datadir_label = QLabel()
         self.datadir_label.setText(self.datadir)
         self.datadir_label.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
@@ -46,8 +48,8 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
             return
         if not os.path.isdir(data_directory):
             self.error_message.showMessage('Directory does not exist, please try again!')
-        self.command_generator.testnet.bitcoin.file.datadir = data_directory
-        self.command_generator.mainnet.bitcoin.set_prune()
+        self.node_set.bitcoin.file.datadir = data_directory
+        self.node_set.bitcoin.set_prune()
         self.datadir = data_directory
         self.datadir_label.setText(data_directory)
 
