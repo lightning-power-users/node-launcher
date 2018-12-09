@@ -4,6 +4,7 @@ from tempfile import NamedTemporaryFile
 from typing import Optional, List
 
 import psutil
+from psutil import AccessDenied
 
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
@@ -72,9 +73,12 @@ class Bitcoin(object):
             ports = [18333, 18332]
         for process in psutil.process_iter():
             if 'bitcoin' in process.name():
-                for connection in process.connections():
-                    if connection.laddr.port in ports:
-                        return process
+                try:
+                    for connection in process.connections():
+                        if connection.laddr.port in ports:
+                            return process
+                except AccessDenied:
+                    continue
 
     def detect_zmq_ports(self) -> bool:
         if self.process is None:

@@ -1,7 +1,7 @@
 # Requirements
 1. ~300 GB of download bandwidth
 2. ~7 GB of disk space (~300 GB if you want the Bitcoin transaction index, makes for a faster LND)
-3. Windows or macOS
+3. Windows 7+ or macOS 10.12.6+
 
 Please submit a pull request if you want to add Linux support! Next year is the Year of Desktop Linux...
 
