@@ -18,13 +18,18 @@ os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
 class LndClient(object):
     def __init__(self, lnd: Lnd):
         self.lnd = lnd
-        lnd_tls_cert_path = os.path.join(self.lnd.lnddir, 'tls.cert')
-        self.lnd_tls_cert = open(lnd_tls_cert_path, 'rb').read()
-        self.cert_credentials = grpc.ssl_channel_credentials(self.lnd_tls_cert)
+        self.cert_credentials = None
+
+    def get_cert_credentials(self):
+        if self.cert_credentials is None:
+            lnd_tls_cert_path = os.path.join(self.lnd.lnddir, 'tls.cert')
+            lnd_tls_cert = open(lnd_tls_cert_path, 'rb').read()
+            self.cert_credentials = grpc.ssl_channel_credentials(lnd_tls_cert)
+        return self.cert_credentials
 
     def wallet_unlocker(self):
         grpc_channel = grpc.secure_channel(f'localhost:{self.lnd.grpc_port}',
-                                           credentials=self.cert_credentials)
+                                           credentials=self.get_cert_credentials())
         return lnrpc.WalletUnlockerStub(grpc_channel)
 
     # noinspection PyUnusedLocal
@@ -40,7 +45,7 @@ class LndClient(object):
 
     def lnd_client(self):
         auth_credentials = grpc.metadata_call_credentials(self.metadata_callback)
-        credentials = grpc.composite_channel_credentials(self.cert_credentials,
+        credentials = grpc.composite_channel_credentials(self.get_cert_credentials(),
                                                          auth_credentials)
         grpc_channel = grpc.secure_channel(f'localhost:{self.lnd.grpc_port}',
                                            credentials)
