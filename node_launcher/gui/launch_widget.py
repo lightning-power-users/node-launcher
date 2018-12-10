@@ -34,7 +34,12 @@ class LaunchWidget(QtWidgets.QWidget):
         self.setLayout(self.grid)
 
         latest_version = LauncherSoftware().get_latest_release_version()
-        if latest_version != NODE_LAUNCHER_RELEASE:
+        latest_major, latest_minor, latest_bugfix = latest_version.split('.')
+        major, minor, bugfix = NODE_LAUNCHER_RELEASE.split('.')
+        major_upgrade = latest_major > major
+        minor_upgrade = latest_major == major and latest_minor > minor
+        bugfix_upgrade = latest_major == major and latest_minor == minor and latest_bugfix > bugfix
+        if major_upgrade or minor_upgrade or bugfix_upgrade:
             self.message_box.setText(UPGRADE)
             self.message_box.setInformativeText(
                 f'Your version: {NODE_LAUNCHER_RELEASE}\n'
