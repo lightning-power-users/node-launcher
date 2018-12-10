@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 from typing import Optional, List
 
 import psutil
-from psutil import AccessDenied
+from psutil import AccessDenied, ZombieProcess
 
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
@@ -72,7 +72,11 @@ class Bitcoin(object):
         else:
             ports = [18333, 18332]
         for process in psutil.process_iter():
-            if 'bitcoin' in process.name():
+            try:
+                process_name = process.name()
+            except ZombieProcess:
+                continue
+            if 'bitcoin' in process_name:
                 try:
                     for connection in process.connections():
                         if connection.laddr.port in ports:
