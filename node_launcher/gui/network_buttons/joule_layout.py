@@ -3,7 +3,7 @@ from PySide2 import QtWidgets
 from node_launcher.gui.components.copy_button import CopyButton
 from node_launcher.gui.components.layouts import QGridLayout
 from node_launcher.gui.horizontal_line import HorizontalLine
-from node_launcher.gui.network_group_box.section_name import SectionName
+from node_launcher.gui.network_buttons.section_name import SectionName
 from node_launcher.gui.utilities import reveal
 from node_launcher.node_set import NodeSet
 
@@ -27,5 +27,6 @@ class JouleLayout(QGridLayout):
         self.show_macaroons_button.clicked.connect(
             lambda: reveal(self.node_set.lnd.macaroon_path)
         )
-        self.addWidget(self.show_macaroons_button, same_row=True, column=columns)
+        self.addWidget(self.show_macaroons_button, same_row=True,
+                       column=columns)
         self.addWidget(HorizontalLine(), column_span=columns)

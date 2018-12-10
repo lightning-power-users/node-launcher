@@ -2,20 +2,20 @@ from PySide2 import QtWidgets
 from PySide2.QtWidgets import QWidget
 
 from node_launcher.gui.components.layouts import QGridLayout
-from node_launcher.gui.network_group_box.cli_layout import CliLayout
-from node_launcher.gui.network_group_box.joule_layout import JouleLayout
-from node_launcher.gui.network_group_box.lnd_wallet_layout import \
+from node_launcher.gui.network_buttons.cli_layout import CliLayout
+from node_launcher.gui.network_buttons.joule_layout import JouleLayout
+from node_launcher.gui.network_buttons.lnd_wallet_layout import \
     LndWalletLayout
-from node_launcher.gui.network_group_box.nodes_layout import NodesLayout
-from node_launcher.gui.network_group_box.zap_layout import ZapLayout
+from node_launcher.gui.network_buttons.nodes_layout import NodesLayout
+from node_launcher.gui.network_buttons.zap_layout import ZapLayout
 from node_launcher.node_set import NodeSet
 
 
-class NetworkGroupBox(QtWidgets.QGroupBox):
+class NetworkWidget(QtWidgets.QWidget):
     node_set: NodeSet
 
     def __init__(self, parent: QWidget, network: str = 'mainnet'):
-        super().__init__(network)
+        super().__init__()
 
         self.node_set = NodeSet(network)
 

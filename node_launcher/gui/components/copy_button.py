@@ -1,6 +1,6 @@
 from PySide2.QtCore import QTimer
 from PySide2.QtGui import QClipboard
-from PySide2.QtWidgets import QVBoxLayout, QPushButton, QLabel
+from PySide2.QtWidgets import QVBoxLayout, QPushButton
 
 
 class CopyButton(QVBoxLayout):
