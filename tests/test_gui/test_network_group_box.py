@@ -29,21 +29,21 @@ class TestGuiUnitTests(object):
 
     def test_lncli_copy_button(self, qtbot: QTest,
                                launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.testnet_group_box.cli_layout.lncli_copy_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.cli_layout.copy_lncli.button,
                          Qt.LeftButton)
         command = launch_widget.testnet_group_box.node_set.lnd.lncli
         assert QClipboard().text() == ' '.join(command)
 
     def test_rest_url_copy_button(self, qtbot: QTest,
                                   launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.testnet_group_box.joule_layout.rest_url_copy_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.joule_layout.copy_rest.button,
                          Qt.LeftButton)
         rest_url = launch_widget.testnet_group_box.node_set.lnd.rest_url
         assert QClipboard().text() == rest_url
 
     def test_grpc_url_copy_button(self, qtbot: QTest,
                                   launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.testnet_group_box.zap_layout.copy_grpc_url_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.zap_layout.copy_grpc_url.button,
                          Qt.LeftButton)
         rest_url = launch_widget.testnet_group_box.node_set.lnd.grpc_url
         assert QClipboard().text() == rest_url
