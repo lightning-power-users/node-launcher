@@ -16,7 +16,7 @@ class JouleLayout(QGridLayout):
         self.node_set = node_set
         columns = 2
 
-        self.addWidget(SectionName('Joule'), column_span=columns)
+        self.addWidget(SectionName('<a href="https://github.com/wbobeirne/joule-extension/wiki/How-to:-Install-Extension-Manually">Joule Chrome Extension</a>'), column_span=columns)
 
         self.copy_rest = CopyButton('Node URL (REST)',
                                     self.node_set.lnd.rest_url)

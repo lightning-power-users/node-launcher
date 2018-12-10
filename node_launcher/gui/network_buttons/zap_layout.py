@@ -13,7 +13,7 @@ class ZapLayout(QGridLayout):
         self.node_set = node_set
         columns = 3
 
-        self.addWidget(SectionName('Zap'), column_span=columns)
+        self.addWidget(SectionName('<a href="https://github.com/LN-Zap/zap-desktop/blob/master/README.md">Zap Desktop Wallet</a>'), column_span=columns)
 
         self.copy_grpc_url = CopyButton('Host gRPC', self.node_set.lnd.grpc_url)
         self.addLayout(self.copy_grpc_url)
