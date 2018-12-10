@@ -2,6 +2,7 @@ import os
 
 from PySide2 import QtWidgets
 from PySide2.QtCore import Qt
+from PySide2.QtGui import QFont
 from PySide2.QtWidgets import QLabel, QFileDialog, QErrorMessage
 
 from node_launcher.gui.utilities import reveal
@@ -23,6 +24,10 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
         self.datadir_label.setFixedHeight(50)
 
         self.prune_warning_label = QLabel()
+        new_font: QFont = self.prune_warning_label.font()
+        new_font.setPointSize(8)
+        self.prune_warning_label.setFont(new_font)
+        self.prune_warning_label.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         self.display_pruning_warning()
 
         self.show_directory_button = QtWidgets.QPushButton('Show Directory')
@@ -37,8 +42,9 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
 
         layout = QtWidgets.QGridLayout()
         layout.addWidget(self.datadir_label, 1, 1, 1, 2)
-        layout.addWidget(self.show_directory_button, 2, 1)
-        layout.addWidget(self.select_directory_button, 2, 2)
+        layout.addWidget(self.prune_warning_label, 2, 1, 1, 2)
+        layout.addWidget(self.show_directory_button, 3, 1)
+        layout.addWidget(self.select_directory_button, 3, 2)
         self.setLayout(layout)
         self.setFixedWidth(self.minimumSizeHint().width())
 
@@ -60,5 +66,9 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
         self.display_pruning_warning()
 
     def display_pruning_warning(self):
-        self.prune_warning_label.setText('Warning: pruning is on')
-        self.prune_warning_label.repaint()
+        if self.node_set.bitcoin.file.prune:
+            self.prune_warning_label.setText('Warning: pruning is on')
+            self.prune_warning_label.repaint()
+        else:
+            self.prune_warning_label.setText('')
+            self.prune_warning_label.repaint()
