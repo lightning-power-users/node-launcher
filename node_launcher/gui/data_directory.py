@@ -4,8 +4,8 @@ from PySide2 import QtWidgets
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QLabel, QFileDialog, QErrorMessage
 
+from node_launcher.gui.utilities import reveal
 from node_launcher.node_set.node_set import NodeSet
-from node_launcher.utilities import reveal
 
 
 class DataDirectoryBox(QtWidgets.QGroupBox):
@@ -24,7 +24,9 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
 
         self.show_directory_button = QtWidgets.QPushButton('Show Directory')
         # noinspection PyUnresolvedReferences
-        self.show_directory_button.clicked.connect(self.reveal_datadir)
+        self.show_directory_button.clicked.connect(
+            lambda: reveal(self.datadir)
+        )
 
         self.select_directory_button = QtWidgets.QPushButton('Select Directory')
         # noinspection PyUnresolvedReferences
@@ -52,10 +54,3 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
         self.node_set.bitcoin.set_prune()
         self.datadir = data_directory
         self.datadir_label.setText(data_directory)
-
-    def reveal_datadir(self):
-        try:
-            reveal(self.datadir)
-        except (NotADirectoryError, FileNotFoundError):
-            self.error_message.showMessage(f'{self.datadir} not found')
-            return

@@ -16,41 +16,41 @@ class TestGuiUnitTests(object):
     @patch.object(Bitcoin, 'launch')
     def test_bitcoin_qt_node_button(self, mock_bitcoin_launch: MagicMock, qtbot: QTest):
         launch_widget = LaunchWidget()
-        qtbot.mouseClick(launch_widget.testnet_group_box.bitcoin_qt_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.nodes_layout.bitcoin_qt_button,
                          Qt.LeftButton)
         mock_bitcoin_launch.assert_called_once()
 
     @patch.object(Lnd, 'launch')
     def test_lnd_node_button(self, mock_lnd_launch: MagicMock, qtbot: QTest):
         launch_widget = LaunchWidget()
-        qtbot.mouseClick(launch_widget.testnet_group_box.lnd_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.nodes_layout.lnd_button,
                          Qt.LeftButton)
         mock_lnd_launch.assert_called_once()
 
     def test_lncli_copy_button(self, qtbot: QTest,
                                launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.testnet_group_box.lncli_copy_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.cli_layout.lncli_copy_button,
                          Qt.LeftButton)
         command = launch_widget.testnet_group_box.node_set.lnd.lncli
         assert QClipboard().text() == ' '.join(command)
 
     def test_rest_url_copy_button(self, qtbot: QTest,
                                   launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.testnet_group_box.rest_url_copy_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.joule_layout.rest_url_copy_button,
                          Qt.LeftButton)
         rest_url = launch_widget.testnet_group_box.node_set.lnd.rest_url
         assert QClipboard().text() == rest_url
 
     def test_grpc_url_copy_button(self, qtbot: QTest,
                                   launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.testnet_group_box.grpc_url_copy_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.zap_layout.copy_grpc_url_button,
                          Qt.LeftButton)
         rest_url = launch_widget.testnet_group_box.node_set.lnd.grpc_url
         assert QClipboard().text() == rest_url
 
     @pytest.mark.slow
     def test_reveal_macaroons(self, qtbot: QTest, launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.testnet_group_box.show_macaroons_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.joule_layout.show_macaroons_button,
                          Qt.LeftButton)
 
     @pytest.mark.slow
@@ -65,6 +65,6 @@ class TestGuiUnitTests(object):
 
     @patch.object(LndClient, 'unlock')
     def test_unlock_wallet_button(self, mock_unlock: MagicMock, qtbot: QTest, launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.testnet_group_box.unlock_wallet_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.lnd_wallet_layout.unlock_wallet_button,
                          Qt.LeftButton)
         assert mock_unlock.called_once()

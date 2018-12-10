@@ -24,6 +24,10 @@ class BitcoinSoftware(NodeSoftwareABC):
         return self.executable_path('bitcoin-qt')
 
     @property
+    def bitcoin_cli(self) -> str:
+        return self.executable_path('bitcoin-cli')
+
+    @property
     def uncompressed_directory_name(self) -> str:
         name = '-'.join(self.download_name.split('-')[:-1])
         if name.count('.') == 3:

@@ -127,6 +127,19 @@ class Bitcoin(object):
             ]
         return command
 
+    @property
+    def bitcoin_cli(self) -> str:
+        command = [
+            f'"{self.software.bitcoin_cli}"',
+            f'-conf="{self.file.path}"',
+            f'-datadir="{self.file.datadir}"',
+        ]
+        if self.network == 'testnet':
+            command += [
+                '-testnet'
+            ]
+        return ' '.join(command)
+
     def launch(self):
         command = self.bitcoin_qt()
         if IS_WINDOWS:
