@@ -3,15 +3,22 @@ import time
 
 from PySide2 import QtWidgets
 from PySide2.QtGui import QClipboard
-from PySide2.QtWidgets import QErrorMessage, QInputDialog, QLineEdit
+from PySide2.QtWidgets import QErrorMessage, QInputDialog, QLineEdit, QLabel
 from grpc._channel import _Rendezvous
 
+from node_launcher.gui.components.layouts import QGridLayout
 from node_launcher.node_set import NodeSet
 from node_launcher.constants import LINUX, OPERATING_SYSTEM, keyring
 from node_launcher.gui.horizontal_line import HorizontalLine
 from node_launcher.gui.image_label import ImageLabel
 from node_launcher.gui.seed_dialog import SeedDialog
 from node_launcher.utilities import reveal
+
+
+class SectionName(QLabel):
+    def __init__(self, text: str):
+        super().__init__()
+        self.setText(text)
 
 
 class NetworkGroupBox(QtWidgets.QGroupBox):
@@ -24,9 +31,11 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
 
         self.node_set = NodeSet(network)
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.addWidget(ImageLabel(f'bitcoin-{network}.png'))
-        layout.addStretch(1)
+        columns = 2
+
+        layout = QGridLayout()
+        image_label = ImageLabel(f'bitcoin-{network}.png')
+        layout.addWidget(image_label, row_span=5)
 
         if OPERATING_SYSTEM == LINUX:
             self.error_message.showMessage(
@@ -34,43 +43,44 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
                 'https://github.com/PierreRochard/node-launcher')
             sys.exit(0)
 
-        layout.addWidget(HorizontalLine())
-
+        layout.addWidget(SectionName('Nodes'), column=columns)
         # Bitcoin-Qt button
         self.bitcoin_qt_button = QtWidgets.QPushButton('Launch Bitcoin')
         # noinspection PyUnresolvedReferences
         self.bitcoin_qt_button.clicked.connect(self.node_set.bitcoin.launch)
-        layout.addWidget(self.bitcoin_qt_button)
+        layout.addWidget(self.bitcoin_qt_button, column=columns)
 
         # LND button
         self.lnd_button = QtWidgets.QPushButton('Launch LND')
         # noinspection PyUnresolvedReferences
         self.lnd_button.clicked.connect(self.node_set.lnd.launch)
-        layout.addWidget(self.lnd_button)
+        layout.addWidget(self.lnd_button, column=columns)
 
-        layout.addWidget(HorizontalLine())
+        layout.addWidget(HorizontalLine(), column=columns)
 
-        # Unlock button
-        self.unlock_wallet_button = QtWidgets.QPushButton('Unlock Wallet')
+        layout.addWidget(SectionName('LND Wallet'), column_span=columns)
+        wallet_buttons_layout = QtWidgets.QHBoxLayout()
+        # Unlock wallet button
+        self.unlock_wallet_button = QtWidgets.QPushButton('Unlock')
         # noinspection PyUnresolvedReferences
         self.unlock_wallet_button.clicked.connect(self.unlock_wallet)
-        layout.addWidget(self.unlock_wallet_button)
+        wallet_buttons_layout.addWidget(self.unlock_wallet_button)
 
         # Create wallet button
-        self.create_wallet_button = QtWidgets.QPushButton(
-            'Create Wallet')
+        self.create_wallet_button = QtWidgets.QPushButton('Create')
         # noinspection PyUnresolvedReferences
         self.create_wallet_button.clicked.connect(self.create_wallet)
-        layout.addWidget(self.create_wallet_button)
+        wallet_buttons_layout.addWidget(self.create_wallet_button, same_row=True, column=2)
 
         # Recover wallet button
-        self.recover_wallet_button = QtWidgets.QPushButton('Recover Wallet')
+        self.recover_wallet_button = QtWidgets.QPushButton('Recover')
         # noinspection PyUnresolvedReferences
         self.recover_wallet_button.clicked.connect(self.recover_wallet)
-        layout.addWidget(self.recover_wallet_button)
+        wallet_buttons_layout.addWidget(self.recover_wallet_button)
+        layout.addLayout(wallet_buttons_layout, column_span=columns)
+        layout.addWidget(HorizontalLine(), column_span=columns)
 
-        layout.addWidget(HorizontalLine())
-
+        layout.addWidget(SectionName('Zap'), column_span=columns)
         # Copy gRPC API URL button
         self.grpc_url_copy_button = QtWidgets.QPushButton(
             'Copy LND gRPC Address')
@@ -83,7 +93,11 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
             'Copy LND REST Address')
         # noinspection PyUnresolvedReferences
         self.rest_url_copy_button.clicked.connect(self.copy_rest_url)
-        layout.addWidget(self.rest_url_copy_button)
+        layout.addWidget(self.rest_url_copy_button, same_row=True, column=2)
+
+        layout.addWidget(HorizontalLine(), column_span=3)
+
+        layout.addWidget(SectionName('Joule'), column_span=3)
 
         # Show Macaroons button
         self.show_macaroons_button = QtWidgets.QPushButton('Show Macaroons')
@@ -95,7 +109,7 @@ class NetworkGroupBox(QtWidgets.QGroupBox):
         self.lncli_copy_button = QtWidgets.QPushButton('Copy lncli Command')
         # noinspection PyUnresolvedReferences
         self.lncli_copy_button.clicked.connect(self.copy_lncli_command)
-        layout.addWidget(self.lncli_copy_button)
+        layout.addWidget(self.lncli_copy_button, same_row=True, column=2)
 
         self.setLayout(layout)
 

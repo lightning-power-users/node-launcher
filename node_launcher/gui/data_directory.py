@@ -34,8 +34,8 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
         layout.addWidget(self.datadir_label, 1, 1, 1, 2)
         layout.addWidget(self.show_directory_button, 2, 1)
         layout.addWidget(self.select_directory_button, 2, 2)
-
         self.setLayout(layout)
+        self.setFixedWidth(self.minimumSizeHint().width())
 
     def file_dialog(self):
         # noinspection PyCallByClass

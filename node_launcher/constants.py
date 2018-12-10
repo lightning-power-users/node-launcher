@@ -58,11 +58,6 @@ BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(APPDATA, 'Bitcoin')
 }
 
-LPU_ADVERTISEMENT = 'Need help? Want a real mainnet Bitcoin faucet? Join the ' \
-                    '<a href="https://www.lightningpowerusers.com/">' \
-                    'Lightning Power Users' \
-                    '</a>'
-
 UPGRADE = 'Please download the latest version of the Node Launcher: ' \
                     '<a href="https://github.com/PierreRochard/node-launcher/releases/">' \
                     'https://github.com/PierreRochard/node-launcher/releases' \

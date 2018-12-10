@@ -6,4 +6,3 @@ class HorizontalLine(QFrame):
         super(HorizontalLine, self).__init__()
         self.setFrameShape(QFrame.HLine)
         self.setFrameShadow(QFrame.Sunken)
-        self.setFixedHeight(30)
