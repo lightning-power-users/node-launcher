@@ -1,9 +1,10 @@
 from PySide2 import QtWidgets
 
+from node_launcher.gui.components.copy_button import CopyButton
 from node_launcher.gui.components.layouts import QGridLayout
 from node_launcher.gui.horizontal_line import HorizontalLine
 from node_launcher.gui.network_group_box.section_name import SectionName
-from node_launcher.gui.utilities import copy_to_clipboard, reveal
+from node_launcher.gui.utilities import reveal
 from node_launcher.node_set import NodeSet
 
 
@@ -16,16 +17,10 @@ class JouleLayout(QGridLayout):
         columns = 2
 
         self.addWidget(SectionName('Joule'), column_span=columns)
+        self.copy_rest = CopyButton('Node URL (REST)',
+                                    self.node_set.lnd.rest_url)
+        self.addLayout(self.copy_rest)
 
-        # Copy REST API URL button
-        self.rest_url_copy_button = QtWidgets.QPushButton('Node URL (REST)')
-        # noinspection PyUnresolvedReferences
-        self.rest_url_copy_button.clicked.connect(
-            lambda: copy_to_clipboard(self.node_set.lnd.rest_url)
-        )
-        self.addWidget(self.rest_url_copy_button)
-
-        # Show Macaroons button
         self.show_macaroons_button = QtWidgets.QPushButton('Show Macaroons')
         # noinspection PyUnresolvedReferences
         self.show_macaroons_button.clicked.connect(
