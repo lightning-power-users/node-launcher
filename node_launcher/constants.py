@@ -3,7 +3,7 @@ from os.path import expanduser
 import platform
 from typing import Dict
 
-NODE_LAUNCHER_RELEASE = '.'.join(map(str, (5, 0, 3)))
+NODE_LAUNCHER_RELEASE = '.'.join(map(str, (5, 1, 0)))
 
 TARGET_BITCOIN_RELEASE = 'v0.17.0.1'
 TARGET_LND_RELEASE = 'v0.5.1-beta'
@@ -57,11 +57,6 @@ BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
     LINUX: expanduser('~/.bitcoin'),
     WINDOWS: os.path.join(APPDATA, 'Bitcoin')
 }
-
-LPU_ADVERTISEMENT = 'Need help? Want a real mainnet Bitcoin faucet? Join the ' \
-                    '<a href="https://www.lightningpowerusers.com/">' \
-                    'Lightning Power Users' \
-                    '</a>'
 
 UPGRADE = 'Please download the latest version of the Node Launcher: ' \
                     '<a href="https://github.com/PierreRochard/node-launcher/releases/">' \

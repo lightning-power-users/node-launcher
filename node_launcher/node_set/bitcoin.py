@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 from typing import Optional, List
 
 import psutil
-from psutil import AccessDenied
+from psutil import AccessDenied, ZombieProcess
 
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
@@ -72,7 +72,11 @@ class Bitcoin(object):
         else:
             ports = [18333, 18332]
         for process in psutil.process_iter():
-            if 'bitcoin' in process.name():
+            try:
+                process_name = process.name()
+            except ZombieProcess:
+                continue
+            if 'bitcoin' in process_name:
                 try:
                     for connection in process.connections():
                         if connection.laddr.port in ports:
@@ -126,6 +130,19 @@ class Bitcoin(object):
                 '-testnet=0',
             ]
         return command
+
+    @property
+    def bitcoin_cli(self) -> str:
+        command = [
+            f'"{self.software.bitcoin_cli}"',
+            f'-conf="{self.file.path}"',
+            f'-datadir="{self.file.datadir}"',
+        ]
+        if self.network == 'testnet':
+            command += [
+                '-testnet'
+            ]
+        return ' '.join(command)
 
     def launch(self):
         command = self.bitcoin_qt()

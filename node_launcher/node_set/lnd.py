@@ -35,6 +35,11 @@ class Lnd(object):
         return macaroons_path
 
     @property
+    def admin_macaroon_path(self) -> str:
+        path = os.path.join(self.macaroon_path, 'admin.macaroon')
+        return path
+
+    @property
     def tls_cert_path(self) -> str:
         tls_cert_path = os.path.join(self.lnddir, 'tls.cert')
         return tls_cert_path
