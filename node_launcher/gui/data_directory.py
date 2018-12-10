@@ -22,6 +22,9 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
         self.datadir_label.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
         self.datadir_label.setFixedHeight(50)
 
+        self.prune_warning_label = QLabel()
+        self.display_pruning_warning()
+
         self.show_directory_button = QtWidgets.QPushButton('Show Directory')
         # noinspection PyUnresolvedReferences
         self.show_directory_button.clicked.connect(
@@ -54,3 +57,8 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
         self.node_set.bitcoin.set_prune()
         self.datadir = data_directory
         self.datadir_label.setText(data_directory)
+        self.display_pruning_warning()
+
+    def display_pruning_warning(self):
+        self.prune_warning_label.setText('Warning: pruning is on')
+        self.prune_warning_label.repaint()
