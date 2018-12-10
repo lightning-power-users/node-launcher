@@ -17,6 +17,7 @@ class JouleLayout(QGridLayout):
         columns = 2
 
         self.addWidget(SectionName('Joule'), column_span=columns)
+
         self.copy_rest = CopyButton('Node URL (REST)',
                                     self.node_set.lnd.rest_url)
         self.addLayout(self.copy_rest)
