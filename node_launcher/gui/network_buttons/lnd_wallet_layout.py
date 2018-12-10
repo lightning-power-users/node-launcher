@@ -83,9 +83,10 @@ class LndWalletLayout(QGridLayout):
                 seed_password = None
             generate_seed_response = self.node_set.lnd_client.generate_seed(
                 seed_password=seed_password)
+            seed = generate_seed_response.cipher_seed_mnemonic
 
             seed_text = ''.join([f'{index + 1}: {value}\n' for index, value
-                                 in enumerate(generate_seed_response)])
+                                 in enumerate(seed)])
             seed_dialog = SeedDialog()
             seed_dialog.text.setText(seed_text)
             seed_dialog.show()
@@ -105,7 +106,7 @@ class LndWalletLayout(QGridLayout):
                     password=seed_password)
 
             self.node_set.lnd_client.initialize_wallet(wallet_password=new_wallet_password,
-                                                       seed=generate_seed_response,
+                                                       seed=seed,
                                                        seed_password=seed_password)
 
         except _Rendezvous as e:
