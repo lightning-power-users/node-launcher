@@ -9,7 +9,7 @@ a = Analysis(['run.py'],
              datas=[
                  ('node_launcher/assets/*.png', 'assets')
              ],
-             hiddenimports=['setuptools'],
+             hiddenimports=['setuptools', 'pypiwin32', 'win32timezone'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
