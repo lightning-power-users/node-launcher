@@ -72,3 +72,10 @@ if IS_WINDOWS:
 if IS_MACOS:
     from keyring.backends.OS_X import Keyring
     keyring = Keyring()
+
+# How many megabytes to keep
+# Total Bitcoin (mainnet) data directory size minus blocks is ~3 GB
+# We are targeting 10 GB, so 10 - 3 = 7
+MAINNET_PRUNE = 7000
+
+TESTNET_PRUNE = 500

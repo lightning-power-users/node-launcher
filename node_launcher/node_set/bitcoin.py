@@ -8,7 +8,8 @@ from psutil import AccessDenied, ZombieProcess
 
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
-from node_launcher.constants import BITCOIN_DATA_PATH, OPERATING_SYSTEM, IS_WINDOWS
+from node_launcher.constants import BITCOIN_DATA_PATH, OPERATING_SYSTEM, \
+    IS_WINDOWS, TESTNET_PRUNE, MAINNET_PRUNE
 from node_launcher.services.hard_drives import HardDrives
 from node_launcher.utilities import get_random_password, get_zmq_port
 
@@ -112,8 +113,12 @@ class Bitcoin(object):
             f'-zmqpubrawtx=tcp://127.0.0.1:{self.zmq_tx_port}'
         ]
         if self.file.prune:
+            if self.network == 'TESTNET':
+                prune = TESTNET_PRUNE
+            else:
+                prune = MAINNET_PRUNE
             command += [
-                '-prune=600',
+                f'-prune={prune}',
                 '-txindex=0'
             ]
         else:
