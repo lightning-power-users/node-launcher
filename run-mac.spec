@@ -43,7 +43,7 @@ exe = EXE(
 
 app = BUNDLE(
     exe,
-    name='macOS.Node.Launcher.app',
+    name='Node Launcher.app',
     icon='AppIcon.icns',
     bundle_identifier=None,
     info_plist={
