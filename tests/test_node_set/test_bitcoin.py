@@ -3,6 +3,8 @@ from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock
 
 import pytest
+from PySide2.QtCore import Slot
+from PySide2.QtTest import QTest
 
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.node_set.bitcoin import (
@@ -87,3 +89,19 @@ class TestBitcoin(object):
         result = bitcoin.launch()
         assert result.pid
 
+    def test_state_change(self, qtbot: QTest, bitcoin: Bitcoin):
+        @Slot(str)
+        def handle_state_change(state: str):
+            print(state)
+            assert state
+
+        bitcoin.state_change.connect(handle_state_change)
+
+        bitcoin.start()
+        bitcoin.waitForStarted()
+        times = 0
+        while True:
+            bitcoin.waitForReadyRead()
+            times += 1
+            if times > 100:
+                break
