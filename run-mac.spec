@@ -49,6 +49,7 @@ app = BUNDLE(
     info_plist={
         'NSPrincipleClass': 'NSApplication',
         'NSAppleScriptEnabled': False,
-        'NSHighResolutionCapable': 'True'
+        'NSHighResolutionCapable': 'True',
+        'NSRequiresAquaSystemAppearance': 'NO'
     }
 )
