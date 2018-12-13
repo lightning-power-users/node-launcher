@@ -39,15 +39,27 @@ class Bitcoin(object):
             self.autoconfigure_datadir()
 
         if self.file.prune is None:
-            self.set_prune(self.hard_drives.should_prune(self.file.datadir, True))
+            should_prune = self.hard_drives.should_prune(self.file.datadir,
+                                                         has_bitcoin=True)
+            self.set_prune(should_prune)
 
         if not self.detect_zmq_ports():
             self.zmq_block_port = get_zmq_port()
             self.zmq_tx_port = get_zmq_port()
 
+        if self.file.dbcache is None:
+            # noinspection PyBroadException
+            try:
+                memory = psutil.virtual_memory()
+                free_mb = round(memory.available/1000000)
+                self.file.dbcache = free_mb
+            except:
+                self.file.dbcache = 1000
+
     def set_prune(self, should_prune: bool = None):
         if should_prune is None:
-            should_prune = self.hard_drives.should_prune(self.file.datadir, True)
+            should_prune = self.hard_drives.should_prune(self.file.datadir,
+                                                         has_bitcoin=True)
         self.file.prune = should_prune
         self.file.txindex = not should_prune
 

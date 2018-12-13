@@ -45,6 +45,8 @@ class ConfigurationFile(object):
             pass
         elif isinstance(value, bool):
             value = str(int(value))
+        elif isinstance(value, int):
+            value = str(value)
         else:
             raise NotImplementedError(f'setattr for {type(value)}')
 
