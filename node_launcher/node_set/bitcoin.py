@@ -122,7 +122,8 @@ class Bitcoin(object):
             f'-rpcuser={self.file.rpcuser}',
             f'-rpcpassword={self.file.rpcpassword}',
             f'-zmqpubrawblock=tcp://127.0.0.1:{self.zmq_block_port}',
-            f'-zmqpubrawtx=tcp://127.0.0.1:{self.zmq_tx_port}'
+            f'-zmqpubrawtx=tcp://127.0.0.1:{self.zmq_tx_port}',
+            '-timeout=5000'
         ]
         if self.file.prune:
             if self.network == 'TESTNET':
