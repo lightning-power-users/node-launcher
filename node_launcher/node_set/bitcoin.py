@@ -85,9 +85,9 @@ class Bitcoin(QProcess):
         self.external_process = self.find_running_node()
         if self.external_process is None:
             self.status = 'off'
-            self.setup_qprocess()
             self.zmq_block_port = get_zmq_port()
             self.zmq_tx_port = get_zmq_port()
+            self.setup_qprocess()
         else:
             self.status = 'external'
             self.detect_zmq_ports()
