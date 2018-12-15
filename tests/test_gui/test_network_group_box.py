@@ -67,6 +67,7 @@ class TestGuiUnitTests(object):
         qtbot.mouseClick(launch_widget.data_directory_group_box.select_directory_button,
                          Qt.LeftButton)
 
+    @pytest.mark.slow
     @patch.object(LndClient, 'unlock')
     def test_unlock_wallet_button(self, mock_unlock: MagicMock, qtbot: QTest, launch_widget: LaunchWidget):
         qtbot.mouseClick(launch_widget.testnet_group_box.lnd_wallet_layout.unlock_wallet_button,
