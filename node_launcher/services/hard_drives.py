@@ -63,7 +63,5 @@ class HardDrives(object):
             bitcoin_bytes = 0
         free_gb = math.floor(free_bytes / GIGABYTE)
         bitcoin_gb = math.ceil(bitcoin_bytes / GIGABYTE)
-        if free_gb < 250 and bitcoin_gb > 10:
-            raise Exception('Un-pruned bitcoin chain data '
-                            'but not enough space to finish IBD')
-        return free_gb < 250
+        free_gb += bitcoin_gb
+        return free_gb < 150
