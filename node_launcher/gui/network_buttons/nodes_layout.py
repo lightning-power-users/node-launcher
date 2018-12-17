@@ -1,4 +1,5 @@
 from PySide2 import QtWidgets
+from PySide2.QtCore import QTimer
 
 from node_launcher.gui.components.layouts import QGridLayout
 from node_launcher.gui.horizontal_line import HorizontalLine
@@ -10,6 +11,7 @@ from node_launcher.node_set import NodeSet
 class NodesLayout(QGridLayout):
     def __init__(self, node_set: NodeSet):
         super(NodesLayout, self).__init__()
+        self.timer = QTimer(self.parentWidget())
         self.node_set = node_set
         self.columns = 2
         image_label = ImageLabel(f'bitcoin-{self.node_set.network}.png')
@@ -21,6 +23,7 @@ class NodesLayout(QGridLayout):
         # noinspection PyUnresolvedReferences
         self.bitcoin_qt_button.clicked.connect(self.node_set.bitcoin.launch)
         self.addWidget(self.bitcoin_qt_button, column=self.columns)
+        self.timer.timeout.connect(self.check_for_bitcoinqt)
 
         # LND button
         self.lnd_button = QtWidgets.QPushButton('Launch LND')
@@ -29,3 +32,13 @@ class NodesLayout(QGridLayout):
         self.addWidget(self.lnd_button, column=self.columns)
 
         self.addWidget(HorizontalLine(), column=self.columns)
+
+        self.timer.start(1000)
+
+    def check_for_bitcoinqt(self):
+        self.node_set.bitcoin.process = self.node_set.bitcoin.find_running_node()
+        if self.node_set.bitcoin.process is not None:
+            self.bitcoin_qt_button.setDisabled(True)
+        else:
+            self.bitcoin_qt_button.setDisabled(False)
+
