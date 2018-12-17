@@ -2,7 +2,7 @@ import sys
 
 from PySide2 import QtWidgets
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QGridLayout, QMessageBox
+from PySide2.QtWidgets import QGridLayout, QMessageBox, QErrorMessage
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE, \
     OPERATING_SYSTEM, LINUX
@@ -17,10 +17,12 @@ class LaunchWidget(QtWidgets.QWidget):
     mainnet_group_box: NetworkWidget
     testnet_group_box: NetworkWidget
     network_grid: QGridLayout
+    error_message: QErrorMessage
 
     def __init__(self):
         super().__init__()
         self.message_box = QMessageBox(self)
+        self.error_message = QErrorMessage(self)
         self.message_box.setTextFormat(Qt.RichText)
         try:
             self.testnet_group_box = NetworkWidget(network='testnet',
@@ -28,7 +30,8 @@ class LaunchWidget(QtWidgets.QWidget):
             self.mainnet_group_box = NetworkWidget(network='mainnet',
                                                    parent=self)
         except ZmqPortsNotOpenError as e:
-            self.error_message.showMessage(e)
+            self.error_message.showMessage(str(e))
+            self.error_message.exec_()
             sys.exit(0)
 
         self.data_directory_group_box = DataDirectoryBox(
@@ -62,4 +65,5 @@ class LaunchWidget(QtWidgets.QWidget):
             self.error_message.showMessage(
                 'Linux is not supported, please submit a pull request! '
                 'https://github.com/PierreRochard/node-launcher')
+            self.error_message.exec_()
             sys.exit(0)
