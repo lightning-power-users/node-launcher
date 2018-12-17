@@ -2,10 +2,11 @@ import sys
 
 from PySide2 import QtWidgets
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QGridLayout, QMessageBox
+from PySide2.QtWidgets import QGridLayout, QMessageBox, QErrorMessage
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE, \
     OPERATING_SYSTEM, LINUX
+from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.gui.components.tabs import Tabs
 from node_launcher.gui.data_directory import DataDirectoryBox
 from node_launcher.gui.network_buttons import NetworkWidget
@@ -16,16 +17,23 @@ class LaunchWidget(QtWidgets.QWidget):
     mainnet_group_box: NetworkWidget
     testnet_group_box: NetworkWidget
     network_grid: QGridLayout
+    error_message: QErrorMessage
 
     def __init__(self):
         super().__init__()
         self.message_box = QMessageBox(self)
+        self.error_message = QErrorMessage(self)
         self.message_box.setTextFormat(Qt.RichText)
+        try:
+            self.testnet_group_box = NetworkWidget(network='testnet',
+                                                   parent=self)
+            self.mainnet_group_box = NetworkWidget(network='mainnet',
+                                                   parent=self)
+        except ZmqPortsNotOpenError as e:
+            self.error_message.showMessage(str(e))
+            self.error_message.exec_()
+            sys.exit(0)
 
-        self.testnet_group_box = NetworkWidget(network='testnet',
-                                               parent=self)
-        self.mainnet_group_box = NetworkWidget(network='mainnet',
-                                               parent=self)
         self.data_directory_group_box = DataDirectoryBox(
             self.mainnet_group_box.node_set)
 
@@ -57,4 +65,5 @@ class LaunchWidget(QtWidgets.QWidget):
             self.error_message.showMessage(
                 'Linux is not supported, please submit a pull request! '
                 'https://github.com/PierreRochard/node-launcher')
+            self.error_message.exec_()
             sys.exit(0)

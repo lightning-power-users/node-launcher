@@ -6,6 +6,7 @@ from typing import Optional, List
 import psutil
 from psutil import AccessDenied, ZombieProcess
 
+from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.constants import BITCOIN_DATA_PATH, OPERATING_SYSTEM, \
@@ -104,8 +105,8 @@ class Bitcoin(object):
                  if 18500 <= c.laddr.port <= 18600]
         ports = set(ports)
         if len(ports) != 2:
-            raise NotImplementedError(f'''ZMQ ports are not open on 
-{self.network} node, please close it and launch it with the Node Launcher''')
+            raise ZmqPortsNotOpenError(f'''ZMQ ports are not open on 
+{self.network} node, please close Bitcoin Core and launch it with the Node Launcher''')
         self.zmq_block_port = min(ports)
         self.zmq_tx_port = max(ports)
         return True

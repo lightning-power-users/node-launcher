@@ -1,6 +1,7 @@
 from PySide2 import QtWidgets
 from PySide2.QtWidgets import QWidget
 
+from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.gui.components.layouts import QGridLayout
 from node_launcher.gui.network_buttons.cli_layout import CliLayout
 from node_launcher.gui.network_buttons.joule_layout import JouleLayout
