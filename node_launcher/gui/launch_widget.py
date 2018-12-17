@@ -6,6 +6,7 @@ from PySide2.QtWidgets import QGridLayout, QMessageBox
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE, \
     OPERATING_SYSTEM, LINUX
+from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.gui.components.tabs import Tabs
 from node_launcher.gui.data_directory import DataDirectoryBox
 from node_launcher.gui.network_buttons import NetworkWidget
@@ -21,11 +22,15 @@ class LaunchWidget(QtWidgets.QWidget):
         super().__init__()
         self.message_box = QMessageBox(self)
         self.message_box.setTextFormat(Qt.RichText)
+        try:
+            self.testnet_group_box = NetworkWidget(network='testnet',
+                                                   parent=self)
+            self.mainnet_group_box = NetworkWidget(network='mainnet',
+                                                   parent=self)
+        except ZmqPortsNotOpenError as e:
+            self.error_message.showMessage(e)
+            sys.exit(0)
 
-        self.testnet_group_box = NetworkWidget(network='testnet',
-                                               parent=self)
-        self.mainnet_group_box = NetworkWidget(network='mainnet',
-                                               parent=self)
         self.data_directory_group_box = DataDirectoryBox(
             self.mainnet_group_box.node_set)
 

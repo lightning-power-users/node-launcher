@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.node_set.bitcoin import (
     Bitcoin
 )
