@@ -27,6 +27,8 @@ class SeedDialog(QDialog):
 
     def print(self):
         printer = QPrinter()
+        print_program = printer.printProgram()
+        printer_name = printer.printerName()
         # Create painter
         painter = QPainter()
         # Start painter

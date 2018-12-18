@@ -4,7 +4,7 @@ from tempfile import NamedTemporaryFile
 from typing import Optional, List
 
 import psutil
-from psutil import AccessDenied, ZombieProcess
+from psutil import AccessDenied, NoSuchProcess, ZombieProcess
 
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.services.bitcoin_software import BitcoinSoftware
@@ -90,7 +90,7 @@ class Bitcoin(object):
         for process in psutil.process_iter():
             try:
                 process_name = process.name()
-            except (ZombieProcess, SystemError):
+            except (NoSuchProcess, ZombieProcess, SystemError):
                 continue
             if 'bitcoin' in process_name:
                 try:

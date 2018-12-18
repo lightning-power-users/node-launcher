@@ -31,8 +31,9 @@ LINUX: OperatingSystem = OperatingSystem('linux')
 WINDOWS: OperatingSystem = OperatingSystem('windows')
 OPERATING_SYSTEM = OperatingSystem(platform.system())
 
-IS_WINDOWS = OPERATING_SYSTEM == WINDOWS
 IS_MACOS = OPERATING_SYSTEM == DARWIN
+IS_LINUX = OPERATING_SYSTEM == LINUX
+IS_WINDOWS = OPERATING_SYSTEM == WINDOWS
 
 # Only relevant for Windows
 LOCALAPPDATA = os.path.abspath(os.environ.get('LOCALAPPDATA', ''))
@@ -71,6 +72,10 @@ if IS_WINDOWS:
 
 if IS_MACOS:
     from keyring.backends.OS_X import Keyring
+    keyring = Keyring()
+
+if IS_LINUX:
+    from keyring.backends.SecretService import Keyring
     keyring = Keyring()
 
 # How many megabytes to keep
