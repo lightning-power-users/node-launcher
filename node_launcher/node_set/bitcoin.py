@@ -26,9 +26,11 @@ class Bitcoin(object):
     def __init__(self, network: str, configuration_file_path: str):
         self.network = network
         self.hard_drives = HardDrives()
+        self.process = self.find_running_node()
         self.software = BitcoinSoftware()
         self.file = ConfigurationFile(configuration_file_path)
         self.process = self.find_running_node()
+        self.running = False
 
         if self.file.rpcuser is None:
             self.file.rpcuser = 'default_user'
@@ -80,7 +82,7 @@ class Bitcoin(object):
         else:
             self.file.datadir = default_datadir
 
-    def find_running_node(self) -> psutil.Process:
+    def find_running_node(self) -> Optional[psutil.Process]:
         if self.network == 'mainnet':
             ports = [8333, 8332]
         else:
@@ -88,15 +90,18 @@ class Bitcoin(object):
         for process in psutil.process_iter():
             try:
                 process_name = process.name()
-            except ZombieProcess:
+            except (ZombieProcess, SystemError):
                 continue
             if 'bitcoin' in process_name:
                 try:
                     for connection in process.connections():
                         if connection.laddr.port in ports:
+                            self.running = True
                             return process
                 except AccessDenied:
                     continue
+        self.running = False
+        return None
 
     def detect_zmq_ports(self) -> bool:
         if self.process is None:

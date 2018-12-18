@@ -1,7 +1,7 @@
 import sys
 
 from PySide2 import QtWidgets
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, QTimer
 from PySide2.QtWidgets import QGridLayout, QMessageBox, QErrorMessage
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE, \
@@ -14,10 +14,10 @@ from node_launcher.services.launcher_software import LauncherSoftware
 
 
 class LaunchWidget(QtWidgets.QWidget):
+    error_message: QErrorMessage
+    network_grid: QGridLayout
     mainnet_group_box: NetworkWidget
     testnet_group_box: NetworkWidget
-    network_grid: QGridLayout
-    error_message: QErrorMessage
 
     def __init__(self):
         super().__init__()
