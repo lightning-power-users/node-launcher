@@ -23,12 +23,14 @@ class TestGuiUnitTests(object):
     @patch.object(Lnd, 'launch')
     def test_lnd_node_button(self, mock_lnd_launch: MagicMock, qtbot: QTest):
         launch_widget = LaunchWidget()
+        launch_widget.testnet_group_box.nodes_layout.lnd_button.setEnabled(True)
         qtbot.mouseClick(launch_widget.testnet_group_box.nodes_layout.lnd_button,
                          Qt.LeftButton)
         mock_lnd_launch.assert_called_once()
 
     def test_lncli_copy_button(self, qtbot: QTest,
                                launch_widget: LaunchWidget):
+        launch_widget.testnet_group_box.cli_layout.copy_lncli.button.setEnabled(True)
         qtbot.mouseClick(launch_widget.testnet_group_box.cli_layout.copy_lncli.button,
                          Qt.LeftButton)
         command = launch_widget.testnet_group_box.node_set.lnd.lncli
@@ -36,6 +38,7 @@ class TestGuiUnitTests(object):
 
     def test_rest_url_copy_button(self, qtbot: QTest,
                                   launch_widget: LaunchWidget):
+        launch_widget.testnet_group_box.joule_layout.copy_rest.button.setEnabled(True)
         qtbot.mouseClick(launch_widget.testnet_group_box.joule_layout.copy_rest.button,
                          Qt.LeftButton)
         rest_url = launch_widget.testnet_group_box.node_set.lnd.rest_url
@@ -43,6 +46,7 @@ class TestGuiUnitTests(object):
 
     def test_grpc_url_copy_button(self, qtbot: QTest,
                                   launch_widget: LaunchWidget):
+        launch_widget.testnet_group_box.zap_layout.copy_grpc_url.button.setEnabled(True)
         qtbot.mouseClick(launch_widget.testnet_group_box.zap_layout.copy_grpc_url.button,
                          Qt.LeftButton)
         rest_url = launch_widget.testnet_group_box.node_set.lnd.grpc_url
