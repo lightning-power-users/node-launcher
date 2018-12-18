@@ -12,6 +12,7 @@ class SeedDialog(QDialog):
         self.layout = QtWidgets.QVBoxLayout()
 
         self.text = QTextBrowser(self)
+        self.text.setMinimumHeight(500)
         self.layout.addWidget(self.text)
 
         self.print_button = QPushButton('Print')
