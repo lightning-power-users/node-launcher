@@ -69,6 +69,8 @@ class NetworkWidget(QtWidgets.QWidget):
             worker = Worker(self.lnd_poll, lnd=self.node_set.lnd)
             worker.signals.result.connect(self.handle_lnd_poll)
             self.threadpool.start(worker)
+        elif self.node_set.lnd.running and self.node_set.lnd.is_unlocked:
+            self.set_open_state()
         elif not self.node_set.lnd.running:
             self.node_set.lnd.is_unlocked = False
             self.set_closed_state()
