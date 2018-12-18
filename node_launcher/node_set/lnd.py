@@ -1,7 +1,10 @@
 import os
+import psutil
 from subprocess import call, Popen, PIPE
 from tempfile import NamedTemporaryFile
-from typing import List
+from typing import List, Optional
+
+from psutil import ZombieProcess, AccessDenied
 
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
@@ -13,11 +16,15 @@ from node_launcher.utilities import get_port
 class Lnd(object):
     file: ConfigurationFile
     software: LndSoftware
+    process: Optional[psutil.Process]
 
     def __init__(self, network: str, configuration_file_path: str, bitcoin: Bitcoin):
+        self.running = False
+        self.is_unlocked = False
         self.network = network
         self.bitcoin = bitcoin
         self.file = ConfigurationFile(configuration_file_path)
+        self.process = self.find_running_node()
         self.software = LndSoftware()
 
         self.lnddir = LND_DIR_PATH[OPERATING_SYSTEM]
@@ -27,6 +34,39 @@ class Lnd(object):
         self.rest_port = get_port(8080)
         self.node_port = get_port(9735)
         self.grpc_port = get_port(10009)
+
+    def find_running_node(self) -> Optional[psutil.Process]:
+        found_ports = []
+        for process in psutil.process_iter():
+            try:
+                process_name = process.name()
+            except ZombieProcess:
+                continue
+            if 'lnd' in process_name:
+                lnd_process = process
+                self.is_unlocked = False
+                self.running = True
+                try:
+                    log_file = lnd_process.open_files()[0]
+                except IndexError:
+                    continue
+                if self.network not in log_file.path:
+                    continue
+                try:
+                    for connection in process.connections():
+                        found_ports.append((connection.laddr, connection.raddr))
+                        if 8080 <= connection.laddr.port <= 9000:
+                            self.rest_port = connection.laddr.port
+                        elif 10009 <= connection.laddr.port <= 10100:
+                            self.grpc_port = connection.laddr.port
+                        elif 9735 <= connection.laddr.port < 9800:
+                            self.node_port = connection.laddr.port
+                            self.is_unlocked = True
+                    return lnd_process
+                except AccessDenied:
+                    continue
+        self.running = False
+        return None
 
     @property
     def macaroon_path(self) -> str:

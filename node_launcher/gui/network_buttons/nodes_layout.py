@@ -29,3 +29,5 @@ class NodesLayout(QGridLayout):
         self.addWidget(self.lnd_button, column=self.columns)
 
         self.addWidget(HorizontalLine(), column=self.columns)
+
+
