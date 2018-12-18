@@ -60,10 +60,3 @@ class LaunchWidget(QtWidgets.QWidget):
                 f'New version: {latest_version}'
             )
             self.message_box.exec_()
-
-        if OPERATING_SYSTEM == LINUX:
-            self.error_message.showMessage(
-                'Linux is not supported, please submit a pull request! '
-                'https://github.com/PierreRochard/node-launcher')
-            self.error_message.exec_()
-            sys.exit(0)

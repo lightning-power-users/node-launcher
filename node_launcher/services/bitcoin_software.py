@@ -1,6 +1,6 @@
 import os
 
-from node_launcher.constants import TARGET_BITCOIN_RELEASE, OPERATING_SYSTEM, DARWIN, IS_WINDOWS
+from node_launcher.constants import TARGET_BITCOIN_RELEASE, OPERATING_SYSTEM, DARWIN, IS_WINDOWS, IS_MACOS, IS_LINUX
 from node_launcher.services.node_software import NodeSoftwareABC
 
 
@@ -42,8 +42,10 @@ class BitcoinSoftware(NodeSoftwareABC):
     def download_name(self) -> str:
         if IS_WINDOWS:
             os_name = 'win64'
-        elif OPERATING_SYSTEM == DARWIN:
+        elif IS_MACOS:
             os_name = 'osx64'
+        elif IS_LINUX:
+            os_name = 'x86_64-linux-gnu'
         else:
             raise Exception(f'{OPERATING_SYSTEM} is not supported')
         return f'bitcoin-{self.release_version}-{os_name}'

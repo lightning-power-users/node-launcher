@@ -8,7 +8,7 @@ from psutil import ZombieProcess, AccessDenied
 
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
-from node_launcher.constants import LND_DIR_PATH, OPERATING_SYSTEM, DARWIN, IS_WINDOWS
+from node_launcher.constants import LND_DIR_PATH, OPERATING_SYSTEM, DARWIN, IS_WINDOWS, IS_LINUX, IS_MACOS
 from node_launcher.services.lnd_software import LndSoftware
 from node_launcher.utilities import get_port
 
@@ -137,7 +137,7 @@ class Lnd(object):
         command = self.lnd()
         command[0] = '"' + command[0] + '"'
         cmd = ' '.join(command)
-        if OPERATING_SYSTEM == DARWIN:
+        if IS_MACOS:
             with NamedTemporaryFile(suffix='-lnd.command', delete=False) as f:
                 f.write(f'#!/bin/sh\n{cmd}\n'.encode('utf-8'))
                 f.flush()
@@ -153,6 +153,12 @@ class Lnd(object):
                     stdin=PIPE, stdout=PIPE, stderr=PIPE,
                     creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
                     close_fds=True, shell=True)
+        elif IS_LINUX:
+            with NamedTemporaryFile(suffix='-lnd.command', delete=False) as f:
+                f.write(f'#!/bin/sh\n{cmd}\n'.encode('utf-8'))
+                f.flush()
+                call(['chmod', 'u+x', f.name])
+                result = Popen(['gnome-terminal', '-e', f.name], close_fds=True)
         else:
             raise NotImplementedError()
         return result
