@@ -70,6 +70,7 @@ class NetworkWidget(QtWidgets.QWidget):
             worker.signals.result.connect(self.handle_lnd_poll)
             self.threadpool.start(worker)
         elif not self.node_set.lnd.running:
+            self.node_set.lnd.is_unlocked = False
             self.set_closed_state()
 
         self.cli_layout.copy_lncli.button.setEnabled(self.node_set.lnd.is_unlocked)
