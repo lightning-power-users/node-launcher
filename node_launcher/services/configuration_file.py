@@ -3,11 +3,10 @@ from os.path import isfile, isdir, pardir
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
 
-exceptions = ['path']
 
-
-class ConfigurationFile(object):
-    def __init__(self, path):
+class ConfigurationFile(dict):
+    def __init__(self, path, **kwargs):
+        super().__init__(**kwargs)
         self.path = path
         parent = os.path.abspath(os.path.join(path, pardir))
         if not isdir(parent):
@@ -18,7 +17,22 @@ class ConfigurationFile(object):
                 f.write(f'# Node Launcher version {NODE_LAUNCHER_RELEASE}\n\n')
                 f.flush()
 
-    def __getattr__(self, name):
+    def __setitem__(self, name, value) -> None:
+        if isinstance(value, str):
+            pass
+        elif isinstance(value, bool):
+            value = str(int(value))
+        elif isinstance(value, int):
+            value = str(value)
+        else:
+            raise NotImplementedError(f'setattr for {type(value)}')
+
+        self.write_property(name, value)
+
+    def __delitem__(self, v) -> None:
+        pass
+
+    def __getitem__(self, name):
         with open(self.path, 'r') as f:
             lines = f.readlines()
         property_lines = [l for l in lines if l.startswith(name)]
@@ -36,21 +50,11 @@ class ConfigurationFile(object):
         else:
             return None
 
-    def __setattr__(self, name, value):
-        if name in exceptions:
-            super().__setattr__(name, value)
-            return
+    def __len__(self) -> int:
+        pass
 
-        if isinstance(value, str):
-            pass
-        elif isinstance(value, bool):
-            value = str(int(value))
-        elif isinstance(value, int):
-            value = str(value)
-        else:
-            raise NotImplementedError(f'setattr for {type(value)}')
-
-        self.write_property(name, value)
+    def __iter__(self):
+        pass
 
     def write_property(self, name: str, value: str):
         if ' ' in value and not value.startswith('"'):

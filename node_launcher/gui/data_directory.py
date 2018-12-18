@@ -17,7 +17,7 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
         self.error_message = QErrorMessage(self)
 
         self.node_set = node_set
-        self.datadir = self.node_set.bitcoin.file.datadir
+        self.datadir = self.node_set.bitcoin.file['datadir']
         self.datadir_label = QLabel()
         self.datadir_label.setText(self.datadir)
         self.datadir_label.setAlignment(Qt.AlignCenter | Qt.AlignCenter)
@@ -59,14 +59,14 @@ class DataDirectoryBox(QtWidgets.QGroupBox):
             return
         if not os.path.isdir(data_directory):
             self.error_message.showMessage('Directory does not exist, please try again!')
-        self.node_set.bitcoin.file.datadir = data_directory
+        self.node_set.bitcoin.file['datadir'] = data_directory
         self.node_set.bitcoin.set_prune()
         self.datadir = data_directory
         self.datadir_label.setText(data_directory)
         self.display_pruning_warning()
 
     def display_pruning_warning(self):
-        if self.node_set.bitcoin.file.prune:
+        if self.node_set.bitcoin.file['prune']:
             self.prune_warning_label.setText('Warning: pruning is on')
             self.prune_warning_label.repaint()
         else:
