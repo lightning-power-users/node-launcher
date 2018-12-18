@@ -70,6 +70,7 @@ class NetworkWidget(QtWidgets.QWidget):
             worker.signals.result.connect(self.handle_lnd_poll)
             self.threadpool.start(worker)
         elif not self.node_set.lnd.running:
+            self.node_set.lnd.is_unlocked = False
             self.set_closed_state()
 
         self.cli_layout.copy_lncli.button.setEnabled(self.node_set.lnd.is_unlocked)
@@ -85,6 +86,11 @@ class NetworkWidget(QtWidgets.QWidget):
         self.lnd_wallet_layout.create_wallet_button.setDisabled(True)
         self.lnd_wallet_layout.recover_wallet_button.setDisabled(True)
         self.lnd_wallet_layout.unlock_wallet_button.setDisabled(False)
+
+    def set_create_recover_state(self):
+        self.lnd_wallet_layout.create_wallet_button.setDisabled(False)
+        self.lnd_wallet_layout.recover_wallet_button.setDisabled(False)
+        self.lnd_wallet_layout.unlock_wallet_button.setDisabled(True)
 
     def set_open_state(self):
         self.lnd_wallet_layout.create_wallet_button.setDisabled(True)
@@ -110,5 +116,7 @@ class NetworkWidget(QtWidgets.QWidget):
             self.set_unlock_state()
         elif 'unknown service lnrpc.WalletUnlocker' in details:
             self.set_open_state()
+        elif 'wallet not found' in details:
+            self.set_create_recover_state()
         else:
             self.set_closed_state()

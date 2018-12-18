@@ -18,14 +18,12 @@ os.environ["GRPC_SSL_CIPHER_SUITES"] = 'HIGH+ECDSA'
 class LndClient(object):
     def __init__(self, lnd: Lnd):
         self.lnd = lnd
-        self.cert_credentials = None
 
     def get_cert_credentials(self):
-        if self.cert_credentials is None:
-            lnd_tls_cert_path = os.path.join(self.lnd.lnddir, 'tls.cert')
-            lnd_tls_cert = open(lnd_tls_cert_path, 'rb').read()
-            self.cert_credentials = grpc.ssl_channel_credentials(lnd_tls_cert)
-        return self.cert_credentials
+        lnd_tls_cert_path = os.path.join(self.lnd.lnddir, 'tls.cert')
+        lnd_tls_cert = open(lnd_tls_cert_path, 'rb').read()
+        cert_credentials = grpc.ssl_channel_credentials(lnd_tls_cert)
+        return cert_credentials
 
     def wallet_unlocker(self):
         grpc_channel = grpc.secure_channel(f'localhost:{self.lnd.grpc_port}',

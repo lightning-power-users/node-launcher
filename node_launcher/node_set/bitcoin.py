@@ -98,7 +98,7 @@ class Bitcoin(object):
                         if connection.laddr.port in ports:
                             self.running = True
                             return process
-                except AccessDenied:
+                except (AccessDenied, ZombieProcess):
                     continue
         self.running = False
         return None
