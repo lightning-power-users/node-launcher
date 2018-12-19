@@ -1,6 +1,6 @@
 from PySide2 import QtWidgets
 from PySide2.QtCore import QTimer, QThread, QThreadPool
-from PySide2.QtWidgets import QWidget
+from PySide2.QtWidgets import QWidget, QErrorMessage
 from grpc._channel import _Rendezvous
 
 from node_launcher.gui.components.layouts import QGridLayout
@@ -121,4 +121,5 @@ class NetworkWidget(QtWidgets.QWidget):
         elif 'wallet not found' in details:
             self.set_create_recover_state()
         else:
+            QErrorMessage(self).showMessage(details)
             self.set_closed_state()
