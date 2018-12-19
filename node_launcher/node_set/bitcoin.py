@@ -4,7 +4,6 @@ from tempfile import NamedTemporaryFile
 from typing import Optional, List
 
 import psutil
-from psutil import AccessDenied, NoSuchProcess, ZombieProcess
 
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.services.bitcoin_software import BitcoinSoftware
@@ -32,17 +31,26 @@ class Bitcoin(object):
         self.process = self.find_running_node()
         self.running = False
 
-        if self.file.rpcuser is None:
-            self.file.rpcuser = 'default_user'
+        if self.file['server'] is None:
+            self.file['server'] = True
 
-        if self.file.rpcpassword is None:
-            self.file.rpcpassword = get_random_password()
+        if self.file['disablewallet'] is None:
+            self.file['disablewallet'] = True
 
-        if self.file.datadir is None:
+        if self.file['timeout'] is None:
+            self.file['timeout'] = 6000
+
+        if self.file['rpcuser'] is None:
+            self.file['rpcuser'] = 'default_user'
+
+        if self.file['rpcpassword'] is None:
+            self.file['rpcpassword'] = get_random_password()
+
+        if self.file['datadir'] is None:
             self.autoconfigure_datadir()
 
-        if self.file.prune is None:
-            should_prune = self.hard_drives.should_prune(self.file.datadir,
+        if self.file['prune'] is None:
+            should_prune = self.hard_drives.should_prune(self.file['datadir'],
                                                          has_bitcoin=True)
             self.set_prune(should_prune)
 
@@ -50,21 +58,32 @@ class Bitcoin(object):
             self.zmq_block_port = get_zmq_port()
             self.zmq_tx_port = get_zmq_port()
 
-        if self.file.dbcache is None:
-            # noinspection PyBroadException
-            try:
-                memory = psutil.virtual_memory()
-                free_mb = round(memory.available/1000000)
-                self.file.dbcache = free_mb
-            except:
-                self.file.dbcache = 1000
+        self.file['zmqpubrawblock'] = f'tcp://127.0.0.1:{self.zmq_block_port}'
+        self.file['zmqpubrawtx'] = f'tcp://127.0.0.1:{self.zmq_tx_port}'
+
+        # noinspection PyBroadException
+        try:
+            memory = psutil.virtual_memory()
+            free_mb = round(memory.available/1000000)
+            free_mb -= int(free_mb * .3)
+            self.file['dbcache'] = free_mb
+        except:
+            self.file['dbcache'] = 1000
 
     def set_prune(self, should_prune: bool = None):
+
         if should_prune is None:
-            should_prune = self.hard_drives.should_prune(self.file.datadir,
+            should_prune = self.hard_drives.should_prune(self.file['datadir'],
                                                          has_bitcoin=True)
-        self.file.prune = should_prune
-        self.file.txindex = not should_prune
+        if should_prune:
+            if self.network == 'testnet':
+                prune = TESTNET_PRUNE
+            else:
+                prune = MAINNET_PRUNE
+            self.file['prune'] = prune
+        else:
+            self.file['prune'] = 0
+        self.file['txindex'] = not should_prune
 
     def autoconfigure_datadir(self):
         default_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
@@ -72,15 +91,15 @@ class Bitcoin(object):
         default_is_big_enough = not self.hard_drives.should_prune(default_datadir, True)
         default_is_biggest = self.hard_drives.is_default_partition(big_drive)
         if default_is_big_enough or default_is_biggest:
-            self.file.datadir = default_datadir
+            self.file['datadir'] = default_datadir
             return
 
         if not self.hard_drives.should_prune(big_drive.mountpoint, False):
-            self.file.datadir = os.path.join(big_drive.mountpoint, 'Bitcoin')
-            if not os.path.exists(self.file.datadir):
-                os.mkdir(self.file.datadir)
+            self.file['datadir'] = os.path.join(big_drive.mountpoint, 'Bitcoin')
+            if not os.path.exists(self.file['datadir']):
+                os.mkdir(self.file['datadir'])
         else:
-            self.file.datadir = default_datadir
+            self.file['datadir'] = default_datadir
 
     def find_running_node(self) -> Optional[psutil.Process]:
         if self.network == 'mainnet':
@@ -88,17 +107,19 @@ class Bitcoin(object):
         else:
             ports = [18333, 18332]
         for process in psutil.process_iter():
+            # noinspection PyBroadException
             try:
                 process_name = process.name()
-            except (NoSuchProcess, ZombieProcess, SystemError):
+            except:
                 continue
             if 'bitcoin' in process_name:
+                # noinspection PyBroadException
                 try:
                     for connection in process.connections():
                         if connection.laddr.port in ports:
                             self.running = True
                             return process
-                except (AccessDenied, ZombieProcess):
+                except:
                     continue
         self.running = False
         return None
@@ -117,41 +138,18 @@ class Bitcoin(object):
         return True
 
     def bitcoin_qt(self) -> List[str]:
-        dir_arg = f'-datadir={self.file.datadir}'
+        conf_arg = f'-conf={self.file.path}'
         if IS_WINDOWS:
-            dir_arg = f'-datadir="{self.file.datadir}"'
+            conf_arg = f'-conf="{self.file.path}"'
+
         command = [
             self.software.bitcoin_qt,
-            dir_arg,
-            '-server=1',
-            '-disablewallet=1',
-            f'-rpcuser={self.file.rpcuser}',
-            f'-rpcpassword={self.file.rpcpassword}',
-            f'-zmqpubrawblock=tcp://127.0.0.1:{self.zmq_block_port}',
-            f'-zmqpubrawtx=tcp://127.0.0.1:{self.zmq_tx_port}',
-            '-timeout=5000'
+            conf_arg,
         ]
-        if self.file.prune:
-            if self.network == 'TESTNET':
-                prune = TESTNET_PRUNE
-            else:
-                prune = MAINNET_PRUNE
-            command += [
-                f'-prune={prune}',
-                '-txindex=0'
-            ]
-        else:
-            command += [
-                '-prune=0',
-                '-txindex=1'
-            ]
+
         if self.network == 'testnet':
             command += [
-                '-testnet=1',
-            ]
-        else:
-            command += [
-                '-testnet=0',
+                '-testnet'
             ]
         return command
 
@@ -160,7 +158,6 @@ class Bitcoin(object):
         command = [
             f'"{self.software.bitcoin_cli}"',
             f'-conf="{self.file.path}"',
-            f'-datadir="{self.file.datadir}"',
         ]
         if self.network == 'testnet':
             command += [

@@ -8,7 +8,7 @@ from psutil import ZombieProcess, AccessDenied
 
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
-from node_launcher.constants import LND_DIR_PATH, OPERATING_SYSTEM, DARWIN, IS_WINDOWS, IS_LINUX, IS_MACOS
+from node_launcher.constants import LND_DIR_PATH, OPERATING_SYSTEM, IS_WINDOWS, IS_LINUX, IS_MACOS
 from node_launcher.services.lnd_software import LndSoftware
 from node_launcher.utilities import get_port
 
@@ -27,13 +27,27 @@ class Lnd(object):
         self.process = self.find_running_node()
         self.software = LndSoftware()
 
-        self.lnddir = LND_DIR_PATH[OPERATING_SYSTEM]
-        if not os.path.exists(self.lnddir):
-            os.mkdir(self.lnddir)
+        self.file['lnddir'] = LND_DIR_PATH[OPERATING_SYSTEM]
+
+        if self.file['debuglevel'] is None:
+            self.file['debuglevel'] = 'debug'
+
+        self.file['bitcoin.active'] = True
+        self.file['bitcoin.node'] = 'bitcoind'
+        self.file['bitcoind.rpchost'] = '127.0.0.1'
+        self.file['bitcoind.rpcuser'] = self.bitcoin.file['rpcuser']
+        self.file['bitcoind.rpcpass'] = self.bitcoin.file['rpcpassword']
+        self.file['bitcoind.zmqpubrawblock'] = self.bitcoin.file['zmqpubrawblock']
+        self.file['bitcoind.zmqpubrawtx'] = self.bitcoin.file['zmqpubrawtx']
 
         self.rest_port = get_port(8080)
+        self.file['restlisten'] = f'127.0.0.1:{self.rest_port}'
+
         self.node_port = get_port(9735)
+        self.file['listen'] = f'127.0.0.1:{self.node_port}'
+
         self.grpc_port = get_port(10009)
+        self.file['rpclisten'] = f'localhost:{self.grpc_port}'
 
     def find_running_node(self) -> Optional[psutil.Process]:
         found_ports = []
@@ -70,7 +84,7 @@ class Lnd(object):
 
     @property
     def macaroon_path(self) -> str:
-        macaroons_path = os.path.join(self.lnddir, 'data', 'chain',
+        macaroons_path = os.path.join(self.file['lnddir'], 'data', 'chain',
                                       'bitcoin', self.network)
         return macaroons_path
 
@@ -81,24 +95,14 @@ class Lnd(object):
 
     @property
     def tls_cert_path(self) -> str:
-        tls_cert_path = os.path.join(self.lnddir, 'tls.cert')
+        tls_cert_path = os.path.join(self.file['lnddir'], 'tls.cert')
         return tls_cert_path
 
     def lnd(self) -> List[str]:
         command = [
             self.software.lnd,
-            f'--lnddir="{self.lnddir}"',
-            '--debuglevel=info',
-            '--bitcoin.active',
-            '--bitcoin.node=bitcoind',
-            '--bitcoind.rpchost=127.0.0.1',
-            f'--bitcoind.rpcuser={self.bitcoin.file.rpcuser}',
-            f'--bitcoind.rpcpass={self.bitcoin.file.rpcpassword}',
-            f'--bitcoind.zmqpubrawblock=tcp://127.0.0.1:{self.bitcoin.zmq_block_port}',
-            f'--bitcoind.zmqpubrawtx=tcp://127.0.0.1:{self.bitcoin.zmq_tx_port}',
-            f'--rpclisten=localhost:{self.grpc_port}',
-            f'--restlisten=127.0.0.1:{self.rest_port}',
-            f'--listen=127.0.0.1:{self.node_port}'
+            f'--configfile="{self.file.path}"',
+            '--debuglevel=trace'
         ]
         if self.network == 'testnet':
             command += [
@@ -119,8 +123,8 @@ class Lnd(object):
             base_command.append(f'--rpcserver=localhost:{self.grpc_port}')
         if self.network != 'mainnet':
             base_command.append(f'--network={self.network}')
-        if self.lnddir != LND_DIR_PATH[OPERATING_SYSTEM]:
-            base_command.append(f'--lnddir="{self.lnddir}"')
+        if self.file['lnddir'] != LND_DIR_PATH[OPERATING_SYSTEM]:
+            base_command.append(f'''--lnddir="{self.file['lnddir']}"''')
             base_command.append(f'--macaroonpath="{self.macaroon_path}"')
             base_command.append(f'--tlscertpath="{self.tls_cert_path}"')
         return base_command

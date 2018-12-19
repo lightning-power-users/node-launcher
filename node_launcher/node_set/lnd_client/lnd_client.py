@@ -20,7 +20,7 @@ class LndClient(object):
         self.lnd = lnd
 
     def get_cert_credentials(self):
-        lnd_tls_cert_path = os.path.join(self.lnd.lnddir, 'tls.cert')
+        lnd_tls_cert_path = os.path.join(self.lnd.file['lnddir'], 'tls.cert')
         lnd_tls_cert = open(lnd_tls_cert_path, 'rb').read()
         cert_credentials = grpc.ssl_channel_credentials(lnd_tls_cert)
         return cert_credentials
