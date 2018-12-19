@@ -61,14 +61,14 @@ class Bitcoin(object):
         self.file['zmqpubrawblock'] = f'tcp://127.0.0.1:{self.zmq_block_port}'
         self.file['zmqpubrawtx'] = f'tcp://127.0.0.1:{self.zmq_tx_port}'
 
-        if self.file['dbcache'] is None:
-            # noinspection PyBroadException
-            try:
-                memory = psutil.virtual_memory()
-                free_mb = round(memory.available/1000000)
-                self.file['dbcache'] = free_mb
-            except:
-                self.file['dbcache'] = 1000
+        # noinspection PyBroadException
+        try:
+            memory = psutil.virtual_memory()
+            free_mb = round(memory.available/1000000)
+            free_mb -= int(free_mb * .3)
+            self.file['dbcache'] = free_mb
+        except:
+            self.file['dbcache'] = 1000
 
     def set_prune(self, should_prune: bool = None):
 
