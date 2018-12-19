@@ -43,14 +43,20 @@ class Lnd(object):
         if self.file['restlisten'] is None:
             self.rest_port = get_port(8080)
             self.file['restlisten'] = f'127.0.0.1:{self.rest_port}'
+        else:
+            self.rest_port = self.file['restlisten'].split(':')[-1]
 
         if self.file['listen'] is None:
             self.node_port = get_port(9735)
             self.file['listen'] = f'127.0.0.1:{self.node_port}'
+        else:
+            self.node_port = self.file['listen'].split(':')[-1]
 
         if self.file['rpclisten'] is None:
             self.grpc_port = get_port(10009)
             self.file['rpclisten'] = f'localhost:{self.grpc_port}'
+        else:
+            self.grpc_port = self.file['rpclisten'].split(':')[-1]
 
     def find_running_node(self) -> Optional[psutil.Process]:
         found_ports = []
