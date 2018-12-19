@@ -99,13 +99,10 @@ class Lnd(object):
         return tls_cert_path
 
     def lnd(self) -> List[str]:
-        conf_arg = f'--configfile={self.file.path}'
-        if IS_WINDOWS:
-            conf_arg = f'--configfile="{self.file.path}"'
-
         command = [
             self.software.lnd,
-            conf_arg
+            f'--configfile="{self.file.path}"',
+            '--debuglevel=trace'
         ]
         if self.network == 'testnet':
             command += [

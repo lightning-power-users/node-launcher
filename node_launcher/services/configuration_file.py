@@ -46,6 +46,8 @@ class ConfigurationFile(dict):
             value = value.replace('"', '')
             if len(value) == 1 and value.isdigit():
                 value = bool(int(value))
+            elif value.isdigit():
+                value = int(value)
             return value
         else:
             return None
