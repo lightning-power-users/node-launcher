@@ -40,14 +40,17 @@ class Lnd(object):
         self.file['bitcoind.zmqpubrawblock'] = self.bitcoin.file['zmqpubrawblock']
         self.file['bitcoind.zmqpubrawtx'] = self.bitcoin.file['zmqpubrawtx']
 
-        self.rest_port = get_port(8080)
-        self.file['restlisten'] = f'127.0.0.1:{self.rest_port}'
+        if self.file['restlisten'] is None:
+            self.rest_port = get_port(8080)
+            self.file['restlisten'] = f'127.0.0.1:{self.rest_port}'
 
-        self.node_port = get_port(9735)
-        self.file['listen'] = f'127.0.0.1:{self.node_port}'
+        if self.file['listen'] is None:
+            self.node_port = get_port(9735)
+            self.file['listen'] = f'127.0.0.1:{self.node_port}'
 
-        self.grpc_port = get_port(10009)
-        self.file['rpclisten'] = f'localhost:{self.grpc_port}'
+        if self.file['rpclisten'] is None:
+            self.grpc_port = get_port(10009)
+            self.file['rpclisten'] = f'localhost:{self.grpc_port}'
 
     def find_running_node(self) -> Optional[psutil.Process]:
         found_ports = []
