@@ -64,6 +64,12 @@ class LndWalletLayout(QGridLayout):
             self.error_message.showMessage(e._state.details)
             return
 
+        keyring.set_password(
+            service=f'lnd_{self.node_set.network}_wallet_password',
+            username=self.node_set.bitcoin.file['rpcuser'],
+            password=password)
+
+
     def create_wallet(self):
         try:
             new_wallet_password, ok = QInputDialog.getText(self.password_dialog,
@@ -114,6 +120,11 @@ class LndWalletLayout(QGridLayout):
             self.error_message.showMessage(e._state.details)
             return
 
+        keyring.set_password(
+            service=f'lnd_{self.node_set.network}_wallet_password',
+            username=self.node_set.bitcoin.file['rpcuser'],
+            password=new_wallet_password)
+
     def recover_wallet(self):
         try:
             new_wallet_password, ok = QInputDialog.getText(self.password_dialog,
@@ -161,3 +172,8 @@ class LndWalletLayout(QGridLayout):
             # noinspection PyProtectedMember
             self.error_message.showMessage(e._state.details)
             return
+
+        keyring.set_password(
+            service=f'lnd_{self.node_set.network}_wallet_password',
+            username=self.node_set.bitcoin.file['rpcuser'],
+            password=new_wallet_password)
