@@ -1,3 +1,6 @@
+Frozen-Flask
+flask
+jinja2
 grpcio
 grpcio-tools
 googleapis-common-protos
@@ -8,3 +11,4 @@ PySide2
 PyTest
 pytest-qt
 requests
+webassets

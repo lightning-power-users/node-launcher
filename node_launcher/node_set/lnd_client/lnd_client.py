@@ -75,3 +75,8 @@ class LndClient(object):
         request.wallet_password = wallet_password.encode('latin1')
         response = self.wallet_unlocker().UnlockWallet(request)
         return response
+
+    def get_info(self) -> ln.GetInfoResponse:
+        request = ln.GetInfoRequest()
+        response = self.lnd_client().GetInfo(request)
+        return response
