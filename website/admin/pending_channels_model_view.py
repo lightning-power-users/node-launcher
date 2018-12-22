@@ -2,7 +2,8 @@ from flask_admin.model import BaseModelView
 from google.protobuf.json_format import MessageToDict
 from wtforms import Form
 
-from website.constants import node_set
+from node_launcher.node_set import NodeSet
+from website.constants import network
 from website.formatters.common import satoshi_formatter
 from website.formatters.lnd import pub_key_formatter, tx_hash_formatter, \
     channel_point_formatter
@@ -55,6 +56,7 @@ class PendingChannelsModelView(BaseModelView):
 
     def get_list(self, page, sort_field, sort_desc, search, filters,
                  page_size=None):
+        node_set = NodeSet(network)
         response = node_set.lnd_client.list_pending_channels()
         pending_channels = []
         pending_types = [

@@ -7,7 +7,7 @@ from flask_admin.model import BaseModelView
 from grpc import StatusCode
 from wtforms import Form, StringField, IntegerField, BooleanField, validators
 
-from website.constants import node_set
+from node_launcher.node_set import NodeSet
 
 wtforms_type_map = {
     3: IntegerField,  # int64
@@ -75,7 +75,7 @@ class LNDModelView(BaseModelView):
 
     def get_list(self, page=None, sort_field=None, sort_desc=False, search=None,
                  filters=None, page_size=None):
-
+        node_set = NodeSet('mainnet')
         results = getattr(node_set.lnd_client, self.get_query)()
         if hasattr(results[0], 'private'):
             results = [r for r in results if not getattr(r, 'private')]
