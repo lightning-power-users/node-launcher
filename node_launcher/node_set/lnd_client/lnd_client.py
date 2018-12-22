@@ -80,3 +80,13 @@ class LndClient(object):
         request = ln.GetInfoRequest()
         response = self.lnd_client().GetInfo(request)
         return response
+
+    def list_channels(self) -> List[ln.Channel]:
+        request = ln.ListChannelsRequest()
+        response = self.lnd_client().ListChannels(request)
+        return response.channels
+
+    def list_pending_channels(self) -> ln.PendingChannelsResponse:
+        request = ln.PendingChannelsRequest()
+        response = self.lnd_client().PendingChannels(request)
+        return response

@@ -1,5 +1,6 @@
 Frozen-Flask
 flask
+flask-admin
 jinja2
 grpcio
 grpcio-tools
