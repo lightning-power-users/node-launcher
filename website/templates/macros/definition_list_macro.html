@@ -1,0 +1,35 @@
+{% macro definition_list(title, data_dict) %}
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">{{ title }}</h3>
+        </div>
+        <div class="panel-body">
+            <dl class="dl-horizontal">
+                {% for key, value in data_dict.items() %}
+                    <dt>{{ key }}</dt>
+                    <dd>
+                        {% if value is string or value is number %}
+                            {{ value }}
+                        {% elif value is mapping %}
+                            <ul class="list-unstyled">
+                                {% for nested_key, nested_value in value.items() %}
+                                    <li>
+                                        {{ nested_key }}: {{ nested_value }}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% elif value is iterable %}
+                            <ul class="list-unstyled">
+                                {% for item in value %}
+                                    <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </dd>
+                {% endfor %}
+            </dl>
+        </div>
+    </div>
+
+{%- endmacro %}

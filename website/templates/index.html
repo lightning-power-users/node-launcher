@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+
+{% import 'macros/definition_list_macro.html' as dl %}
+
 {% block content %}
     <script>
         var clipboard = new ClipboardJS('.btn');
@@ -33,7 +36,8 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                             <input class="form-control"
-                                                   style="width: 100%;"
+                                                   style="width: 100%;
+                                                          text-align: center;"
                                                    id="foo"
                                                    value="0331f80652fb840239df8dc99205792bba2e559a05469915804c08420230e23c7c@mainnet.node.lightningpowerusers.com:9735">
                                         </div>
@@ -52,6 +56,24 @@
                         </div>
                     </div>
                 </div>
+            </div>
+            {% if info %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-1">
+                                </div>
+                                <div class="col-md-10">
+                                    {{ dl.definition_list(title='Node Info', data_dict=info) }}
+                                </div>
+                                <div class="col-md-1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
