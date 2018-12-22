@@ -29,7 +29,7 @@ def get_txid_link(txid: str):
     # txid = txid[-20:]
     # link = f'''<a href="{url}">{txid}</a>'''
     # return Markup(link)
-    return txid
+    return txid[-20:]
 
 
 def tx_hash_formatter(view, context, model, name):

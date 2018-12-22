@@ -46,7 +46,8 @@ class LndClient(object):
         credentials = grpc.composite_channel_credentials(self.get_cert_credentials(),
                                                          auth_credentials)
         grpc_channel = grpc.secure_channel(f'localhost:{self.lnd.grpc_port}',
-                                           credentials)
+                                           credentials,
+                                           )
         return lnrpc.LightningStub(grpc_channel)
 
     def generate_seed(self, seed_password: str = None) -> ln.GenSeedResponse:

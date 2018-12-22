@@ -61,6 +61,7 @@ class LNDModelView(BaseModelView):
     create_modal = True
     can_delete = False
     can_edit = False
+    column_display_actions = False
 
     list_template = 'admin/lnd_list.html'
 

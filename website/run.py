@@ -1,10 +1,10 @@
-from flask import render_template, Flask
-from flask_admin import Admin
-from flask_frozen import Freezer
+import json
+
+from flask import render_template, Flask, redirect
+from flask_admin import Admin, BaseView, expose
 from google.protobuf.json_format import MessageToDict
 
-from node_launcher.node_set.lnd_client.rpc_pb2 import Channel
-from website.admin.models.pending_channel import PendingChannel
+from website.admin.models.pending_channel import PendingChannels, Channels
 from website.admin.pending_channels_model_view import PendingChannelsModelView
 
 from website.admin.open_channels_model_view import OpenChannelsModelView
@@ -19,23 +19,32 @@ class App(Flask):
 
         @self.route('/')
         def index():
-            # noinspection PyBroadException
-            try:
-                info = MessageToDict(node_set.lnd_client.get_info())
-            except Exception as e:
-                info = None
-            return render_template('index.html', info=info)
+           return redirect('admin/home')
 
-        self.admin = Admin(app=self,
-                           name='Bitcoin/LN',
-                           template_mode='bootstrap3',
-                           )
+        self.admin = Admin(app=self)
 
-        self.admin.add_view(PendingChannelsModelView(PendingChannel,
+        class HomeView(BaseView):
+            @expose('/')
+            def index(self):
+                # noinspection PyBroadException
+                try:
+                    # Todo add timeout
+                    info = MessageToDict(node_set.lnd_client.get_info())
+                    with open('cache/info.json', 'w') as f:
+                        json.dump(info, f)
+                except Exception as e:
+                    # Todo add logging
+                    with open('cache/info.json', 'r') as f:
+                        info = json.load(f)
+                return render_template('index.html', info=info)
+
+        self.admin.add_view(HomeView(name='Home', endpoint='home'))
+
+        self.admin.add_view(PendingChannelsModelView(PendingChannels,
                                                      name='Pending Channels',
                                                      category='LND'))
 
-        self.admin.add_view(OpenChannelsModelView(Channel,
+        self.admin.add_view(OpenChannelsModelView(Channels,
                                                   name='Open Channels',
                                                   category='LND'))
 

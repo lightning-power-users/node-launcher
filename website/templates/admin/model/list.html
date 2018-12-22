@@ -1,6 +1,6 @@
 {% extends 'admin/master.html' %}
 {% import 'admin/lib.html' as lib with context %}
-{% import 'admin/static.html' as admin_static with context%}
+{% import 'admin/static.html' as admin_static with context %}
 {% import 'admin/model/layout.html' as model_layout with context %}
 {% import 'admin/actions.html' as actionlib with context %}
 {% import 'admin/model/row_actions.html' as row_actions with context %}
@@ -12,14 +12,41 @@
 
 {% block body %}
     {% block model_list_table %}
+        <style>/* unvisited link */
+        a:link {
+            color: white;
+        }
+
+        /* visited link */
+        a:visited {
+            color: white;
+        }
+
+        /* mouse over link */
+        a:hover {
+            color: white;
+        }
+
+        /* selected link */
+        a:active {
+            color: white;
+        }
+
+        </style>
+        <div class="container">
+        <div class="row">
+        <div class="col-sm-0 col-md-0 col-lg-2 col-xl-2"></div>
+        <div class="col-sm-12 col-md-12 col-lg-8 col-xl-8">
         <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover model-list">
+            <table class="table table-striped table-bordered table-hover model-list table-sm">
                 <thead>
                 <tr>
                     {% block list_header scoped %}
                         {% if actions %}
                             <th class="list-checkbox-column">
-                                <input type="checkbox" name="rowtoggle" class="action-rowtoggle" title="{{ _gettext('Select all records') }}" />
+                                <input type="checkbox" name="rowtoggle"
+                                       class="action-rowtoggle"
+                                       title="{{ _gettext('Select all records') }}"/>
                             </th>
                         {% endif %}
                         {% block list_row_actions_header %}
@@ -29,10 +56,11 @@
                         {% endblock %}
                         {% for c, name in list_columns %}
                             {% set column = loop.index0 %}
-                            <th class="column-header col-{{c}}">
+                            <th class="column-header col-{{ c }}">
                                 {% if admin_view.is_sortable(c) %}
                                     {% if sort_column == column %}
-                                        <a href="{{ sort_url(column, True) }}" title="{{ _gettext('Sort by %(name)s', name=name) }}">
+                                        <a href="{{ sort_url(column, True) }}"
+                                           title="{{ _gettext('Sort by %(name)s', name=name) }}">
                                             {{ name }}
                                             {% if sort_desc %}
                                                 <span class="fa fa-chevron-up glyphicon glyphicon-chevron-up"></span>
@@ -41,7 +69,8 @@
                                             {% endif %}
                                         </a>
                                     {% else %}
-                                        <a href="{{ sort_url(column) }}" title="{{ _gettext('Sort by %(name)s', name=name) }}">{{ name }}</a>
+                                        <a href="{{ sort_url(column) }}"
+                                           title="{{ _gettext('Sort by %(name)s', name=name) }}">{{ name }}</a>
                                     {% endif %}
                                 {% else %}
                                     {{ name }}
@@ -49,7 +78,8 @@
                                 {% if admin_view.column_descriptions.get(c) %}
                                     <a class="fa fa-question-circle glyphicon glyphicon-question-sign"
                                        title="{{ admin_view.column_descriptions[c] }}"
-                                       href="javascript:void(0)" data-role="tooltip"
+                                       href="javascript:void(0)"
+                                       data-role="tooltip"
                                     ></a>
                                 {% endif %}
                             </th>
@@ -62,7 +92,10 @@
                         {% block list_row scoped %}
                             {% if actions %}
                                 <td>
-                                    <input type="checkbox" name="rowid" class="action-checkbox" value="{{ get_pk_value(row) }}" title="{{ _gettext('Select record') }}" />
+                                    <input type="checkbox" name="rowid"
+                                           class="action-checkbox"
+                                           value="{{ get_pk_value(row) }}"
+                                           title="{{ _gettext('Select record') }}"/>
                                 </td>
                             {% endif %}
                             {% block list_row_actions_column scoped %}
@@ -78,7 +111,7 @@
                             {% endblock %}
 
                             {% for c, name in list_columns %}
-                                <td class="col-{{c}}">
+                                <td class="col-{{ c }}">
                                     {% if admin_view.is_editable(c) %}
                                         {% set form = list_forms[get_pk_value(row)] %}
                                         {% if form.csrf_token %}
@@ -115,21 +148,29 @@
         {% endblock %}
     {% endblock %}
 
-    {% block actions %}
-        {{ actionlib.form(actions, get_url('.action_view')) }}
-    {% endblock %}
+{% block actions %}
+    {{ actionlib.form(actions, get_url('.action_view')) }}
+{% endblock %}
 
-    {%- if admin_view.edit_modal or admin_view.create_modal or admin_view.details_modal -%}
-        {{ lib.add_modal_window() }}
-    {%- endif -%}
+{%- if admin_view.edit_modal or admin_view.create_modal or admin_view.details_modal -%}
+    {{ lib.add_modal_window() }}
+{%- endif -%}
+
+</div>
+
+<div class="col-sm-0 col-md-0 col-lg-2 col-xl-2"></div>
+</div>
+</div>
 {% endblock %}
 
 {% block tail %}
     {{ super() }}
 
     {% if filter_groups %}
-        <div id="filter-groups-data" style="display:none;">{{ filter_groups|tojson|safe }}</div>
-        <div id="active-filters-data" style="display:none;">{{ active_filters|tojson|safe }}</div>
+        <div id="filter-groups-data"
+             style="display:none;">{{ filter_groups|tojson|safe }}</div>
+        <div id="active-filters-data"
+             style="display:none;">{{ active_filters|tojson|safe }}</div>
     {% endif %}
 
     <script src="{{ admin_static.url(filename='admin/js/filters.js', v='1.0.0') }}"></script>

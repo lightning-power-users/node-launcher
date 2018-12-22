@@ -2,23 +2,37 @@ from flask_admin import expose
 
 from website.admin.lnd_model_view import LNDModelView
 from website.formatters.common import satoshi_formatter
-from website.formatters.lnd import channel_point_formatter, pub_key_formatter
+from website.formatters.lnd import channel_point_formatter
 
 
 class OpenChannelsModelView(LNDModelView):
     can_create = False
     can_delete = False
     can_edit = False
+    can_view_details = False
     get_query = 'list_channels'
     primary_key = 'chan_id'
 
     column_default_sort = 'chan_id'
     form_excluded_columns = ['node_pubkey']
     column_exclude_list = [
-        ''
+        'local_balance',
+        'remote_balance',
+        'commit_fee',
+        'commit_weight',
+        'unsettled_balance',
+        'total_satoshis_received',
+        'num_updates',
+        'pending_htlcs',
+        'csv_delay',
+        'private',
+        'fee_per_kw',
+        'total_satoshis_sent',
+        'chan_id',
+        'active',
+        'channel_point'
     ]
     column_formatters = {
-        'remote_pubkey': pub_key_formatter,
         'channel_point': channel_point_formatter,
         'capacity': satoshi_formatter,
         'local_balance': satoshi_formatter,

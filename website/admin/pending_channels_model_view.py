@@ -6,7 +6,7 @@ from website.constants import node_set
 from website.formatters.common import satoshi_formatter
 from website.formatters.lnd import pub_key_formatter, tx_hash_formatter, \
     channel_point_formatter
-from website.admin.models.pending_channel import PendingChannel
+from website.admin.models.pending_channel import PendingChannels
 
 
 class PendingChannelsModelView(BaseModelView):
@@ -69,7 +69,7 @@ class PendingChannelsModelView(BaseModelView):
                 nested_data = channel_dict.pop('channel')
                 flat_dict = {**channel_dict, **nested_data}
                 flat_dict['pending_type'] = pending_type
-                pending_channel_model = PendingChannel(**flat_dict)
+                pending_channel_model = PendingChannels(**flat_dict)
                 pending_channels.append(pending_channel_model)
         return len(pending_channels), pending_channels
 
