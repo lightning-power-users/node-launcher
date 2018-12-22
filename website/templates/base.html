@@ -1,0 +1,52 @@
+{% from "macros/navbar_item.html" import navbar_item with context %}
+
+<!doctype html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+          type="text/css"
+          href="{{ url_for('static',filename='css/cyborg_bootstrap.min.css') }}">
+
+    <script src="{{ url_for('static',filename='js/jquery-3.2.1.slim.min.js') }}" async></script>
+    <script src="{{ url_for('static',filename='js/popper.min.js') }}" async></script>
+    <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}" async></script>
+    <script src="{{ url_for('static',filename='js/clipboard.min.js') }}" async></script>
+    <script async>
+        var clipboard = new ClipboardJS('.btn');
+    </script>
+    <title>Lightning Power Users</title>
+    {% endblock %}
+</head>
+<body>
+<header>
+    <div class="navbar navbar-expand-lg navbar-dark">
+        <div class="container d-flex justify-content-between">
+            <a href="/" class="navbar-brand d-flex align-items-center">
+                <strong>Lightning Power Users</strong>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    {{ navbar_item('/', 'Home') }}
+                    {{ navbar_item('/channels', 'Channels') }}
+                    {{ navbar_item('/help', 'Help') }}
+                </ul>
+            </div>
+        </div>
+    </div>
+</header>
+
+{% block content %}{% endblock %}
+
+
+</body>
+</html>

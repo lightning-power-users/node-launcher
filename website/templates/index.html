@@ -1,88 +1,59 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-
-    <link rel="stylesheet" type="text/css"
-          href="{{ url_for('static',filename='css/cyborg_bootstrap.min.css') }}">
-
-
-    <title>Lightning Power Users</title>
-</head>
-<body>
-    <header>
-        <div class="collapse" id="navbarHeader">
-            <div class="container">
-                <div class="row">
-                    <div class="col-sm-8 col-md-7 py-4">
-                        <h4>About</h4>
-                        <p class="text-muted">Add some information about the album below, the author, or any other background context. Make it a few sentences long so folks can pick up some informative tidbits. Then, link them off to some social networking sites or contact information.</p>
-                    </div>
-                    <div class="col-sm-4 offset-md-1 py-4">
-                        <h4>Contact</h4>
-                        <ul class="list-unstyled">
-                            <li><a href="#">Follow on Twitter</a></li>
-                            <li><a href="#">Like on Facebook</a></li>
-                            <li><a href="#">Email me</a></li>
-                        </ul>
+{% extends 'base.html' %}
+{% block content %}
+    <script>
+        var clipboard = new ClipboardJS('.btn');
+    </script>
+    <div class="album py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card mb-4 shadow-sm">
+                        <div style="height: 400px;">
+                            <img style="max-width:100%;
+                                    max-height:100%;
+                                    display: block;
+                                    margin-left: auto;
+                                    margin-right: auto;"
+                                 src="{{ url_for('static',filename='img/small_badger.png') }}"
+                                 alt="Honey Badger">
+                        </div>
+                        <div class="card-body">
+                            <div class="col-md-12">
+                                <h4>Connect</h4>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-12 text-center">
+                                            <label for="foo">
+                                                Pubkey@Host:Port
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <input class="form-control"
+                                                   style="width: 100%;"
+                                                   id="foo"
+                                                   value="0331f80652fb840239df8dc99205792bba2e559a05469915804c08420230e23c7c@mainnet.node.lightningpowerusers.com:9735">
+                                        </div>
+                                    </div>
+                                    <div class="row" style="padding-top: 20px;">
+                                        <div class="col-md-12 text-center">
+                                            <button type="button"
+                                                    class="btn btn-lg btn-outline-secondary"
+                                                    data-clipboard-target="#foo">
+                                                Copy
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="navbar navbar-dark bg-dark shadow-sm">
-            <div class="container d-flex justify-content-between">
-                <a href="#" class="navbar-brand d-flex align-items-center">
-                    <strong>Lightning Power Users</strong>
-                </a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-            </div>
-        </div>
-    </header>
+    </div>
 
-    <img src="{{ url_for('static',filename='img/small_badger.png') }}"
-         alt="Honey Badger">
-
-    <h2>
-        Connect</h2>
-    <p>
-        0331f80652fb840239df8dc99205792bba2e559a05469915804c08420230e23c7c@mainnet.node.lightningpowerusers.com:9735
-    </p>
-
-    <h2>
-        Guides
-    </h2>
-    <ol>
-        <li>
-            <a target="_blank"
-               href="https://medium.com/@pierre_rochard/windows-macos-lightning-network-284bd5034340">Set
-                up your BTC/LN nodes</a>
-        </li>
-        <li>
-            <a target="_blank"
-               href="https://medium.com/@pierre_rochard/easy-lightning-with-node-launcher-zap-488133edfbd">Set
-                up Zap Desktop</a>
-        </li>
-        <li>
-            <a target="_blank"
-               href="https://medium.com/@pierre_rochard/send-a-lightning-payment-with-zap-desktop-17b74b65b9b8">Open
-                a chanel and send a payment</a>
-        </li>
-        <li>
-            <a target="_blank"
-               href="https://medium.com/@pierre_rochard/bitcoin-lightning-joule-chrome-extension-ac149bb05cb9">Install
-                the Joule Chrome extension</a>
-        </li>
-    </ol>
-<!-- Optional JavaScript -->
-<!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="{{ url_for('static',filename='js/jquery-3.2.1.slim.min.js') }}"></script>
-<script src="{{ url_for('static',filename='js/popper.min.js') }}"></script>
-<script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"></script>
-</body>
-</html>
+{% endblock %}
