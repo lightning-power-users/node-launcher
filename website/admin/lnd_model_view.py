@@ -1,5 +1,7 @@
 import functools
 import json
+import os
+import pickle
 
 from flask import flash
 from flask_admin.babel import gettext
@@ -8,6 +10,7 @@ from grpc import StatusCode
 from wtforms import Form, StringField, IntegerField, BooleanField, validators
 
 from node_launcher.node_set import NodeSet
+from website.constants import cache_path
 
 wtforms_type_map = {
     3: IntegerField,  # int64
@@ -76,8 +79,20 @@ class LNDModelView(BaseModelView):
     def get_list(self, page=None, sort_field=None, sort_desc=False, search=None,
                  filters=None, page_size=None):
         node_set = NodeSet('mainnet')
-        results = getattr(node_set.lnd_client, self.get_query)()
-        if hasattr(results[0], 'private'):
+        cache_file = os.path.join(cache_path, self.get_query)
+        try:
+            results = getattr(node_set.lnd_client, self.get_query)()
+            with open(cache_file, 'w') as f:
+                pickle.dump(results, f)
+        except Exception as e:
+            # todo add error logging
+            print(e)
+            try:
+                with open(cache_file, 'r') as f:
+                    results = pickle.load(f)
+            except FileNotFoundError:
+                results = []
+        if results and hasattr(results[0], 'private'):
             results = [r for r in results if not getattr(r, 'private')]
 
         sort_field = sort_field or self.column_default_sort

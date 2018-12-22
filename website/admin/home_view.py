@@ -17,7 +17,6 @@ class HomeView(BaseView):
         info_cache_file = os.path.join(cache_path, 'info.json')
         try:
             node_set = NodeSet(network)
-            # Todo add timeout
             info = MessageToDict(node_set.lnd_client.get_info())
             with open(info_cache_file, 'w') as f:
                 json.dump(info, f)
