@@ -50,7 +50,6 @@ def grpc_error_handling(func):
 
 
 class LNDModelView(BaseModelView):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -164,3 +163,6 @@ class LNDModelView(BaseModelView):
             for c in columns
         }
         return columns
+
+    def _create_ajax_loader(self, name, options):
+        pass

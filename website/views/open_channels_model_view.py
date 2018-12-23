@@ -1,6 +1,6 @@
 from flask_admin import expose
 
-from website.admin.lnd_model_view import LNDModelView
+from website.views.lnd_model_view import LNDModelView
 from website.formatters.common import satoshi_formatter
 from website.formatters.lnd import channel_point_formatter
 

@@ -1,4 +1,5 @@
 from flask_admin.model import BaseModelView
+# noinspection PyPackageRequirements
 from google.protobuf.json_format import MessageToDict
 from wtforms import Form
 
@@ -7,13 +8,16 @@ from website.constants import network
 from website.formatters.common import satoshi_formatter
 from website.formatters.lnd import pub_key_formatter, tx_hash_formatter, \
     channel_point_formatter
-from website.admin.models.pending_channel import PendingChannels
+from website.models.pending_channel import PendingChannels
 
 
 class PendingChannelsModelView(BaseModelView):
     can_create = False
     can_delete = False
     can_edit = False
+    can_view_details = False
+    column_display_actions = False
+
     column_formatters = {
         'capacity': satoshi_formatter,
         'channel_point': channel_point_formatter,
@@ -24,6 +28,20 @@ class PendingChannelsModelView(BaseModelView):
         'local_balance': satoshi_formatter,
         'remote_node_pub': pub_key_formatter,
     }
+    column_exclude_list = [
+        'channel_point',
+        'closing_txid',
+        'commit_fee',
+        'commit_weight',
+        'fee_per_kw',
+        'limbo_balance',
+        'local_balance',
+    ]
+    column_list = [
+        'pending_type',
+        'remote_node_pub',
+        'capacity'
+    ]
 
     def get_pk_value(self, model):
         pass
@@ -57,24 +75,32 @@ class PendingChannelsModelView(BaseModelView):
     def get_list(self, page, sort_field, sort_desc, search, filters,
                  page_size=None):
         node_set = NodeSet(network)
-        response = node_set.lnd_client.list_pending_channels()
-        pending_channels = []
-        pending_types = [
-            'pending_open_channels',
-            'pending_closing_channels',
-            'pending_force_closing_channels',
-            'waiting_close_channels'
-        ]
-        for pending_type in pending_types:
-            for pending_channel in getattr(response, pending_type):
-                channel_dict = MessageToDict(pending_channel)
-                nested_data = channel_dict.pop('channel')
-                flat_dict = {**channel_dict, **nested_data}
-                flat_dict['pending_type'] = pending_type
-                pending_channel_model = PendingChannels(**flat_dict)
-                pending_channels.append(pending_channel_model)
+        try:
+            response = node_set.lnd_client.list_pending_channels()
+            pending_channels = []
+            pending_types = [
+                'pending_open_channels',
+                'pending_closing_channels',
+                'pending_force_closing_channels',
+                'waiting_close_channels'
+            ]
+            for pending_type in pending_types:
+                for pending_channel in getattr(response, pending_type):
+                    channel_dict = MessageToDict(pending_channel)
+                    nested_data = channel_dict.pop('channel')
+                    # noinspection PyDictCreation
+                    flat_dict = {**channel_dict, **nested_data}
+                    flat_dict['pending_type'] = pending_type
+                    pending_channel_model = PendingChannels(**flat_dict)
+                    pending_channels.append(pending_channel_model)
+        except Exception as e:
+            # todo add error handling
+            # todo add error logging
+            print(e)
+            pending_channels = []
         return len(pending_channels), pending_channels
 
+    # noinspection PyShadowingBuiltins
     def get_one(self, id):
         pass
 
