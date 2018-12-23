@@ -45,6 +45,11 @@ class PendingChannelsModelView(BaseModelView):
         'capacity'
     ]
 
+    column_labels = {
+        'pending_type': 'Status',
+        'remote_node_pub': 'Remote Public Key'
+    }
+
     def get_pk_value(self, model):
         pass
 

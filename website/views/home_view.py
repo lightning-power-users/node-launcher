@@ -32,8 +32,3 @@ class HomeView(BaseView):
             except FileNotFoundError:
                 info = {}
         return render_template('index.html', info=info)
-
-    @expose('/help/')
-    @cache.cached(timeout=600)
-    def help(self):
-        return render_template('help.html')

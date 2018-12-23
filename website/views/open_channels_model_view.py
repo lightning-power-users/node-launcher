@@ -45,6 +45,11 @@ class OpenChannelsModelView(LNDModelView):
 
     }
 
+    column_labels = {
+        'pending_type': 'Status',
+        'remote_pubkey': 'Remote Public Key'
+    }
+
     def _create_ajax_loader(self, name, options):
         pass
 
