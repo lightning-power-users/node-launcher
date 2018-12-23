@@ -2,10 +2,12 @@ import functools
 import json
 import os
 import pickle
+from json import JSONDecodeError
 
 from flask import flash
 from flask_admin.babel import gettext
 from flask_admin.model import BaseModelView
+from google.protobuf.json_format import MessageToDict, ParseDict
 from grpc import StatusCode
 from wtforms import Form, StringField, IntegerField, BooleanField, validators
 
@@ -79,18 +81,19 @@ class LNDModelView(BaseModelView):
     def get_list(self, page=None, sort_field=None, sort_desc=False, search=None,
                  filters=None, page_size=None):
         node_set = NodeSet('mainnet')
-        cache_file = os.path.join(cache_path, self.get_query)
+        cache_file = os.path.join(cache_path, self.get_query + '.json')
         try:
             results = getattr(node_set.lnd_client, self.get_query)()
             with open(cache_file, 'w') as f:
-                pickle.dump(results, f)
+                json.dump([MessageToDict(m) for m in results], f)
         except Exception as e:
             # todo add error logging
             print(e)
             try:
                 with open(cache_file, 'r') as f:
-                    results = pickle.load(f)
-            except FileNotFoundError:
+                    results = json.load(f)
+                    results = [ParseDict(m, self.model) for m in results]
+            except (FileNotFoundError, JSONDecodeError):
                 results = []
         if results and hasattr(results[0], 'private'):
             results = [r for r in results if not getattr(r, 'private')]

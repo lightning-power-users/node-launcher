@@ -29,7 +29,6 @@ class OpenChannelsModelView(LNDModelView):
         'fee_per_kw',
         'total_satoshis_sent',
         'chan_id',
-        'active',
         'channel_point'
     ]
     column_formatters = {
