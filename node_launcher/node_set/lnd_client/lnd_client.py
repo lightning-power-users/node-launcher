@@ -84,7 +84,7 @@ class LndClient(object):
 
     def list_channels(self) -> List[ln.Channel]:
         request = ln.ListChannelsRequest()
-        response = self.lnd_client().ListChannels(request, timeout=3)
+        response = self.lnd_client().ListChannels(request, timeout=1)
         return response.channels
 
     def list_pending_channels(self) -> ln.PendingChannelsResponse:

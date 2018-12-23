@@ -13,6 +13,7 @@ from wtforms import Form, StringField, IntegerField, BooleanField, validators
 
 from node_launcher.node_set import NodeSet
 from website.constants import cache_path
+from website.extensions import cache
 
 wtforms_type_map = {
     3: IntegerField,  # int64

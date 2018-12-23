@@ -4,14 +4,17 @@ from pprint import pformat
 
 from flask import render_template
 from flask_admin import BaseView, expose
+# noinspection PyPackageRequirements
 from google.protobuf.json_format import MessageToDict
 
 from node_launcher.node_set import NodeSet
 from website.constants import cache_path, network
+from website.extensions import cache
 
 
 class HomeView(BaseView):
     @expose('/')
+    @cache.cached(timeout=600)
     def index(self):
         # noinspection PyBroadException
         info_cache_file = os.path.join(cache_path, 'info.json')
@@ -29,3 +32,8 @@ class HomeView(BaseView):
             except FileNotFoundError:
                 info = {}
         return render_template('index.html', info=info)
+
+    @expose('/help/')
+    @cache.cached(timeout=600)
+    def help(self):
+        return render_template('help.html')

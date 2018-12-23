@@ -1,6 +1,7 @@
-from flask import Flask, redirect, render_template
+from flask import Flask, redirect, render_template, url_for
 from flask_admin import Admin
 
+from website.extensions import cache
 from website.views.home_view import HomeView
 from website.models import Channels, PendingChannels
 from website.views.pending_channels_model_view import PendingChannelsModelView
@@ -11,18 +12,22 @@ from website.constants import FLASK_SECRET_KEY
 class App(Flask):
     def __init__(self):
         super().__init__(__name__)
+        cache.init_app(self)
         self.debug = False
         self.config['SECRET_KEY'] = FLASK_SECRET_KEY
 
         @self.route('/')
+        @cache.cached(timeout=600)
         def index():
-            return redirect('admin/home')
+            return redirect(url_for('home.index'))
 
         @self.errorhandler(404)
+        @cache.cached(timeout=600)
         def page_not_found(e):
-            return redirect('admin/home')
+            return redirect(url_for('home.index'))
 
-        self.admin = Admin(app=self)
+        self.admin = Admin(app=self,
+                           url='/')
         self.admin.add_view(HomeView(name='Home', endpoint='home'))
         self.admin.add_view(PendingChannelsModelView(PendingChannels,
                                                      endpoint='pending-channels',
@@ -32,10 +37,6 @@ class App(Flask):
                                                   endpoint='channels',
                                                   name='Open Channels',
                                                   category='LND'))
-
-        @self.route('/help')
-        def help_route():
-            return render_template('help.html')
 
 
 if __name__ == '__main__':

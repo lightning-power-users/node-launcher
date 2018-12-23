@@ -1,5 +1,6 @@
 from flask_admin import expose
 
+from website.extensions import cache
 from website.views.lnd_model_view import LNDModelView
 from website.formatters.common import satoshi_formatter
 from website.formatters.lnd import channel_point_formatter
@@ -48,5 +49,6 @@ class OpenChannelsModelView(LNDModelView):
         pass
 
     @expose('/')
+    @cache.memoize(300)
     def index_view(self):
         return super(OpenChannelsModelView, self).index_view()

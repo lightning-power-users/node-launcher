@@ -1,10 +1,11 @@
-Frozen-Flask
 flask
 flask-admin
-jinja2
+flask-caching
+Frozen-Flask
+googleapis-common-protos
 grpcio
 grpcio-tools
-googleapis-common-protos
+jinja2
 keyring
 psutil
 pyinstaller
@@ -13,3 +14,4 @@ PyTest
 pytest-qt
 requests
 webassets
+wtforms

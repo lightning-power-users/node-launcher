@@ -36,10 +36,10 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
-                    {{ navbar_item('/admin/home', 'Home') }}
-                    {{ navbar_item('/admin/channels', 'Open Channels') }}
-                    {{ navbar_item('/admin/pending-channels', 'Pending Channels') }}
-                    {{ navbar_item('/admin/help', 'Help') }}
+                    {{ navbar_item(url_for('home.index'), 'Home') }}
+                    {{ navbar_item(url_for('channels.index_view'), 'Open Channels') }}
+                    {{ navbar_item(url_for('pending-channels.index_view'), 'Pending Channels') }}
+                    {{ navbar_item(url_for('home.help'), 'Help') }}
                 </ul>
             </div>
         </div>
