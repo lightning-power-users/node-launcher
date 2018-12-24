@@ -29,7 +29,6 @@ class PendingChannelsModelView(BaseModelView):
         'fee_per_kw': satoshi_formatter,
         'limbo_balance': satoshi_formatter,
         'local_balance': satoshi_formatter,
-        'remote_node_pub': pub_key_formatter,
     }
     column_exclude_list = [
         'channel_point',
