@@ -7,6 +7,7 @@ grpcio
 grpcio-tools
 jinja2
 keyring
+protobuf
 psutil
 pyinstaller
 PySide2
