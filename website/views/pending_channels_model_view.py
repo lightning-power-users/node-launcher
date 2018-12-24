@@ -14,6 +14,7 @@ from website.models.pending_channel import PendingChannels
 
 
 class PendingChannelsModelView(BaseModelView):
+    column_sortable_list = []
     can_create = False
     can_delete = False
     can_edit = False

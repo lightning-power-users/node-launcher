@@ -17,12 +17,12 @@ class App(Flask):
         self.config['SECRET_KEY'] = FLASK_SECRET_KEY
 
         @self.route('/')
-        @cache.cached(timeout=600)
+        @cache.memoize(timeout=600)
         def index():
             return redirect(url_for('home.index'))
 
         @self.errorhandler(404)
-        @cache.cached(timeout=600)
+        @cache.memoize(timeout=600)
         def page_not_found(e):
             return redirect(url_for('home.index'))
 

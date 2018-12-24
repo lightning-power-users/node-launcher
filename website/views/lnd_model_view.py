@@ -13,7 +13,6 @@ from wtforms import Form, StringField, IntegerField, BooleanField, validators
 
 from node_launcher.node_set import NodeSet
 from website.constants import cache_path
-from website.extensions import cache
 
 wtforms_type_map = {
     3: IntegerField,  # int64
@@ -95,15 +94,21 @@ class LNDModelView(BaseModelView):
             try:
                 with open(cache_file, 'r') as f:
                     results = json.load(f)
-                    results = [ParseDict(m, self.model) for m in results]
+                    results = [r for r in results if not r.get('private', False)]
+                    [r.pop('pending_htlcs', None) for r in results]
+                    results = [ParseDict(m, self.model()) for m in results]
             except (FileNotFoundError, JSONDecodeError):
                 results = []
-        if results and hasattr(results[0], 'private'):
-            results = [r for r in results if not getattr(r, 'private')]
 
         sort_field = sort_field or self.column_default_sort
         if isinstance(sort_field, tuple):
             sort_field, sort_desc = sort_field
+        if hasattr(self.model(), 'capacity'):
+            results.sort(key=lambda x: getattr(x, 'capacity'),
+                         reverse=True)
+        if hasattr(self.model(), 'active'):
+            results.sort(key=lambda x: getattr(x, 'active'),
+                         reverse=True)
         if sort_field is not None:
             results.sort(key=lambda x: getattr(x, sort_field),
                          reverse=sort_desc)

@@ -14,7 +14,7 @@ from website.extensions import cache
 
 class HomeView(BaseView):
     @expose('/')
-    @cache.cached(timeout=600)
+    @cache.memoize(timeout=600)
     def index(self):
         # noinspection PyBroadException
         info_cache_file = os.path.join(cache_path, 'info.json')

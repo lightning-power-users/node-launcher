@@ -2,11 +2,12 @@ from flask_admin import expose
 
 from website.extensions import cache
 from website.views.lnd_model_view import LNDModelView
-from website.formatters.common import satoshi_formatter
+from website.formatters.common import satoshi_formatter, format_bool
 from website.formatters.lnd import channel_point_formatter
 
 
 class OpenChannelsModelView(LNDModelView):
+    column_sortable_list = []
     can_create = False
     can_delete = False
     can_edit = False
@@ -14,7 +15,6 @@ class OpenChannelsModelView(LNDModelView):
     get_query = 'list_channels'
     primary_key = 'chan_id'
 
-    column_default_sort = 'chan_id'
     form_excluded_columns = ['node_pubkey']
     column_exclude_list = [
         'local_balance',
@@ -42,7 +42,7 @@ class OpenChannelsModelView(LNDModelView):
         'total_satoshis_sent': satoshi_formatter,
         'total_satoshis_received': satoshi_formatter,
         'unsettled_balance': satoshi_formatter,
-
+        'active': format_bool
     }
 
     column_labels = {

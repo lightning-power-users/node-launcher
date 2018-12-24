@@ -119,13 +119,6 @@
                 {% endfor %}
             </table>
         </div>
-        {% block list_pager %}
-            {% if num_pages is not none %}
-                {{ lib.pager(page, num_pages, pager_url) }}
-            {% else %}
-                {{ lib.simple_pager(page, data|length == page_size, pager_url) }}
-            {% endif %}
-        {% endblock %}
     {% endblock %}
 
 {% block actions %}
