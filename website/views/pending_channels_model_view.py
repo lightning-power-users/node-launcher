@@ -40,7 +40,6 @@ class PendingChannelsModelView(BaseModelView):
         'local_balance',
     ]
     column_list = [
-        'pending_type',
         'remote_node_pub',
         'capacity'
     ]
