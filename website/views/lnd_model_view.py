@@ -54,7 +54,10 @@ class LNDModelView(BaseModelView):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    with open('rpc.swagger.json', 'r') as swagger_file:
+    swagger_file_path = os.path.abspath(os.path.join(__file__,
+                                                     '..', '..',
+                                                     'rpc.swagger.json'))
+    with open(swagger_file_path, 'r') as swagger_file:
         swagger = json.load(swagger_file)
 
     create_form_class = None
