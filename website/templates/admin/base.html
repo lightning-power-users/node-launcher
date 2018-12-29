@@ -66,6 +66,14 @@
                     {{ navbar_item(url_for('pending-channels.index_view'), 'Pending Channels') }}
                     {{ navbar_item('https://medium.com/lightning-power-users', 'Guides') }}
                 </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a class="btn navbar-btn btn-success"
+                            href="{{ url_for('tip.index') }}">
+                            Send a Tip
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>

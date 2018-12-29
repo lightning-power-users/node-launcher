@@ -1,6 +1,7 @@
 flask
 flask-admin
 flask-caching
+flask-wtf
 Frozen-Flask
 googleapis-common-protos
 grpcio
@@ -13,6 +14,7 @@ pyinstaller
 PySide2
 PyTest
 pytest-qt
+Flask-QRcode
 requests
 webassets
 wtforms
