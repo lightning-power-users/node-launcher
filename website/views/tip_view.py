@@ -17,12 +17,18 @@ class TipView(BaseView):
                                form=form,
                                address=address)
 
-    @expose('/payreq', methods=['POST'])
+    @expose('/payreq', methods=['GET', 'POST'])
     def tip(self):
+        if request.method == 'POST':
+            value = int(request.form['value'])
+            memo = request.form['memo']
+        else:
+            value = 50000
+            memo = 'Tip'
         node_set = NodeSet(network)
         payment_request = node_set.lnd_client.create_invoice(
-            value=int(request.form['value']),
-            memo=request.form['memo']
+            value=value,
+            memo=memo
         ).payment_request
         uri = ':'.join(['lightning', payment_request])
 
