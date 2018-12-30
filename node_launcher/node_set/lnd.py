@@ -1,5 +1,6 @@
 import os
 import psutil
+import socket
 from subprocess import call, Popen, PIPE
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
@@ -30,7 +31,7 @@ class Lnd(object):
         self.file['lnddir'] = LND_DIR_PATH[OPERATING_SYSTEM]
 
         if self.file['debuglevel'] is None:
-            self.file['debuglevel'] = 'debug'
+            self.file['debuglevel'] = 'info'
 
         self.file['bitcoin.active'] = True
         self.file['bitcoin.node'] = 'bitcoind'
@@ -54,9 +55,15 @@ class Lnd(object):
 
         if self.file['rpclisten'] is None:
             self.grpc_port = get_port(10009)
-            self.file['rpclisten'] = f'localhost:{self.grpc_port}'
+            self.file['rpclisten'] = f'0.0.0.0:{self.grpc_port}'
         else:
             self.grpc_port = self.file['rpclisten'].split(':')[-1]
+
+        if self.file['tlsextraip'] is None:
+            self.extraip = socket.gethostbyname(socket.gethostname())
+            self.file['tlsextraip'] = f'{self.extraip}'
+        else:
+            self.extraip = self.file['tlsextraip'].split('=')[-1]
 
     def find_running_node(self) -> Optional[psutil.Process]:
         found_ports = []
@@ -111,7 +118,7 @@ class Lnd(object):
         command = [
             self.software.lnd,
             f'--configfile="{self.file.path}"',
-            '--debuglevel=trace'
+            '--debuglevel=info'
         ]
         if self.network == 'testnet':
             command += [
