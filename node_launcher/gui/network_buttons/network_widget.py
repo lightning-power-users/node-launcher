@@ -3,6 +3,7 @@ from PySide2.QtCore import QTimer, QThread, QThreadPool
 from PySide2.QtWidgets import QWidget, QErrorMessage
 from grpc._channel import _Rendezvous
 
+from node_launcher.constants import keyring
 from node_launcher.gui.components.layouts import QGridLayout
 from node_launcher.gui.network_buttons.cli_layout import CliLayout
 from node_launcher.gui.network_buttons.joule_layout import JouleLayout
@@ -66,7 +67,15 @@ class NetworkWidget(QtWidgets.QWidget):
         self.nodes_layout.lnd_button.setDisabled(disable_lnd_launch)
 
         if self.node_set.lnd.running and not self.node_set.lnd.is_unlocked:
-            worker = Worker(self.lnd_poll, lnd=self.node_set.lnd)
+            password = keyring.get_password(
+                service=f'lnd_{self.node_set.network}_wallet_password',
+                username=self.node_set.bitcoin.file['rpcuser'],
+            )
+            if password is None:
+                password = 'fake_password_123'
+
+            worker = Worker(self.lnd_poll, lnd=self.node_set.lnd,
+                            password=password)
             worker.signals.result.connect(self.handle_lnd_poll)
             self.threadpool.start(worker)
         elif self.node_set.lnd.running and self.node_set.lnd.is_unlocked:
@@ -104,10 +113,10 @@ class NetworkWidget(QtWidgets.QWidget):
         self.lnd_wallet_layout.unlock_wallet_button.setDisabled(True)
 
     @staticmethod
-    def lnd_poll(lnd: Lnd, progress_callback):
+    def lnd_poll(lnd: Lnd, progress_callback, password: str):
         client = LndClient(lnd)
         try:
-            response = client.unlock('bad_password123')
+            response = client.unlock(password)
         except _Rendezvous as e:
             details = e.details()
             return details

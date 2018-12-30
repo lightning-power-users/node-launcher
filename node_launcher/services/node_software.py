@@ -100,9 +100,12 @@ class NodeSoftwareABC(ABC):
 
     def get_latest_release_version(self) -> Optional[str]:
         github_url = 'https://api.github.com'
-        lnd_url = github_url + f'/repos/{self.github_team}/{self.github_repo}/releases'
-        response = requests.get(lnd_url)
-        if response.status_code == 403:
+        releases_url = github_url + f'/repos/{self.github_team}/{self.github_repo}/releases'
+        try:
+            response = requests.get(releases_url)
+        except requests.exceptions.RequestException:
+            return None
+        if response.status_code != 200:
             return None
         release = response.json()[0]
         return release['tag_name']

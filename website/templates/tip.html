@@ -1,0 +1,47 @@
+{% extends 'admin/base.html' %}
+
+{% import 'macros/definition_list_macro.html' as dl %}
+
+{% block body %}
+    <script>
+        var clipboard = new ClipboardJS('.btn');
+    </script>
+    <div class="album py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <h4>
+                        Send a Tip Off-chain
+                    </h4>
+                    <form action="{{ url_for('tip.tip') }}" method="post" novalidate>
+                        {{ form.hidden_tag() }}
+                        <p>
+                            {{ form.value.label }}<br>
+                            {{ form.value(size=32) }}
+                        </p>
+                        <p>
+                            {{ form.memo.label }}<br>
+                            {{ form.memo(size=32) }}
+                        </p>
+                        <p>{{ form.generate_invoice() }}</p>
+                    </form>
+                </div>
+                <div class="col-md-4"></div>
+            </div>
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <h4>
+                        Send a Tip On-chain
+                    </h4>
+                    <p>
+                        {{ address }}
+                    </p>
+                </div>
+                <div class="col-md-4"></div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

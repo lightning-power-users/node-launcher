@@ -1,0 +1,7 @@
+{% macro navbar_item(href='#', value='' ) -%}
+    <li class="nav-item">
+        <a class="nav-link" href="{{ href }}">
+            {{ value }}
+        </a>
+    </li>
+{%- endmacro %}
