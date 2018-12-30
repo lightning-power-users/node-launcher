@@ -16,5 +16,7 @@ PyTest
 pytest-qt
 Flask-QRcode
 requests
+qrcode
+pillow
 webassets
 wtforms

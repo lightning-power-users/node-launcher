@@ -86,9 +86,8 @@ class NetworkWidget(QtWidgets.QWidget):
 
         self.cli_layout.copy_lncli.button.setEnabled(self.node_set.lnd.is_unlocked)
 
-        self.zap_layout.copy_grpc_url.button.setEnabled(self.node_set.lnd.is_unlocked)
-        self.zap_layout.copy_tls_cert_path.button.setEnabled(self.node_set.lnd.is_unlocked)
-        self.zap_layout.copy_admin_macaroon_path.button.setEnabled(self.node_set.lnd.is_unlocked)
+        self.zap_layout.open_zap_desktop_button.setEnabled(self.node_set.lnd.is_unlocked)
+        self.zap_layout.show_zap_qrcode_button.setEnabled(self.node_set.lnd.is_unlocked)
 
         self.joule_layout.copy_rest.button.setEnabled(self.node_set.lnd.is_unlocked)
         self.joule_layout.show_macaroons_button.setEnabled(self.node_set.lnd.is_unlocked)
