@@ -16,6 +16,7 @@ class HomeView(BaseView):
     @expose('/')
     @cache.memoize(timeout=600)
     def index(self):
+
         # noinspection PyBroadException
         info_cache_file = os.path.join(cache_path, 'info.json')
         try:
@@ -31,4 +32,5 @@ class HomeView(BaseView):
                     info = json.load(f)
             except FileNotFoundError:
                 info = {}
+
         return render_template('index.html', info=info)

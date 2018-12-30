@@ -169,3 +169,13 @@ class LndClient(object):
         request = ln.OpenChannelRequest(**kwargs)
         response = self.lnd_client().OpenChannel(request)
         return response
+
+    def create_invoice(self, **kwargs) -> ln.AddInvoiceResponse:
+        request = ln.Invoice(**kwargs)
+        response = self.lnd_client().AddInvoice(request)
+        return response
+
+    def get_new_address(self, address_type: str = 'NESTED_PUBKEY_HASH') -> str:
+        request = ln.NewAddressRequest(type=address_type)
+        response = self.lnd_client().NewAddress(request)
+        return response.address
