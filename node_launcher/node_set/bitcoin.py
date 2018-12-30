@@ -73,15 +73,27 @@ class Bitcoin(QProcess):
         except:
             self.file['dbcache'] = 1000
 
+        if self.file.dbcache is None:
+            # noinspection PyBroadException
+            try:
+                memory = psutil.virtual_memory()
+                free_mb = round(memory.available/1000000)
+                self.file.dbcache = free_mb
+            except:
+                self.file.dbcache = 1000
+
         self.external_process = self.find_running_node()
         if self.external_process is None:
             self.status = 'off'
             self.setup_qprocess()
+            self.zmq_block_port = get_zmq_port()
+            self.zmq_tx_port = get_zmq_port()
         else:
             self.status = 'external'
+            self.detect_zmq_ports()
 
     def setup_qprocess(self):
-        self.setProgram(self.bitcoin_software.bitcoind)
+        self.setProgram(self.software.bitcoind)
         self.setArguments(self.bitcoind_arguments)
 
         # noinspection PyUnresolvedReferences
@@ -143,9 +155,7 @@ class Bitcoin(QProcess):
         self.running = False
         return None
 
-    def detect_zmq_ports(self) -> bool:
-        if self.external_process is None:
-            return False
+    def detect_zmq_ports(self):
         ports = [c.laddr.port for c in self.external_process.connections()
                  if 18500 <= c.laddr.port <= 18600]
         ports = set(ports)
@@ -154,13 +164,12 @@ class Bitcoin(QProcess):
 {self.network} node, please close Bitcoin Core and launch it with the Node Launcher''')
         self.zmq_block_port = min(ports)
         self.zmq_tx_port = max(ports)
-        return True
 
     @property
     def bitcoind_arguments(self) -> List[str]:
         args = [
 
-            f'-datadir={self.bitcoin.file.datadir}',
+            f'-datadir={self.file.datadir}',
             '-server=1',
             '-disablewallet=1',
             f'-rpcuser={self.file.rpcuser}',
