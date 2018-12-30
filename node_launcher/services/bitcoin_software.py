@@ -7,16 +7,20 @@ from node_launcher.services.node_software import NodeSoftwareABC
 class BitcoinSoftware(NodeSoftwareABC):
     release_version = None
 
-    def __init__(self, override_directory: str = None):
+    def __init__(self, override_directory: str = None,
+                 check_for_update: bool = False):
         super().__init__(override_directory)
         self.github_team = 'bitcoin'
         self.github_repo = 'bitcoin'
-        if self.release_version is None:
+        if check_for_update and self.release_version is None:
             latest = self.get_latest_release_version()
             if latest is None:
                 self.release_version = TARGET_BITCOIN_RELEASE
             else:
                 self.release_version = latest
+        elif not check_for_update and self.release_version is None:
+            self.release_version = TARGET_BITCOIN_RELEASE
+
         self.release_version = self.release_version.replace('v', '')
 
     @property
@@ -26,6 +30,10 @@ class BitcoinSoftware(NodeSoftwareABC):
     @property
     def bitcoin_cli(self) -> str:
         return self.executable_path('bitcoin-cli')
+
+    @property
+    def bitcoind(self) -> str:
+        return self.executable_path('bitcoind')
 
     @property
     def uncompressed_directory_name(self) -> str:

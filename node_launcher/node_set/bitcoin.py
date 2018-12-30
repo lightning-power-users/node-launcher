@@ -4,6 +4,8 @@ from tempfile import NamedTemporaryFile
 from typing import Optional, List
 
 import psutil
+from PySide2.QtWidgets import QErrorMessage
+from PySide2.QtCore import QProcess, QByteArray
 
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.services.bitcoin_software import BitcoinSoftware
@@ -14,15 +16,16 @@ from node_launcher.services.hard_drives import HardDrives
 from node_launcher.utilities import get_random_password, get_zmq_port
 
 
-class Bitcoin(object):
+class Bitcoin(QProcess):
     file: ConfigurationFile
     hard_drives: HardDrives
-    process: Optional[psutil.Process]
+    external_process: Optional[psutil.Process]
     software: BitcoinSoftware
     zmq_block_port: int
     zmq_tx_port: int
 
     def __init__(self, network: str, configuration_file_path: str):
+        super().__init__()
         self.network = network
         self.hard_drives = HardDrives()
         self.process = self.find_running_node()
@@ -69,6 +72,22 @@ class Bitcoin(object):
             self.file['dbcache'] = free_mb
         except:
             self.file['dbcache'] = 1000
+
+        self.external_process = self.find_running_node()
+        if self.external_process is None:
+            self.status = 'off'
+            self.setup_qprocess()
+        else:
+            self.status = 'external'
+
+    def setup_qprocess(self):
+        self.setProgram(self.bitcoin_software.bitcoind)
+        self.setArguments(self.bitcoind_arguments)
+
+        # noinspection PyUnresolvedReferences
+        self.readyReadStandardError.connect(self.handle_error)
+        # noinspection PyUnresolvedReferences
+        self.readyReadStandardOutput.connect(self.handle_output)
 
     def set_prune(self, should_prune: bool = None):
 
@@ -125,9 +144,9 @@ class Bitcoin(object):
         return None
 
     def detect_zmq_ports(self) -> bool:
-        if self.process is None:
+        if self.external_process is None:
             return False
-        ports = [c.laddr.port for c in self.process.connections()
+        ports = [c.laddr.port for c in self.external_process.connections()
                  if 18500 <= c.laddr.port <= 18600]
         ports = set(ports)
         if len(ports) != 2:
@@ -136,6 +155,42 @@ class Bitcoin(object):
         self.zmq_block_port = min(ports)
         self.zmq_tx_port = max(ports)
         return True
+
+    @property
+    def bitcoind_arguments(self) -> List[str]:
+        args = [
+
+            f'-datadir={self.bitcoin.file.datadir}',
+            '-server=1',
+            '-disablewallet=1',
+            f'-rpcuser={self.file.rpcuser}',
+            f'-rpcpassword={self.file.rpcpassword}',
+            f'-zmqpubrawblock=tcp://127.0.0.1:{self.zmq_block_port}',
+            f'-zmqpubrawtx=tcp://127.0.0.1:{self.zmq_tx_port}'
+        ]
+        if self.file.prune:
+            if self.network == 'TESTNET':
+                prune = TESTNET_PRUNE
+            else:
+                prune = MAINNET_PRUNE
+            args += [
+                f'-prune={prune}',
+                '-txindex=0'
+            ]
+        else:
+            args += [
+                '-prune=0',
+                '-txindex=1'
+            ]
+        if self.network == 'testnet':
+            args += [
+                '-testnet=1',
+            ]
+        else:
+            args += [
+                '-testnet=0',
+            ]
+        return args
 
     def bitcoin_qt(self) -> List[str]:
         conf_arg = f'-conf={self.file.path}'
@@ -184,3 +239,22 @@ class Bitcoin(object):
             result = Popen(command, close_fds=True, shell=False)
 
         return result
+
+
+    def handle_error(self):
+        output: QByteArray = self.readAllStandardError()
+        message = output.data().decode('utf-8').strip()
+        QErrorMessage().showMessage(message)
+
+    def handle_output(self):
+        self.setCurrentReadChannel(0)
+        output: QByteArray = self.readLine()
+        message = output.data().decode('utf-8').strip()
+        while message:
+            timestamp = message.split(' ')[0]
+            message = ' '.join(message.split(' ')[1:])
+            print(message)
+            if message.startswith('Bitcoin Core version'):
+                self.state_change.emit(message)
+            output = self.readLine()
+            message = output.data().decode('utf-8').strip()
