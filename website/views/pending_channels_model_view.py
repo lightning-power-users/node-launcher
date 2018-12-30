@@ -82,29 +82,12 @@ class PendingChannelsModelView(BaseModelView):
                  page_size=None):
         node_set = NodeSet(network)
         try:
-            response = node_set.lnd_client.list_pending_channels()
-            pending_channels = []
-            pending_types = [
-                'pending_open_channels',
-                'pending_closing_channels',
-                'pending_force_closing_channels',
-                'waiting_close_channels'
-            ]
-            for pending_type in pending_types:
-                for pending_channel in getattr(response, pending_type):
-                    channel_dict = MessageToDict(pending_channel)
-                    nested_data = channel_dict.pop('channel')
-                    # noinspection PyDictCreation
-                    flat_dict = {**channel_dict, **nested_data}
-                    flat_dict['pending_type'] = pending_type
-                    pending_channel_model = PendingChannels(**flat_dict)
-                    pending_channels.append(pending_channel_model)
+            pending_channels = node_set.lnd_client.list_pending_channels()
+            return len(pending_channels), pending_channels
         except Exception as e:
             # todo add error handling
             # todo add error logging
             print(e)
-            pending_channels = []
-        return len(pending_channels), pending_channels
 
     # noinspection PyShadowingBuiltins
     def get_one(self, id):
