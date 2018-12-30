@@ -167,3 +167,5 @@ venv.bak/
 !/run-mac.spec
 /node_launcher/node_set/lnd_client/rpc.proto
 /node_launcher/node_set/lnd_client/googleapis
+/website/supervisord.conf
+/tools/remote/
