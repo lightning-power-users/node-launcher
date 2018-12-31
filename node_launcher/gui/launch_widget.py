@@ -21,6 +21,7 @@ class LaunchWidget(QtWidgets.QWidget):
 
     def __init__(self):
         super().__init__()
+        self.setWindowTitle('Node Launcher')
         self.message_box = QMessageBox(self)
         self.error_message = QErrorMessage(self)
         self.message_box.setTextFormat(Qt.RichText)

@@ -3,15 +3,17 @@ import sys
 
 
 class AssetAccess(object):
-    # noinspection PyUnresolvedReferences,PyProtectedMember
-    def __init__(self):
+
+    @property
+    def assets_directory(self):
         if getattr(sys, 'frozen', False):
-            self.assets_directory = os.path.join(sys._MEIPASS, 'assets')
+            # noinspection PyUnresolvedReferences,PyProtectedMember
+            return os.path.join(sys._MEIPASS, 'assets')
         else:
             class_file_path = os.path.realpath(__file__)
-            self.assets_directory = os.path.abspath(
-                os.path.join(class_file_path,
-                             os.path.pardir))
+            directory_path = os.path.join(class_file_path, os.path.pardir)
+            abs_directory_path = os.path.abspath(directory_path)
+            return abs_directory_path
 
     def get_asset_full_path(self, asset_name: str) -> str:
         asset_path = os.path.join(self.assets_directory, asset_name)

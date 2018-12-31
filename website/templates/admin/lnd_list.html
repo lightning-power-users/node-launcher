@@ -1,0 +1,9 @@
+{% extends 'admin/model/list.html' %}
+
+
+{% block tail_js %}
+    {{ super() }}
+    <script>
+        document.getElementById("fa_modal_window").childNodes[1].classList.add("modal-lg");
+    </script>
+{% endblock %}
