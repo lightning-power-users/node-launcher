@@ -131,7 +131,7 @@ class Lnd(object):
         return command
 
     @property
-    def lncli(self) -> List[str]:
+    def lncli(self) -> str:
         base_command = [
             f'"{self.software.lncli}"',
         ]
@@ -143,7 +143,7 @@ class Lnd(object):
             base_command.append(f'''--lnddir="{self.file['lnddir']}"''')
             base_command.append(f'--macaroonpath="{self.macaroon_path}"')
             base_command.append(f'--tlscertpath="{self.tls_cert_path}"')
-        return base_command
+        return ' '.join(base_command)
 
     @property
     def rest_url(self) -> str:

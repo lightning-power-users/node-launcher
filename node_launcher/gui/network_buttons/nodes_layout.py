@@ -1,6 +1,6 @@
 from PySide2 import QtWidgets
 
-from node_launcher.gui.components.layouts import QGridLayout
+from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.image_label import ImageLabel
 from node_launcher.gui.network_buttons.section_name import SectionName

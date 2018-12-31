@@ -34,7 +34,7 @@ class TestGuiUnitTests(object):
         qtbot.mouseClick(launch_widget.testnet_group_box.cli_layout.copy_lncli.button,
                          Qt.LeftButton)
         command = launch_widget.testnet_group_box.node_set.lnd.lncli
-        assert QClipboard().text() == ' '.join(command)
+        assert QClipboard().text() == command
 
     def test_rest_url_copy_button(self, qtbot: QTest,
                                   launch_widget: LaunchWidget):
