@@ -6,7 +6,7 @@ from PySide2.QtWidgets import QGridLayout, QMessageBox, QErrorMessage
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
 from node_launcher.exceptions import ZmqPortsNotOpenError
-from node_launcher.gui.components.tabs import Tabs
+from node_launcher.gui.tabs import Tabs
 from node_launcher.gui.data_directory import DataDirectoryBox
 from node_launcher.gui.network_buttons import NetworkWidget
 from node_launcher.services.launcher_software import LauncherSoftware

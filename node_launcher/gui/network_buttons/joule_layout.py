@@ -2,7 +2,7 @@ from PySide2 import QtWidgets
 
 from node_launcher.gui.components.copy_button import CopyButton
 from node_launcher.gui.components.layouts import QGridLayout
-from node_launcher.gui.horizontal_line import HorizontalLine
+from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.network_buttons.section_name import SectionName
 from node_launcher.gui.utilities import reveal
 from node_launcher.node_set import NodeSet

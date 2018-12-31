@@ -1,10 +1,11 @@
 from PySide2 import QtWidgets
-from PySide2.QtCore import QTimer, QThread, QThreadPool
+from PySide2.QtCore import QTimer, QThreadPool
 from PySide2.QtWidgets import QWidget, QErrorMessage
+# noinspection PyProtectedMember
 from grpc._channel import _Rendezvous
 
 from node_launcher.constants import keyring
-from node_launcher.gui.components.layouts import QGridLayout
+from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.network_buttons.cli_layout import CliLayout
 from node_launcher.gui.network_buttons.joule_layout import JouleLayout
 from node_launcher.gui.network_buttons.lnd_wallet_layout import \
@@ -52,6 +53,7 @@ class NetworkWidget(QtWidgets.QWidget):
         self.threadpool = QThreadPool()
 
         self.timer.start(1000)
+        # noinspection PyUnresolvedReferences
         self.timer.timeout.connect(self.refresh)
 
         self.refresh()
