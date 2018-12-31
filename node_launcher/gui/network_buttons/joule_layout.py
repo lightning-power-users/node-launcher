@@ -16,17 +16,20 @@ class JouleLayout(QGridLayout):
         self.node_set = node_set
         columns = 2
 
-        self.addWidget(SectionName('<a href="https://github.com/wbobeirne/joule-extension/wiki/How-to:-Install-Extension-Manually">Joule Chrome Extension</a>'), column_span=columns)
+        section_name = SectionName(
+            '<a href="https://lightningjoule.com/">Joule Chrome Extension</a>'
+        )
+        self.addWidget(section_name, column_span=columns)
 
         self.copy_rest = CopyButton('Node URL (REST)',
                                     self.node_set.lnd.rest_url)
         self.addLayout(self.copy_rest)
 
-        self.show_macaroons_button = QtWidgets.QPushButton('Show Macaroons')
+        self.show_macaroons = QtWidgets.QPushButton('Show Macaroons')
         # noinspection PyUnresolvedReferences
-        self.show_macaroons_button.clicked.connect(
+        self.show_macaroons.clicked.connect(
             lambda: reveal(self.node_set.lnd.macaroon_path)
         )
-        self.addWidget(self.show_macaroons_button, same_row=True,
+        self.addWidget(self.show_macaroons, same_row=True,
                        column=columns)
         self.addWidget(HorizontalLine(), column_span=columns)
