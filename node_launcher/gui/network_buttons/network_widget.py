@@ -92,7 +92,7 @@ class NetworkWidget(QtWidgets.QWidget):
         self.zap_layout.show_zap_qrcode_button.setEnabled(self.node_set.lnd.is_unlocked)
 
         self.joule_layout.copy_rest.button.setEnabled(self.node_set.lnd.is_unlocked)
-        self.joule_layout.show_macaroons_button.setEnabled(self.node_set.lnd.is_unlocked)
+        self.joule_layout.show_macaroons.setEnabled(self.node_set.lnd.is_unlocked)
 
     def set_unlock_state(self):
         self.lnd_wallet_layout.create_wallet_button.setDisabled(True)
