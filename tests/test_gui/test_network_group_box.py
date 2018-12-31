@@ -44,14 +44,6 @@ class TestGuiUnitTests(object):
         rest_url = launch_widget.testnet_group_box.node_set.lnd.rest_url
         assert QClipboard().text() == rest_url
 
-    def test_grpc_url_copy_button(self, qtbot: QTest,
-                                  launch_widget: LaunchWidget):
-        launch_widget.testnet_group_box.zap_layout.copy_grpc_url.button.setEnabled(True)
-        qtbot.mouseClick(launch_widget.testnet_group_box.zap_layout.copy_grpc_url.button,
-                         Qt.LeftButton)
-        rest_url = launch_widget.testnet_group_box.node_set.lnd.grpc_url
-        assert QClipboard().text() == rest_url
-
     @pytest.mark.slow
     def test_reveal_macaroons(self, qtbot: QTest, launch_widget: LaunchWidget):
         qtbot.mouseClick(launch_widget.testnet_group_box.joule_layout.show_macaroons_button,
