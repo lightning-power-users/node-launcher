@@ -29,9 +29,12 @@ class BitcoinSoftware(NodeSoftwareABC):
 
     @property
     def uncompressed_directory_name(self) -> str:
-        name = '-'.join(self.download_name.split('-')[:-1])
-        if name.count('.') == 3:
-            name = '.'.join(name.split('.')[:-1])
+        if IS_LINUX:
+            name = '-'.join(self.download_name.split('-')[0:2])
+        else:
+            name = '-'.join(self.download_name.split('-')[:-1])
+            if name.count('.') == 3:
+                name = '.'.join(name.split('.')[:-1])
         return name
 
     @property

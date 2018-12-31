@@ -9,8 +9,9 @@ from google.protobuf.json_format import MessageToDict
 from grpc._plugin_wrapping import (_AuthMetadataContext,
                                    _AuthMetadataPluginCallback)
 
-import node_launcher.node_set.lnd_client.rpc_pb2 as ln
-import node_launcher.node_set.lnd_client.rpc_pb2_grpc as lnrpc
+from . import rpc_pb2 as ln
+from . import rpc_pb2_grpc as lnrpc
+
 from node_launcher.node_set.lnd import Lnd
 from website.models import PendingChannels
 
