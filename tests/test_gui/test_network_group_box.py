@@ -46,7 +46,7 @@ class TestGuiUnitTests(object):
 
     @pytest.mark.slow
     def test_reveal_macaroons(self, qtbot: QTest, launch_widget: LaunchWidget):
-        qtbot.mouseClick(launch_widget.testnet_group_box.joule_layout.show_macaroons_button,
+        qtbot.mouseClick(launch_widget.testnet_group_box.joule_layout.show_macaroons,
                          Qt.LeftButton)
 
     @pytest.mark.slow
