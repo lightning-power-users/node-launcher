@@ -9,7 +9,7 @@ TARGET_BITCOIN_RELEASE = 'v0.17.0.1'
 TARGET_LND_RELEASE = 'v0.5.1-beta'
 
 
-class OperatingSystem(object):
+class StringConstant(object):
     def __init__(self, name: str):
         self.name = name.lower()
 
@@ -23,7 +23,19 @@ class OperatingSystem(object):
         return other.name == self.name
 
     def __ne__(self, other):
-        return other.lower() != self.name
+        return str(other).lower() != self.name
+
+
+class Network(StringConstant):
+    pass
+
+
+TESTNET: Network = Network('testnet')
+MAINNET: Network = Network('mainnet')
+
+
+class OperatingSystem(StringConstant):
+    pass
 
 
 DARWIN: OperatingSystem = OperatingSystem('darwin')
@@ -83,4 +95,4 @@ if IS_LINUX:
 # We are targeting 10 GB, so 10 - 3 = 7
 MAINNET_PRUNE = 7000
 
-TESTNET_PRUNE = 500
+TESTNET_PRUNE = 1000

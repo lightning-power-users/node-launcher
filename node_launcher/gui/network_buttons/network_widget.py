@@ -4,7 +4,7 @@ from PySide2.QtWidgets import QWidget, QErrorMessage
 # noinspection PyProtectedMember
 from grpc._channel import _Rendezvous
 
-from node_launcher.constants import keyring
+from node_launcher.constants import keyring, MAINNET, Network
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.network_buttons.cli_layout import CliLayout
 from node_launcher.gui.network_buttons.joule_layout import JouleLayout
@@ -22,8 +22,8 @@ class NetworkWidget(QtWidgets.QWidget):
     node_set: NodeSet
     timer = QTimer
 
-    def __init__(self, parent: QWidget, network: str = 'mainnet'):
-        super().__init__()
+    def __init__(self, parent: QWidget, network: Network = MAINNET):
+        super().__init__(parent)
 
         self.timer = QTimer(self.parentWidget())
 
@@ -58,28 +58,45 @@ class NetworkWidget(QtWidgets.QWidget):
 
         self.refresh()
 
+    def auto_unlock_wallet(self):
+        password = keyring.get_password(
+            service=f'lnd_{self.node_set.network}_wallet_password',
+            username=self.node_set.bitcoin.file['rpcuser'],
+        )
+        if password is not None:
+            worker = Worker(
+                fn=self.lnd_poll,
+                lnd=self.node_set.lnd,
+                password=password
+            )
+            worker.signals.result.connect(self.handle_lnd_poll)
+            self.threadpool.start(worker)
+        else:
+            self.set_unlock_state()
+
     def refresh(self):
         self.node_set.bitcoin.process = self.node_set.bitcoin.find_running_node()
         self.node_set.lnd.process = self.node_set.lnd.find_running_node()
 
-        self.nodes_layout.bitcoin_qt_button.setDisabled(self.node_set.bitcoin.running)
-        self.cli_layout.copy_bitcoin_cli.button.setEnabled(self.node_set.bitcoin.running)
+        # Can not launch Bitcoin
+        self.nodes_layout.bitcoin_qt_button.setDisabled(
+            self.node_set.bitcoin.running
+        )
+        # Can use bitcoin-cli
+        self.cli_layout.copy_bitcoin_cli.button.setEnabled(
+            self.node_set.bitcoin.running
+        )
 
-        disable_lnd_launch = self.node_set.lnd.running or not self.node_set.bitcoin.running
+        # Need to have Bitcoin running to launch LND
+        disable_lnd_launch = (self.node_set.lnd.running
+                              or not self.node_set.bitcoin.running)
         self.nodes_layout.lnd_button.setDisabled(disable_lnd_launch)
 
         if self.node_set.lnd.running and not self.node_set.lnd.is_unlocked:
-            password = keyring.get_password(
-                service=f'lnd_{self.node_set.network}_wallet_password',
-                username=self.node_set.bitcoin.file['rpcuser'],
-            )
-            if password is None:
-                password = 'fake_password_123'
-
-            worker = Worker(self.lnd_poll, lnd=self.node_set.lnd,
-                            password=password)
-            worker.signals.result.connect(self.handle_lnd_poll)
-            self.threadpool.start(worker)
+            if self.node_set.lnd.has_wallet:
+                self.auto_unlock_wallet()
+            else:
+                self.set_create_recover_state()
         elif self.node_set.lnd.running and self.node_set.lnd.is_unlocked:
             self.set_open_state()
         elif not self.node_set.lnd.running:
@@ -118,18 +135,21 @@ class NetworkWidget(QtWidgets.QWidget):
     def lnd_poll(lnd: Lnd, progress_callback, password: str):
         client = LndClient(lnd)
         try:
-            response = client.unlock(password)
+            client.unlock(password)
         except _Rendezvous as e:
             details = e.details()
             return details
 
     def handle_lnd_poll(self, details: str):
-        if 'invalid passphrase' in details:
-            self.set_unlock_state()
-        elif 'unknown service lnrpc.WalletUnlocker' in details:
+        if details is None:
+            return
+        details = details.lower()
+        if 'unknown service lnrpc.WalletUnlocker' in details:
             self.set_open_state()
         elif 'wallet not found' in details:
             self.set_create_recover_state()
+        elif 'connect failed' in details:
+            pass
         else:
             QErrorMessage(self).showMessage(details)
-            self.set_closed_state()
+            self.set_open_state()

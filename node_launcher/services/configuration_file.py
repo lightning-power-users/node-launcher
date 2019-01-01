@@ -59,8 +59,6 @@ class ConfigurationFile(dict):
         pass
 
     def write_property(self, name: str, value: str):
-        if ' ' in value and not value.startswith('"'):
-            value = f'"{value}"'
         property_string = f'{name}={value}\n'
 
         with open(self.path, 'r') as f:
