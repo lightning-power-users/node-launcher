@@ -48,14 +48,22 @@ class LndWalletLayout(QGridLayout):
 
         self.addWidget(HorizontalLine(), column_span=columns)
 
-    def unlock_wallet(self):
-        password, ok = QInputDialog.getText(self.password_dialog.parentWidget(),
-                                            f'Unlock {self.node_set.network} LND Wallet',
-                                            'Wallet Password',
-                                            QLineEdit.Password)
-
+    def password_prompt(self, title: str, label: str):
+        password, ok = QInputDialog.getText(
+            self.password_dialog,
+            title,
+            label,
+            QLineEdit.Password
+        )
         if not ok:
-            return
+            raise Exception()
+        return password
+
+    def unlock_wallet(self):
+        password = self.password_prompt(
+            title=f'Unlock {self.node_set.network} LND Wallet',
+            label='Wallet Password'
+        )
 
         try:
             self.node_set.lnd_client.unlock(wallet_password=password)
@@ -74,65 +82,27 @@ class LndWalletLayout(QGridLayout):
             username=self.node_set.bitcoin.file['rpcuser'],
             password=password)
 
-    def password_prompt(self):
-        password, ok = QInputDialog.getText(
-            self.password_dialog,
-            title,
-            f'New {password_name} Password',
-            QLineEdit.Password
-        )
-        if not ok:
-            raise Exception()
-        return password
-
     def get_new_password(self, title: str, password_name: str) -> str:
-
-        confirm_wallet_password, ok = QInputDialog.getText(
-            self.password_dialog,
-            title,
-            f'Confirm {password_name} Password',
-            QLineEdit.Password
+        new_password = self.password_prompt(
+            title=title,
+            label=f'New {password_name} Password'
         )
-        if not ok:
-            raise Exception()
+        confirm_password = self.password_prompt(
+            title=title,
+            label=f'Confirm {password_name} Password',
+        )
 
-        if new_wallet_password != confirm_wallet_password:
+        if new_password != confirm_password:
             self.error_message.showMessage('Passwords do not match, '
                                            'please try again!')
             return self.get_new_password(title, password_name)
 
-        return new_wallet_password
+        if not new_password:
+            new_password = None
 
-    def create_wallet(self):
-        new_wallet_password = self.get_new_password(
-            title=f'Create {self.node_set.network} LND Wallet',
-            password_name='LND Wallet'
-        )
-        new_seed_password, ok = QInputDialog.getText(
-            self.password_dialog,
-            f'Create {self.node_set.network} LND Wallet',
-            'New Seed Password (Optional)',
-            QLineEdit.Password
-        )
-        if not ok:
-            return
-        confirm_seed_password, ok = QInputDialog.getText(
-            self.password_dialog,
-            f'Create {self.node_set.network} LND Wallet',
-            'Confirm Seed Password (Optional)',
-            QLineEdit.Password
-        )
-        if not ok:
-            return
+        return new_password
 
-        if new_seed_password != confirm_seed_password:
-            self.error_message.showMessage('Passwords do not match, '
-                                           'please try again!')
-            return
-
-        if not new_seed_password:
-            new_seed_password = None
-
+    def generate_seed(self, new_seed_password: str):
         try:
             generate_seed_response = self.node_set.lnd_client.generate_seed(
                 seed_password=new_seed_password
@@ -144,30 +114,46 @@ class LndWalletLayout(QGridLayout):
 
         seed = generate_seed_response.cipher_seed_mnemonic
 
-        seed_text = ''.join([f'{index + 1}: {value}\n' for index, value
-                             in enumerate(seed)])
-        seed_dialog = SeedDialog()
-        seed_dialog.set_text(seed_text)
-        seed_dialog.show()
-
-        timestamp = str(time.time())
-        keyring.set_password(
-            service=f'lnd_{self.node_set.network}_wallet_password',
-            username=timestamp,
-            password=new_wallet_password
-        )
         keyring.set_password(
             service=f'lnd_{self.node_set.network}_seed',
-            username=timestamp,
-            password=seed_text
+            username=''.join(seed[0:2]),
+            password=' '.join(seed)
         )
 
         if new_seed_password is not None:
             keyring.set_password(
                 service=f'lnd_{self.node_set.network}_seed_password',
-                username=timestamp,
+                username=''.join(seed[0:2]),
                 password=new_seed_password
             )
+        return seed
+
+    def backup_seed(self, seed):
+        seed_words = [f'{index + 1}: {value}\n'
+                      for index, value in enumerate(seed)]
+        seed_text = ''.join(seed_words)
+        seed_dialog = SeedDialog(self.parentWidget())
+        seed_dialog.set_text(seed_text)
+        seed_dialog.show()
+
+    def create_wallet(self):
+        new_wallet_password = self.get_new_password(
+            title=f'Create {self.node_set.network} LND Wallet',
+            password_name='LND Wallet'
+        )
+        keyring.set_password(
+            service=f'lnd_{self.node_set.network}_wallet_password',
+            username=str(time.time()),
+            password=new_wallet_password
+        )
+
+        new_seed_password = self.get_new_password(
+            title=f'Create {self.node_set.network} LND Wallet',
+            password_name='Mnemonic Seed'
+        )
+
+        seed = self.generate_seed(new_seed_password)
+        self.backup_seed(seed)
 
         try:
             self.node_set.lnd_client.initialize_wallet(
@@ -187,49 +173,51 @@ class LndWalletLayout(QGridLayout):
         )
 
     def recover_wallet(self):
-        try:
-            new_wallet_password, ok = QInputDialog.getText(self.password_dialog,
-                                                           f'Recover {self.node_set.network} LND Wallet',
-                                                           'New Wallet Password',
-                                                           QLineEdit.Password)
-            if not ok:
-                return
+        title = f'Recover {self.node_set.network} LND Wallet'
+        new_wallet_password = self.get_new_password(
+            title=title,
+            password_name='LND Wallet'
+        )
 
-            seed_password, ok = QInputDialog.getText(self.password_dialog,
-                                                     f'Recover {self.node_set.network} LND Wallet',
-                                                     'Seed Password (Optional)',
-                                                     QLineEdit.Password)
-            if not ok:
-                return
-            if not seed_password:
-                seed_password = None
+        seed_password = self.password_prompt(
+            title=title,
+            label='Seed Password (Optional)'
+        )
 
-            seed, ok = QInputDialog.getText(self.password_dialog,
-                                            f'Recover {self.node_set.network} LND Wallet',
-                                            'Seed')
-            if not ok:
-                return
-            seed_list = seed.split(' ')
+        seed, ok = QInputDialog.getText(
+            self.password_dialog,
+            title,
+            'Mnemonic Seed (one line with spaces)'
+        )
+        if not ok:
+            raise Exception()
+        seed_list = seed.split(' ')
 
-            timestamp = str(time.time())
+        timestamp = str(time.time())
+        keyring.set_password(
+            service=f'lnd_{self.node_set.network}_wallet_password',
+            username=timestamp,
+            password=new_wallet_password
+        )
+        keyring.set_password(
+            service=f'lnd_{self.node_set.network}_seed',
+            username=timestamp,
+            password=seed
+        )
+        if seed_password is not None:
             keyring.set_password(
-                service=f'lnd_{self.node_set.network}_wallet_password',
+                service=f'lnd_{self.node_set.network}_seed_password',
                 username=timestamp,
-                password=new_wallet_password)
-            keyring.set_password(service=f'lnd_{self.node_set.network}_seed',
-                                 username=timestamp,
-                                 password=seed)
-            if seed_password is not None:
-                keyring.set_password(
-                    service=f'lnd_{self.node_set.network}_seed_password',
-                    username=timestamp,
-                    password=seed_password)
+                password=seed_password
+            )
 
+        try:
             self.node_set.lnd_client.initialize_wallet(
                 wallet_password=new_wallet_password,
                 seed=seed_list,
                 seed_password=seed_password,
-                recovery_window=10000)
+                recovery_window=10000
+            )
         except _Rendezvous as e:
             # noinspection PyProtectedMember
             self.error_message.showMessage(e._state.details)
@@ -238,4 +226,5 @@ class LndWalletLayout(QGridLayout):
         keyring.set_password(
             service=f'lnd_{self.node_set.network}_wallet_password',
             username=self.node_set.bitcoin.file['rpcuser'],
-            password=new_wallet_password)
+            password=new_wallet_password
+        )
