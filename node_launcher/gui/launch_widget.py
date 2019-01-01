@@ -4,7 +4,12 @@ from PySide2 import QtWidgets
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QGridLayout, QMessageBox, QErrorMessage
 
-from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
+from node_launcher.constants import (
+    MAINNET,
+    NODE_LAUNCHER_RELEASE,
+    TESTNET,
+    UPGRADE
+)
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.gui.tabs import Tabs
 from node_launcher.gui.data_directory import DataDirectoryBox
@@ -25,9 +30,9 @@ class LaunchWidget(QtWidgets.QWidget):
         self.error_message = QErrorMessage(self)
         self.message_box.setTextFormat(Qt.RichText)
         try:
-            self.testnet_group_box = NetworkWidget(network='testnet',
+            self.testnet_group_box = NetworkWidget(network=TESTNET,
                                                    parent=self)
-            self.mainnet_group_box = NetworkWidget(network='mainnet',
+            self.mainnet_group_box = NetworkWidget(network=MAINNET,
                                                    parent=self)
         except ZmqPortsNotOpenError as e:
             self.error_message.showMessage(str(e))
@@ -50,9 +55,16 @@ class LaunchWidget(QtWidgets.QWidget):
         latest_version = LauncherSoftware().get_latest_release_version()
         latest_major, latest_minor, latest_bugfix = latest_version.split('.')
         major, minor, bugfix = NODE_LAUNCHER_RELEASE.split('.')
+
         major_upgrade = latest_major > major
-        minor_upgrade = latest_major == major and latest_minor > minor
-        bugfix_upgrade = latest_major == major and latest_minor == minor and latest_bugfix > bugfix
+
+        minor_upgrade = (latest_major == major
+                         and latest_minor > minor)
+
+        bugfix_upgrade = (latest_major == major
+                          and latest_minor == minor
+                          and latest_bugfix > bugfix)
+
         if major_upgrade or minor_upgrade or bugfix_upgrade:
             self.message_box.setText(UPGRADE)
             self.message_box.setInformativeText(

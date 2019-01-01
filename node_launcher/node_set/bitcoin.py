@@ -8,8 +8,14 @@ import psutil
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
-from node_launcher.constants import BITCOIN_DATA_PATH, OPERATING_SYSTEM, \
-    IS_WINDOWS, TESTNET_PRUNE, MAINNET_PRUNE
+from node_launcher.constants import (
+    BITCOIN_DATA_PATH,
+    OPERATING_SYSTEM,
+    IS_WINDOWS,
+    TESTNET_PRUNE,
+    MAINNET_PRUNE,
+    Network,
+    TESTNET, MAINNET)
 from node_launcher.services.hard_drives import HardDrives
 from node_launcher.utilities import get_random_password, get_zmq_port
 
@@ -22,7 +28,7 @@ class Bitcoin(object):
     zmq_block_port: int
     zmq_tx_port: int
 
-    def __init__(self, network: str, configuration_file_path: str):
+    def __init__(self, network: Network, configuration_file_path: str):
         self.network = network
         self.hard_drives = HardDrives()
         self.process = self.find_running_node()
@@ -64,7 +70,7 @@ class Bitcoin(object):
         # noinspection PyBroadException
         try:
             memory = psutil.virtual_memory()
-            free_mb = round(memory.available/1000000)
+            free_mb = round(memory.available / 1000000)
             free_mb -= int(free_mb * .3)
             self.file['dbcache'] = free_mb
         except:
@@ -76,7 +82,7 @@ class Bitcoin(object):
             should_prune = self.hard_drives.should_prune(self.file['datadir'],
                                                          has_bitcoin=True)
         if should_prune:
-            if self.network == 'testnet':
+            if self.network == TESTNET:
                 prune = TESTNET_PRUNE
             else:
                 prune = MAINNET_PRUNE
@@ -88,7 +94,8 @@ class Bitcoin(object):
     def autoconfigure_datadir(self):
         default_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
         big_drive = self.hard_drives.get_big_drive()
-        default_is_big_enough = not self.hard_drives.should_prune(default_datadir, True)
+        default_is_big_enough = not self.hard_drives.should_prune(
+            default_datadir, True)
         default_is_biggest = self.hard_drives.is_default_partition(big_drive)
         if default_is_big_enough or default_is_biggest:
             self.file['datadir'] = default_datadir
@@ -102,7 +109,7 @@ class Bitcoin(object):
             self.file['datadir'] = default_datadir
 
     def find_running_node(self) -> Optional[psutil.Process]:
-        if self.network == 'mainnet':
+        if self.network == MAINNET:
             ports = [8333, 8332]
         else:
             ports = [18333, 18332]
@@ -147,7 +154,7 @@ class Bitcoin(object):
             conf_arg,
         ]
 
-        if self.network == 'testnet':
+        if self.network == TESTNET:
             command += [
                 '-testnet'
             ]
@@ -159,7 +166,7 @@ class Bitcoin(object):
             f'"{self.software.bitcoin_cli}"',
             f'-conf="{self.file.path}"',
         ]
-        if self.network == 'testnet':
+        if self.network == MAINNET:
             command += [
                 '-testnet'
             ]
