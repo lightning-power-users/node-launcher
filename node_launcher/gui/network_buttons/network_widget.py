@@ -75,15 +75,63 @@ class NetworkWidget(QtWidgets.QWidget):
             self.set_unlock_state()
 
     def refresh(self):
-        self.node_set.bitcoin.process = self.node_set.bitcoin.find_running_node()
-        self.node_set.lnd.process = self.node_set.lnd.find_running_node()
+        self.node_set.bitcoin.check_process()
+        self.node_set.lnd.check_process()
 
-        # Can not launch Bitcoin
-        self.nodes_layout.bitcoin_qt_button.setDisabled(
+        self.set_nodes_state()
+        if self.node_set.lnd.running and not self.node_set.lnd.is_unlocked:
+            if self.node_set.lnd.has_wallet:
+                self.auto_unlock_wallet()
+            else:
+                self.set_lnd_wallet_create_recover_state()
+        elif self.node_set.lnd.running and self.node_set.lnd.is_unlocked:
+            self.set_lnd_wallet_open_state()
+        elif not self.node_set.lnd.running:
+            self.node_set.lnd.is_unlocked = False
+            self.set_lnd_wallet_closed_state()
+        self.set_zap_state()
+        self.set_joule_state()
+        self.set_cli_state()
+
+    def set_cli_state(self):
+        self.cli_layout.copy_bitcoin_cli.button.setEnabled(
             self.node_set.bitcoin.running
         )
-        # Can use bitcoin-cli
-        self.cli_layout.copy_bitcoin_cli.button.setEnabled(
+        self.cli_layout.copy_lncli.button.setEnabled(
+            self.node_set.lnd.is_unlocked
+        )
+
+    def set_joule_state(self):
+        self.joule_layout.copy_rest.button.setEnabled(
+            self.node_set.lnd.is_unlocked
+        )
+        self.joule_layout.show_macaroons.setEnabled(
+            self.node_set.lnd.is_unlocked
+        )
+
+    def set_lnd_wallet_unlock_state(self):
+        self.lnd_wallet_layout.create_wallet_button.setDisabled(True)
+        self.lnd_wallet_layout.recover_wallet_button.setDisabled(True)
+        self.lnd_wallet_layout.unlock_wallet_button.setDisabled(False)
+
+    def set_lnd_wallet_create_recover_state(self):
+        self.lnd_wallet_layout.create_wallet_button.setDisabled(False)
+        self.lnd_wallet_layout.recover_wallet_button.setDisabled(False)
+        self.lnd_wallet_layout.unlock_wallet_button.setDisabled(True)
+
+    def set_lnd_wallet_open_state(self):
+        self.lnd_wallet_layout.create_wallet_button.setDisabled(True)
+        self.lnd_wallet_layout.recover_wallet_button.setDisabled(True)
+        self.lnd_wallet_layout.unlock_wallet_button.setDisabled(True)
+
+    def set_lnd_wallet_closed_state(self):
+        self.lnd_wallet_layout.create_wallet_button.setDisabled(True)
+        self.lnd_wallet_layout.recover_wallet_button.setDisabled(True)
+        self.lnd_wallet_layout.unlock_wallet_button.setDisabled(True)
+
+    def set_nodes_state(self):
+        # Can not launch Bitcoin
+        self.nodes_layout.bitcoin_qt_button.setDisabled(
             self.node_set.bitcoin.running
         )
 
@@ -92,44 +140,13 @@ class NetworkWidget(QtWidgets.QWidget):
                               or not self.node_set.bitcoin.running)
         self.nodes_layout.lnd_button.setDisabled(disable_lnd_launch)
 
-        if self.node_set.lnd.running and not self.node_set.lnd.is_unlocked:
-            if self.node_set.lnd.has_wallet:
-                self.auto_unlock_wallet()
-            else:
-                self.set_create_recover_state()
-        elif self.node_set.lnd.running and self.node_set.lnd.is_unlocked:
-            self.set_open_state()
-        elif not self.node_set.lnd.running:
-            self.node_set.lnd.is_unlocked = False
-            self.set_closed_state()
-
-        self.cli_layout.copy_lncli.button.setEnabled(self.node_set.lnd.is_unlocked)
-
-        self.zap_layout.open_zap_desktop_button.setEnabled(self.node_set.lnd.is_unlocked)
-        self.zap_layout.show_zap_qrcode_button.setEnabled(self.node_set.lnd.is_unlocked)
-
-        self.joule_layout.copy_rest.button.setEnabled(self.node_set.lnd.is_unlocked)
-        self.joule_layout.show_macaroons.setEnabled(self.node_set.lnd.is_unlocked)
-
-    def set_unlock_state(self):
-        self.lnd_wallet_layout.create_wallet_button.setDisabled(True)
-        self.lnd_wallet_layout.recover_wallet_button.setDisabled(True)
-        self.lnd_wallet_layout.unlock_wallet_button.setDisabled(False)
-
-    def set_create_recover_state(self):
-        self.lnd_wallet_layout.create_wallet_button.setDisabled(False)
-        self.lnd_wallet_layout.recover_wallet_button.setDisabled(False)
-        self.lnd_wallet_layout.unlock_wallet_button.setDisabled(True)
-
-    def set_open_state(self):
-        self.lnd_wallet_layout.create_wallet_button.setDisabled(True)
-        self.lnd_wallet_layout.recover_wallet_button.setDisabled(True)
-        self.lnd_wallet_layout.unlock_wallet_button.setDisabled(True)
-
-    def set_closed_state(self):
-        self.lnd_wallet_layout.create_wallet_button.setDisabled(True)
-        self.lnd_wallet_layout.recover_wallet_button.setDisabled(True)
-        self.lnd_wallet_layout.unlock_wallet_button.setDisabled(True)
+    def set_zap_state(self):
+        self.zap_layout.open_zap_desktop_button.setEnabled(
+            self.node_set.lnd.is_unlocked
+        )
+        self.zap_layout.show_zap_qrcode_button.setEnabled(
+            self.node_set.lnd.is_unlocked
+        )
 
     @staticmethod
     def lnd_poll(lnd: Lnd, progress_callback, password: str):
@@ -144,12 +161,12 @@ class NetworkWidget(QtWidgets.QWidget):
         if details is None:
             return
         details = details.lower()
-        if 'unknown service lnrpc.WalletUnlocker' in details:
-            self.set_open_state()
+        if 'unknown service lnrpc.walletunlocker' in details:
+            self.set_lnd_wallet_open_state()
         elif 'wallet not found' in details:
-            self.set_create_recover_state()
+            self.set_lnd_wallet_create_recover_state()
         elif 'connect failed' in details:
             pass
         else:
             QErrorMessage(self).showMessage(details)
-            self.set_open_state()
+            self.set_lnd_wallet_open_state()

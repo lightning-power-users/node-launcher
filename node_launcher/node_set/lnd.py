@@ -75,16 +75,24 @@ class Lnd(object):
         else:
             self.extraip = self.file['tlsextraip'].split('=')[-1]
 
+    def check_process(self):
+        if self.process is None or not self.process.is_running():
+            self.find_running_node()
+
     def find_running_node(self) -> Optional[psutil.Process]:
+        self.is_unlocked = False
+        self.running = False
+        self.process = None
         found_ports = []
         for process in psutil.process_iter():
+            if not process.is_running():
+                continue
             try:
                 process_name = process.name()
             except ZombieProcess:
                 continue
             if 'lnd' in process_name:
                 lnd_process = process
-                self.is_unlocked = False
                 self.running = True
                 try:
                     log_file = lnd_process.open_files()[0]
@@ -109,7 +117,6 @@ class Lnd(object):
                     return lnd_process
                 except AccessDenied:
                     continue
-        self.running = False
         return None
 
     @property
