@@ -31,11 +31,10 @@ class Bitcoin(object):
     def __init__(self, network: Network, configuration_file_path: str):
         self.network = network
         self.hard_drives = HardDrives()
-        self.process = self.find_running_node()
         self.software = BitcoinSoftware()
         self.file = ConfigurationFile(configuration_file_path)
-        self.process = self.find_running_node()
         self.running = False
+        self.process = None
 
         if self.file['server'] is None:
             self.file['server'] = True
@@ -76,6 +75,8 @@ class Bitcoin(object):
         except:
             self.file['dbcache'] = 1000
 
+        self.check_process()
+
     def set_prune(self, should_prune: bool = None):
 
         if should_prune is None:
@@ -108,12 +109,22 @@ class Bitcoin(object):
         else:
             self.file['datadir'] = default_datadir
 
+    def check_process(self):
+        if self.process is not None and not self.process.is_running():
+            self.process = None
+
+        if self.process is None:
+            self.running = False
+            self.process = self.find_running_node()
+
     def find_running_node(self) -> Optional[psutil.Process]:
         if self.network == MAINNET:
             ports = [8333, 8332]
         else:
             ports = [18333, 18332]
         for process in psutil.process_iter():
+            if not process.is_running():
+                continue
             # noinspection PyBroadException
             try:
                 process_name = process.name()
@@ -128,7 +139,6 @@ class Bitcoin(object):
                             return process
                 except:
                     continue
-        self.running = False
         return None
 
     def detect_zmq_ports(self) -> bool:
