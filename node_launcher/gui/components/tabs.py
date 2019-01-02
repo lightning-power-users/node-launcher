@@ -1,6 +1,6 @@
 from PySide2.QtWidgets import QTabWidget
 
-from node_launcher.gui.network_buttons import NetworkWidget
+from node_launcher.gui.network_buttons.network_widget import NetworkWidget
 
 
 class Tabs(QTabWidget):
