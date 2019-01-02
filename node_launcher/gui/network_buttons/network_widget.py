@@ -1,4 +1,3 @@
-from PySide2 import QtWidgets
 from PySide2.QtCore import QTimer, QThreadPool
 from PySide2.QtWidgets import QWidget, QErrorMessage
 # noinspection PyProtectedMember
@@ -6,19 +5,15 @@ from grpc._channel import _Rendezvous
 
 from node_launcher.constants import keyring, MAINNET, Network
 from node_launcher.gui.components.grid_layout import QGridLayout
-from node_launcher.gui.network_buttons.cli_layout import CliLayout
-from node_launcher.gui.network_buttons.joule_layout import JouleLayout
-from node_launcher.gui.network_buttons.lnd_wallet_layout import \
-    LndWalletLayout
-from node_launcher.gui.network_buttons.nodes_layout import NodesLayout
-from node_launcher.gui.network_buttons.zap_layout import ZapLayout
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.node_set import NodeSet
 from node_launcher.node_set.lnd import Lnd
 from node_launcher.node_set.lnd_client import LndClient
 
+from . import CliLayout, JouleLayout, LndWalletLayout, NodesLayout, ZapLayout
 
-class NetworkWidget(QtWidgets.QWidget):
+
+class NetworkWidget(QWidget):
     node_set: NodeSet
     timer = QTimer
 

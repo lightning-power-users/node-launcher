@@ -2,12 +2,12 @@ import sys
 
 from PySide2 import QtWidgets
 
-from node_launcher.gui.launch_widget import LaunchWidget
+from node_launcher.gui.main_widget import MainWidget
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
 
-    widget = LaunchWidget()
+    widget = MainWidget()
 
     widget.show()
 
