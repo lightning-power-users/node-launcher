@@ -110,12 +110,15 @@ class Bitcoin(object):
             self.file['datadir'] = default_datadir
 
     def check_process(self):
-        if self.process is not None and not self.process.is_running():
-            self.process = None
+        if self.process is not None:
+            if (not self.process.is_running()
+                    or self.process.status() == 'zombie'):
+                self.process = None
 
         if self.process is None:
             self.running = False
             self.process = self.find_running_node()
+            self.detect_zmq_ports()
 
     def find_running_node(self) -> Optional[psutil.Process]:
         if self.network == MAINNET:
@@ -123,7 +126,7 @@ class Bitcoin(object):
         else:
             ports = [18333, 18332]
         for process in psutil.process_iter():
-            if not process.is_running():
+            if not process.is_running() or process.status() == 'zombie':
                 continue
             # noinspection PyBroadException
             try:
@@ -152,6 +155,8 @@ class Bitcoin(object):
 {self.network} node, please close Bitcoin Core and launch it with the Node Launcher''')
         self.zmq_block_port = min(ports)
         self.zmq_tx_port = max(ports)
+        self.file['zmqpubrawblock'] = f'tcp://127.0.0.1:{self.zmq_block_port}'
+        self.file['zmqpubrawtx'] = f'tcp://127.0.0.1:{self.zmq_tx_port}'
         return True
 
     def bitcoin_qt(self) -> List[str]:

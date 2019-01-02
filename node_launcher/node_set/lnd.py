@@ -89,18 +89,18 @@ class Lnd(object):
                 continue
             try:
                 process_name = process.name()
-            except ZombieProcess:
+            except:
                 continue
             if 'lnd' in process_name:
                 lnd_process = process
-                self.running = True
                 try:
                     log_file = lnd_process.open_files()[0]
-                except IndexError:
+                except (IndexError, AccessDenied):
                     continue
                 if str(self.network) not in log_file.path:
                     continue
 
+                self.running = True
                 try:
                     is_unlocked = False
                     connections = process.connections()
