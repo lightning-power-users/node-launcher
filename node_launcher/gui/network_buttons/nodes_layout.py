@@ -30,4 +30,13 @@ class NodesLayout(QGridLayout):
 
         self.addWidget(HorizontalLine(), column=self.columns)
 
+    def set_button_state(self):
+        # Can not launch Bitcoin
+        self.bitcoin_qt_button.setDisabled(
+            self.node_set.bitcoin.running
+        )
 
+        # Need to have Bitcoin running to launch LND
+        disable_lnd_launch = (self.node_set.lnd.running
+                              or not self.node_set.bitcoin.running)
+        self.lnd_button.setDisabled(disable_lnd_launch)
