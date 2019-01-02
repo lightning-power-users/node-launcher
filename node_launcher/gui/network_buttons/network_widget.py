@@ -72,7 +72,7 @@ class NetworkWidget(QtWidgets.QWidget):
             worker.signals.result.connect(self.handle_lnd_poll)
             self.threadpool.start(worker)
         else:
-            self.set_unlock_state()
+            self.set_lnd_wallet_unlock_state()
 
     def refresh(self):
         self.node_set.bitcoin.check_process()
