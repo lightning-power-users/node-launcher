@@ -8,8 +8,8 @@ from grpc._channel import _Rendezvous
 from node_launcher.constants import keyring
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
-from node_launcher.gui.network_buttons.section_name import SectionName
-from node_launcher.gui.seed_dialog import SeedDialog
+from node_launcher.gui.components.section_name import SectionName
+from node_launcher.gui.components.seed_dialog import SeedDialog
 from node_launcher.node_set import NodeSet
 
 

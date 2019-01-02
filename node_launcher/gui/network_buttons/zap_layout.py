@@ -6,7 +6,7 @@ from node_launcher.services.lndconnect import get_deprecated_lndconnect_url, get
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
-from node_launcher.gui.network_buttons.section_name import SectionName
+from node_launcher.gui.components.section_name import SectionName
 from node_launcher.node_set import NodeSet
 
 
