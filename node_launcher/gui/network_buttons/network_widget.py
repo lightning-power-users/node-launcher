@@ -12,7 +12,7 @@ from node_launcher.gui.network_buttons.lnd_wallet_layout import \
     LndWalletLayout
 from node_launcher.gui.network_buttons.nodes_layout import NodesLayout
 from node_launcher.gui.network_buttons.zap_layout import ZapLayout
-from node_launcher.gui.thread_worker import Worker
+from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.node_set import NodeSet
 from node_launcher.node_set.lnd import Lnd
 from node_launcher.node_set.lnd_client import LndClient
