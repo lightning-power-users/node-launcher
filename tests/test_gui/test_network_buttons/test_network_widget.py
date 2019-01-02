@@ -14,28 +14,19 @@ def network_widget() -> NetworkWidget:
         parent=QWidget(),
         network=MAINNET
     )
-    network_widget.threadpool = MagicMock()
     network_widget.timer = MagicMock()
+    network_widget.node_set = MagicMock()
     return network_widget
 
 
 @patch('node_launcher.gui.network_buttons.network_widget.QTimer')
-@patch('node_launcher.gui.network_buttons.network_widget.Worker')
-@patch('node_launcher.gui.network_buttons.network_widget.QThreadPool')
-@patch('node_launcher.gui.network_buttons.network_widget.QErrorMessage')
-@patch('node_launcher.gui.network_buttons.network_widget.keyring')
 @patch('node_launcher.gui.network_buttons.network_widget.NodeSet')
 class TestNetworkWidget(object):
-    def test_auto_unlock_wallet(self,
-                                node_set_patch: MagicMock,
-                                keyring_patch: MagicMock,
-                                error_message_patch: MagicMock,
-                                thread_pool_patch: MagicMock,
-                                worker_patch: MagicMock,
-                                timer_patch: MagicMock,
-                                network_widget: NetworkWidget,
-                                qtbot: QTest):
-        network_widget.auto_unlock_wallet()
-        keyring_patch.get_password.assert_called()
-        worker_patch.assert_called()
-        network_widget.threadpool.start.assert_called()
+    def test_refresh(self,
+                     node_set_patch: MagicMock,
+                     timer_patch: MagicMock,
+                     network_widget: NetworkWidget,
+                     qtbot: QTest):
+        network_widget.refresh()
+        network_widget.node_set.bitcoin.check_process.assert_called()
+        network_widget.node_set.lnd.check_process.assert_called()
