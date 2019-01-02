@@ -1,6 +1,7 @@
 import time
 
 from PySide2 import QtWidgets
+from PySide2.QtCore import QThreadPool
 from PySide2.QtWidgets import QInputDialog, QLineEdit, QErrorMessage, QWidget
 # noinspection PyProtectedMember
 from grpc._channel import _Rendezvous
@@ -10,7 +11,10 @@ from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.section_name import SectionName
 from node_launcher.gui.components.seed_dialog import SeedDialog
+from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.node_set import NodeSet
+from node_launcher.node_set.lnd import Lnd
+from node_launcher.node_set.lnd_client import LndClient
 
 
 class LndWalletLayout(QGridLayout):
@@ -22,6 +26,8 @@ class LndWalletLayout(QGridLayout):
         self.parent = parent
         self.password_dialog = QInputDialog(self.parent)
         self.error_message = QErrorMessage(self.parent)
+
+        self.threadpool = QThreadPool()
 
         columns = 2
         self.addWidget(SectionName('LND Wallet'), column_span=columns)
@@ -47,6 +53,76 @@ class LndWalletLayout(QGridLayout):
         self.addLayout(wallet_buttons_layout, column_span=columns)
 
         self.addWidget(HorizontalLine(), column_span=columns)
+
+    def set_button_state(self):
+        if self.node_set.lnd.running and not self.node_set.lnd.is_unlocked:
+            if self.node_set.lnd.has_wallet:
+                self.set_unlock_state()
+                self.auto_unlock_wallet()
+            else:
+                self.set_create_recover_state()
+        elif self.node_set.lnd.running and self.node_set.lnd.is_unlocked:
+            self.set_open_state()
+        elif not self.node_set.lnd.running:
+            self.node_set.lnd.is_unlocked = False
+            self.set_closed_state()
+
+    def auto_unlock_wallet(self):
+        password = keyring.get_password(
+            service=f'lnd_{self.node_set.network}_wallet_password',
+            username=self.node_set.bitcoin.file['rpcuser'],
+        )
+        if password is not None:
+            worker = Worker(
+                fn=self.lnd_poll,
+                lnd=self.node_set.lnd,
+                password=password
+            )
+            worker.signals.result.connect(self.handle_lnd_poll)
+            self.threadpool.start(worker)
+
+    @staticmethod
+    def lnd_poll(lnd: Lnd, progress_callback, password: str):
+        client = LndClient(lnd)
+        try:
+            client.unlock(password)
+        except _Rendezvous as e:
+            details = e.details()
+            return details
+
+    def handle_lnd_poll(self, details: str):
+        if details is None:
+            return
+        details = details.lower()
+        if 'unknown service lnrpc.walletunlocker' in details:
+            self.lnd_wallet_layout.set_open_state()
+        elif 'wallet not found' in details:
+            self.lnd_wallet_layout.set_create_recover_state()
+        elif 'connect failed' in details:
+            pass
+        else:
+            QErrorMessage(self).showMessage(details)
+            self.lnd_wallet_layout.set_open_state()
+
+    def set_unlock_state(self):
+        self.create_wallet_button.setDisabled(True)
+        self.recover_wallet_button.setDisabled(True)
+        self.unlock_wallet_button.setDisabled(False)
+
+    def set_create_recover_state(self):
+        self.create_wallet_button.setDisabled(False)
+        self.recover_wallet_button.setDisabled(False)
+        self.unlock_wallet_button.setDisabled(True)
+
+    def set_open_state(self):
+        self.create_wallet_button.setDisabled(True)
+        self.recover_wallet_button.setDisabled(True)
+        self.unlock_wallet_button.setDisabled(True)
+
+    def set_closed_state(self):
+        self.create_wallet_button.setDisabled(True)
+        self.recover_wallet_button.setDisabled(True)
+        self.unlock_wallet_button.setDisabled(True)
 
     def password_prompt(self, title: str, label: str):
         password, ok = QInputDialog.getText(

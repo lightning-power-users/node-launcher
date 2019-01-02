@@ -31,6 +31,10 @@ class ZapLayout(QGridLayout):
 
         self.addWidget(HorizontalLine(), column_span=columns)
 
+    def set_button_state(self):
+        self.open_zap_desktop_button.setEnabled(self.node_set.lnd.is_unlocked)
+        self.show_zap_qrcode_button.setEnabled(self.node_set.lnd.is_unlocked)
+
     def open_zap_desktop(self):
         # This should soon be replaced with using the get_lndconnect_url method
         old_lndconnect_url = get_deprecated_lndconnect_url(

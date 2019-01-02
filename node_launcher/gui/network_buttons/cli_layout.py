@@ -25,3 +25,7 @@ class CliLayout(QGridLayout):
         self.addWidget(SectionName('Command Line'), column_span=columns)
         self.addLayout(self.copy_bitcoin_cli)
         self.addLayout(self.copy_lncli, same_row=True, column=columns)
+
+    def set_button_state(self):
+        self.copy_bitcoin_cli.button.setEnabled(self.node_set.bitcoin.running)
+        self.copy_lncli.button.setEnabled(self.node_set.lnd.is_unlocked)
