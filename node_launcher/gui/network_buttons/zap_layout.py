@@ -1,6 +1,8 @@
 import webbrowser
 
-from PySide2 import QtWidgets, QtGui
+from PySide2 import QtWidgets
+from PySide2.QtGui import QPixmap
+from PySide2.QtWidgets import QLabel
 
 from node_launcher.services.lndconnect import get_deprecated_lndconnect_url, \
     get_qrcode_img
@@ -57,9 +59,9 @@ class ZapLayout(QGridLayout):
         )
         qrcode_img.save('qrcode.png', 'PNG')
 
-        pixmap = QtGui.QPixmap('qrcode.png')
+        pixmap = QPixmap('qrcode.png')
         pixmap = pixmap.scaledToWidth(400)
-        self.qrcode_label = QtWidgets.QLabel()
+        self.qrcode_label = QLabel()
         self.qrcode_label.setWindowTitle('Zap QR Code')
         self.qrcode_label.resize(400, 400)
         self.qrcode_label.setPixmap(pixmap)
