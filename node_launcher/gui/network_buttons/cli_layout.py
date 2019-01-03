@@ -21,8 +21,8 @@ class CliLayout(QGridLayout):
             copy_text=self.node_set.lnd.lncli
         )
         columns = 2
-
-        self.addWidget(SectionName('Command Line'), column_span=columns)
+        self.section_name = SectionName('Command Line')
+        self.addWidget(self.section_name, column_span=columns)
         self.addLayout(self.copy_bitcoin_cli)
         self.addLayout(self.copy_lncli, same_row=True, column=columns)
 

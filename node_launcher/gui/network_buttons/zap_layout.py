@@ -2,7 +2,8 @@ import webbrowser
 
 from PySide2 import QtWidgets, QtGui
 
-from node_launcher.services.lndconnect import get_deprecated_lndconnect_url, get_qrcode_img
+from node_launcher.services.lndconnect import get_deprecated_lndconnect_url, \
+    get_qrcode_img
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
@@ -19,16 +20,18 @@ class ZapLayout(QGridLayout):
         self.node_set = node_set
         columns = 2
 
-        self.addWidget(SectionName('<a href="https://github.com/LN-Zap/zap-desktop/blob/master/README.md">Zap Desktop Wallet</a>'), column_span=columns)
+        self.section_name = SectionName(
+            '<a href="https://medium.com/lightning-power-users/easy-lightning-with-node-launcher-zap-488133edfbd">Zap Desktop Wallet</a>')
 
         self.open_zap_desktop_button = QtWidgets.QPushButton('Open Zap Desktop')
         self.open_zap_desktop_button.clicked.connect(self.open_zap_desktop)
-        self.addWidget(self.open_zap_desktop_button)
 
         self.show_zap_qrcode_button = QtWidgets.QPushButton('Show QR Code')
         self.show_zap_qrcode_button.clicked.connect(self.show_zap_qrcode)
-        self.addWidget(self.show_zap_qrcode_button, same_row=True, column=2)
 
+        self.addWidget(self.section_name, column_span=columns)
+        self.addWidget(self.open_zap_desktop_button)
+        self.addWidget(self.show_zap_qrcode_button, same_row=True, column=2)
         self.addWidget(HorizontalLine(), column_span=columns)
 
     def set_button_state(self):

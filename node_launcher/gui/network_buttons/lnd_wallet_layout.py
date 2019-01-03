@@ -95,14 +95,14 @@ class LndWalletLayout(QGridLayout):
             return
         details = details.lower()
         if 'unknown service lnrpc.walletunlocker' in details:
-            self.lnd_wallet_layout.set_open_state()
+            self.set_open_state()
         elif 'wallet not found' in details:
-            self.lnd_wallet_layout.set_create_recover_state()
+            self.set_create_recover_state()
         elif 'connect failed' in details:
             pass
         else:
             QErrorMessage(self).showMessage(details)
-            self.lnd_wallet_layout.set_open_state()
+            self.set_open_state()
 
     def set_unlock_state(self):
         self.create_wallet_button.setDisabled(True)

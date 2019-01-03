@@ -2,26 +2,25 @@ from unittest.mock import MagicMock
 
 import pytest
 from PySide2.QtCore import Qt
-from PySide2.QtGui import QClipboard
 from PySide2.QtTest import QTest
 
-from node_launcher.gui.network_buttons.cli_layout import CliLayout
+from node_launcher.constants import TESTNET
+from node_launcher.gui.network_buttons.nodes_layout import NodesLayout
 
 
 @pytest.fixture
-def cli_layout() -> CliLayout:
+def nodes_layout() -> NodesLayout:
     node_set = MagicMock()
-    node_set.bitcoin.bitcoin_cli = 'test bitcoin-cli'
-    node_set.lnd.lncli = 'test lncli'
-    cli_layout = CliLayout(node_set)
-    return cli_layout
+    node_set.network = TESTNET
+    nodes_layout = NodesLayout(node_set)
+    return nodes_layout
 
 
-class TestCliLayout(object):
-    def test_copy_bitcoin_cli(self, cli_layout: CliLayout, qtbot: QTest):
-        qtbot.mouseClick(cli_layout.copy_bitcoin_cli.button, Qt.LeftButton)
-        assert QClipboard().text() == 'test bitcoin-cli'
+class TestNodesLayout(object):
+    def test_bitcoin_qt_button(self, nodes_layout: NodesLayout, qtbot: QTest):
+        qtbot.mouseClick(nodes_layout.bitcoin_qt_button, Qt.LeftButton)
+        nodes_layout.node_set.bitcoin.launch.assert_called_once()
 
-    def test_copy_lncli(self, cli_layout: CliLayout, qtbot: QTest):
-        qtbot.mouseClick(cli_layout.copy_lncli.button, Qt.LeftButton)
-        assert QClipboard().text() == 'test lncli'
+    def test_lnd_button(self, nodes_layout: NodesLayout, qtbot: QTest):
+        qtbot.mouseClick(nodes_layout.lnd_button, Qt.LeftButton)
+        nodes_layout.node_set.lnd.launch.assert_called_once()
