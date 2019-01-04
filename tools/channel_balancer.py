@@ -260,12 +260,12 @@ class ChannelBalancer(object):
                         node.available_capacity,
                         ', '.join(txids)
                     ]
-                    if len(node.channels) == 1 and node.remote_balance > 200000:
+                    if len(node.channels) == 1 and node.remote_balance:
                         total += node.capacity
                         print(node.capacity)
                         response = lnd_client.open_channel(
                             node_pubkey_string=node.pubkey,
-                            local_funding_amount=node.capacity,
+                            local_funding_amount=max(node.capacity, 200000),
                             push_sat=0,
                             sat_per_byte=1,
                             spend_unconfirmed=True
@@ -312,7 +312,7 @@ class ChannelBalancer(object):
 if __name__ == '__main__':
     channel_balancer = ChannelBalancer()
     channel_balancer.get_channels()
-    # channel_balancer.get_google_sheet_data()
+    channel_balancer.get_google_sheet_data()
 
     # response = lnd_client.open_channel(
     #     node_pubkey_string='',
@@ -332,7 +332,7 @@ if __name__ == '__main__':
     #     print(datetime.now(), e)
 
     # channel_balancer.identify_dupes()
-    channel_balancer.reconnect()
+    # channel_balancer.reconnect()
     # while True:
     #     time.sleep(1)
     #     try:

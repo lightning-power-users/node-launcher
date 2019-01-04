@@ -171,3 +171,4 @@ venv.bak/
 /tools/remote/
 /tools/credentials.json
 /tools/secrets.py
+/tools/token.json

@@ -21,7 +21,7 @@ class LndWalletLayout(QGridLayout):
     node_set: NodeSet
 
     def __init__(self, parent: QWidget, node_set: NodeSet):
-        super(LndWalletLayout, self).__init__()
+        super(LndWalletLayout, self).__init__(parent)
         self.node_set = node_set
         self.parent = parent
         self.password_dialog = QInputDialog(self.parent)
