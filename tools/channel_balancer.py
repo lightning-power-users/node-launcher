@@ -225,7 +225,7 @@ class ChannelBalancer(object):
         from oauth2client import file, client, tools
         SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
 
-        SAMPLE_RANGE_NAME = 'Form Responses 1!A1:H'
+        SAMPLE_RANGE_NAME = 'Form Responses 1!A1:I'
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
@@ -270,15 +270,18 @@ class ChannelBalancer(object):
                             sat_per_byte=1,
                             spend_unconfirmed=True
                         )
+                        status = ''
                         try:
                             for update in response:
                                 if isinstance(update, OpenStatusUpdate):
                                     print(update)
+                                    status = 'Pending channel'
                                     break
                                 else:
                                     print(update)
                         except _Rendezvous as e:
-                            print(datetime.now(), e)
+                            status = e.details()
+                        new_row.append(status)
                 else:
                     new_row = [
                         0,
@@ -288,7 +291,7 @@ class ChannelBalancer(object):
                         ''
                     ]
                 changed = False
-                for i, _ in enumerate(new_row[:-1]):
+                for i, _ in enumerate(new_row[:-2]):
                     try:
                         if old_row[i] == '':
                             old_row[i] = 0
@@ -303,7 +306,7 @@ class ChannelBalancer(object):
                     body = dict(values=[new_row])
                     result = service.spreadsheets().values().update(
                         spreadsheetId=spreadsheet_id,
-                        range=f'Form Responses 1!D{index+2}:H',
+                        range=f'Form Responses 1!D{index+2}:I',
                         body=body,
                         valueInputOption='USER_ENTERED').execute()
                     print(result)
@@ -312,6 +315,7 @@ class ChannelBalancer(object):
 if __name__ == '__main__':
     channel_balancer = ChannelBalancer()
     channel_balancer.get_channels()
+    # channel_balancer.reconnect()
     channel_balancer.get_google_sheet_data()
 
     # response = lnd_client.open_channel(
@@ -332,7 +336,6 @@ if __name__ == '__main__':
     #     print(datetime.now(), e)
 
     # channel_balancer.identify_dupes()
-    # channel_balancer.reconnect()
     # while True:
     #     time.sleep(1)
     #     try:
