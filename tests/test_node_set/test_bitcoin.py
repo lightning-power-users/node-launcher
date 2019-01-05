@@ -20,7 +20,7 @@ class TestBitcoinConfiguration(object):
         with TemporaryDirectory() as tmpdirname:
             os.rmdir(tmpdirname)
             configuration_path = os.path.join(tmpdirname, 'bitcoin.conf')
-            bitcoin = Bitcoin(TESTNET,
+            bitcoin = Bitcoin(network=TESTNET,
                               configuration_file_path=configuration_path)
             assert os.path.isfile(bitcoin.file.path)
 
