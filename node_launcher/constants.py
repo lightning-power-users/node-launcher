@@ -5,7 +5,7 @@ from typing import Dict
 
 NODE_LAUNCHER_RELEASE = '.'.join(map(str, (5, 3, 0)))
 
-TARGET_BITCOIN_RELEASE = 'v0.17.0.1'
+TARGET_BITCOIN_RELEASE = 'v0.17.1'
 TARGET_LND_RELEASE = 'v0.5.1-beta'
 
 
