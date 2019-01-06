@@ -20,12 +20,11 @@ from node_launcher.node_set.lnd_client import LndClient
 class LndWalletLayout(QGridLayout):
     node_set: NodeSet
 
-    def __init__(self, parent: QWidget, node_set: NodeSet):
-        super(LndWalletLayout, self).__init__(parent)
+    def __init__(self, node_set: NodeSet):
+        super(LndWalletLayout, self).__init__()
         self.node_set = node_set
-        self.parent = parent
-        self.password_dialog = QInputDialog(self.parent)
-        self.error_message = QErrorMessage(self.parent)
+        self.password_dialog = QInputDialog()
+        self.error_message = QErrorMessage()
 
         self.threadpool = QThreadPool()
 

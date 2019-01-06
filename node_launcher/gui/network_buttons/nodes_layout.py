@@ -1,4 +1,5 @@
 from PySide2 import QtWidgets
+from PySide2.QtWidgets import QWidget
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine

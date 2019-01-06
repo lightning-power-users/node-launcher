@@ -1,24 +1,19 @@
-import os
-
-from PySide2.QtCore import Signal
 from PySide2.QtWidgets import (
-    QErrorMessage,
-    QFileDialog,
     QGridLayout,
     QGroupBox,
     QPushButton
 )
 
 from node_launcher.gui.data_directory import DatadirLabel, PruneWarningLabel
+from node_launcher.gui.data_directory import SelectDirectoryDialog
 from node_launcher.gui.utilities import reveal
 
 
 class DataDirectoryBox(QGroupBox):
-    new_data_directory = Signal(str)
 
     def __init__(self):
         super().__init__('Bitcoin Data Directory')
-        self.error_message = QErrorMessage(self)
+        self.file_dialog = SelectDirectoryDialog(self)
 
         self.datadir = None
 
@@ -33,9 +28,11 @@ class DataDirectoryBox(QGroupBox):
 
         self.select_directory_button = QPushButton('Select Directory')
         # noinspection PyUnresolvedReferences
-        self.select_directory_button.clicked.connect(self.file_dialog)
+        self.select_directory_button.clicked.connect(
+            lambda: self.file_dialog.select_new(current_datadir=self.datadir)
+        )
 
-        layout = QGridLayout()
+        layout = QGridLayout(self)
         layout.addWidget(self.datadir_label, 1, 1, 1, 2)
         layout.addWidget(self.prune_warning_label, 2, 1, 1, 2)
         layout.addWidget(self.show_directory_button, 3, 1)
@@ -47,18 +44,3 @@ class DataDirectoryBox(QGroupBox):
         self.datadir = datadir
         self.datadir_label.set_datadir(self.datadir)
         self.prune_warning_label.display_pruning_warning(prune)
-
-    def file_dialog(self):
-        # noinspection PyCallByClass
-        data_directory = QFileDialog.getExistingDirectory(self,
-                                                          'Select Data Directory',
-                                                          self.datadir,
-                                                          QFileDialog.ShowDirsOnly
-                                                          | QFileDialog.DontResolveSymlinks)
-        if not data_directory:
-            return
-        if not os.path.isdir(data_directory):
-            self.error_message.showMessage('Directory does not exist, please try again!')
-
-        # noinspection PyUnresolvedReferences
-        self.new_data_directory.emit(data_directory)

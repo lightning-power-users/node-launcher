@@ -11,8 +11,8 @@ class NetworkWidget(QWidget):
     node_set: NodeSet
     timer = QTimer
 
-    def __init__(self, parent: QWidget, network: Network = MAINNET):
-        super().__init__(parent)
+    def __init__(self, network: Network = MAINNET):
+        super().__init__()
 
         self.timer = QTimer(self.parentWidget())
 
@@ -24,8 +24,7 @@ class NetworkWidget(QWidget):
         self.nodes_layout = NodesLayout(node_set=self.node_set)
         layout.addLayout(self.nodes_layout, column_span=columns)
 
-        self.lnd_wallet_layout = LndWalletLayout(node_set=self.node_set,
-                                                 parent=parent)
+        self.lnd_wallet_layout = LndWalletLayout(node_set=self.node_set)
         layout.addLayout(self.lnd_wallet_layout, column_span=columns)
 
         self.zap_layout = ZapLayout(node_set=self.node_set)

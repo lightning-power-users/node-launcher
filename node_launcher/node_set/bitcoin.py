@@ -160,14 +160,20 @@ class Bitcoin(object):
         return True
 
     def bitcoin_qt(self) -> List[str]:
-        conf_arg = f'-conf={self.file.path}'
+        args = [
+            f'-conf={self.file.path}',
+            f'-datadir={self.file["datadir"]}'
+        ]
+
         if IS_WINDOWS:
-            conf_arg = f'-conf="{self.file.path}"'
+            args = [
+                f'-conf="{self.file.path}"',
+                f'-datadir="{self.file["datadir"]}"'
+            ]
 
         command = [
             self.software.bitcoin_qt,
-            conf_arg,
-        ]
+        ] + args
 
         if self.network == TESTNET:
             command += [

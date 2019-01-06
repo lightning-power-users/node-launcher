@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from PySide2.QtCore import Qt
 from PySide2.QtTest import QTest
-from PySide2.QtWidgets import QWidget
 
 from node_launcher.gui.network_buttons.lnd_wallet_layout import LndWalletLayout
 
@@ -12,7 +11,7 @@ from node_launcher.gui.network_buttons.lnd_wallet_layout import LndWalletLayout
 def lnd_wallet_layout() -> LndWalletLayout:
     node_set = MagicMock()
     node_set.network = 'mainnet'
-    lnd_wallet_layout = LndWalletLayout(QWidget(), node_set)
+    lnd_wallet_layout = LndWalletLayout(node_set)
     return lnd_wallet_layout
 
 
