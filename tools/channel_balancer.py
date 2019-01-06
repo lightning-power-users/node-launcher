@@ -1,5 +1,6 @@
 import math
 import os
+import time
 from collections import defaultdict
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -222,7 +223,7 @@ class ChannelBalancer(object):
         from oauth2client import file, client, tools
         SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
 
-        SAMPLE_RANGE_NAME = 'Form Responses 1!A1:I'
+        SAMPLE_RANGE_NAME = 'Form Responses 1!A1:J'
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
@@ -255,8 +256,10 @@ class ChannelBalancer(object):
                         node.remote_balance,
                         node.local_balance,
                         node.available_capacity,
+                        node.balance,
                         ', '.join(txids)
                     ]
+                    status = ''
                     if len(node.channels) == 1 and node.remote_balance:
                         total += node.capacity
                         print(node.pubkey, "{0:,d}".format(node.capacity))
@@ -267,7 +270,6 @@ class ChannelBalancer(object):
                             sat_per_byte=1,
                             spend_unconfirmed=True
                         )
-                        status = ''
                         try:
                             for update in response:
                                 if isinstance(update, OpenStatusUpdate):
@@ -278,9 +280,10 @@ class ChannelBalancer(object):
                                     print(update)
                         except _Rendezvous as e:
                             status = e.details()
-                        new_row.append(status)
+                    new_row.append(status)
                 else:
                     new_row = [
+                        0,
                         0,
                         0,
                         0,
@@ -292,20 +295,24 @@ class ChannelBalancer(object):
                     try:
                         if old_row[i] == '':
                             old_row[i] = 0
-                        old_value = int(float(old_row[i].replace(',', '')))
+                        old_value = int(float(str(old_row[i]).replace(',', '')))
                     except IndexError:
                         old_value = 0
 
                     if int(new_row[i]) != old_value:
                         changed = True
                         break
-                if changed:
+                if changed or True:
                     body = dict(values=[new_row])
-                    result = service.spreadsheets().values().update(
+                    try:
+                        result = service.spreadsheets().values().update(
                         spreadsheetId=spreadsheet_id,
-                        range=f'Form Responses 1!D{index+2}:I',
+                        range=f'Form Responses 1!D{index+2}:J',
                         body=body,
                         valueInputOption='USER_ENTERED').execute()
+                        time.sleep(0.5)
+                    except Exception as e:
+                        pass
 
 
 if __name__ == '__main__':
