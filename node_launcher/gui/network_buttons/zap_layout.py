@@ -2,7 +2,7 @@ import webbrowser
 
 from PySide2 import QtWidgets
 from PySide2.QtGui import QPixmap
-from PySide2.QtWidgets import QLabel, QWidget
+from PySide2.QtWidgets import QLabel
 
 from node_launcher.services.lndconnect import get_deprecated_lndconnect_url, \
     get_qrcode_img
@@ -52,7 +52,7 @@ class ZapLayout(QGridLayout):
 
     def show_zap_qrcode(self):
         qrcode_img = get_qrcode_img(
-            self.node_set.lnd.extraip,
+            self.node_set.lnd.tlsextraip,
             self.node_set.lnd.grpc_url.split(':')[1],
             self.node_set.lnd.tls_cert_path,
             self.node_set.lnd.admin_macaroon_path

@@ -70,10 +70,10 @@ class Lnd(object):
             self.grpc_port = self.file['rpclisten'].split(':')[-1]
 
         if self.file['tlsextraip'] is None:
-            self.extraip = socket.gethostbyname(socket.gethostname())
-            self.file['tlsextraip'] = f'{self.extraip}'
+            self.tlsextraip = socket.gethostbyname(socket.gethostname())
+            self.file['tlsextraip'] = f'{self.tlsextraip}'
         else:
-            self.extraip = self.file['tlsextraip'].split('=')[-1]
+            self.tlsextraip = self.file['tlsextraip'].split('=')[-1]
 
     def check_process(self):
         if self.process is None or not self.process.is_running():
