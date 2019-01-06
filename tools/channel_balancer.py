@@ -1,18 +1,15 @@
 import math
-from datetime import datetime
 import os
 from collections import defaultdict
-import time
-from typing import List, Optional, Dict
+from datetime import datetime
+from typing import Dict, List, Optional
 
 from google.protobuf.json_format import MessageToDict
 # noinspection PyProtectedMember
 from grpc._channel import _Rendezvous
 
 from node_launcher.node_set.lnd_client import LndClient
-from node_launcher.node_set.lnd_client.rpc_pb2 import NodeAddress, \
-    OpenStatusUpdate
-from tools.exceptions import OutOfFundsException
+from node_launcher.node_set.lnd_client.rpc_pb2 import OpenStatusUpdate
 from tools.secrets import spreadsheet_id
 
 network = 'mainnet'
@@ -262,7 +259,7 @@ class ChannelBalancer(object):
                     ]
                     if len(node.channels) == 1 and node.remote_balance:
                         total += node.capacity
-                        print(node.capacity)
+                        print(node.pubkey, "{0:,d}".format(node.capacity))
                         response = lnd_client.open_channel(
                             node_pubkey_string=node.pubkey,
                             local_funding_amount=max(node.capacity, 200000),
@@ -309,7 +306,6 @@ class ChannelBalancer(object):
                         range=f'Form Responses 1!D{index+2}:I',
                         body=body,
                         valueInputOption='USER_ENTERED').execute()
-                    print(result)
 
 
 if __name__ == '__main__':
