@@ -169,3 +169,6 @@ venv.bak/
 /node_launcher/node_set/lnd_client/googleapis
 /website/supervisord.conf
 /tools/remote/
+/tools/credentials.json
+/tools/secrets.py
+/tools/token.json

@@ -1,5 +1,6 @@
 from PySide2 import QtWidgets
-from PySide2.QtGui import QPainter
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QPainter, QColor
 from PySide2.QtPrintSupport import QPrinter, QPrintDialog
 from PySide2.QtWidgets import QDialog, QTextBrowser, QPushButton
 
@@ -42,3 +43,9 @@ class SeedDialog(QDialog):
 
         print_dialog = QPrintDialog(printer, self)
         print_dialog.exec_()
+
+    def set_text(self, text: str):
+        self.text.setText(text)
+        self.text.selectAll()
+        self.text.setTextColor(Qt.black)
+        self.text.setTextBackgroundColor(Qt.white)

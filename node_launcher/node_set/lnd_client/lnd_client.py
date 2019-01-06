@@ -6,6 +6,7 @@ from typing import List
 import grpc
 # noinspection PyProtectedMember,PyPackageRequirements
 from google.protobuf.json_format import MessageToDict
+# noinspection PyProtectedMember
 from grpc._plugin_wrapping import (_AuthMetadataContext,
                                    _AuthMetadataPluginCallback)
 
@@ -27,6 +28,17 @@ class LndClient(object):
         self._grpc_port = grpc_port
         self._grpc_host = grpc_host
         self._macaroon_path = macaroon_path
+
+        auth_credentials = grpc.metadata_call_credentials(self.metadata_callback)
+        credentials = grpc.composite_channel_credentials(self.get_cert_credentials(),
+                                                         auth_credentials)
+        grpc_channel = grpc.secure_channel(f'{self.grpc_host}:{self.grpc_port}',
+                                           credentials)
+        self.lnd_client = lnrpc.LightningStub(grpc_channel)
+
+        grpc_channel = grpc.secure_channel(f'{self.grpc_host}:{self.grpc_port}',
+                                           credentials=self.get_cert_credentials())
+        self.wallet_unlocker = lnrpc.WalletUnlockerStub(grpc_channel)
 
     @property
     def lnddir(self) -> str:
@@ -65,11 +77,6 @@ class LndClient(object):
         cert_credentials = grpc.ssl_channel_credentials(lnd_tls_cert)
         return cert_credentials
 
-    def wallet_unlocker(self):
-        grpc_channel = grpc.secure_channel(f'{self.grpc_host}:{self.grpc_port}',
-                                           credentials=self.get_cert_credentials())
-        return lnrpc.WalletUnlockerStub(grpc_channel)
-
     # noinspection PyUnusedLocal
     def metadata_callback(self,
                           context: _AuthMetadataPluginCallback,
@@ -81,20 +88,11 @@ class LndClient(object):
         # noinspection PyCallingNonCallable
         callback([('macaroon', macaroon)], None)
 
-    def lnd_client(self):
-        auth_credentials = grpc.metadata_call_credentials(self.metadata_callback)
-        credentials = grpc.composite_channel_credentials(self.get_cert_credentials(),
-                                                         auth_credentials)
-        grpc_channel = grpc.secure_channel(f'{self.grpc_host}:{self.grpc_port}',
-                                           credentials,
-                                           )
-        return lnrpc.LightningStub(grpc_channel)
-
     def generate_seed(self, seed_password: str = None) -> ln.GenSeedResponse:
         request = ln.GenSeedRequest()
         if seed_password is not None:
             request.aezeed_passphrase = seed_password.encode('latin1')
-        response = self.wallet_unlocker().GenSeed(request)
+        response = self.wallet_unlocker.GenSeed(request)
         return response
 
     def initialize_wallet(self, wallet_password: str,
@@ -108,45 +106,45 @@ class LndClient(object):
             request.aezeed_passphrase = seed_password.encode('latin1')
         if recovery_window is not None:
             request.recovery_window = recovery_window
-        response = self.wallet_unlocker().InitWallet(request)
+        response = self.wallet_unlocker.InitWallet(request)
         return response
 
     def unlock(self, wallet_password: str) -> ln.UnlockWalletResponse:
         request = ln.UnlockWalletRequest()
         request.wallet_password = wallet_password.encode('latin1')
-        response = self.wallet_unlocker().UnlockWallet(request)
+        response = self.wallet_unlocker.UnlockWallet(request)
         return response
 
     def get_info(self) -> ln.GetInfoResponse:
         request = ln.GetInfoRequest()
-        response = self.lnd_client().GetInfo(request, timeout=1)
+        response = self.lnd_client.GetInfo(request, timeout=1)
         return response
 
     def get_node_info(self, pub_key: str) -> ln.NodeInfo:
         request = ln.NodeInfoRequest()
         request.pub_key = pub_key
-        response = self.lnd_client().GetNodeInfo(request, timeout=1)
+        response = self.lnd_client.GetNodeInfo(request, timeout=30)
         return response
 
     def connect_peer(self, pubkey: str, host: str) -> ln.ConnectPeerResponse:
         address = ln.LightningAddress(pubkey=pubkey, host=host)
         request = ln.ConnectPeerRequest(addr=address)
-        response = self.lnd_client().ConnectPeer(request, timeout=1)
+        response = self.lnd_client.ConnectPeer(request, timeout=3)
         return response
 
     def list_peers(self) -> List[ln.Peer]:
         request = ln.ListPeersRequest()
-        response = self.lnd_client().ListPeers(request)
+        response = self.lnd_client.ListPeers(request)
         return response.peers
 
     def list_channels(self) -> List[ln.Channel]:
         request = ln.ListChannelsRequest()
-        response = self.lnd_client().ListChannels(request, timeout=1)
+        response = self.lnd_client.ListChannels(request, timeout=30)
         return response.channels
 
     def list_pending_channels(self) -> List[PendingChannels]:
         request = ln.PendingChannelsRequest()
-        response = self.lnd_client().PendingChannels(request, timeout=1)
+        response = self.lnd_client.PendingChannels(request, timeout=1)
         pending_channels = []
         pending_types = [
             'pending_open_channels',
@@ -168,15 +166,15 @@ class LndClient(object):
     def open_channel(self, **kwargs):
         kwargs['node_pubkey'] = codecs.decode(kwargs['node_pubkey_string'], 'hex')
         request = ln.OpenChannelRequest(**kwargs)
-        response = self.lnd_client().OpenChannel(request)
+        response = self.lnd_client.OpenChannel(request)
         return response
 
     def create_invoice(self, **kwargs) -> ln.AddInvoiceResponse:
         request = ln.Invoice(**kwargs)
-        response = self.lnd_client().AddInvoice(request)
+        response = self.lnd_client.AddInvoice(request)
         return response
 
     def get_new_address(self, address_type: str = 'NESTED_PUBKEY_HASH') -> str:
         request = ln.NewAddressRequest(type=address_type)
-        response = self.lnd_client().NewAddress(request)
+        response = self.lnd_client.NewAddress(request)
         return response.address

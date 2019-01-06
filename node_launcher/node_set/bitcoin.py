@@ -8,8 +8,14 @@ import psutil
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
-from node_launcher.constants import BITCOIN_DATA_PATH, OPERATING_SYSTEM, \
-    IS_WINDOWS, TESTNET_PRUNE, MAINNET_PRUNE
+from node_launcher.constants import (
+    BITCOIN_DATA_PATH,
+    OPERATING_SYSTEM,
+    IS_WINDOWS,
+    TESTNET_PRUNE,
+    MAINNET_PRUNE,
+    Network,
+    TESTNET, MAINNET)
 from node_launcher.services.hard_drives import HardDrives
 from node_launcher.utilities import get_random_password, get_zmq_port
 
@@ -22,14 +28,13 @@ class Bitcoin(object):
     zmq_block_port: int
     zmq_tx_port: int
 
-    def __init__(self, network: str, configuration_file_path: str):
+    def __init__(self, network: Network, configuration_file_path: str):
         self.network = network
         self.hard_drives = HardDrives()
-        self.process = self.find_running_node()
         self.software = BitcoinSoftware()
         self.file = ConfigurationFile(configuration_file_path)
-        self.process = self.find_running_node()
         self.running = False
+        self.process = None
 
         if self.file['server'] is None:
             self.file['server'] = True
@@ -64,11 +69,13 @@ class Bitcoin(object):
         # noinspection PyBroadException
         try:
             memory = psutil.virtual_memory()
-            free_mb = round(memory.available/1000000)
+            free_mb = round(memory.available / 1000000)
             free_mb -= int(free_mb * .3)
             self.file['dbcache'] = free_mb
         except:
             self.file['dbcache'] = 1000
+
+        self.check_process()
 
     def set_prune(self, should_prune: bool = None):
 
@@ -76,7 +83,7 @@ class Bitcoin(object):
             should_prune = self.hard_drives.should_prune(self.file['datadir'],
                                                          has_bitcoin=True)
         if should_prune:
-            if self.network == 'testnet':
+            if self.network == TESTNET:
                 prune = TESTNET_PRUNE
             else:
                 prune = MAINNET_PRUNE
@@ -88,7 +95,8 @@ class Bitcoin(object):
     def autoconfigure_datadir(self):
         default_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
         big_drive = self.hard_drives.get_big_drive()
-        default_is_big_enough = not self.hard_drives.should_prune(default_datadir, True)
+        default_is_big_enough = not self.hard_drives.should_prune(
+            default_datadir, True)
         default_is_biggest = self.hard_drives.is_default_partition(big_drive)
         if default_is_big_enough or default_is_biggest:
             self.file['datadir'] = default_datadir
@@ -101,12 +109,25 @@ class Bitcoin(object):
         else:
             self.file['datadir'] = default_datadir
 
+    def check_process(self):
+        if self.process is not None:
+            if (not self.process.is_running()
+                    or self.process.status() == 'zombie'):
+                self.process = None
+
+        if self.process is None:
+            self.running = False
+            self.process = self.find_running_node()
+            self.detect_zmq_ports()
+
     def find_running_node(self) -> Optional[psutil.Process]:
-        if self.network == 'mainnet':
+        if self.network == MAINNET:
             ports = [8333, 8332]
         else:
             ports = [18333, 18332]
         for process in psutil.process_iter():
+            if not process.is_running() or process.status() == 'zombie':
+                continue
             # noinspection PyBroadException
             try:
                 process_name = process.name()
@@ -121,7 +142,6 @@ class Bitcoin(object):
                             return process
                 except:
                     continue
-        self.running = False
         return None
 
     def detect_zmq_ports(self) -> bool:
@@ -135,19 +155,27 @@ class Bitcoin(object):
 {self.network} node, please close Bitcoin Core and launch it with the Node Launcher''')
         self.zmq_block_port = min(ports)
         self.zmq_tx_port = max(ports)
+        self.file['zmqpubrawblock'] = f'tcp://127.0.0.1:{self.zmq_block_port}'
+        self.file['zmqpubrawtx'] = f'tcp://127.0.0.1:{self.zmq_tx_port}'
         return True
 
     def bitcoin_qt(self) -> List[str]:
-        conf_arg = f'-conf={self.file.path}'
+        args = [
+            f'-conf={self.file.path}',
+            f'-datadir={self.file["datadir"]}'
+        ]
+
         if IS_WINDOWS:
-            conf_arg = f'-conf="{self.file.path}"'
+            args = [
+                f'-conf="{self.file.path}"',
+                f'-datadir="{self.file["datadir"]}"'
+            ]
 
         command = [
             self.software.bitcoin_qt,
-            conf_arg,
-        ]
+        ] + args
 
-        if self.network == 'testnet':
+        if self.network == TESTNET:
             command += [
                 '-testnet'
             ]
@@ -159,7 +187,7 @@ class Bitcoin(object):
             f'"{self.software.bitcoin_cli}"',
             f'-conf="{self.file.path}"',
         ]
-        if self.network == 'testnet':
+        if self.network == MAINNET:
             command += [
                 '-testnet'
             ]

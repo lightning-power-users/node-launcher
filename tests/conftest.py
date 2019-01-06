@@ -1,16 +1,17 @@
 import pytest
 from tempfile import NamedTemporaryFile
 
+from node_launcher.constants import Network, TESTNET
 from node_launcher.node_set.lnd import Lnd
 from node_launcher.node_set.lnd_client import LndClient
 from node_launcher.node_set import NodeSet
 from node_launcher.node_set.bitcoin import Bitcoin
-from node_launcher.gui.launch_widget import LaunchWidget
+from node_launcher.gui.main_widget import MainWidget
 
 
 @pytest.fixture
-def network() -> str:
-    return 'testnet'
+def network() -> Network:
+    return TESTNET
 
 
 @pytest.fixture
@@ -45,6 +46,6 @@ def lnd_client(lnd: Lnd) -> LndClient:
 
 
 @pytest.fixture
-def launch_widget():
-    launch_widget = LaunchWidget()
-    return launch_widget
+def main_widget():
+    main_widget = MainWidget()
+    return main_widget

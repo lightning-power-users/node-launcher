@@ -1,18 +1,16 @@
 import math
-from datetime import datetime
 import os
 from collections import defaultdict
-import time
-from typing import List, Optional, Dict
+from datetime import datetime
+from typing import Dict, List, Optional
 
 from google.protobuf.json_format import MessageToDict
 # noinspection PyProtectedMember
 from grpc._channel import _Rendezvous
 
 from node_launcher.node_set.lnd_client import LndClient
-from node_launcher.node_set.lnd_client.rpc_pb2 import NodeAddress, \
-    OpenStatusUpdate
-from tools.exceptions import OutOfFundsException
+from node_launcher.node_set.lnd_client.rpc_pb2 import OpenStatusUpdate
+from tools.secrets import spreadsheet_id
 
 network = 'mainnet'
 class_file_path = os.path.realpath(__file__)
@@ -28,9 +26,9 @@ if not os.path.exists(macaroons_path):
     os.mkdir(macaroons_path)
 
 lnd_client = LndClient(lnddir=remote_host_path,
-                            grpc_host='localhost',
-                            grpc_port=10009,
-                            macaroon_path=macaroons_path)
+                       grpc_host='localhost',
+                       grpc_port=10009,
+                       macaroon_path=macaroons_path)
 
 
 class Channel(object):
@@ -38,11 +36,13 @@ class Channel(object):
                  commit_fee: int,
                  local_balance: int = 0, remote_balance: int = 0,
                  remote_pubkey: str = None, chan_id: int = None,
+                 channel_point: str = None,
                  **kwargs):
         self.data = kwargs
         self.remote_pubkey = remote_pubkey
         if not remote_pubkey:
             self.remote_pubkey = kwargs['remote_node_pub']
+        self.channel_point = channel_point
         if chan_id is not None:
             self.chan_id = int(chan_id)
         else:
@@ -87,22 +87,30 @@ class Node(object):
     def __init__(self, pubkey: str):
         self.pubkey = pubkey
         self.channels = []
+        self.peer_info = None
+        self.info = None
         try:
             self.info = MessageToDict(lnd_client.get_node_info(pubkey))
         except _Rendezvous as e:
-            if e.details() == 'unable to find node':
+            details = e.details().lower()
+            if details == 'unable to find node':
+                pass
+            elif 'invalid byte' in details:
                 pass
             else:
                 raise
-        self.peer_info = None
 
     def add_channel(self, channel: Channel):
         if not [c for c in self.channels if c.chan_id == channel.chan_id]:
             self.channels.append(channel)
 
     @property
-    def last_update(self):
-        return datetime.fromtimestamp(self.info['node']['last_update'])
+    def last_update(self) -> Optional[datetime]:
+        if self.info is not None:
+            last_update = self.info['node'].get('last_update')
+            if last_update is not None:
+                return datetime.fromtimestamp(last_update)
+        return None
 
     @property
     def local_balance(self) -> int:
@@ -111,6 +119,10 @@ class Node(object):
     @property
     def remote_balance(self) -> int:
         return sum([c.remote_balance for c in self.channels])
+
+    @property
+    def capacity(self) -> int:
+        return sum([c.capacity for c in self.channels])
 
     @property
     def available_capacity(self) -> int:
@@ -137,16 +149,24 @@ class ChannelBalancer(object):
         self.nodes.clear()
         channels = lnd_client.list_channels()
         pending_open_channels = [c for c in lnd_client.list_pending_channels()
-                            if c['pending_type'] == 'pending_open_channels']
+                                 if
+                                 c['pending_type'] == 'pending_open_channels']
         [self.nodes[m.remote_pubkey].add_channel(Channel(**MessageToDict(m)))
          for m in channels]
         [self.nodes[m.remote_node_pub].add_channel(Channel(**m))
          for m in pending_open_channels]
 
     def reconnect(self):
+        peers = lnd_client.list_peers()
+        for peer in peers:
+            data = MessageToDict(peer)
+            node = self.nodes[data['pub_key']]
+            node.peer_info = data
         for node in self.nodes.values():
             print(node.last_update)
-            for address in node.info['node']['addresses']:
+            if node.info is None or node.peer_info is not None:
+                continue
+            for address in node.info['node'].get('addresses', []):
                 print(address['addr'])
                 try:
                     lnd_client.connect_peer(node.pubkey, address['addr'])
@@ -154,12 +174,7 @@ class ChannelBalancer(object):
                     print(e)
 
     def rebalance(self):
-        peers = lnd_client.list_peers()
         total_rebalance = 0
-        for peer in peers:
-            data = MessageToDict(peer)
-            node = self.nodes[data['pub_key']]
-            node.peer_info = data
         for node in self.nodes.values():
             if node.peer_info is None or node.balance is None:
                 continue
@@ -169,12 +184,19 @@ class ChannelBalancer(object):
                 continue
 
             rebalance_amount = node.remote_balance - node.local_balance
-            rebalance_amount = min(max(int(math.ceil(rebalance_amount / 100000.0)) * 100000 * 2, 500000), 16000000)
+            rebalance_amount = min(
+                max(int(math.ceil(rebalance_amount / 100000.0)) * 100000 * 2,
+                    500000), 16000000)
             if node.balance < 50:
                 if rebalance_amount > 100000:
                     total_rebalance += rebalance_amount
-                    print(node.pubkey, f'{rebalance_amount:,d}', node.peer_info.get('sat_recv'), node.peer_info.get('sat_sent'))
-                    response = lnd_client.open_channel(node_pubkey_string=node.pubkey, local_funding_amount=rebalance_amount, push_sat=0, sat_per_byte=5)
+                    print(node.pubkey, f'{rebalance_amount:,d}',
+                          node.peer_info.get('sat_recv'),
+                          node.peer_info.get('sat_sent'))
+                    response = lnd_client.open_channel(
+                        node_pubkey_string=node.pubkey,
+                        local_funding_amount=rebalance_amount, push_sat=0,
+                        sat_per_byte=5)
                     try:
                         for update in response:
                             if isinstance(update, OpenStatusUpdate):
@@ -194,15 +216,125 @@ class ChannelBalancer(object):
                 continue
             print(node)
 
+    def get_google_sheet_data(self):
+        from googleapiclient.discovery import build
+        from httplib2 import Http
+        from oauth2client import file, client, tools
+        SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
+
+        SAMPLE_RANGE_NAME = 'Form Responses 1!A1:I'
+        # The file token.json stores the user's access and refresh tokens, and is
+        # created automatically when the authorization flow completes for the first
+        # time.
+        store = file.Storage('token.json')
+        credentials = store.get()
+        if not credentials or credentials.invalid:
+            flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
+            credentials = tools.run_flow(flow, store)
+        service = build('sheets', 'v4', http=credentials.authorize(Http()))
+
+        # Call the Sheets API
+        sheet = service.spreadsheets()
+        result = sheet.values().get(spreadsheetId=spreadsheet_id,
+                                    range=SAMPLE_RANGE_NAME).execute()
+        values = result.get('values', [])
+
+        if not values:
+            print('No data found.')
+        else:
+            total = 0
+            for index, row in enumerate(values[1:]):
+                old_row = row[3:]
+                pubkey = row[1].split('@')[0]
+                # twitter_handle = row.get(2)
+                if pubkey in self.nodes:
+                    node = self.nodes[pubkey]
+                    txids = [c.channel_point for c in node.channels]
+                    new_row = [
+                        len(node.channels),
+                        node.remote_balance,
+                        node.local_balance,
+                        node.available_capacity,
+                        ', '.join(txids)
+                    ]
+                    if len(node.channels) == 1 and node.remote_balance:
+                        total += node.capacity
+                        print(node.pubkey, "{0:,d}".format(node.capacity))
+                        response = lnd_client.open_channel(
+                            node_pubkey_string=node.pubkey,
+                            local_funding_amount=max(node.capacity, 200000),
+                            push_sat=0,
+                            sat_per_byte=1,
+                            spend_unconfirmed=True
+                        )
+                        status = ''
+                        try:
+                            for update in response:
+                                if isinstance(update, OpenStatusUpdate):
+                                    print(update)
+                                    status = 'Pending channel'
+                                    break
+                                else:
+                                    print(update)
+                        except _Rendezvous as e:
+                            status = e.details()
+                        new_row.append(status)
+                else:
+                    new_row = [
+                        0,
+                        0,
+                        0,
+                        0,
+                        ''
+                    ]
+                changed = False
+                for i, _ in enumerate(new_row[:-2]):
+                    try:
+                        if old_row[i] == '':
+                            old_row[i] = 0
+                        old_value = int(float(old_row[i].replace(',', '')))
+                    except IndexError:
+                        old_value = 0
+
+                    if int(new_row[i]) != old_value:
+                        changed = True
+                        break
+                if changed:
+                    body = dict(values=[new_row])
+                    result = service.spreadsheets().values().update(
+                        spreadsheetId=spreadsheet_id,
+                        range=f'Form Responses 1!D{index+2}:I',
+                        body=body,
+                        valueInputOption='USER_ENTERED').execute()
+
 
 if __name__ == '__main__':
-
     channel_balancer = ChannelBalancer()
     channel_balancer.get_channels()
+    # channel_balancer.reconnect()
+    channel_balancer.get_google_sheet_data()
+
+    # response = lnd_client.open_channel(
+    #     node_pubkey_string='',
+    #     local_funding_amount=,
+    #     push_sat=0,
+    #     sat_per_byte=1,
+    #     spend_unconfirmed=True
+    # )
+    # try:
+    #     for update in response:
+    #         if isinstance(update, OpenStatusUpdate):
+    #             print(update)
+    #             break
+    #         else:
+    #             print(update)
+    # except _Rendezvous as e:
+    #     print(datetime.now(), e)
+
     # channel_balancer.identify_dupes()
-    while True:
-        time.sleep(1)
-        try:
-            channel_balancer.rebalance()
-        except OutOfFundsException:
-            continue
+    # while True:
+    #     time.sleep(1)
+    #     try:
+    #         channel_balancer.rebalance()
+    #     except OutOfFundsException:
+    #         continue

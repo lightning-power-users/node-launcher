@@ -1,9 +1,10 @@
 from PySide2 import QtWidgets
+from PySide2.QtWidgets import QWidget
 
-from node_launcher.gui.components.layouts import QGridLayout
-from node_launcher.gui.horizontal_line import HorizontalLine
-from node_launcher.gui.image_label import ImageLabel
-from node_launcher.gui.network_buttons.section_name import SectionName
+from node_launcher.gui.components.grid_layout import QGridLayout
+from node_launcher.gui.components.horizontal_line import HorizontalLine
+from node_launcher.gui.components.image_label import ImageLabel
+from node_launcher.gui.components.section_name import SectionName
 from node_launcher.node_set import NodeSet
 
 
@@ -30,4 +31,13 @@ class NodesLayout(QGridLayout):
 
         self.addWidget(HorizontalLine(), column=self.columns)
 
+    def set_button_state(self):
+        # Can not launch Bitcoin
+        self.bitcoin_qt_button.setDisabled(
+            self.node_set.bitcoin.running
+        )
 
+        # Need to have Bitcoin running to launch LND
+        disable_lnd_launch = (self.node_set.lnd.running
+                              or not self.node_set.bitcoin.running)
+        self.lnd_button.setDisabled(disable_lnd_launch)
