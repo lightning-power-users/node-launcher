@@ -16,7 +16,8 @@ from node_launcher.constants import (
     LND_DIR_PATH,
     Network,
     OPERATING_SYSTEM,
-    TESTNET, MAINNET)
+    TESTNET, MAINNET, LND_DEFAULT_PEER_PORT, LND_DEFAULT_GRPC_PORT,
+    LND_DEFAULT_REST_PORT)
 from node_launcher.services.lnd_software import LndSoftware
 from node_launcher.utilities import get_port
 
@@ -52,19 +53,28 @@ class Lnd(object):
         self.file['bitcoind.zmqpubrawtx'] = self.bitcoin.file['zmqpubrawtx']
 
         if self.file['restlisten'] is None:
-            self.rest_port = get_port(8080)
+            if self.network == TESTNET:
+                self.rest_port = get_port(LND_DEFAULT_REST_PORT + 1)
+            else:
+                self.rest_port = get_port(LND_DEFAULT_REST_PORT)
             self.file['restlisten'] = f'127.0.0.1:{self.rest_port}'
         else:
             self.rest_port = self.file['restlisten'].split(':')[-1]
 
         if self.file['listen'] is None:
-            self.node_port = get_port(9735)
+            if self.network == TESTNET:
+                self.node_port = get_port(LND_DEFAULT_PEER_PORT + 1)
+            else:
+                self.node_port = get_port(LND_DEFAULT_PEER_PORT)
             self.file['listen'] = f'127.0.0.1:{self.node_port}'
         else:
             self.node_port = self.file['listen'].split(':')[-1]
 
         if self.file['rpclisten'] is None:
-            self.grpc_port = get_port(10009)
+            if self.network == TESTNET:
+                self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT + 1)
+            else:
+                self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT)
             self.file['rpclisten'] = f'0.0.0.0:{self.grpc_port}'
         else:
             self.grpc_port = self.file['rpclisten'].split(':')[-1]

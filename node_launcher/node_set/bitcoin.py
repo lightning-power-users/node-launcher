@@ -15,7 +15,8 @@ from node_launcher.constants import (
     TESTNET_PRUNE,
     MAINNET_PRUNE,
     Network,
-    TESTNET, MAINNET)
+    TESTNET, MAINNET, BITCOIN_MAINNET_PEER_PORT, BITCOIN_MAINNET_RPC_PORT,
+    BITCOIN_TESTNET_RPC_PORT, BITCOIN_TESTNET_PEER_PORT)
 from node_launcher.services.hard_drives import HardDrives
 from node_launcher.utilities import get_random_password, get_zmq_port
 
@@ -77,6 +78,18 @@ class Bitcoin(object):
 
         self.check_process()
 
+    @property
+    def node_port(self):
+        if self.network == TESTNET:
+            return BITCOIN_TESTNET_PEER_PORT
+        return BITCOIN_MAINNET_PEER_PORT
+
+    @property
+    def rpc_port(self):
+        if self.network == TESTNET:
+            return BITCOIN_TESTNET_RPC_PORT
+        return BITCOIN_MAINNET_RPC_PORT
+
     def set_prune(self, should_prune: bool = None):
 
         if should_prune is None:
@@ -121,10 +134,6 @@ class Bitcoin(object):
             self.detect_zmq_ports()
 
     def find_running_node(self) -> Optional[psutil.Process]:
-        if self.network == MAINNET:
-            ports = [8333, 8332]
-        else:
-            ports = [18333, 18332]
         for process in psutil.process_iter():
             if not process.is_running() or process.status() == 'zombie':
                 continue
@@ -137,6 +146,7 @@ class Bitcoin(object):
                 # noinspection PyBroadException
                 try:
                     for connection in process.connections():
+                        ports = [self.rpc_port, self.node_port]
                         if connection.laddr.port in ports:
                             self.running = True
                             return process
