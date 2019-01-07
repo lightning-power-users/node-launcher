@@ -1,5 +1,6 @@
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
+from node_launcher.gui.components.section_name import SectionName
 from node_launcher.gui.components.selectable_text import SelectableText
 from node_launcher.node_set import NodeSet
 
@@ -9,8 +10,10 @@ class PortsLayout(QGridLayout):
         super(PortsLayout, self).__init__()
         self.node_set = node_set
 
-        self.network_ports = SelectableText(
-            f'Network Ports'
+        self.network_ports = SectionName(
+            f'Network Ports (for <a '
+            f'href="https://www.wikihow.com/Set-Up-Port-Forwarding-on-a-Router"'
+            f'>port forwarding</a>)'
         )
 
         self.bitcoin_network_port = SelectableText(
@@ -28,7 +31,7 @@ class PortsLayout(QGridLayout):
         self.addWidget(HorizontalLine())
 
         self.client_ports = SelectableText(
-            f'Client Ports'
+            f'Client Ports (you can lose money port forwarding these!)'
         )
         self.addWidget(self.client_ports)
 
