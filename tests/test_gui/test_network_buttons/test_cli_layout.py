@@ -5,7 +5,7 @@ from PySide2.QtCore import Qt
 from PySide2.QtGui import QClipboard
 from PySide2.QtTest import QTest
 
-from node_launcher.gui.network_buttons.cli_layout import CliLayout
+from node_launcher.gui.advanced.cli_layout import CliLayout
 
 
 @pytest.fixture
