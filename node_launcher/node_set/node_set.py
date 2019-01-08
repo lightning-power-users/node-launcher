@@ -56,3 +56,13 @@ class NodeSet(object):
             file_name = 'bitcoin-testnet.conf'
         bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
         return os.path.join(bitcoin_data_path, file_name)
+
+    def reset_tls(self):
+        was_running = self.lnd.running
+        if was_running:
+            self.lnd.stop()
+        os.remove(self.lnd_client.tls_cert_path)
+        os.remove(self.lnd_client.tls_key_path)
+        if was_running:
+            self.lnd.launch()
+        self.lnd_client.reset()

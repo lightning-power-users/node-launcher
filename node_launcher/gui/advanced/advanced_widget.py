@@ -1,8 +1,9 @@
 from PySide2.QtWidgets import QWidget
 
-from node_launcher.gui.advanced.actions_layout import ActionsLayout
+from node_launcher.gui.advanced.configuration_files_layout import ConfigurationFilesLayout
 from node_launcher.gui.advanced.cli_layout import CliLayout
 from node_launcher.gui.advanced.ports_layout import PortsLayout
+from node_launcher.gui.advanced.tls_layout import TlsLayout
 from node_launcher.gui.advanced.versions_layout import VersionsLayout
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
@@ -21,13 +22,17 @@ class AdvancedWidget(QWidget):
 
         self.versions_layout = VersionsLayout(node_set=node_set)
         self.ports_layout = PortsLayout(node_set=node_set)
-        self.actions_layout = ActionsLayout(node_set=node_set)
+        self.actions_layout = ConfigurationFilesLayout(node_set=node_set)
         self.cli_layout = CliLayout(node_set=self.node_set)
+        self.tls_layout = TlsLayout(node_set=self.node_set)
 
         self.layout.addLayout(self.versions_layout, column_span=self.columns)
         self.layout.addWidget(HorizontalLine(), column_span=self.columns)
         self.layout.addLayout(self.ports_layout, column_span=self.columns)
         self.layout.addWidget(HorizontalLine(), column_span=self.columns)
         self.layout.addLayout(self.actions_layout, column_span=self.columns)
+        self.layout.addWidget(HorizontalLine(), column_span=self.columns)
         self.layout.addLayout(self.cli_layout, column_span=self.columns)
+        self.layout.addWidget(HorizontalLine(), column_span=self.columns)
+        self.layout.addLayout(self.tls_layout, column_span=self.columns)
         self.setLayout(self.layout)

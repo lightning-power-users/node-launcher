@@ -7,8 +7,8 @@ from node_launcher.node_set.lnd_client import LndClient
 
 @pytest.fixture
 def mocked_lnd_client(lnd_client: LndClient) -> LndClient:
-    lnd_client.wallet_unlocker = MagicMock()
-    lnd_client.lnd_client = MagicMock()
+    lnd_client._wallet_unlocker = MagicMock()
+    lnd_client._lnd_client = MagicMock()
     return lnd_client
 
 
