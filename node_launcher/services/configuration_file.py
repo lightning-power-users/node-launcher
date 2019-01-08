@@ -58,6 +58,13 @@ class ConfigurationFile(dict):
     def __iter__(self):
         pass
 
+    @property
+    def directory(self):
+        directory_path = os.path.abspath(
+            os.path.join(self.path, os.pardir)
+        )
+        return directory_path
+
     def write_property(self, name: str, value: str):
         property_string = f'{name}={value}\n'
 

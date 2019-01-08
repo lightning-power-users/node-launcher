@@ -13,24 +13,17 @@ class ActionsLayout(QGridLayout):
     def __init__(self, node_set: NodeSet):
         super(ActionsLayout, self).__init__()
         self.node_set = node_set
-        columns = 2
 
         self.show_bitcoin_conf = QtWidgets.QPushButton('Show bitcoin.conf')
-        bitcoin_conf_dir = os.path.abspath(
-            os.path.join(self.node_set.bitcoin.file.path, os.pardir)
-        )
         # noinspection PyUnresolvedReferences
         self.show_bitcoin_conf.clicked.connect(
-            lambda: reveal(bitcoin_conf_dir)
+            lambda: reveal(self.node_set.bitcoin.file.directory)
         )
         self.addWidget(self.show_bitcoin_conf, column=1)
 
         self.show_lnd_conf = QtWidgets.QPushButton('Show lnd.conf')
-        lnd_conf_dir = os.path.abspath(
-            os.path.join(self.node_set.lnd.file.path, os.pardir)
-        )
         # noinspection PyUnresolvedReferences
         self.show_lnd_conf.clicked.connect(
-            lambda: reveal(lnd_conf_dir)
+            lambda: reveal(self.node_set.lnd.file.directory)
         )
         self.addWidget(self.show_lnd_conf, same_row=True, column=2)

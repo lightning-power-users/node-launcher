@@ -10,8 +10,8 @@ from node_launcher.gui.advanced.actions_layout import ActionsLayout
 @pytest.fixture
 def actions_layout() -> ActionsLayout:
     node_set = MagicMock()
-    node_set.bitcoin.file.path = '/test/bitcoin/file.conf'
-    node_set.lnd.file.path = '/test/lnd/file.conf'
+    node_set.bitcoin.file.directory = '/test/bitcoin'
+    node_set.lnd.file.directory = '/test/lnd'
     actions_layout = ActionsLayout(node_set)
     return actions_layout
 
