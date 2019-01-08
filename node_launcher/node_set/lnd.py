@@ -1,11 +1,14 @@
 import os
+import time
+from signal import SIGINT
+
 import psutil
 import socket
 from subprocess import call, Popen, PIPE
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
-from psutil import ZombieProcess, AccessDenied
+from psutil import AccessDenied
 
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
@@ -89,6 +92,14 @@ class Lnd(object):
         if self.process is None or not self.process.is_running():
             self.find_running_node()
 
+    def stop(self):
+        self.check_process()
+        self.process.send_signal(SIGINT)
+        time.sleep(0.1)
+        self.check_process()
+        if self.process is not None:
+            self.stop()
+
     def find_running_node(self) -> Optional[psutil.Process]:
         self.is_unlocked = False
         self.running = False
@@ -109,7 +120,7 @@ class Lnd(object):
                     continue
                 if str(self.network) not in log_file.path:
                     continue
-
+                self.process = lnd_process
                 self.running = True
                 try:
                     is_unlocked = False

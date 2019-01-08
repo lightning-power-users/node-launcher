@@ -28,17 +28,38 @@ class LndClient(object):
         self._grpc_port = grpc_port
         self._grpc_host = grpc_host
         self._macaroon_path = macaroon_path
+        self._lnd_client = None
+        self._wallet_unlocker = None
 
-        auth_credentials = grpc.metadata_call_credentials(self.metadata_callback)
-        credentials = grpc.composite_channel_credentials(self.get_cert_credentials(),
-                                                         auth_credentials)
+    def reset(self):
+        self._lnd_client = None
+        self._wallet_unlocker = None
+
+    @property
+    def lnd_client(self):
+        if self._lnd_client is not None:
+            return self._lnd_client
+        auth_credentials = grpc.metadata_call_credentials(
+            self.metadata_callback)
+
+        credentials = grpc.composite_channel_credentials(
+            self.get_cert_credentials(),
+            auth_credentials)
+
         grpc_channel = grpc.secure_channel(f'{self.grpc_host}:{self.grpc_port}',
                                            credentials)
-        self.lnd_client = lnrpc.LightningStub(grpc_channel)
+        self._lnd_client = lnrpc.LightningStub(grpc_channel)
+        return self._lnd_client
+
+    @property
+    def wallet_unlocker(self):
+        if self._wallet_unlocker is not None:
+            return self._wallet_unlocker
 
         grpc_channel = grpc.secure_channel(f'{self.grpc_host}:{self.grpc_port}',
                                            credentials=self.get_cert_credentials())
-        self.wallet_unlocker = lnrpc.WalletUnlockerStub(grpc_channel)
+        self._wallet_unlocker = lnrpc.WalletUnlockerStub(grpc_channel)
+        return self._wallet_unlocker
 
     @property
     def lnddir(self) -> str:
@@ -71,6 +92,10 @@ class LndClient(object):
     @property
     def tls_cert_path(self) -> str:
         return os.path.join(self.lnddir, 'tls.cert')
+
+    @property
+    def tls_key_path(self) -> str:
+        return os.path.join(self.lnddir, 'tls.key')
 
     def get_cert_credentials(self):
         lnd_tls_cert = open(self.tls_cert_path, 'rb').read()
@@ -164,7 +189,8 @@ class LndClient(object):
         return pending_channels
 
     def open_channel(self, **kwargs):
-        kwargs['node_pubkey'] = codecs.decode(kwargs['node_pubkey_string'], 'hex')
+        kwargs['node_pubkey'] = codecs.decode(kwargs['node_pubkey_string'],
+                                              'hex')
         request = ln.OpenChannelRequest(**kwargs)
         response = self.lnd_client.OpenChannel(request)
         return response
