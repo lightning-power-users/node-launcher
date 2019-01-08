@@ -32,7 +32,6 @@ class JouleLayout(QGridLayout):
         )
         self.addWidget(self.show_macaroons, same_row=True,
                        column=columns)
-        self.addWidget(HorizontalLine(), column_span=columns)
 
     def set_button_state(self):
         self.copy_rest.button.setEnabled(self.node_set.lnd.is_unlocked)
