@@ -2,7 +2,8 @@ import sys
 
 from PySide2 import QtWidgets
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QMessageBox, QErrorMessage, QVBoxLayout
+from PySide2.QtWidgets import QMessageBox, QErrorMessage, QVBoxLayout, \
+    QLineEdit, QApplication, QMainWindow
 
 from node_launcher.constants import (
     MAINNET,
@@ -94,3 +95,9 @@ class MainWidget(QtWidgets.QWidget):
             self.mainnet_group_box.node_set.bitcoin.file['datadir'],
             self.mainnet_group_box.node_set.bitcoin.file['prune']
         )
+
+    def mousePressEvent(self, event):
+        focused_widget = QApplication.focusWidget()
+        if isinstance(focused_widget, QLineEdit):
+            focused_widget.clearFocus()
+        QMainWindow.mousePressEvent(self, event)

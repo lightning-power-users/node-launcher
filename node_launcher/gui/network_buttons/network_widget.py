@@ -3,6 +3,7 @@ from PySide2.QtWidgets import QWidget
 
 from node_launcher.constants import MAINNET, Network
 from node_launcher.gui.components.grid_layout import QGridLayout
+from node_launcher.gui.network_buttons.alias_layout import AliasLayout
 from node_launcher.node_set import NodeSet
 from . import JouleLayout, LndWalletLayout, NodesLayout, ZapLayout
 
@@ -21,6 +22,17 @@ class NetworkWidget(QWidget):
         columns = 2
 
         layout = QGridLayout()
+
+        self.alias_layout = AliasLayout()
+        if self.node_set.lnd.file['alias'] is not None:
+            self.alias_layout.alias_editor.setText(
+                self.node_set.lnd.file['alias']
+            )
+        self.alias_layout.alias_editor.textEdited.connect(
+            self.set_new_alias
+        )
+        layout.addLayout(self.alias_layout)
+
         self.nodes_layout = NodesLayout(node_set=self.node_set)
         layout.addLayout(self.nodes_layout, column_span=columns)
 
@@ -49,3 +61,5 @@ class NetworkWidget(QWidget):
         self.zap_layout.set_button_state()
         self.joule_layout.set_button_state()
 
+    def set_new_alias(self, new_alias: str):
+        self.node_set.lnd.file['alias'] = new_alias
