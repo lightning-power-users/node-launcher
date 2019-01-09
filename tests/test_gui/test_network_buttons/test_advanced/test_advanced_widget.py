@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from node_launcher.gui.advanced.advanced_widget import AdvancedWidget
+from node_launcher.gui.network_buttons.advanced import AdvancedWidget
 
 
 @pytest.fixture

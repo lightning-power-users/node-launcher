@@ -5,7 +5,7 @@ from PySide2.QtTest import QTest
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, \
     TARGET_BITCOIN_RELEASE, TARGET_LND_RELEASE
-from node_launcher.gui.advanced.versions_layout import VersionsLayout
+from node_launcher.gui.network_buttons.advanced import VersionsLayout
 
 
 @pytest.fixture

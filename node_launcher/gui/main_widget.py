@@ -32,8 +32,8 @@ class MainWidget(QtWidgets.QWidget):
         self.error_message = QErrorMessage(self)
         self.message_box.setTextFormat(Qt.RichText)
         try:
-            self.testnet_group_box = NetworkWidget(network=TESTNET)
             self.mainnet_group_box = NetworkWidget(network=MAINNET)
+            self.testnet_group_box = NetworkWidget(network=TESTNET)
         except ZmqPortsNotOpenError as e:
             self.error_message.showMessage(str(e))
             self.error_message.exec_()
