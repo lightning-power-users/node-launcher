@@ -73,10 +73,38 @@ LND_DIR_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(LOCALAPPDATA, 'Lnd')
 }
 
+LND_CONF_PATH: Dict[OperatingSystem, str] = {
+    DARWIN: expanduser('~/Library/Application Support/Lnd/lnd.conf'),
+    LINUX: expanduser('~/.lnd/lnd.conf'),
+    WINDOWS: os.path.join(LOCALAPPDATA, r'Lnd\lnd.conf')
+}
+
 BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Bitcoin/'),
     LINUX: expanduser('~/.bitcoin'),
     WINDOWS: os.path.join(APPDATA, 'Bitcoin')
+}
+
+BITCOIN_CONF_PATH: Dict[OperatingSystem, str] = {
+    DARWIN: expanduser('~/Library/Application Support/Bitcoin/'),
+    LINUX: expanduser('~/.bitcoin'),
+    WINDOWS: os.path.join(APPDATA, r'Bitcoin\bitcoin.conf')
+}
+
+TOR_DATA_PATH: Dict[OperatingSystem, str] = {
+    WINDOWS: os.path.join(APPDATA, r'tor')
+}
+
+TOR_TORRC_PATH: Dict[OperatingSystem, str] = {
+    WINDOWS: os.path.join(APPDATA, r'tor\torrc')
+}
+
+TOR_PATH: Dict[OperatingSystem, str] = {
+    WINDOWS: os.path.join(LOCALAPPDATA, 'tor')
+}
+
+TOR_EXE_PATH: Dict[OperatingSystem, str] = {
+    WINDOWS: os.path.join(LOCALAPPDATA, r'tor\tor\tor.exe')
 }
 
 UPGRADE = 'Please download the latest version of the Node Launcher: ' \
