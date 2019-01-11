@@ -39,6 +39,14 @@ class NodesLayout(QGridLayout):
 
         self.addWidget(HorizontalLine(), column=self.columns)
 
+        # Tor button
+        self.tor_button = QPushButton('Tor')
+        # noinspection PyUnresolvedReferences
+        self.tor_button.clicked.connect(self.node_set.setup_tor.launch)
+        self.addWidget(self.tor_button, column=self.columns)
+
+        self.addWidget(HorizontalLine(), column=self.columns)
+
     def set_button_state(self):
         # Can not launch Bitcoin
         self.bitcoin_qt_button.setDisabled(
