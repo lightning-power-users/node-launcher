@@ -13,6 +13,7 @@ from node_launcher.constants import (
 from node_launcher.node_set.lnd_client import LndClient
 from node_launcher.node_set.setup_tor import setup_tor
 
+
 class NodeSet(object):
     lnd_client: LndClient
     bitcoin: Bitcoin
