@@ -31,6 +31,11 @@ class LndClient(object):
         self._lnd_client = None
         self._wallet_unlocker = None
 
+        self.grpc_options = [
+            ('grpc.max_receive_message_length', 33554432),
+            ('grpc.max_send_message_length', 33554432),
+        ]
+
     def reset(self):
         self._lnd_client = None
         self._wallet_unlocker = None
@@ -46,8 +51,11 @@ class LndClient(object):
             self.get_cert_credentials(),
             auth_credentials)
 
-        grpc_channel = grpc.secure_channel(f'{self.grpc_host}:{self.grpc_port}',
-                                           credentials)
+        grpc_channel = grpc.secure_channel(
+            f'{self.grpc_host}:{self.grpc_port}',
+            credentials,
+            options=self.grpc_options
+        )
         self._lnd_client = lnrpc.LightningStub(grpc_channel)
         return self._lnd_client
 
@@ -56,8 +64,10 @@ class LndClient(object):
         if self._wallet_unlocker is not None:
             return self._wallet_unlocker
 
-        grpc_channel = grpc.secure_channel(f'{self.grpc_host}:{self.grpc_port}',
-                                           credentials=self.get_cert_credentials())
+        grpc_channel = grpc.secure_channel(
+            f'{self.grpc_host}:{self.grpc_port}',
+            credentials=self.get_cert_credentials()
+        )
         self._wallet_unlocker = lnrpc.WalletUnlockerStub(grpc_channel)
         return self._wallet_unlocker
 
