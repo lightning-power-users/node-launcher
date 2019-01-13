@@ -11,7 +11,7 @@ from node_launcher.constants import (
     TESTNET
 )
 from node_launcher.node_set.lnd_client import LndClient
-from node_launcher.node_set.setup_tor import setup_tor
+from node_launcher.node_set.setup_tor import SetupTor
 
 
 class NodeSet(object):
@@ -19,7 +19,7 @@ class NodeSet(object):
     bitcoin: Bitcoin
     lnd: Lnd
     network: Network
-    setup_tor: setup_tor
+    setup_tor: SetupTor
 
     def __init__(self, network: Network):
         self.network = network
@@ -34,7 +34,7 @@ class NodeSet(object):
             bitcoin=self.bitcoin
         )
         self.lnd_client = LndClient(self.lnd)
-        self.setup_tor = setup_tor()
+        self.setup_tor = SetupTor(self)
 
     @property
     def is_testnet(self) -> bool:
