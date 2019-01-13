@@ -11,13 +11,14 @@ from node_launcher.constants import (
 
 
 from node_launcher.node_set.lnd_client import LndClient
-from node_launcher.node_set.setup_tor import setup_tor
+from node_launcher.node_set.setup_tor import SetupTor
 
 
 class NodeSet(object):
     bitcoin: Bitcoin
     lnd: Lnd
-    setup_tor: setup_tor
+
+    setup_tor: SetupTor
 
     def __init__(self):
         file_name = 'bitcoin.conf'
@@ -45,7 +46,7 @@ class NodeSet(object):
         )
 
         self.lnd_client = LndClient(self.lnd)
-        self.setup_tor = setup_tor()
+        self.setup_tor = SetupTor(self)
 
     @property
     def is_testnet(self) -> bool:

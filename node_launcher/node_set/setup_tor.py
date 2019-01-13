@@ -8,27 +8,25 @@ from urllib.request import urlopen
 from node_launcher.constants import BITCOIN_DATA_PATH, BITCOIN_CONF_PATH, TOR_DATA_PATH, \
     TOR_TORRC_PATH, LND_CONF_PATH , TOR_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS
 
-
-class setup_tor(object):
+class SetupTor(object):
+    def __init__(self, node_set):
+        self.node_set = node_set
 
     def edit_bitcoin_conf(self):
         f = open(str(BITCOIN_CONF_PATH[OPERATING_SYSTEM]) , 'a')
-        f.write('proxy=127.0.0.1:9050\n')
-        f.write('listen=1\n')
-        f.write('bind=127.0.0.1\n')
-        f.write('debug=tor\n')
+        self.node_set.bitcoin.file['proxy'] = '127.0.0.1:9050'
+        self.node_set.bitcoin.file['listen'] = '1'
+        self.node_set.bitcoin.file['bind'] = '127.0.0.1'
+        self.node_set.bitcoin.file['debug'] ='tor'
         f.close()
 
     def edit_lnd_conf(self):
         f = open(str(LND_CONF_PATH[OPERATING_SYSTEM]), 'a')
-        f.write(' \n')
-        f.write('[Application Options]\n')
-        f.write('listen=localhost\n')
-        f.write(' \n')
-        f.write('[tor]\n')
-        f.write('tor.active=1\n')
-        f.write('tor.v3=1\n')
-        f.write('tor.streamisolation=1\n')
+        self.node_set.lnd.file['listen'] = 'localhost'
+        self.node_set.lnd.file[' ']
+        self.node_set.lnd.file['tor.active'] ='1'
+        self.node_set.lnd.file['tor.v3'] = '1'
+        self.node_set.lnd.file['tor.streamisolation'] ='1'
         f.close()
 
     def downloadtor(self):
