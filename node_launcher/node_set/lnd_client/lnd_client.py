@@ -214,3 +214,9 @@ class LndClient(object):
         request = ln.NewAddressRequest(type=address_type)
         response = self.lnd_client.NewAddress(request)
         return response.address
+
+    def get_graph(self) -> ln.ChannelGraph:
+        request = ln.ChannelGraphRequest()
+        request.include_unannounced = False
+        response = self.lnd_client.DescribeGraph(request)
+        return response
