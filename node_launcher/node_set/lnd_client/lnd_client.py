@@ -164,7 +164,7 @@ class LndClient(object):
     def connect_peer(self, pubkey: str, host: str) -> ln.ConnectPeerResponse:
         address = ln.LightningAddress(pubkey=pubkey, host=host)
         request = ln.ConnectPeerRequest(addr=address)
-        response = self.lnd_client.ConnectPeer(request, timeout=3)
+        response = self.lnd_client.ConnectPeer(request, timeout=10)
         return response
 
     def list_peers(self) -> List[ln.Peer]:
@@ -179,7 +179,7 @@ class LndClient(object):
 
     def list_pending_channels(self) -> List[PendingChannels]:
         request = ln.PendingChannelsRequest()
-        response = self.lnd_client.PendingChannels(request, timeout=1)
+        response = self.lnd_client.PendingChannels(request, timeout=5)
         pending_channels = []
         pending_types = [
             'pending_open_channels',
