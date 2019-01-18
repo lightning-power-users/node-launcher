@@ -3,7 +3,6 @@ flask
 flask-admin
 flask-caching
 Flask-QRcode
-Flask-QRcode
 flask-wtf
 Frozen-Flask
 googleapis-common-protos
