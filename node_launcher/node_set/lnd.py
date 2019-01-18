@@ -1,6 +1,9 @@
 import os
 import time
 from signal import SIGINT
+from sys import platform
+import subprocess
+from threading import Thread
 
 import psutil
 import socket
@@ -38,6 +41,7 @@ class Lnd(object):
         self.network = network
         self.bitcoin = bitcoin
         self.file = ConfigurationFile(configuration_file_path)
+        self.task_list_output = None
         self.process = self.find_running_node()
         self.software = LndSoftware()
 
@@ -103,44 +107,67 @@ class Lnd(object):
         if self.process is not None:
             self.stop()
 
+    def get_task_list_output(self):
+        self.task_list_output = subprocess.check_output('tasklist')
+
     def find_running_node(self) -> Optional[psutil.Process]:
         self.is_unlocked = False
         self.running = False
         self.process = None
         found_ports = []
-        for process in psutil.process_iter():
-            if not process.is_running():
-                continue
+        lnd_processes = []
+        if platform == 'win32':
+            Thread(target=self.get_task_list_output).start()
+            if self.task_list_output is not None:
+                for line in self.task_list_output.splitlines():
+                    line_str = line.decode('utf-8')
+                    if 'lnd' in line_str:
+                        line_components = line_str.split(' ')
+                        for line_component in line_components[1:]:
+                            if line_component != '':
+                                try:
+                                    lnd_process = psutil.Process(int(line_component))
+                                except:
+                                    break
+                                lnd_processes.append(lnd_process)
+                                break
+        else:
+            for process in psutil.process_iter():
+                # noinspection PyBroadException
+                try:
+                    process_name = process.name()
+                except Exception:
+                    continue
+                if 'lnd' in process_name:
+                    lnd_processes.append(process)
+
+        from time import time
+        time_t = time()
+        for process in lnd_processes:
             try:
-                process_name = process.name()
-            except:
+                log_file = process.open_files()[0]
+            except (IndexError, AccessDenied):
                 continue
-            if 'lnd' in process_name:
-                lnd_process = process
-                try:
-                    log_file = lnd_process.open_files()[0]
-                except (IndexError, AccessDenied):
-                    continue
-                if str(self.network) not in log_file.path:
-                    continue
-                self.process = lnd_process
-                self.running = True
-                try:
-                    is_unlocked = False
-                    connections = process.connections()
-                    for connection in connections:
-                        found_ports.append((connection.laddr, connection.raddr))
-                        if 8080 <= connection.laddr.port <= 9000:
-                            self.rest_port = connection.laddr.port
-                        elif 10009 <= connection.laddr.port <= 10100:
-                            self.grpc_port = connection.laddr.port
-                        elif 9735 <= connection.laddr.port < 9800:
-                            self.node_port = connection.laddr.port
-                            is_unlocked = True
-                    self.is_unlocked = is_unlocked
-                    return lnd_process
-                except AccessDenied:
-                    continue
+            if str(self.network) not in log_file.path:
+                continue
+            self.process = process
+            self.running = True
+            try:
+                is_unlocked = False
+                connections = process.connections()
+                for connection in connections:
+                    found_ports.append((connection.laddr, connection.raddr))
+                    if 8080 <= connection.laddr.port <= 9000:
+                        self.rest_port = connection.laddr.port
+                    elif 10009 <= connection.laddr.port <= 10100:
+                        self.grpc_port = connection.laddr.port
+                    elif 9735 <= connection.laddr.port < 9800:
+                        self.node_port = connection.laddr.port
+                        is_unlocked = True
+                self.is_unlocked = is_unlocked
+                return process
+            except AccessDenied:
+                continue
         return None
 
     @property

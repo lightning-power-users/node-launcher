@@ -55,6 +55,11 @@ class MainWidget(QtWidgets.QWidget):
             testnet=self.testnet_network_widget
         )
 
+        self.tab_widgets = [self.mainnet_network_widget, self.testnet_network_widget]
+
+        self.mainnet_network_widget.start_refresh_timer()
+        self.network_grid.currentChanged.connect(self.on_tab_change)
+
         self.grid = QVBoxLayout()
         self.grid.addStretch()
         self.grid.addWidget(self.data_directory_group_box)
@@ -63,6 +68,13 @@ class MainWidget(QtWidgets.QWidget):
         self.setLayout(self.grid)
 
         self.check_version()
+
+    def on_tab_change(self, i):
+        for index, tab_widget in enumerate(self.tab_widgets):
+            if index == i:
+                tab_widget.start_refresh_timer()
+            else:
+                tab_widget.stop_refresh_timer()
 
     def check_version(self):
         latest_version = LauncherSoftware().get_latest_release_version()

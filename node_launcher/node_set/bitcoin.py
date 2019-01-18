@@ -1,7 +1,10 @@
 import os
+import subprocess
+from threading import Thread
 from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile
 from typing import Optional, List
+from sys import platform
 
 import psutil
 
@@ -36,6 +39,7 @@ class Bitcoin(object):
         self.file = ConfigurationFile(configuration_file_path)
         self.running = False
         self.process = None
+        self.task_list_output = None
 
         if self.file['server'] is None:
             self.file['server'] = True
@@ -130,28 +134,54 @@ class Bitcoin(object):
 
         if self.process is None:
             self.running = False
+
             self.process = self.find_running_node()
             self.detect_zmq_ports()
 
+    def get_task_list_output(self):
+        self.task_list_output = subprocess.check_output('tasklist')
+
     def find_running_node(self) -> Optional[psutil.Process]:
-        for process in psutil.process_iter():
+        bitcoin_processes = []
+        if platform == 'win32':
+            Thread(target=self.get_task_list_output).start()
+            if self.task_list_output is not None:
+                for line in self.task_list_output.splitlines():
+                    line_str = line.decode('utf-8')
+                    if 'bitcoin' in line_str:
+                        line_components = line_str.split(' ')
+                        for line_component in line_components[1:]:
+                            if line_component != '':
+                                try:
+                                    bitcoin_process = psutil.Process(int(line_component))
+                                except Exception:
+                                    break
+                                bitcoin_processes.append(bitcoin_process)
+                                break
+            else:
+                return None
+        else:
+            for process in psutil.process_iter():
+                # noinspection PyBroadException
+                try:
+                    process_name = process.name()
+                except Exception:
+                    continue
+                if 'bitcoin' in process_name:
+                    bitcoin_processes.append(process)
+
+        for process in bitcoin_processes:
             if not process.is_running() or process.status() == 'zombie':
                 continue
             # noinspection PyBroadException
             try:
-                process_name = process.name()
-            except:
+                for connection in process.connections():
+                    ports = [self.rpc_port, self.node_port]
+                    if connection.laddr.port in ports:
+                        self.running = True
+                        return process
+            except Exception:
                 continue
-            if 'bitcoin' in process_name:
-                # noinspection PyBroadException
-                try:
-                    for connection in process.connections():
-                        ports = [self.rpc_port, self.node_port]
-                        if connection.laddr.port in ports:
-                            self.running = True
-                            return process
-                except:
-                    continue
         return None
 
     def detect_zmq_ports(self) -> bool:
