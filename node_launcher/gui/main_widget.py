@@ -2,7 +2,8 @@ import sys
 
 from PySide2 import QtWidgets
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QMessageBox, QErrorMessage, QVBoxLayout
+from PySide2.QtWidgets import QMessageBox, QErrorMessage, QVBoxLayout, \
+    QLineEdit, QApplication, QMainWindow
 
 from node_launcher.constants import (
     MAINNET,
@@ -21,19 +22,19 @@ class MainWidget(QtWidgets.QWidget):
     data_directory_group_box: DataDirectoryBox
     error_message: QErrorMessage
     grid: QVBoxLayout
-    mainnet_group_box: NetworkWidget
+    mainnet_network_widget: NetworkWidget
     network_grid: Tabs
-    testnet_group_box: NetworkWidget
+    testnet_network_widget: NetworkWidget
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Node Launcher')
         self.message_box = QMessageBox(self)
-        self.error_message = QErrorMessage(self)
         self.message_box.setTextFormat(Qt.RichText)
+        self.error_message = QErrorMessage(self)
         try:
-            self.testnet_group_box = NetworkWidget(network=TESTNET)
-            self.mainnet_group_box = NetworkWidget(network=MAINNET)
+            self.mainnet_network_widget = NetworkWidget(network=MAINNET)
+            self.testnet_network_widget = NetworkWidget(network=TESTNET)
         except ZmqPortsNotOpenError as e:
             self.error_message.showMessage(str(e))
             self.error_message.exec_()
@@ -44,14 +45,14 @@ class MainWidget(QtWidgets.QWidget):
             self.change_datadir
         )
         self.data_directory_group_box.set_datadir(
-            self.mainnet_group_box.node_set.bitcoin.file['datadir'],
-            self.mainnet_group_box.node_set.bitcoin.file['prune']
+            self.mainnet_network_widget.node_set.bitcoin.file['datadir'],
+            self.mainnet_network_widget.node_set.bitcoin.file['prune']
         )
 
         self.network_grid = Tabs(
             self,
-            mainnet=self.mainnet_group_box,
-            testnet=self.testnet_group_box
+            mainnet=self.mainnet_network_widget,
+            testnet=self.testnet_network_widget
         )
 
         self.grid = QVBoxLayout()
@@ -86,11 +87,17 @@ class MainWidget(QtWidgets.QWidget):
             self.message_box.exec_()
 
     def change_datadir(self, new_datadir: str):
-        self.mainnet_group_box.node_set.bitcoin.file['datadir'] = new_datadir
-        self.testnet_group_box.node_set.bitcoin.file['datadir'] = new_datadir
-        self.mainnet_group_box.node_set.bitcoin.set_prune()
-        self.testnet_group_box.node_set.bitcoin.set_prune()
+        self.mainnet_network_widget.node_set.bitcoin.file['datadir'] = new_datadir
+        self.testnet_network_widget.node_set.bitcoin.file['datadir'] = new_datadir
+        self.mainnet_network_widget.node_set.bitcoin.set_prune()
+        self.testnet_network_widget.node_set.bitcoin.set_prune()
         self.data_directory_group_box.set_datadir(
-            self.mainnet_group_box.node_set.bitcoin.file['datadir'],
-            self.mainnet_group_box.node_set.bitcoin.file['prune']
+            self.mainnet_network_widget.node_set.bitcoin.file['datadir'],
+            self.mainnet_network_widget.node_set.bitcoin.file['prune']
         )
+
+    def mousePressEvent(self, event):
+        focused_widget = QApplication.focusWidget()
+        if isinstance(focused_widget, QLineEdit):
+            focused_widget.clearFocus()
+        QMainWindow.mousePressEvent(self, event)

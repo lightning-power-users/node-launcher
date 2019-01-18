@@ -31,6 +31,11 @@ class LndClient(object):
         self._lnd_client = None
         self._wallet_unlocker = None
 
+        self.grpc_options = [
+            ('grpc.max_receive_message_length', 33554432),
+            ('grpc.max_send_message_length', 33554432),
+        ]
+
     def reset(self):
         self._lnd_client = None
         self._wallet_unlocker = None
@@ -46,8 +51,11 @@ class LndClient(object):
             self.get_cert_credentials(),
             auth_credentials)
 
-        grpc_channel = grpc.secure_channel(f'{self.grpc_host}:{self.grpc_port}',
-                                           credentials)
+        grpc_channel = grpc.secure_channel(
+            f'{self.grpc_host}:{self.grpc_port}',
+            credentials,
+            options=self.grpc_options
+        )
         self._lnd_client = lnrpc.LightningStub(grpc_channel)
         return self._lnd_client
 
@@ -56,8 +64,10 @@ class LndClient(object):
         if self._wallet_unlocker is not None:
             return self._wallet_unlocker
 
-        grpc_channel = grpc.secure_channel(f'{self.grpc_host}:{self.grpc_port}',
-                                           credentials=self.get_cert_credentials())
+        grpc_channel = grpc.secure_channel(
+            f'{self.grpc_host}:{self.grpc_port}',
+            credentials=self.get_cert_credentials()
+        )
         self._wallet_unlocker = lnrpc.WalletUnlockerStub(grpc_channel)
         return self._wallet_unlocker
 
@@ -154,7 +164,7 @@ class LndClient(object):
     def connect_peer(self, pubkey: str, host: str) -> ln.ConnectPeerResponse:
         address = ln.LightningAddress(pubkey=pubkey, host=host)
         request = ln.ConnectPeerRequest(addr=address)
-        response = self.lnd_client.ConnectPeer(request, timeout=3)
+        response = self.lnd_client.ConnectPeer(request, timeout=10)
         return response
 
     def list_peers(self) -> List[ln.Peer]:
@@ -169,7 +179,7 @@ class LndClient(object):
 
     def list_pending_channels(self) -> List[PendingChannels]:
         request = ln.PendingChannelsRequest()
-        response = self.lnd_client.PendingChannels(request, timeout=1)
+        response = self.lnd_client.PendingChannels(request, timeout=5)
         pending_channels = []
         pending_types = [
             'pending_open_channels',
@@ -204,3 +214,9 @@ class LndClient(object):
         request = ln.NewAddressRequest(type=address_type)
         response = self.lnd_client.NewAddress(request)
         return response.address
+
+    def get_graph(self) -> ln.ChannelGraph:
+        request = ln.ChannelGraphRequest()
+        request.include_unannounced = False
+        response = self.lnd_client.DescribeGraph(request)
+        return response

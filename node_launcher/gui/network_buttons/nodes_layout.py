@@ -1,6 +1,6 @@
 from PySide2.QtWidgets import QPushButton
 
-from node_launcher.gui.advanced.advanced_widget import AdvancedWidget
+from node_launcher.gui.network_buttons.advanced.advanced_widget import AdvancedWidget
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.image_label import ImageLabel

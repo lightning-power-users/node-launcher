@@ -317,8 +317,8 @@ class ChannelBalancer(object):
 
 if __name__ == '__main__':
     channel_balancer = ChannelBalancer()
+    channel_balancer.reconnect()
     channel_balancer.get_channels()
-    # channel_balancer.reconnect()
     channel_balancer.get_google_sheet_data()
 
     # response = lnd_client.open_channel(

@@ -88,6 +88,9 @@ class Lnd(object):
         else:
             self.tlsextraip = self.file['tlsextraip'].split('=')[-1]
 
+        if self.file['color'] is None:
+            self.file['color'] = '#000000'
+
     def check_process(self):
         if self.process is None or not self.process.is_running():
             self.find_running_node()

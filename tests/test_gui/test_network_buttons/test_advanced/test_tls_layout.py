@@ -4,7 +4,7 @@ import pytest
 from PySide2.QtCore import Qt
 from PySide2.QtTest import QTest
 
-from node_launcher.gui.advanced.tls_layout import TlsLayout
+from node_launcher.gui.network_buttons.advanced.tls_layout import TlsLayout
 
 
 @pytest.fixture

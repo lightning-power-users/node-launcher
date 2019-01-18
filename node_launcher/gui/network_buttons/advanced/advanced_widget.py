@@ -1,10 +1,10 @@
 from PySide2.QtWidgets import QWidget
 
-from node_launcher.gui.advanced.configuration_files_layout import ConfigurationFilesLayout
-from node_launcher.gui.advanced.cli_layout import CliLayout
-from node_launcher.gui.advanced.ports_layout import PortsLayout
-from node_launcher.gui.advanced.tls_layout import TlsLayout
-from node_launcher.gui.advanced.versions_layout import VersionsLayout
+from .configuration_files_layout import ConfigurationFilesLayout
+from .cli_layout import CliLayout
+from .ports_layout import PortsLayout
+from .tls_layout import TlsLayout
+from .versions_layout import VersionsLayout
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.node_set import NodeSet
