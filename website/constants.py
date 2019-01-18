@@ -2,14 +2,15 @@ import os
 import string
 import random
 
-from node_launcher.constants import OPERATING_SYSTEM, NODE_LAUNCHER_DATA_PATH
+from node_launcher.constants import OPERATING_SYSTEM, NODE_LAUNCHER_DATA_PATH, \
+    MAINNET
 
 default_secret_key = ''.join(
     random.choice(string.ascii_uppercase + string.digits) for _ in
     range(20))
 FLASK_SECRET_KEY = os.environ.get('FLASK_SECRET_KEY', default_secret_key)
 
-network = 'mainnet'
+network = MAINNET
 
 
 cache_path = os.path.join(NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM],
