@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, url_for
+from flask import Flask, redirect, url_for
 from flask_admin import Admin
 from flask_qrcode import QRcode
 
