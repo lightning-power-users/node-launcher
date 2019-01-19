@@ -18,7 +18,6 @@ class ProcessChecker(Thread):
     # Private methods
 
     def _refresh_task_list(self):
-        print('Refresh task list')
         new_task_list = {}
         if platform == 'win32':
             # In Windows it's faster to just take the output of tasklist.exe and do some string parsing
@@ -48,7 +47,6 @@ class ProcessChecker(Thread):
                         new_task_list[process_name] = int(pid)
 
         self._task_list = new_task_list
-        print('TaskList: ' + str(self._task_list))
 
     def run(self):
         while True:
