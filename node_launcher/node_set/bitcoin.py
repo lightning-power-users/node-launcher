@@ -1,16 +1,15 @@
 import os
 import subprocess
-from threading import Thread
 from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile
 from typing import Optional, List
-from sys import platform
 
 import psutil
 
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
+from node_launcher.services.process_checker import process_checker
 from node_launcher.constants import (
     BITCOIN_DATA_PATH,
     OPERATING_SYSTEM,
@@ -142,33 +141,7 @@ class Bitcoin(object):
         self.task_list_output = subprocess.check_output('tasklist')
 
     def find_running_node(self) -> Optional[psutil.Process]:
-        bitcoin_processes = []
-        if platform == 'win32':
-            Thread(target=self.get_task_list_output).start()
-            if self.task_list_output is not None:
-                for line in self.task_list_output.splitlines():
-                    line_str = line.decode('utf-8')
-                    if 'bitcoin' in line_str:
-                        line_components = line_str.split(' ')
-                        for line_component in line_components[1:]:
-                            if line_component != '':
-                                try:
-                                    bitcoin_process = psutil.Process(int(line_component))
-                                except Exception:
-                                    break
-                                bitcoin_processes.append(bitcoin_process)
-                                break
-            else:
-                return None
-        else:
-            for process in psutil.process_iter():
-                # noinspection PyBroadException
-                try:
-                    process_name = process.name()
-                except Exception:
-                    continue
-                if 'bitcoin' in process_name:
-                    bitcoin_processes.append(process)
+        bitcoin_processes = process_checker.get_processes_by_name('bitcoin')
 
         for process in bitcoin_processes:
             if not process.is_running() or process.status() == 'zombie':

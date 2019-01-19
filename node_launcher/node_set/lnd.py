@@ -1,9 +1,7 @@
 import os
 import time
 from signal import SIGINT
-from sys import platform
 import subprocess
-from threading import Thread
 
 import psutil
 import socket
@@ -15,6 +13,7 @@ from psutil import AccessDenied
 
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
+from node_launcher.services.process_checker import process_checker
 from node_launcher.constants import (
     IS_LINUX,
     IS_MACOS,
@@ -115,34 +114,8 @@ class Lnd(object):
         self.running = False
         self.process = None
         found_ports = []
-        lnd_processes = []
-        if platform == 'win32':
-            Thread(target=self.get_task_list_output).start()
-            if self.task_list_output is not None:
-                for line in self.task_list_output.splitlines():
-                    line_str = line.decode('utf-8')
-                    if 'lnd' in line_str:
-                        line_components = line_str.split(' ')
-                        for line_component in line_components[1:]:
-                            if line_component != '':
-                                try:
-                                    lnd_process = psutil.Process(int(line_component))
-                                except:
-                                    break
-                                lnd_processes.append(lnd_process)
-                                break
-        else:
-            for process in psutil.process_iter():
-                # noinspection PyBroadException
-                try:
-                    process_name = process.name()
-                except Exception:
-                    continue
-                if 'lnd' in process_name:
-                    lnd_processes.append(process)
+        lnd_processes = process_checker.get_processes_by_name('lnd')
 
-        from time import time
-        time_t = time()
         for process in lnd_processes:
             try:
                 log_file = process.open_files()[0]
