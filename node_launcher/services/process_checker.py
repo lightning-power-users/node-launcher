@@ -63,7 +63,6 @@ class ProcessChecker(Thread):
                 try:
                     process = Process(pid)
                 except Exception as e:
-                    print('Exception: ' + str(e))
                     continue
 
                 processes.append(process)
