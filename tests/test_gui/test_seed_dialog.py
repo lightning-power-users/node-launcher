@@ -11,8 +11,8 @@ from node_launcher.node_set.lnd_client.rpc_pb2 import GenSeedResponse
 
 class TestSeedDialog(object):
     def test_show(self, qtbot: QTest, main_widget: MainWidget):
-        main_widget.testnet_group_box.node_set.lnd_client.generate_seed = MagicMock(return_value=GenSeedResponse(cipher_seed_mnemonic=['test', 'seed']))
-        qtbot.mouseClick(main_widget.testnet_group_box.lnd_wallet_layout.create_wallet_button,
+        main_widget.testnet_network_widget.node_set.lnd_client.generate_seed = MagicMock(return_value=GenSeedResponse(cipher_seed_mnemonic=['test', 'seed']))
+        qtbot.mouseClick(main_widget.testnet_network_widget.lnd_wallet_layout.create_wallet_button,
                          Qt.LeftButton)
 
     def test_keyring(self):
