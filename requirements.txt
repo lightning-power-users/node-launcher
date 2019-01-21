@@ -19,6 +19,5 @@ PyTest
 pytest-qt
 qrcode
 requests
-requests
 webassets
 wtforms
