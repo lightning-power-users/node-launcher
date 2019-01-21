@@ -1,6 +1,7 @@
 import os
 import time
-from signal import SIGINT
+from signal import SIGINT, SIGTERM
+from sys import platform
 
 import psutil
 import socket
@@ -97,7 +98,10 @@ class Lnd(object):
 
     def stop(self):
         self.check_process()
-        self.process.send_signal(SIGINT)
+        if platform == 'win32':
+            self.process.send_signal(SIGTERM)
+        else:
+            self.process.send_signal(SIGINT)
         time.sleep(0.1)
         self.check_process()
         if self.process is not None:
