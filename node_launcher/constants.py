@@ -84,15 +84,18 @@ BITCOIN_CONF_PATH: Dict[OperatingSystem, str] = {
 }
 
 TOR_DATA_PATH: Dict[OperatingSystem, str] = {
-    WINDOWS: os.path.join(APPDATA, r'tor')
+    WINDOWS: os.path.join(APPDATA, r'tor'),
+    DARWIN: '/var/tmp/dist/tor/etc/tor/'
 }
 
 TOR_TORRC_PATH: Dict[OperatingSystem, str] = {
-    WINDOWS: os.path.join(APPDATA, r'tor\torrc')
+    WINDOWS: os.path.join(APPDATA, r'tor\torrc'),
+    DARWIN: '/var/tmp/dist/tor/etc/tor/torrc'
 }
 
 TOR_PATH: Dict[OperatingSystem, str] = {
-    WINDOWS: os.path.join(LOCALAPPDATA, 'tor')
+    WINDOWS: os.path.join(LOCALAPPDATA, 'tor'),
+    DARWIN: expanduser('~/Library/Application Support/Tor')
 }
 
 TOR_EXE_PATH: Dict[OperatingSystem, str] = {
