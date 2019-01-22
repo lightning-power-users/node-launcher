@@ -34,19 +34,19 @@ https://github.com/PierreRochard/node-launcher/releases
 
 # Development
 
-0. `git clone https://github.com/PierreRochard/node-launcher && cd node-launcher`
-1. Setup and activate Python 3.7.2 virtual environment
-2. Install pipenv: `pip install pipenv`
-3. Install packages from pipfile: `pipenv install --dev`
-4. `python setup.py develop`
-5. `python run.py`
+1. `git clone https://github.com/PierreRochard/node-launcher && cd node-launcher`
+2. Setup and activate Python 3.7.2 virtual environment
+3. Install pipenv: `pip install pipenv`
+4. Install packages from pipfile: `pipenv install --dev`
+5. `python setup.py develop`
+6. `python run.py`
 
 # Managing packages with pipenv
 
 Pipfile.lock takes advantage of security improvements in pip. By default, the Pipfile.lock will be generated with the sha256 hashes of each downloaded package. This will allow pip to guarantee you’re installing what you intend to when on a compromised network, or downloading dependencies from an untrusted PyPI endpoint.
 
 
-`pip` itself should **not** be used directly to install or upgrade packages in this project's virtual environment packages to maintain compatibility
+`pip` itself should **not** be used directly to install or upgrade packages in this project's virtual environment to maintain compatibility
 
 Installing packages:
 * `pipenv install <package>`
