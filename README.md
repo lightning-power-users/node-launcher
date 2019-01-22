@@ -35,10 +35,34 @@ https://github.com/PierreRochard/node-launcher/releases
 # Development
 
 0. `git clone https://github.com/PierreRochard/node-launcher && cd node-launcher`
-1. Setup a Python 3.7+ virtual environment
-2. `pip install -r requirements.txt`
-3. `python setup.py develop`
-4. `python run.py`
+1. Setup and activate Python 3.7.2 virtual environment
+   * Most compatible venv system with pipenv is `pyenv` which pipenv can direct to install exact python version required by pipfile.lock if it is missing from the system when `pipenv install` is run 
+2. Install pipenv: `pip install --user pipenv`
+3. Install packages from pipfile: `pipenv install --dev --python=/full/path/to/python`
+4. `python setup.py develop`
+5. `python run.py`
+
+# Managing packages with pipenv
+
+Pipfile.lock takes advantage of some great new security improvements in pip. By default, the Pipfile.lock will be generated with the sha256 hashes of each downloaded package. This will allow pip to guarantee you’re installing what you intend to when on a compromised network, or downloading dependencies from an untrusted PyPI endpoint.
+
+
+`pip` itself should **not** be used directly to install or upgrade packages in this project's virtual environment packages to maintain compatibility
+
+Installing packages:
+* `pipenv install <package>`
+or
+* `pipenv install requests~=1.2   # equivalent to requests~=1.2.0`
+
+Upgrading packages:
+* Find out what’s changed upstream: `pipenv update --outdated`
+* Upgrade everything: `pipenv update`
+* Upgrade individual package: `pipenv update <pkg>`
+
+After modifying installed packages:
+* Generate a new Pipfile.lock: `pipenv lock`
+
+Pipfile and Pipfile.lock should be included in VCS
 
 # Testing
 
