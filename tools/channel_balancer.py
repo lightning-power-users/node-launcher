@@ -299,7 +299,7 @@ class ChannelBalancer(object):
                     except IndexError:
                         old_value = 0
 
-                    if int(new_row[i]) != old_value:
+                    if new_row[i] is not None and int(new_row[i]) != old_value:
                         changed = True
                         break
                 if changed or True:
@@ -317,8 +317,8 @@ class ChannelBalancer(object):
 
 if __name__ == '__main__':
     channel_balancer = ChannelBalancer()
-    channel_balancer.reconnect()
     channel_balancer.get_channels()
+    channel_balancer.reconnect()
     channel_balancer.get_google_sheet_data()
 
     # response = lnd_client.open_channel(
