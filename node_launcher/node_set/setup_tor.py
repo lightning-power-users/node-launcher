@@ -54,14 +54,14 @@ class SetupTor(object):
             torpath = expanduser('~/Library/Application Support/Tor/')
             if not os.path.exists(torpath):
                 os.makedirs(torpath)
-            bashcommand_mount = 'hdiutil attach ~/Downloads/TorBrowser-8.0.4-osx64_en-US.dmg'
-            bashcommand_unmount = 'hdiutil detach ~/Downloads/TorBrowser-8.0.4-osx64_en-US.dmg '
+            bashcommand_attach = 'hdiutil attach ~/Downloads/TorBrowser-8.0.4-osx64_en-US.dmg'
+            bashcommand_detach = 'hdiutil detach /Volumes/Tor\ Browser'
             cp = ["cp -R /Volumes/Tor\ Browser/Tor\ Browser.app ", str(bash_torpath)]
             bashcommand_cp =  ""
             bashcommand_cp = bashcommand_cp.join(cp)
-            subprocess.run(['bash', '-c', bashcommand_mount])
+            subprocess.run(['bash', '-c', bashcommand_attach])
             subprocess.run(['bash', '-c', bashcommand_cp])
-            subprocess.run(['bash', '-c', bashcommand_unmount])
+            subprocess.run(['bash', '-c', bashcommand_detach])
 
     def runtor(self):
         if IS_WINDOWS:
