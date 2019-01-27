@@ -161,10 +161,10 @@ class LndClient(object):
         response = self.lnd_client.GetNodeInfo(request, timeout=30)
         return response
 
-    def connect_peer(self, pubkey: str, host: str) -> ln.ConnectPeerResponse:
+    def connect_peer(self, pubkey: str, host: str, timeout: int = 3) -> ln.ConnectPeerResponse:
         address = ln.LightningAddress(pubkey=pubkey, host=host)
         request = ln.ConnectPeerRequest(addr=address)
-        response = self.lnd_client.ConnectPeer(request, timeout=10)
+        response = self.lnd_client.ConnectPeer(request, timeout=timeout)
         return response
 
     def list_peers(self) -> List[ln.Peer]:

@@ -164,15 +164,16 @@ class ChannelBalancer(object):
             node = self.nodes[data['pub_key']]
             node.peer_info = data
         for node in self.nodes.values():
-            print(node.last_update)
             if node.info is None or node.peer_info is not None:
                 continue
             for address in node.info['node'].get('addresses', []):
-                print(address['addr'])
+                print(node.pubkey, address['addr'])
                 try:
-                    lnd_client.connect_peer(node.pubkey, address['addr'])
-                except Exception as e:
-                    print(e)
+                    lnd_client.connect_peer(node.pubkey,
+                                            address['addr'],
+                                            timeout=5)
+                except _Rendezvous as e:
+                    print(e.details())
 
     def rebalance(self):
         total_rebalance = 0
@@ -317,8 +318,8 @@ class ChannelBalancer(object):
 
 if __name__ == '__main__':
     channel_balancer = ChannelBalancer()
-    channel_balancer.reconnect()
     channel_balancer.get_channels()
+    # channel_balancer.reconnect()
     channel_balancer.get_google_sheet_data()
 
     # response = lnd_client.open_channel(
