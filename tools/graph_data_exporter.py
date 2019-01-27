@@ -5,7 +5,7 @@ from typing import List
 from google.protobuf.json_format import MessageToDict
 
 from node_launcher.node_set.lnd_client.rpc_pb2 import ChannelGraph
-from tools.channel_balancer import lnd_client
+from tools.node_operator import lnd_client
 
 
 def save_to_csv(name: str, data: List[dict]):
