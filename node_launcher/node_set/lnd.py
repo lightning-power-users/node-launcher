@@ -92,6 +92,14 @@ class Lnd(object):
         if self.file['color'] is None:
             self.file['color'] = '#000000'
 
+        self.macaroon_path = os.path.join(
+            self.file['lnddir'],
+            'data',
+            'chain',
+            'bitcoin',
+            str(self.network)
+        )
+
     def check_process(self):
         if self.process is None or not self.process.is_running():
             self.find_running_node()
@@ -123,7 +131,7 @@ class Lnd(object):
                 lnd_process = process
                 try:
                     log_file = lnd_process.open_files()[0]
-                except (IndexError, AccessDenied):
+                except (IndexError, AccessDenied) as e:
                     continue
                 if str(self.network) not in log_file.path:
                     continue
@@ -146,17 +154,6 @@ class Lnd(object):
                 except AccessDenied:
                     continue
         return None
-
-    @property
-    def macaroon_path(self) -> str:
-        macaroons_path = os.path.join(
-            self.file['lnddir'],
-            'data',
-            'chain',
-            'bitcoin',
-            str(self.network)
-        )
-        return macaroons_path
 
     @property
     def admin_macaroon_path(self) -> str:
