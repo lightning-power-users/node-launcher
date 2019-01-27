@@ -47,3 +47,4 @@ class SeedDialog(QDialog):
         self.text.selectAll()
         self.text.setTextColor(Qt.black)
         self.text.setTextBackgroundColor(Qt.white)
+        
