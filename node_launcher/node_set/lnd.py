@@ -132,10 +132,8 @@ class Lnd(object):
                 try:
                     log_file = lnd_process.open_files()[0]
                 except (IndexError, AccessDenied) as e:
-                    print(e)
                     continue
                 if str(self.network) not in log_file.path:
-                    print(log_file.path)
                     continue
                 self.process = lnd_process
                 self.running = True
