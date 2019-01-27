@@ -56,14 +56,14 @@ class NodeOperator(object):
                 except _Rendezvous as e:
                     print(e.details())
 
-    def close_channels(self, ip_address: str = None):
+    def close_channels(self, ip_address: str):
         for node in self.nodes.values():
             ip_addresses = []
             if node.info is None:
                 continue
             for address in node.info['node'].get('addresses', []):
                 ip_addresses.append(address['addr'])
-                if ip_address is not None and ip_address in address['addr']:
+                if ip_address in address['addr']:
                     for channel in node.channels:
                         force = not channel.is_active
                         txid = lnd_client.close_channel(
