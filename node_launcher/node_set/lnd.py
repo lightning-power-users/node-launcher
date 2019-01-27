@@ -101,7 +101,9 @@ class Lnd(object):
         )
 
     def check_process(self):
-        if self.process is None or not self.process.is_running():
+        if (self.process is None
+                or not self.process.is_running()
+                or not self.is_unlocked):
             self.find_running_node()
 
     def stop(self):
