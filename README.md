@@ -34,6 +34,8 @@ https://github.com/PierreRochard/node-launcher/releases
 
 # Development
 
+Review the contributing.md file https://github.com/PierreRochard/node-launcher/blob/master/contributing.md
+
 0. `git clone https://github.com/PierreRochard/node-launcher && cd node-launcher`
 1. Setup a Python 3.7+ virtual environment
 2. `pip install -r requirements.txt`
