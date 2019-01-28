@@ -161,10 +161,16 @@ class LndClient(object):
         response = self.lnd_client.GetNodeInfo(request, timeout=30)
         return response
 
-    def connect_peer(self, pubkey: str, host: str) -> ln.ConnectPeerResponse:
+    def get_chan_info(self, chan_id: int) -> ln.ChannelEdge:
+        request = ln.ChanInfoRequest()
+        request.chan_id = int(chan_id)
+        response = self.lnd_client.GetChanInfo(request)
+        return response
+
+    def connect_peer(self, pubkey: str, host: str, timeout: int = 3) -> ln.ConnectPeerResponse:
         address = ln.LightningAddress(pubkey=pubkey, host=host)
         request = ln.ConnectPeerRequest(addr=address)
-        response = self.lnd_client.ConnectPeer(request, timeout=10)
+        response = self.lnd_client.ConnectPeer(request, timeout=timeout)
         return response
 
     def list_peers(self) -> List[ln.Peer]:
@@ -174,6 +180,10 @@ class LndClient(object):
 
     def list_channels(self) -> List[ln.Channel]:
         request = ln.ListChannelsRequest()
+        request.active_only = False
+        request.inactive_only = False
+        request.public_only = False
+        request.private_only = False
         response = self.lnd_client.ListChannels(request, timeout=30)
         return response.channels
 
@@ -217,6 +227,19 @@ class LndClient(object):
 
     def get_graph(self) -> ln.ChannelGraph:
         request = ln.ChannelGraphRequest()
-        request.include_unannounced = False
+        request.include_unannounced = True
         response = self.lnd_client.DescribeGraph(request)
         return response
+
+    def close_channel(self, channel_point: str, force: bool, sat_per_byte: int):
+        request = ln.CloseChannelRequest()
+        request.channel_point = channel_point
+        request.force = force
+        request.sat_per_byte = sat_per_byte
+        response = self.lnd_client.CloseChannel(request)
+        return response
+
+    def closed_channels(self):
+        request = ln.ClosedChannelsRequest()
+        response = self.lnd_client.ClosedChannels(request)
+        return response.channels

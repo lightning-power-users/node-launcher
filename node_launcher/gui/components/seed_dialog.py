@@ -28,24 +28,23 @@ class SeedDialog(QDialog):
 
     def print(self):
         printer = QPrinter()
-        print_program = printer.printProgram()
-        printer_name = printer.printerName()
-        # Create painter
-        painter = QPainter()
-        # Start painter
-        painter.begin(printer)
-        # Grab a widget you want to print
-        screen = self.text.grab()
-        # Draw grabbed pixmap
-        painter.drawPixmap(10, 10, screen)
-        # End painting
-        painter.end()
-
         print_dialog = QPrintDialog(printer, self)
-        print_dialog.exec_()
+        # Check if the dialog is accepted by the user
+        if print_dialog.exec_() == QDialog.Accepted:
+            # Create painter
+            painter = QPainter()
+            # Start painter
+            painter.begin(printer)
+            # Grab a widget you want to print
+            screen = self.text.grab()
+            # Draw grabbed pixmap
+            painter.drawPixmap(10, 10, screen)
+            # End painting
+            painter.end()
 
     def set_text(self, text: str):
         self.text.setText(text)
         self.text.selectAll()
         self.text.setTextColor(Qt.black)
         self.text.setTextBackgroundColor(Qt.white)
+        
