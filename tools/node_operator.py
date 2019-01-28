@@ -30,11 +30,16 @@ class NodeOperator(object):
 
     def get_channels(self):
         channels = lnd_client.list_channels()
-        pending_channels = [c for c in lnd_client.list_pending_channels()]
         [self.nodes[m.remote_pubkey].add_channel(Channel(**MessageToDict(m)))
          for m in channels]
+
+        pending_channels = [c for c in lnd_client.list_pending_channels()]
         [self.nodes[m.remote_node_pub].add_channel(Channel(**m))
          for m in pending_channels]
+
+        closed_channels = [c for c in lnd_client.closed_channels()]
+        [self.nodes[m.remote_pubkey].add_channel(Channel(**MessageToDict((m))))
+         for m in closed_channels]
 
     def get_peers(self):
         peers = lnd_client.list_peers()
