@@ -238,3 +238,8 @@ class LndClient(object):
         request.sat_per_byte = sat_per_byte
         response = self.lnd_client.CloseChannel(request)
         return response
+
+    def closed_channels(self):
+        request = ln.ClosedChannelsRequest()
+        response = self.lnd_client.ClosedChannels(request)
+        return response.channels
