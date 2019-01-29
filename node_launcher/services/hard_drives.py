@@ -26,7 +26,7 @@ class HardDrives(object):
     def get_gb(path: str) -> int:
         try:
             capacity, used, free, percent = psutil.disk_usage(path)
-        except PermissionError:
+        except (PermissionError, OSError):
             return 0
         free_gb = math.floor(free / GIGABYTE)
         return free_gb
