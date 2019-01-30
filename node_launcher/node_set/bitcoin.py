@@ -134,7 +134,11 @@ class Bitcoin(object):
             self.detect_zmq_ports()
 
     def find_running_node(self) -> Optional[psutil.Process]:
-        for process in psutil.process_iter():
+        try:
+            processes = psutil.process_iter()
+        except:
+            return None
+        for process in processes:
             if not process.is_running() or process.status() == 'zombie':
                 continue
             # noinspection PyBroadException

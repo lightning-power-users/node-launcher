@@ -122,7 +122,12 @@ class Lnd(object):
         self.running = False
         self.process = None
         found_ports = []
-        for process in psutil.process_iter():
+        try:
+            processes = psutil.process_iter()
+        except:
+            return None
+
+        for process in processes:
             if not process.is_running():
                 continue
             try:
