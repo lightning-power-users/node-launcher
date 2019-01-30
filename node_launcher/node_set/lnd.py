@@ -79,7 +79,7 @@ class Lnd(object):
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT + 1)
             else:
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT)
-            self.file['rpclisten'] = f'0.0.0.0:{self.grpc_port}'
+            self.file['rpclisten'] = f'127.0.0.1:{self.grpc_port}'
         else:
             self.grpc_port = self.file['rpclisten'].split(':')[-1]
 
