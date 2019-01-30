@@ -93,10 +93,17 @@ class LndWalletLayout(QGridLayout):
         if details is None:
             return
         details = details.lower()
+
+        # The Wallet Unlocker gRPC service disappears from LND's API
+        # after the wallet is unlocked (or created/recovered)
         if 'unknown service lnrpc.walletunlocker' in details:
             self.set_open_state()
+
+        # User needs to create a new wallet
         elif 'wallet not found' in details:
             self.set_create_recover_state()
+
+        # Todo: add logging for debugging
         elif 'connect failed' in details:
             pass
         else:
