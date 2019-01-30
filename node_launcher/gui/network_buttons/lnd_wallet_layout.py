@@ -87,6 +87,7 @@ class LndWalletLayout(QGridLayout):
             client.unlock(password)
         except _Rendezvous as e:
             details = e.details()
+            details = 'unknown gRPC error detail'
             return details
 
     def handle_lnd_poll(self, details: str):
