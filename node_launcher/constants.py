@@ -3,7 +3,7 @@ from os.path import expanduser
 import platform
 from typing import Dict
 
-NODE_LAUNCHER_RELEASE = '.'.join(map(str, (5, 4, 0)))
+NODE_LAUNCHER_RELEASE = '.'.join(map(str, (5, 4, 1)))
 
 TARGET_BITCOIN_RELEASE = 'v0.17.1'
 TARGET_LND_RELEASE = 'v0.5.2-beta-rc3'
