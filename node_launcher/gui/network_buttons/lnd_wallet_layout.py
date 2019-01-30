@@ -108,7 +108,7 @@ class LndWalletLayout(QGridLayout):
         elif 'connect failed' in details:
             pass
         else:
-            QErrorMessage(self).showMessage(details)
+            QErrorMessage.showMessage(self.error_message, details)
             self.set_open_state()
 
     def set_unlock_state(self):
