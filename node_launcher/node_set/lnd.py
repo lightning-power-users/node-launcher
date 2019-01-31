@@ -81,7 +81,7 @@ class Lnd(object):
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT)
             self.file['rpclisten'] = f'127.0.0.1:{self.grpc_port}'
         else:
-            self.grpc_port = self.file['rpclisten'].split(':')[-1]
+            self.grpc_port = int(self.file['rpclisten'].split(':')[-1])
 
         if self.file['tlsextraip'] is None:
             self.tlsextraip = socket.gethostbyname(socket.gethostname())
@@ -202,7 +202,7 @@ class Lnd(object):
         base_command = [
             f'"{self.software.lncli}"',
         ]
-        if self.grpc_port != 10009:
+        if self.grpc_port != LND_DEFAULT_GRPC_PORT:
             base_command.append(f'--rpcserver=localhost:{self.grpc_port}')
         if self.network != MAINNET:
             base_command.append(f'--network={self.network}')
