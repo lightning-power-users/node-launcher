@@ -7,7 +7,7 @@ from typing import List
 import psutil as psutil
 
 from node_launcher.constants import GIGABYTE, BITCOIN_DATA_PATH, OPERATING_SYSTEM
-from node_launcher.utilities import get_dir_size
+from node_launcher.utilities.utilities import get_dir_size
 
 
 @dataclass

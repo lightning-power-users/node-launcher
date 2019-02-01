@@ -18,7 +18,7 @@ from node_launcher.constants import (
     TESTNET, MAINNET, BITCOIN_MAINNET_PEER_PORT, BITCOIN_MAINNET_RPC_PORT,
     BITCOIN_TESTNET_RPC_PORT, BITCOIN_TESTNET_PEER_PORT)
 from node_launcher.services.hard_drives import HardDrives
-from node_launcher.utilities import get_random_password, get_zmq_port
+from node_launcher.utilities.utilities import get_random_password, get_zmq_port
 
 
 class Bitcoin(object):
