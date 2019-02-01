@@ -23,7 +23,7 @@ from node_launcher.constants import (
     TESTNET, MAINNET, LND_DEFAULT_PEER_PORT, LND_DEFAULT_GRPC_PORT,
     LND_DEFAULT_REST_PORT)
 from node_launcher.services.lnd_software import LndSoftware
-from node_launcher.utilities import get_port
+from node_launcher.utilities.utilities import get_port
 
 
 class Lnd(object):

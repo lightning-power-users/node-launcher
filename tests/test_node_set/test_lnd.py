@@ -7,7 +7,7 @@ from node_launcher.constants import IS_WINDOWS
 from node_launcher.node_set.lnd import (
     Lnd
 )
-from node_launcher.utilities import is_port_in_use
+from node_launcher.utilities.utilities import is_port_in_use
 
 
 class TestDirectoryConfiguration(object):
