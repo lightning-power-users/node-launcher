@@ -14,6 +14,13 @@ class TestDirectoryConfiguration(object):
     def test_lnd_data_path(self, lnd: Lnd):
         assert os.path.isdir(lnd.file['lnddir'])
 
+    def test_multi_property(self, lnd: Lnd):
+        lnd.file['multi_property'] = [
+            'test1',
+            'test2'
+        ]
+        assert len(lnd.file['multi_property']) == 2
+
     def test_rest(self, lnd: Lnd):
         assert not is_port_in_use(lnd.rest_port)
 
