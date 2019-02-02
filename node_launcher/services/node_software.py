@@ -96,6 +96,8 @@ class NodeSoftwareABC(ABC):
         for executable in os.listdir(self.bin_path):
             source = os.path.join(self.bin_path, executable)
             destination = os.path.join(self.latest_bin_path, executable)
+            if os.path.exists(destination):
+                os.remove(destination)
             os.link(source, destination)
 
     @property

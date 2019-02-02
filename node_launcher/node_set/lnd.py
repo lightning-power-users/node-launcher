@@ -1,15 +1,14 @@
 import os
 import time
 from signal import SIGINT, SIGTERM
-from sys import platform
-
-import psutil
-import socket
 from subprocess import call, Popen, PIPE
+from sys import platform
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
+import psutil
 from psutil import AccessDenied
+
 
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
@@ -74,7 +73,7 @@ class Lnd(object):
         else:
             self.node_port = self.file['listen'].split(':')[-1]
 
-        if self.file['rpclisten'] is None:
+        if not self.file['rpclisten']:
             if self.network == TESTNET:
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT + 1)
             else:
@@ -82,12 +81,6 @@ class Lnd(object):
             self.file['rpclisten'] = f'127.0.0.1:{self.grpc_port}'
         else:
             self.grpc_port = int(self.file['rpclisten'].split(':')[-1])
-
-        if self.file['tlsextraip'] is None:
-            self.tlsextraip = socket.gethostbyname(socket.gethostname())
-            self.file['tlsextraip'] = f'{self.tlsextraip}'
-        else:
-            self.tlsextraip = self.file['tlsextraip'].split('=')[-1]
 
         if self.file['color'] is None:
             self.file['color'] = '#000000'
