@@ -22,10 +22,15 @@ class ZapLayout(QGridLayout):
         self.node_set = node_set
         columns = 2
 
-        self.section_name = SectionName(
-            '<a href="https://medium.com/lightning-power-users/easy-lightning-with-node-launcher-zap-488133edfbd">Zap Desktop Wallet</a>')
+        self.section_name = SectionName('''
+<a href="https://medium.com/lightning-power-users/easy-lightning-with-node-launcher-zap-488133edfbd">
+    Zap Desktop Wallet
+</a>
+<br>
+Manually open the Zap Desktop application first
+''')
 
-        self.open_zap_desktop_button = QtWidgets.QPushButton('Open Zap Desktop')
+        self.open_zap_desktop_button = QtWidgets.QPushButton('Configure Zap Desktop')
         self.open_zap_desktop_button.clicked.connect(self.open_zap_desktop)
 
         self.show_zap_qrcode_button = QtWidgets.QPushButton('Show QR Code')
