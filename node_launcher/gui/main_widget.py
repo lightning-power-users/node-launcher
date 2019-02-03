@@ -1,9 +1,18 @@
 import sys
 
-from PySide2 import QtWidgets
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QMessageBox, QErrorMessage, QVBoxLayout, \
-    QLineEdit, QApplication, QMainWindow
+from PySide2.QtGui import QKeySequence
+from PySide2.QtWidgets import (
+    QAction,
+    QApplication,
+    QErrorMessage,
+    QLineEdit,
+    QMainWindow,
+    QMenuBar,
+    QMessageBox,
+    QVBoxLayout,
+    QWidget
+)
 
 from node_launcher.constants import (
     MAINNET,
@@ -13,12 +22,13 @@ from node_launcher.constants import (
 )
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.gui.components.tabs import Tabs
-from node_launcher.gui.data_directory.data_directory_box import DataDirectoryBox
+from node_launcher.gui.settings.data_directories.data_directory_box import DataDirectoryBox
 from node_launcher.gui.network_buttons.network_widget import NetworkWidget
+from node_launcher.gui.settings.settings_tab_dialog import SettingsTabDialog
 from node_launcher.services.launcher_software import LauncherSoftware
 
 
-class MainWidget(QtWidgets.QWidget):
+class MainWidget(QWidget):
     data_directory_group_box: DataDirectoryBox
     error_message: QErrorMessage
     grid: QVBoxLayout
@@ -63,6 +73,16 @@ class MainWidget(QtWidgets.QWidget):
         self.setLayout(self.grid)
 
         self.check_version()
+
+        self.settings_tab = SettingsTabDialog()
+
+        settings_action = QAction('&Settings', self)
+        settings_action.setShortcut(QKeySequence.Preferences)
+        settings_action.triggered.connect(self.settings_tab.show)
+
+        menubar = QMenuBar(self)
+        file_menu = menubar.addMenu('&File')
+        file_menu.addAction(settings_action)
 
     def check_version(self):
         latest_version = LauncherSoftware().get_latest_release_version()
