@@ -74,7 +74,7 @@ class MainWidget(QWidget):
 
         self.check_version()
 
-        self.settings_tab = SettingsTabDialog()
+        self.settings_tab = SettingsTabDialog(node_set=self.mainnet_network_widget.node_set)
 
         settings_action = QAction('&Settings', self)
         settings_action.setShortcut(QKeySequence.Preferences)
