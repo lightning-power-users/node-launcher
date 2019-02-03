@@ -177,8 +177,7 @@ class Lnd(object):
     def lnd(self) -> List[str]:
         command = [
             self.software.lnd,
-            f'--configfile="{self.file.path}"',
-            '--debuglevel=info'
+            f'--configfile="{self.file.path}"'
         ]
         if self.network == TESTNET:
             command += [
