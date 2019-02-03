@@ -50,15 +50,6 @@ class MainWidget(QWidget):
             self.error_message.exec_()
             sys.exit(0)
 
-        self.data_directory_group_box = DataDirectoryBox()
-        self.data_directory_group_box.file_dialog.new_data_directory.connect(
-            self.change_datadir
-        )
-        self.data_directory_group_box.set_datadir(
-            self.mainnet_network_widget.node_set.bitcoin.file['datadir'],
-            self.mainnet_network_widget.node_set.bitcoin.file['prune']
-        )
-
         self.network_grid = Tabs(
             self,
             mainnet=self.mainnet_network_widget,
@@ -67,9 +58,7 @@ class MainWidget(QWidget):
 
         self.grid = QVBoxLayout()
         self.grid.addStretch()
-        self.grid.addWidget(self.data_directory_group_box)
         self.grid.addWidget(self.network_grid)
-        self.grid.setAlignment(self.data_directory_group_box, Qt.AlignHCenter)
         self.setLayout(self.grid)
 
         self.check_version()
@@ -105,16 +94,6 @@ class MainWidget(QWidget):
                 f'New version: {latest_version}'
             )
             self.message_box.exec_()
-
-    def change_datadir(self, new_datadir: str):
-        self.mainnet_network_widget.node_set.bitcoin.file['datadir'] = new_datadir
-        self.testnet_network_widget.node_set.bitcoin.file['datadir'] = new_datadir
-        self.mainnet_network_widget.node_set.bitcoin.set_prune()
-        self.testnet_network_widget.node_set.bitcoin.set_prune()
-        self.data_directory_group_box.set_datadir(
-            self.mainnet_network_widget.node_set.bitcoin.file['datadir'],
-            self.mainnet_network_widget.node_set.bitcoin.file['prune']
-        )
 
     def mousePressEvent(self, event):
         focused_widget = QApplication.focusWidget()
