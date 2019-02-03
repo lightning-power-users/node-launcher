@@ -47,7 +47,7 @@ class Bitcoin(object):
 
         if self.file['disablewallet'] is None and not self.wallet_paths:
             self.file['disablewallet'] = True
-        elif self.wallet_paths:
+        elif self.file['disablewallet'] is None and self.wallet_paths:
             self.file['disablewallet'] = False
 
         if self.file['timeout'] is None:
