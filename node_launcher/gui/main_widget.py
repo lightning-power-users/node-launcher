@@ -74,6 +74,8 @@ class MainWidget(QWidget):
 
     def check_version(self):
         latest_version = LauncherSoftware().get_latest_release_version()
+        if latest_version is None:
+            return
         latest_major, latest_minor, latest_bugfix = latest_version.split('.')
         major, minor, bugfix = NODE_LAUNCHER_RELEASE.split('.')
 
