@@ -55,12 +55,6 @@ class MainWidget(QWidget):
         )
 
         self.grid = QVBoxLayout()
-        self.grid.addStretch()
-        self.grid.addWidget(self.network_grid)
-        self.setLayout(self.grid)
-
-        timer = QTimer()
-        timer.singleShot(1000, self.check_version)
 
         self.settings_tab = SettingsTabDialog(node_set=self.mainnet_network_widget.node_set)
 
@@ -68,9 +62,20 @@ class MainWidget(QWidget):
         settings_action.setShortcut(QKeySequence.Preferences)
         settings_action.triggered.connect(self.settings_tab.show)
 
-        menubar = QMenuBar(self)
-        file_menu = menubar.addMenu('&File')
+        self.menubar = QMenuBar()
+        self.menubar.setMinimumWidth(self.menubar.sizeHint().width())
+        file_menu = self.menubar.addMenu('&File')
         file_menu.addAction(settings_action)
+        self.grid.addWidget(self.menubar)
+
+        self.grid.addStretch()
+        self.grid.addWidget(self.network_grid)
+        self.setLayout(self.grid)
+
+        timer = QTimer()
+        timer.singleShot(1000, self.check_version)
+
+
 
     def check_version(self):
         latest_version = LauncherSoftware().get_latest_release_version()
