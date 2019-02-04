@@ -1,6 +1,6 @@
 import sys
 
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, QTimer
 from PySide2.QtGui import QKeySequence
 from PySide2.QtWidgets import (
     QAction,
@@ -39,8 +39,6 @@ class MainWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Node Launcher')
-        self.message_box = QMessageBox(self)
-        self.message_box.setTextFormat(Qt.RichText)
         self.error_message = QErrorMessage(self)
         try:
             self.mainnet_network_widget = NetworkWidget(network=MAINNET)
@@ -61,7 +59,8 @@ class MainWidget(QWidget):
         self.grid.addWidget(self.network_grid)
         self.setLayout(self.grid)
 
-        self.check_version()
+        timer = QTimer()
+        timer.singleShot(1000, self.check_version)
 
         self.settings_tab = SettingsTabDialog(node_set=self.mainnet_network_widget.node_set)
 
@@ -88,12 +87,14 @@ class MainWidget(QWidget):
                           and latest_bugfix > bugfix)
 
         if major_upgrade or minor_upgrade or bugfix_upgrade:
-            self.message_box.setText(UPGRADE)
-            self.message_box.setInformativeText(
+            message_box = QMessageBox(self)
+            message_box.setTextFormat(Qt.RichText)
+            message_box.setText(UPGRADE)
+            message_box.setInformativeText(
                 f'Your version: {NODE_LAUNCHER_RELEASE}\n'
                 f'New version: {latest_version}'
             )
-            self.message_box.exec_()
+            message_box.exec_()
 
     def mousePressEvent(self, event):
         focused_widget = QApplication.focusWidget()
