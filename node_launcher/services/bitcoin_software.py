@@ -5,19 +5,12 @@ from node_launcher.services.node_software import NodeSoftwareABC
 
 
 class BitcoinSoftware(NodeSoftwareABC):
-    release_version = None
 
     def __init__(self, override_directory: str = None):
         super().__init__(override_directory)
+        self.release_version = TARGET_BITCOIN_RELEASE.replace('v', '')
         self.github_team = 'bitcoin'
         self.github_repo = 'bitcoin'
-        if self.release_version is None:
-            latest = self.get_latest_release_version()
-            if latest is None:
-                self.release_version = TARGET_BITCOIN_RELEASE
-            else:
-                self.release_version = latest
-        self.release_version = self.release_version.replace('v', '')
 
     @property
     def bitcoin_qt(self) -> str:
