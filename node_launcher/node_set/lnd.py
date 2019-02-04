@@ -1,4 +1,6 @@
 import os
+import socket
+import ssl
 import time
 from signal import SIGINT, SIGTERM
 from subprocess import call, Popen, PIPE
@@ -92,6 +94,15 @@ class Lnd(object):
             'bitcoin',
             str(self.network)
         )
+
+    def test_tls_cert(self):
+        context = ssl.create_default_context()
+        context.load_verify_locations(cafile=self.tls_cert_path)
+        conn = context.wrap_socket(socket.socket(socket.AF_INET),
+                                   server_hostname='127.0.0.1')
+        conn.connect(('127.0.0.1', int(self.rest_port)))
+        cert = conn.getpeercert()
+        return cert
 
     def check_process(self):
         if (self.process is None
@@ -195,7 +206,7 @@ class Lnd(object):
             f'"{self.software.lncli}"',
         ]
         if self.grpc_port != LND_DEFAULT_GRPC_PORT:
-            base_command.append(f'--rpcserver=localhost:{self.grpc_port}')
+            base_command.append(f'--rpcserver=127.0.0.1:{self.grpc_port}')
         if self.network != MAINNET:
             base_command.append(f'--network={self.network}')
         if self.file['lnddir'] != LND_DIR_PATH[OPERATING_SYSTEM]:
@@ -206,11 +217,11 @@ class Lnd(object):
 
     @property
     def rest_url(self) -> str:
-        return f'https://localhost:{self.rest_port}'
+        return f'https://127.0.0.1:{self.rest_port}'
 
     @property
     def grpc_url(self) -> str:
-        return f'localhost:{self.grpc_port}'
+        return f'127.0.0.1:{self.grpc_port}'
 
     def launch(self):
         command = self.lnd()
