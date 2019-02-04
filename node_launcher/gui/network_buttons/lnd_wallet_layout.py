@@ -2,7 +2,7 @@ import time
 
 from PySide2 import QtWidgets
 from PySide2.QtCore import QThreadPool
-from PySide2.QtWidgets import QInputDialog, QLineEdit, QErrorMessage, QWidget
+from PySide2.QtWidgets import QInputDialog, QLineEdit, QErrorMessage
 # noinspection PyProtectedMember
 from grpc._channel import _Rendezvous
 
@@ -108,7 +108,6 @@ class LndWalletLayout(QGridLayout):
             pass
         else:
             self.error_message.showMessage(details)
-            # QErrorMessage.showMessage(self.error_message, details)
             self.set_open_state()
 
     def set_unlock_state(self):
