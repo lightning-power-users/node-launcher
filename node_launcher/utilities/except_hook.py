@@ -21,6 +21,8 @@ Error information:'''
 
     sections = [
         notice,
+        str(exception_type),
+        str(exception_value),
         traceback_info
     ]
     msg = '<br>'.join(sections)
