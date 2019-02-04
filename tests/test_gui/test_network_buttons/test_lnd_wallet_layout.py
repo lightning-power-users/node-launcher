@@ -12,6 +12,7 @@ def lnd_wallet_layout() -> LndWalletLayout:
     node_set = MagicMock()
     node_set.network = 'mainnet'
     lnd_wallet_layout = LndWalletLayout(node_set)
+    lnd_wallet_layout.error_message = MagicMock()
     return lnd_wallet_layout
 
 
@@ -32,7 +33,6 @@ class TestLndWalletLayout(object):
                            lnd_wallet_layout: LndWalletLayout,
                            qtbot: QTest):
         lnd_wallet_layout.handle_lnd_poll('unknown gRPC error detail')
-        # error_message_patch.showMessage.assert_called()
         lnd_wallet_layout.error_message.showMessage.assert_called()
 
     def test_unlock_wallet(self,
