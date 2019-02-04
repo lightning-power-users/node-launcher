@@ -18,7 +18,7 @@ from node_launcher.constants import (
     TESTNET, MAINNET, BITCOIN_MAINNET_PEER_PORT, BITCOIN_MAINNET_RPC_PORT,
     BITCOIN_TESTNET_RPC_PORT, BITCOIN_TESTNET_PEER_PORT)
 from node_launcher.services.hard_drives import HardDrives
-from node_launcher.utilities import get_random_password, get_zmq_port
+from node_launcher.utilities.utilities import get_random_password, get_zmq_port
 
 
 class Bitcoin(object):
@@ -37,11 +37,18 @@ class Bitcoin(object):
         self.running = False
         self.process = None
 
+        if self.file['datadir'] is None:
+            self.autoconfigure_datadir()
+
+        self.wallet_paths = self.get_wallet_paths()
+
         if self.file['server'] is None:
             self.file['server'] = True
 
-        if self.file['disablewallet'] is None:
+        if self.file['disablewallet'] is None and not self.wallet_paths:
             self.file['disablewallet'] = True
+        elif self.file['disablewallet'] is None and self.wallet_paths:
+            self.file['disablewallet'] = False
 
         if self.file['timeout'] is None:
             self.file['timeout'] = 6000
@@ -51,9 +58,6 @@ class Bitcoin(object):
 
         if self.file['rpcpassword'] is None:
             self.file['rpcpassword'] = get_random_password()
-
-        if self.file['datadir'] is None:
-            self.autoconfigure_datadir()
 
         if self.file['prune'] is None:
             should_prune = self.hard_drives.should_prune(self.file['datadir'],
@@ -77,6 +81,37 @@ class Bitcoin(object):
             self.file['dbcache'] = 1000
 
         self.check_process()
+
+    def get_wallet_paths(self):
+        exclude_files = {
+            'addr.dat',
+            'banlist.dat',
+            'fee_estimates.dat',
+            'mempool.dat',
+            'peers.dat'
+        }
+        candidate_paths = []
+        datadir = self.file['datadir']
+        for file in os.listdir(datadir):
+            if file not in exclude_files:
+                candidate_paths.append(os.path.join(datadir, file))
+        default_walletdir = os.path.join(self.file['datadir'], 'wallets')
+        if os.path.exists(default_walletdir):
+            for file in os.listdir(default_walletdir):
+                if file not in exclude_files:
+                    candidate_paths.append(os.path.join(default_walletdir, file))
+        if self.file['walletdir'] is not None:
+            wallet_dir = self.file['walletdir']
+            for file in os.listdir(wallet_dir):
+                if file not in exclude_files:
+                    candidate_paths += os.path.join(os.path.join(wallet_dir, file))
+        dat_files = [f for f in candidate_paths if f.endswith('.dat')
+                     and not f.startswith('blk')]
+        dat_files = set(dat_files)
+        wallet_paths = dat_files - exclude_files
+        if self.file['wallet'] is not None:
+            wallet_paths += set(self.file['wallet'])
+        return wallet_paths
 
     @property
     def node_port(self):
@@ -186,8 +221,8 @@ class Bitcoin(object):
             ]
 
         command = [
-            self.software.bitcoin_qt,
-        ] + args
+                      self.software.bitcoin_qt,
+                  ] + args
 
         if self.network == TESTNET:
             command += [
