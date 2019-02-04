@@ -75,8 +75,6 @@ class MainWidget(QWidget):
         timer = QTimer()
         timer.singleShot(1000, self.check_version)
 
-
-
     def check_version(self):
         latest_version = LauncherSoftware().get_latest_release_version()
         if latest_version is None:
