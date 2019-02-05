@@ -7,7 +7,7 @@ from typing import List
 import psutil as psutil
 
 from node_launcher.constants import GIGABYTE, BITCOIN_DATA_PATH, OPERATING_SYSTEM
-from node_launcher.utilities import get_dir_size
+from node_launcher.utilities.utilities import get_dir_size
 
 
 @dataclass
@@ -26,15 +26,18 @@ class HardDrives(object):
     def get_gb(path: str) -> int:
         try:
             capacity, used, free, percent = psutil.disk_usage(path)
-        except PermissionError:
+        except:
             return 0
         free_gb = math.floor(free / GIGABYTE)
         return free_gb
 
     def list_partitions(self) -> List[Partition]:
-        ps = psutil.disk_partitions()
-        partition_paths = [p.mountpoint for p in ps if 'removable' not in p.opts]
         partitions = []
+        try:
+            ps = psutil.disk_partitions()
+        except:
+            return partitions
+        partition_paths = [p.mountpoint for p in ps if 'removable' not in p.opts]
         for path in partition_paths:
             free_gb = self.get_gb(path)
             partitions.append(Partition(path, free_gb), )
@@ -55,7 +58,10 @@ class HardDrives(object):
 
     @staticmethod
     def should_prune(directory: str, has_bitcoin: bool) -> bool:
-        _, _, free_bytes, _ = psutil.disk_usage(os.path.realpath(directory))
+        try:
+            _, _, free_bytes, _ = psutil.disk_usage(os.path.realpath(directory))
+        except:
+            return False
         if has_bitcoin:
             bitcoin_bytes = get_dir_size(directory)
             free_bytes += bitcoin_bytes

@@ -1,6 +1,6 @@
 import pytest
 
-from node_launcher.utilities import is_port_in_use
+from node_launcher.utilities.utilities import is_port_in_use
 
 
 @pytest.fixture

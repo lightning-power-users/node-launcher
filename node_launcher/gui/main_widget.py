@@ -1,9 +1,18 @@
 import sys
 
-from PySide2 import QtWidgets
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QMessageBox, QErrorMessage, QVBoxLayout, \
-    QLineEdit, QApplication, QMainWindow
+from PySide2.QtCore import Qt, QTimer
+from PySide2.QtGui import QKeySequence
+from PySide2.QtWidgets import (
+    QAction,
+    QApplication,
+    QErrorMessage,
+    QLineEdit,
+    QMainWindow,
+    QMenuBar,
+    QMessageBox,
+    QVBoxLayout,
+    QWidget
+)
 
 from node_launcher.constants import (
     MAINNET,
@@ -13,12 +22,13 @@ from node_launcher.constants import (
 )
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.gui.components.tabs import Tabs
-from node_launcher.gui.data_directory.data_directory_box import DataDirectoryBox
+from node_launcher.gui.settings.data_directories.data_directory_box import DataDirectoryBox
 from node_launcher.gui.network_buttons.network_widget import NetworkWidget
+from node_launcher.gui.settings.settings_tab_dialog import SettingsTabDialog
 from node_launcher.services.launcher_software import LauncherSoftware
 
 
-class MainWidget(QtWidgets.QWidget):
+class MainWidget(QWidget):
     data_directory_group_box: DataDirectoryBox
     error_message: QErrorMessage
     grid: QVBoxLayout
@@ -29,8 +39,6 @@ class MainWidget(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Node Launcher')
-        self.message_box = QMessageBox(self)
-        self.message_box.setTextFormat(Qt.RichText)
         self.error_message = QErrorMessage(self)
         try:
             self.mainnet_network_widget = NetworkWidget(network=MAINNET)
@@ -39,15 +47,6 @@ class MainWidget(QtWidgets.QWidget):
             self.error_message.showMessage(str(e))
             self.error_message.exec_()
             sys.exit(0)
-
-        self.data_directory_group_box = DataDirectoryBox()
-        self.data_directory_group_box.file_dialog.new_data_directory.connect(
-            self.change_datadir
-        )
-        self.data_directory_group_box.set_datadir(
-            self.mainnet_network_widget.node_set.bitcoin.file['datadir'],
-            self.mainnet_network_widget.node_set.bitcoin.file['prune']
-        )
 
         self.network_grid = Tabs(
             self,
@@ -61,13 +60,25 @@ class MainWidget(QtWidgets.QWidget):
         self.network_grid.currentChanged.connect(self.on_tab_change)
 
         self.grid = QVBoxLayout()
+
+        self.settings_tab = SettingsTabDialog(node_set=self.mainnet_network_widget.node_set)
+
+        settings_action = QAction('&Settings', self)
+        settings_action.setShortcut(QKeySequence.Preferences)
+        settings_action.triggered.connect(self.settings_tab.show)
+
+        self.menubar = QMenuBar()
+        self.menubar.setMinimumWidth(self.menubar.sizeHint().width())
+        file_menu = self.menubar.addMenu('&File')
+        file_menu.addAction(settings_action)
+        self.grid.addWidget(self.menubar)
+
         self.grid.addStretch()
-        self.grid.addWidget(self.data_directory_group_box)
         self.grid.addWidget(self.network_grid)
-        self.grid.setAlignment(self.data_directory_group_box, Qt.AlignHCenter)
         self.setLayout(self.grid)
 
-        self.check_version()
+        timer = QTimer()
+        timer.singleShot(1000, self.check_version)
 
     def on_tab_change(self, i):
         for index, tab_widget in enumerate(self.tab_widgets):
@@ -78,6 +89,8 @@ class MainWidget(QtWidgets.QWidget):
 
     def check_version(self):
         latest_version = LauncherSoftware().get_latest_release_version()
+        if latest_version is None:
+            return
         latest_major, latest_minor, latest_bugfix = latest_version.split('.')
         major, minor, bugfix = NODE_LAUNCHER_RELEASE.split('.')
 
@@ -91,22 +104,14 @@ class MainWidget(QtWidgets.QWidget):
                           and latest_bugfix > bugfix)
 
         if major_upgrade or minor_upgrade or bugfix_upgrade:
-            self.message_box.setText(UPGRADE)
-            self.message_box.setInformativeText(
+            message_box = QMessageBox(self)
+            message_box.setTextFormat(Qt.RichText)
+            message_box.setText(UPGRADE)
+            message_box.setInformativeText(
                 f'Your version: {NODE_LAUNCHER_RELEASE}\n'
                 f'New version: {latest_version}'
             )
-            self.message_box.exec_()
-
-    def change_datadir(self, new_datadir: str):
-        self.mainnet_network_widget.node_set.bitcoin.file['datadir'] = new_datadir
-        self.testnet_network_widget.node_set.bitcoin.file['datadir'] = new_datadir
-        self.mainnet_network_widget.node_set.bitcoin.set_prune()
-        self.testnet_network_widget.node_set.bitcoin.set_prune()
-        self.data_directory_group_box.set_datadir(
-            self.mainnet_network_widget.node_set.bitcoin.file['datadir'],
-            self.mainnet_network_widget.node_set.bitcoin.file['prune']
-        )
+            message_box.exec_()
 
     def mousePressEvent(self, event):
         focused_widget = QApplication.focusWidget()

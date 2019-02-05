@@ -2,7 +2,7 @@ import time
 
 from PySide2 import QtWidgets
 from PySide2.QtCore import QThreadPool
-from PySide2.QtWidgets import QInputDialog, QLineEdit, QErrorMessage, QWidget
+from PySide2.QtWidgets import QInputDialog, QLineEdit, QErrorMessage
 # noinspection PyProtectedMember
 from grpc._channel import _Rendezvous
 
@@ -93,14 +93,21 @@ class LndWalletLayout(QGridLayout):
         if details is None:
             return
         details = details.lower()
+
+        # The Wallet Unlocker gRPC service disappears from LND's API
+        # after the wallet is unlocked (or created/recovered)
         if 'unknown service lnrpc.walletunlocker' in details:
             self.set_open_state()
+
+        # User needs to create a new wallet
         elif 'wallet not found' in details:
             self.set_create_recover_state()
+
+        # Todo: add logging for debugging
         elif 'connect failed' in details:
             pass
         else:
-            QErrorMessage(self).showMessage(details)
+            self.error_message.showMessage(details)
             self.set_open_state()
 
     def set_unlock_state(self):

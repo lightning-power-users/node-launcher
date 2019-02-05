@@ -89,7 +89,7 @@ def get_google_sheet_data(node_operator):
                 except IndexError:
                     old_value = 0
 
-                if int(new_row[i]) != old_value:
+                if new_row[i] is not None and int(new_row[i]) != old_value:
                     changed = True
                     break
             if changed or True:

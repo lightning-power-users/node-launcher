@@ -1,4 +1,6 @@
 import os
+import socket
+import ssl
 import time
 import subprocess
 from sys import platform
@@ -6,11 +8,15 @@ from signal import SIGINT, SIGTERM
 
 import psutil
 import socket
+
 from subprocess import call, Popen, PIPE
+from sys import platform
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
+import psutil
 from psutil import AccessDenied
+
 
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
@@ -25,7 +31,7 @@ from node_launcher.constants import (
     TESTNET, MAINNET, LND_DEFAULT_PEER_PORT, LND_DEFAULT_GRPC_PORT,
     LND_DEFAULT_REST_PORT)
 from node_launcher.services.lnd_software import LndSoftware
-from node_launcher.utilities import get_port
+from node_launcher.utilities.utilities import get_port
 
 
 class Lnd(object):
@@ -77,20 +83,14 @@ class Lnd(object):
         else:
             self.node_port = self.file['listen'].split(':')[-1]
 
-        if self.file['rpclisten'] is None:
+        if not self.file['rpclisten']:
             if self.network == TESTNET:
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT + 1)
             else:
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT)
-            self.file['rpclisten'] = f'0.0.0.0:{self.grpc_port}'
+            self.file['rpclisten'] = f'127.0.0.1:{self.grpc_port}'
         else:
-            self.grpc_port = self.file['rpclisten'].split(':')[-1]
-
-        if self.file['tlsextraip'] is None:
-            self.tlsextraip = socket.gethostbyname(socket.gethostname())
-            self.file['tlsextraip'] = f'{self.tlsextraip}'
-        else:
-            self.tlsextraip = self.file['tlsextraip'].split('=')[-1]
+            self.grpc_port = int(self.file['rpclisten'].split(':')[-1])
 
         if self.file['color'] is None:
             self.file['color'] = '#000000'
@@ -102,6 +102,15 @@ class Lnd(object):
             'bitcoin',
             str(self.network)
         )
+
+    def test_tls_cert(self):
+        context = ssl.create_default_context()
+        context.load_verify_locations(cafile=self.tls_cert_path)
+        conn = context.wrap_socket(socket.socket(socket.AF_INET),
+                                   server_hostname='127.0.0.1')
+        conn.connect(('127.0.0.1', int(self.rest_port)))
+        cert = conn.getpeercert()
+        return cert
 
     def check_process(self):
         if (self.process is None
@@ -180,8 +189,7 @@ class Lnd(object):
     def lnd(self) -> List[str]:
         command = [
             self.software.lnd,
-            f'--configfile="{self.file.path}"',
-            '--debuglevel=info'
+            f'--configfile="{self.file.path}"'
         ]
         if self.network == TESTNET:
             command += [
@@ -198,8 +206,8 @@ class Lnd(object):
         base_command = [
             f'"{self.software.lncli}"',
         ]
-        if self.grpc_port != 10009:
-            base_command.append(f'--rpcserver=localhost:{self.grpc_port}')
+        if self.grpc_port != LND_DEFAULT_GRPC_PORT:
+            base_command.append(f'--rpcserver=127.0.0.1:{self.grpc_port}')
         if self.network != MAINNET:
             base_command.append(f'--network={self.network}')
         if self.file['lnddir'] != LND_DIR_PATH[OPERATING_SYSTEM]:
@@ -210,11 +218,11 @@ class Lnd(object):
 
     @property
     def rest_url(self) -> str:
-        return f'https://localhost:{self.rest_port}'
+        return f'https://127.0.0.1:{self.rest_port}'
 
     @property
     def grpc_url(self) -> str:
-        return f'localhost:{self.grpc_port}'
+        return f'127.0.0.1:{self.grpc_port}'
 
     def launch(self):
         command = self.lnd()
