@@ -18,35 +18,38 @@ class ProcessChecker(Thread):
     # Private methods
 
     def _refresh_task_list(self):
-        new_task_list = {}
-        if platform == 'win32':
-            # In Windows it's faster to just take the output of tasklist.exe and do some string parsing
-            task_list_output = subprocess.check_output('tasklist')
-            for line in task_list_output.splitlines():
-                line_str = line.decode('utf-8')
-                for rpn in self._relevant_process_names:
-                    if rpn in line_str:
-                        line_components = line_str.split(' ')
-                        # line_components[0] will hold the process name
-                        # the next non empty string will hold the process id
-                        for line_component in line_components[1:]:
-                            if line_component != '':
-                                new_task_list[line_components[0]] = int(line_component)
-                                break
-        else:
-            for process in process_iter():
-                # noinspection PyBroadException
-                try:
-                    process_name = process.name()
-                    pid = process.pid()
-                except Exception:
-                    continue
+        try:
+            new_task_list = {}
+            if platform == 'win32':
+                # In Windows it's faster to just take the output of tasklist.exe and do some string parsing
+                task_list_output = subprocess.check_output('tasklist')
+                for line in task_list_output.splitlines():
+                    line_str = line.decode('utf-8')
+                    for rpn in self._relevant_process_names:
+                        if rpn in line_str:
+                            line_components = line_str.split(' ')
+                            # line_components[0] will hold the process name
+                            # the next non empty string will hold the process id
+                            for line_component in line_components[1:]:
+                                if line_component != '':
+                                    new_task_list[line_components[0]] = int(line_component)
+                                    break
+            else:
+                for process in process_iter():
+                    # noinspection PyBroadException
+                    try:
+                        process_name = process.name()
+                        pid = process.pid()
+                    except Exception:
+                        continue
 
-                for rpn in self._relevant_process_names:
-                    if rpn in process_name:
-                        new_task_list[process_name] = int(pid)
+                    for rpn in self._relevant_process_names:
+                        if rpn in process_name:
+                            new_task_list[process_name] = int(pid)
 
-        self._task_list = new_task_list
+            self._task_list = new_task_list
+        except Exception:
+            pass
 
     def run(self):
         while True:
