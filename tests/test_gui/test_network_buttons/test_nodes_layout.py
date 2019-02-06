@@ -4,14 +4,14 @@ import pytest
 from PySide2.QtCore import Qt
 from PySide2.QtTest import QTest
 
-from node_launcher.constants import TESTNET
+from node_launcher.constants import MAINNET
 from node_launcher.gui.network_buttons.nodes_layout import NodesLayout
 
 
 @pytest.fixture
 def nodes_layout() -> NodesLayout:
     node_set = MagicMock()
-    node_set.network = TESTNET
+    node_set.bitcoin.network = MAINNET
     nodes_layout = NodesLayout(node_set)
     return nodes_layout
 

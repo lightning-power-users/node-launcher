@@ -18,6 +18,9 @@ class ConfigurationFile(dict):
                 f.write(f'# Node Launcher version {NODE_LAUNCHER_RELEASE}\n\n')
                 f.flush()
 
+    def __repr__(self):
+        return f'ConfigurationFile: {self.path}'
+
     def __delitem__(self, v) -> None:
         raise NotImplementedError()
 

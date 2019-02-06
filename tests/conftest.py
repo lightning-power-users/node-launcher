@@ -17,16 +17,14 @@ def network() -> Network:
 @pytest.fixture
 def bitcoin(network: str) -> Bitcoin:
     with NamedTemporaryFile(suffix='-bitcoin.conf', delete=False) as f:
-        bitcoin = Bitcoin(network=network,
-                          configuration_file_path=f.name)
+        bitcoin = Bitcoin(configuration_file_path=f.name)
     return bitcoin
 
 
 @pytest.fixture
 def lnd(network: str, bitcoin: Bitcoin) -> Lnd:
     with NamedTemporaryFile(suffix='-lnd.conf', delete=False) as f:
-        lnd = Lnd(network=network,
-                  configuration_file_path=f.name,
+        lnd = Lnd(configuration_file_path=f.name,
                   bitcoin=bitcoin)
     return lnd
 
@@ -35,7 +33,7 @@ def lnd(network: str, bitcoin: Bitcoin) -> Lnd:
 def node_set(network: str,
              bitcoin: Bitcoin,
              lnd: Lnd) -> NodeSet:
-    configuration = NodeSet(network)
+    configuration = NodeSet()
     return configuration
 
 

@@ -15,11 +15,9 @@ from PySide2.QtWidgets import (
 )
 
 from node_launcher.constants import (
-    MAINNET,
     NODE_LAUNCHER_RELEASE,
-    TESTNET,
-    UPGRADE
-)
+    UPGRADE,
+    Network)
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.gui.components.tabs import Tabs
 from node_launcher.gui.settings.data_directories.data_directory_box import DataDirectoryBox
@@ -32,31 +30,26 @@ class MainWidget(QWidget):
     data_directory_group_box: DataDirectoryBox
     error_message: QErrorMessage
     grid: QVBoxLayout
-    mainnet_network_widget: NetworkWidget
     network_grid: Tabs
-    testnet_network_widget: NetworkWidget
+    network_widget: NetworkWidget
+    settings_tab: SettingsTabDialog
 
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Node Launcher')
         self.error_message = QErrorMessage(self)
         try:
-            self.mainnet_network_widget = NetworkWidget(network=MAINNET)
-            self.testnet_network_widget = NetworkWidget(network=TESTNET)
+            self.network_widget = NetworkWidget()
         except ZmqPortsNotOpenError as e:
             self.error_message.showMessage(str(e))
             self.error_message.exec_()
             sys.exit(0)
 
-        self.network_grid = Tabs(
-            self,
-            mainnet=self.mainnet_network_widget,
-            testnet=self.testnet_network_widget
-        )
+        self.network_grid = Tabs(self, self.network_widget)
 
         self.grid = QVBoxLayout()
 
-        self.settings_tab = SettingsTabDialog(node_set=self.mainnet_network_widget.node_set)
+        self.settings_tab = SettingsTabDialog(node_set=self.network_widget.node_set)
 
         settings_action = QAction('&Settings', self)
         settings_action.setShortcut(QKeySequence.Preferences)
@@ -71,6 +64,8 @@ class MainWidget(QWidget):
         self.grid.addStretch()
         self.grid.addWidget(self.network_grid)
         self.setLayout(self.grid)
+
+        self.settings_tab.bitcoin_tab.change_network.connect(self.change_network)
 
         timer = QTimer()
         timer.singleShot(1000, self.check_version)
@@ -100,6 +95,9 @@ class MainWidget(QWidget):
                 f'New version: {latest_version}'
             )
             message_box.exec_()
+
+    def change_network(self, network: Network):
+        self.network_widget.nodes_layout.image_label.set_image(f'bitcoin-{network}.png')
 
     def mousePressEvent(self, event):
         focused_widget = QApplication.focusWidget()
