@@ -181,7 +181,10 @@ class Bitcoin(object):
         except:
             return None
         for process in processes:
-            if not process.is_running() or process.status() == 'zombie':
+            try:
+                if not process.is_running() or process.status() == 'zombie':
+                    continue
+            except psutil.NoSuchProcess:
                 continue
             # noinspection PyBroadException
             try:
