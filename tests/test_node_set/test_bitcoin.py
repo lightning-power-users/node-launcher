@@ -7,10 +7,8 @@ import pytest
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.constants import (
-    BITCOIN_DATA_PATH,
     IS_WINDOWS,
     MAINNET_PRUNE,
-    OPERATING_SYSTEM,
     TESTNET_PRUNE
 )
 
@@ -31,9 +29,8 @@ class TestBitcoinConfiguration(object):
 
     @staticmethod
     def test_datadir(bitcoin: Bitcoin):
-        assert bitcoin.file['datadir'] == BITCOIN_DATA_PATH[
-            OPERATING_SYSTEM]
         assert os.path.exists(bitcoin.file['datadir'])
+        assert 'bitcoin.conf' in os.listdir(bitcoin.file['datadir'])
 
     @staticmethod
     def test_prune(bitcoin: Bitcoin):
