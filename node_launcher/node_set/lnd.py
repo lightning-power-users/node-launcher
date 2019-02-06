@@ -18,11 +18,14 @@ from node_launcher.constants import (
     IS_LINUX,
     IS_MACOS,
     IS_WINDOWS,
+    LND_DEFAULT_GRPC_PORT,
+    LND_DEFAULT_PEER_PORT,
+    LND_DEFAULT_REST_PORT,
     LND_DIR_PATH,
-    Network,
+    MAINNET,
     OPERATING_SYSTEM,
-    TESTNET, MAINNET, LND_DEFAULT_PEER_PORT, LND_DEFAULT_GRPC_PORT,
-    LND_DEFAULT_REST_PORT)
+    TESTNET
+)
 from node_launcher.services.lnd_software import LndSoftware
 from node_launcher.utilities.utilities import get_port
 
@@ -32,12 +35,9 @@ class Lnd(object):
     software: LndSoftware
     process: Optional[psutil.Process]
 
-    def __init__(self, network: Network,
-                 configuration_file_path: str,
-                 bitcoin: Bitcoin):
+    def __init__(self, configuration_file_path: str, bitcoin: Bitcoin):
         self.running = False
         self.is_unlocked = False
-        self.network = network
         self.bitcoin = bitcoin
         self.file = ConfigurationFile(configuration_file_path)
         self.process = self.find_running_node()
@@ -58,7 +58,7 @@ class Lnd(object):
         self.file['bitcoind.zmqpubrawtx'] = self.bitcoin.file['zmqpubrawtx']
 
         if self.file['restlisten'] is None:
-            if self.network == TESTNET:
+            if self.bitcoin.file['testnet']:
                 self.rest_port = get_port(LND_DEFAULT_REST_PORT + 1)
             else:
                 self.rest_port = get_port(LND_DEFAULT_REST_PORT)
@@ -67,7 +67,7 @@ class Lnd(object):
             self.rest_port = self.file['restlisten'].split(':')[-1]
 
         if self.file['listen'] is None:
-            if self.network == TESTNET:
+            if self.bitcoin.file['testnet']:
                 self.node_port = get_port(LND_DEFAULT_PEER_PORT + 1)
             else:
                 self.node_port = get_port(LND_DEFAULT_PEER_PORT)
@@ -76,7 +76,7 @@ class Lnd(object):
             self.node_port = self.file['listen'].split(':')[-1]
 
         if not self.file['rpclisten']:
-            if self.network == TESTNET:
+            if self.bitcoin.file['testnet']:
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT + 1)
             else:
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT)
@@ -92,7 +92,7 @@ class Lnd(object):
             'data',
             'chain',
             'bitcoin',
-            str(self.network)
+            str(self.bitcoin.network)
         )
 
     def test_tls_cert(self):
@@ -144,7 +144,7 @@ class Lnd(object):
                     log_file = lnd_process.open_files()[0]
                 except (IndexError, AccessDenied) as e:
                     continue
-                if str(self.network) not in log_file.path:
+                if str(self.bitcoin.network) not in log_file.path:
                     continue
                 self.process = lnd_process
                 self.running = True
@@ -190,7 +190,7 @@ class Lnd(object):
             self.software.lnd,
             f'--configfile="{self.file.path}"'
         ]
-        if self.network == TESTNET:
+        if self.bitcoin.file['testnet']:
             command += [
                 '--bitcoin.testnet'
             ]
@@ -207,8 +207,8 @@ class Lnd(object):
         ]
         if self.grpc_port != LND_DEFAULT_GRPC_PORT:
             base_command.append(f'--rpcserver=127.0.0.1:{self.grpc_port}')
-        if self.network != MAINNET:
-            base_command.append(f'--network={self.network}')
+        if self.bitcoin.file['testnet']:
+            base_command.append(f'--network={self.bitcoin.network}')
         if self.file['lnddir'] != LND_DIR_PATH[OPERATING_SYSTEM]:
             base_command.append(f'''--lnddir="{self.file['lnddir']}"''')
             base_command.append(f'--macaroonpath="{self.macaroon_path}"')

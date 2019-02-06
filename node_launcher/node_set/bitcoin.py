@@ -14,7 +14,6 @@ from node_launcher.constants import (
     IS_WINDOWS,
     TESTNET_PRUNE,
     MAINNET_PRUNE,
-    Network,
     TESTNET, MAINNET, BITCOIN_MAINNET_PEER_PORT, BITCOIN_MAINNET_RPC_PORT,
     BITCOIN_TESTNET_RPC_PORT, BITCOIN_TESTNET_PEER_PORT)
 from node_launcher.services.hard_drives import HardDrives
@@ -29,8 +28,7 @@ class Bitcoin(object):
     zmq_block_port: int
     zmq_tx_port: int
 
-    def __init__(self, network: Network, configuration_file_path: str):
-        self.network = network
+    def __init__(self, configuration_file_path: str):
         self.hard_drives = HardDrives()
         self.software = BitcoinSoftware()
         self.file = ConfigurationFile(configuration_file_path)
@@ -82,6 +80,12 @@ class Bitcoin(object):
 
         self.check_process()
 
+    @property
+    def network(self):
+        if self.file['testnet']:
+            return TESTNET
+        return MAINNET
+
     def get_wallet_paths(self):
         exclude_files = {
             'addr.dat',
@@ -99,12 +103,14 @@ class Bitcoin(object):
         if os.path.exists(default_walletdir):
             for file in os.listdir(default_walletdir):
                 if file not in exclude_files:
-                    candidate_paths.append(os.path.join(default_walletdir, file))
+                    candidate_paths.append(
+                        os.path.join(default_walletdir, file))
         if self.file['walletdir'] is not None:
             wallet_dir = self.file['walletdir']
             for file in os.listdir(wallet_dir):
                 if file not in exclude_files:
-                    candidate_paths += os.path.join(os.path.join(wallet_dir, file))
+                    candidate_paths += os.path.join(
+                        os.path.join(wallet_dir, file))
         dat_files = [f for f in candidate_paths if f.endswith('.dat')
                      and not f.startswith('blk')]
         dat_files = set(dat_files)
@@ -115,13 +121,13 @@ class Bitcoin(object):
 
     @property
     def node_port(self):
-        if self.network == TESTNET:
+        if self.file['testnet']:
             return BITCOIN_TESTNET_PEER_PORT
         return BITCOIN_MAINNET_PEER_PORT
 
     @property
     def rpc_port(self):
-        if self.network == TESTNET:
+        if self.file['testnet']:
             return BITCOIN_TESTNET_RPC_PORT
         return BITCOIN_MAINNET_RPC_PORT
 
@@ -131,7 +137,7 @@ class Bitcoin(object):
             should_prune = self.hard_drives.should_prune(self.file['datadir'],
                                                          has_bitcoin=True)
         if should_prune:
-            if self.network == TESTNET:
+            if self.file['testnet']:
                 prune = TESTNET_PRUNE
             else:
                 prune = MAINNET_PRUNE
@@ -169,6 +175,7 @@ class Bitcoin(object):
             self.detect_zmq_ports()
 
     def find_running_node(self) -> Optional[psutil.Process]:
+        # noinspection PyBroadException
         try:
             processes = psutil.process_iter()
         except:
@@ -200,8 +207,10 @@ class Bitcoin(object):
                  if 18500 <= c.laddr.port <= 18600]
         ports = set(ports)
         if len(ports) != 2:
-            raise ZmqPortsNotOpenError(f'''ZMQ ports are not open on 
-{self.network} node, please close Bitcoin Core and launch it with the Node Launcher''')
+            raise ZmqPortsNotOpenError(
+                'ZMQ ports are not open on your node, '
+                'please close Bitcoin Core and launch it with the Node Launcher'
+            )
         self.zmq_block_port = min(ports)
         self.zmq_tx_port = max(ports)
         self.file['zmqpubrawblock'] = f'tcp://127.0.0.1:{self.zmq_block_port}'
@@ -224,7 +233,7 @@ class Bitcoin(object):
                       self.software.bitcoin_qt,
                   ] + args
 
-        if self.network == TESTNET:
+        if self.file['testnet']:
             command += [
                 '-testnet'
             ]
@@ -236,7 +245,7 @@ class Bitcoin(object):
             f'"{self.software.bitcoin_cli}"',
             f'-conf="{self.file.path}"',
         ]
-        if self.network == MAINNET:
+        if self.file['testnet']:
             command += [
                 '-testnet'
             ]

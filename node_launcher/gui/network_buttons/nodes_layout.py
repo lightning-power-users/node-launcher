@@ -15,7 +15,7 @@ class NodesLayout(QGridLayout):
         self.advanced_widget = AdvancedWidget(node_set)
 
         self.columns = 2
-        image_label = ImageLabel(f'bitcoin-{self.node_set.network}.png')
+        image_label = ImageLabel(f'bitcoin-{self.node_set.bitcoin.network}.png')
         self.addWidget(image_label, row_span=5)
 
         self.addWidget(SectionName('Nodes'), column=self.columns)

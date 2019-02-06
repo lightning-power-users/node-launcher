@@ -4,14 +4,15 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from node_launcher.node_set.bitcoin import (
-    Bitcoin
-)
+from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.constants import (
     BITCOIN_DATA_PATH,
+    IS_WINDOWS,
+    MAINNET_PRUNE,
     OPERATING_SYSTEM,
-    IS_WINDOWS, TESTNET_PRUNE, TESTNET)
+    TESTNET_PRUNE
+)
 
 
 class TestBitcoinConfiguration(object):
@@ -20,8 +21,7 @@ class TestBitcoinConfiguration(object):
         with TemporaryDirectory() as tmpdirname:
             os.rmdir(tmpdirname)
             configuration_path = os.path.join(tmpdirname, 'bitcoin.conf')
-            bitcoin = Bitcoin(network=TESTNET,
-                              configuration_file_path=configuration_path)
+            bitcoin = Bitcoin(configuration_file_path=configuration_path)
             assert os.path.isfile(bitcoin.file.path)
 
     @staticmethod
@@ -37,7 +37,11 @@ class TestBitcoinConfiguration(object):
 
     @staticmethod
     def test_prune(bitcoin: Bitcoin):
-        assert (bitcoin.file['prune'] == TESTNET_PRUNE or bitcoin.file['prune'] == 0)
+        assert (
+                bitcoin.file['prune'] == TESTNET_PRUNE
+                or bitcoin.file['prune'] == 0
+                or bitcoin.file['prune'] == MAINNET_PRUNE
+        )
 
     @staticmethod
     def test_set_prune(bitcoin: Bitcoin):
