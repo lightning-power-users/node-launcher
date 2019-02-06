@@ -38,6 +38,10 @@ class Bitcoin(object):
         if self.file['datadir'] is None:
             self.autoconfigure_datadir()
 
+        if 'bitcoin.conf' in os.listdir(self.file['datadir']):
+            actual_conf_file = os.path.join(self.file['datadir'], 'bitcoin.conf')
+            self.file = ConfigurationFile(actual_conf_file)
+
         self.wallet_paths = self.get_wallet_paths()
 
         if self.file['server'] is None:
@@ -114,9 +118,13 @@ class Bitcoin(object):
         dat_files = [f for f in candidate_paths if f.endswith('.dat')
                      and not f.startswith('blk')]
         dat_files = set(dat_files)
-        wallet_paths = dat_files - exclude_files
+        wallet_paths = set(dat_files - exclude_files)
         if self.file['wallet'] is not None:
-            wallet_paths += set(self.file['wallet'])
+            if isinstance(self.file['wallet'], list):
+                for wallet in self.file['wallet']:
+                    wallet_paths.add(wallet)
+            else:
+                wallet_paths.add(self.file['wallet'])
         return wallet_paths
 
     @property
@@ -221,25 +229,17 @@ class Bitcoin(object):
         return True
 
     def bitcoin_qt(self) -> List[str]:
+        command = [self.software.bitcoin_qt]
         args = [
             f'-conf={self.file.path}',
             f'-datadir={self.file["datadir"]}'
         ]
-
         if IS_WINDOWS:
             args = [
                 f'-conf="{self.file.path}"',
                 f'-datadir="{self.file["datadir"]}"'
             ]
-
-        command = [
-                      self.software.bitcoin_qt,
-                  ] + args
-
-        if self.file['testnet']:
-            command += [
-                '-testnet'
-            ]
+        command += args
         return command
 
     @property
@@ -248,10 +248,6 @@ class Bitcoin(object):
             f'"{self.software.bitcoin_cli}"',
             f'-conf="{self.file.path}"',
         ]
-        if self.file['testnet']:
-            command += [
-                '-testnet'
-            ]
         return ' '.join(command)
 
     def launch(self):

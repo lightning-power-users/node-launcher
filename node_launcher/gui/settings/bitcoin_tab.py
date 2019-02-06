@@ -28,8 +28,22 @@ class BitcoinTab(QWidget):
         self.enable_wallet_label = QLabel('Enable wallet')
         self.enable_wallet_widget = QCheckBox('Enable Wallet')
         self.enable_wallet_widget.setChecked(not self.bitcoin.file['disablewallet'])
-        self.enable_wallet_widget.stateChanged.connect(self.enable_wallet)
+        self.enable_wallet_widget.stateChanged.connect(
+            lambda x: self.update_config('disablewallet', not bool(x))
+        )
         self.bitcoin_layout.addWidget(self.enable_wallet_widget)
+
+        self.enable_testnet_label = QLabel('Enable testnet')
+        self.enable_testnet_widget = QCheckBox('Enable Testnet')
+        self.set_checked(
+            self.enable_testnet_widget,
+            self.bitcoin.file['testnet']
+        )
+        self.enable_testnet_widget.stateChanged.connect(
+            lambda x: self.update_config('testnet', bool(x))
+        )
+        self.bitcoin_layout.addWidget(self.enable_testnet_widget)
+
         self.setLayout(self.bitcoin_layout)
 
     def change_datadir(self, new_datadir: str):
@@ -40,5 +54,12 @@ class BitcoinTab(QWidget):
             self.bitcoin.file['prune']
         )
 
-    def enable_wallet(self, state: int):
-        self.bitcoin.file['disablewallet'] = not bool(state)
+    @staticmethod
+    def set_checked(widget: QCheckBox, state: bool):
+        if state is None:
+            widget.setChecked(False)
+            return
+        widget.setChecked(state)
+
+    def update_config(self, name: str, state: bool):
+        self.bitcoin.file[name] = state
