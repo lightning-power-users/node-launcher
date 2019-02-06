@@ -16,8 +16,8 @@ from PySide2.QtWidgets import (
 
 from node_launcher.constants import (
     NODE_LAUNCHER_RELEASE,
-    UPGRADE
-)
+    UPGRADE,
+    Network)
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.gui.components.tabs import Tabs
 from node_launcher.gui.settings.data_directories.data_directory_box import DataDirectoryBox
@@ -30,8 +30,9 @@ class MainWidget(QWidget):
     data_directory_group_box: DataDirectoryBox
     error_message: QErrorMessage
     grid: QVBoxLayout
-    network_widget: NetworkWidget
     network_grid: Tabs
+    network_widget: NetworkWidget
+    settings_tab: SettingsTabDialog
 
     def __init__(self):
         super().__init__()
@@ -64,6 +65,8 @@ class MainWidget(QWidget):
         self.grid.addWidget(self.network_grid)
         self.setLayout(self.grid)
 
+        self.settings_tab.bitcoin_tab.change_network.connect(self.change_network)
+
         timer = QTimer()
         timer.singleShot(1000, self.check_version)
 
@@ -92,6 +95,9 @@ class MainWidget(QWidget):
                 f'New version: {latest_version}'
             )
             message_box.exec_()
+
+    def change_network(self, network: Network):
+        self.network_widget.nodes_layout.image_label.set_image(f'bitcoin-{network}.png')
 
     def mousePressEvent(self, event):
         focused_widget = QApplication.focusWidget()

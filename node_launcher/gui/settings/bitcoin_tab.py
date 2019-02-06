@@ -1,12 +1,15 @@
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, Signal
 from PySide2.QtWidgets import QWidget, QLabel, QCheckBox, QVBoxLayout
 
+from node_launcher.constants import Network, MAINNET, TESTNET
 from node_launcher.gui.settings.data_directories.data_directory_box import \
     DataDirectoryBox
 from node_launcher.node_set.bitcoin import Bitcoin
 
 
 class BitcoinTab(QWidget):
+    change_network = Signal(Network)
+
     def __init__(self, bitcoin: Bitcoin):
         super().__init__()
 
@@ -63,3 +66,8 @@ class BitcoinTab(QWidget):
 
     def update_config(self, name: str, state: bool):
         self.bitcoin.file[name] = state
+
+        if name == 'testnet' and state:
+            self.change_network.emit(TESTNET)
+        elif name == 'testnet' and not state:
+            self.change_network.emit(MAINNET)
