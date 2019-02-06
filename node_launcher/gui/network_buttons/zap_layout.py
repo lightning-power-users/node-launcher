@@ -33,17 +33,17 @@ Manually open the Zap Desktop application first
         self.open_zap_desktop_button = QtWidgets.QPushButton('Configure Zap Desktop')
         self.open_zap_desktop_button.clicked.connect(self.open_zap_desktop)
 
-        self.show_zap_qrcode_button = QtWidgets.QPushButton('Show QR Code')
-        self.show_zap_qrcode_button.clicked.connect(self.show_zap_qrcode)
+        # self.show_zap_qrcode_button = QtWidgets.QPushButton('Show QR Code')
+        # self.show_zap_qrcode_button.clicked.connect(self.show_zap_qrcode)
 
         self.addWidget(self.section_name, column_span=columns)
-        self.addWidget(self.open_zap_desktop_button)
-        self.addWidget(self.show_zap_qrcode_button, same_row=True, column=2)
+        self.addWidget(self.open_zap_desktop_button, column_span=columns)
+        # self.addWidget(self.show_zap_qrcode_button, same_row=True, column=2)
         self.addWidget(HorizontalLine(), column_span=columns)
 
     def set_button_state(self):
         self.open_zap_desktop_button.setEnabled(self.node_set.lnd.is_unlocked)
-        self.show_zap_qrcode_button.setEnabled(self.node_set.lnd.is_unlocked)
+        # self.show_zap_qrcode_button.setEnabled(self.node_set.lnd.is_unlocked)
 
     def open_zap_desktop(self):
         # This should soon be replaced with using the get_lndconnect_url method
