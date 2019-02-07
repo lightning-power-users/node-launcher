@@ -1,4 +1,5 @@
 import os
+import subprocess
 from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile
 from typing import Optional, List
@@ -8,6 +9,7 @@ import psutil
 from node_launcher.exceptions import ZmqPortsNotOpenError
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
+from node_launcher.services.process_checker import process_checker
 from node_launcher.constants import (
     BITCOIN_DATA_PATH,
     OPERATING_SYSTEM,
@@ -34,6 +36,7 @@ class Bitcoin(object):
         self.file = ConfigurationFile(configuration_file_path)
         self.running = False
         self.process = None
+        self.task_list_output = None
 
         if self.file['datadir'] is None:
             self.autoconfigure_datadir()
@@ -182,15 +185,15 @@ class Bitcoin(object):
 
         if self.process is None:
             self.running = False
+
             self.process = self.find_running_node()
             self.detect_zmq_ports()
 
+    def get_task_list_output(self):
+        self.task_list_output = subprocess.check_output('tasklist')
+
     def find_running_node(self) -> Optional[psutil.Process]:
-        # noinspection PyBroadException
-        try:
-            processes = psutil.process_iter()
-        except:
-            return None
+        bitcoin_processes = process_checker.get_processes_by_name('bitcoin')
         for process in processes:
             try:
                 if not process.is_running() or process.status() == 'zombie':
@@ -199,19 +202,13 @@ class Bitcoin(object):
                 continue
             # noinspection PyBroadException
             try:
-                process_name = process.name()
-            except:
+                for connection in process.connections():
+                    ports = [self.rpc_port, self.node_port]
+                    if connection.laddr.port in ports:
+                        self.running = True
+                        return process
+            except Exception:
                 continue
-            if 'bitcoin' in process_name:
-                # noinspection PyBroadException
-                try:
-                    for connection in process.connections():
-                        ports = [self.rpc_port, self.node_port]
-                        if connection.laddr.port in ports:
-                            self.running = True
-                            return process
-                except:
-                    continue
         return None
 
     def detect_zmq_ports(self) -> bool:
