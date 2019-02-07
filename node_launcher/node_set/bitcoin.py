@@ -193,7 +193,7 @@ class Bitcoin(object):
         self.task_list_output = subprocess.check_output('tasklist')
 
     def find_running_node(self) -> Optional[psutil.Process]:
-        bitcoin_processes = process_checker.get_processes_by_name('bitcoin')
+        processes = process_checker.get_processes_by_name('bitcoin')
         for process in processes:
             try:
                 if not process.is_running() or process.status() == 'zombie':
