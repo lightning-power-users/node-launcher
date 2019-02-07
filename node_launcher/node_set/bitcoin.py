@@ -41,6 +41,8 @@ class Bitcoin(object):
         if 'bitcoin.conf' in os.listdir(self.file['datadir']):
             actual_conf_file = os.path.join(self.file['datadir'], 'bitcoin.conf')
             self.file = ConfigurationFile(actual_conf_file)
+            if self.file['datadir'] is None:
+                self.autoconfigure_datadir()
 
         self.wallet_paths = self.get_wallet_paths()
 
@@ -102,7 +104,8 @@ class Bitcoin(object):
         datadir = self.file['datadir']
         for file in os.listdir(datadir):
             if file not in exclude_files:
-                candidate_paths.append(os.path.join(datadir, file))
+                path = os.path.join(datadir, file)
+                candidate_paths.append(path)
         default_walletdir = os.path.join(self.file['datadir'], 'wallets')
         if os.path.exists(default_walletdir):
             for file in os.listdir(default_walletdir):
