@@ -14,9 +14,12 @@ class ConfigurationFile(dict):
             os.mkdir(parent)
         if not isfile(self.path):
             with open(self.path, 'w') as f:
-                f.write('# Auto-Generated Configuration File\n\n')
-                f.write(f'# Node Launcher version {NODE_LAUNCHER_RELEASE}\n\n')
+                f.write('# Auto-Generated Configuration File' + os.linesep + os.linesep)
+                f.write(f'# Node Launcher version {NODE_LAUNCHER_RELEASE}' + os.linesep + os.linesep)
                 f.flush()
+
+    def __repr__(self):
+        return f'ConfigurationFile: {self.path}'
 
     def __delitem__(self, v) -> None:
         raise NotImplementedError()
@@ -72,7 +75,7 @@ class ConfigurationFile(dict):
         for property_line_index in property_lines:
             lines.pop(property_line_index)
         for value in value_list:
-            property_string = f'{name}={value}\n'
+            property_string = os.linesep + f'{name}={value}' + os.linesep
             lines.append(property_string)
         with open(self.path, 'w') as f:
             f.writelines(lines)

@@ -1,7 +1,6 @@
 from PySide2.QtCore import QTimer
 from PySide2.QtWidgets import QWidget
 
-from node_launcher.constants import MAINNET, Network
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.node_set import NodeSet
 from . import JouleLayout, LndWalletLayout, NodesLayout, ZapLayout
@@ -11,12 +10,12 @@ class NetworkWidget(QWidget):
     node_set: NodeSet
     timer = QTimer
 
-    def __init__(self, network: Network = MAINNET):
+    def __init__(self):
         super().__init__()
 
         self.timer = QTimer(self.parentWidget())
 
-        self.node_set = NodeSet(network)
+        self.node_set = NodeSet()
 
         columns = 2
 

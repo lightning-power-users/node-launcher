@@ -1,12 +1,15 @@
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, Signal
 from PySide2.QtWidgets import QWidget, QLabel, QCheckBox, QVBoxLayout
 
+from node_launcher.constants import Network, MAINNET, TESTNET
 from node_launcher.gui.settings.data_directories.data_directory_box import \
     DataDirectoryBox
 from node_launcher.node_set.bitcoin import Bitcoin
 
 
 class BitcoinTab(QWidget):
+    change_network = Signal(Network)
+
     def __init__(self, bitcoin: Bitcoin):
         super().__init__()
 
@@ -28,8 +31,22 @@ class BitcoinTab(QWidget):
         self.enable_wallet_label = QLabel('Enable wallet')
         self.enable_wallet_widget = QCheckBox('Enable Wallet')
         self.enable_wallet_widget.setChecked(not self.bitcoin.file['disablewallet'])
-        self.enable_wallet_widget.stateChanged.connect(self.enable_wallet)
+        self.enable_wallet_widget.stateChanged.connect(
+            lambda x: self.update_config('disablewallet', not bool(x))
+        )
         self.bitcoin_layout.addWidget(self.enable_wallet_widget)
+
+        self.enable_testnet_label = QLabel('Enable testnet')
+        self.enable_testnet_widget = QCheckBox('Enable Testnet')
+        self.set_checked(
+            self.enable_testnet_widget,
+            self.bitcoin.file['testnet']
+        )
+        self.enable_testnet_widget.stateChanged.connect(
+            lambda x: self.update_config('testnet', bool(x))
+        )
+        self.bitcoin_layout.addWidget(self.enable_testnet_widget)
+
         self.setLayout(self.bitcoin_layout)
 
     def change_datadir(self, new_datadir: str):
@@ -40,5 +57,17 @@ class BitcoinTab(QWidget):
             self.bitcoin.file['prune']
         )
 
-    def enable_wallet(self, state: int):
-        self.bitcoin.file['disablewallet'] = not bool(state)
+    @staticmethod
+    def set_checked(widget: QCheckBox, state: bool):
+        if state is None:
+            widget.setChecked(False)
+            return
+        widget.setChecked(state)
+
+    def update_config(self, name: str, state: bool):
+        self.bitcoin.file[name] = state
+
+        if name == 'testnet' and state:
+            self.change_network.emit(TESTNET)
+        elif name == 'testnet' and not state:
+            self.change_network.emit(MAINNET)
