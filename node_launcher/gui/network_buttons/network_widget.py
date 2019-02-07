@@ -35,17 +35,11 @@ class NetworkWidget(QWidget):
 
         self.setLayout(layout)
 
+        self.timer.start(1000)
         # noinspection PyUnresolvedReferences
         self.timer.timeout.connect(self.refresh)
         single_timer = QTimer()
         single_timer.singleShot(300, self.refresh)
-
-    def start_refresh_timer(self):
-        self.timer.start(2000)
-        self.refresh()
-
-    def stop_refresh_timer(self):
-        self.timer.stop()
 
     def refresh(self):
         self.node_set.bitcoin.check_process()

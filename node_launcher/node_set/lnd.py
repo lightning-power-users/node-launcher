@@ -2,13 +2,7 @@ import os
 import socket
 import ssl
 import time
-import subprocess
-from sys import platform
 from signal import SIGINT, SIGTERM
-
-import psutil
-import socket
-
 from subprocess import call, Popen, PIPE
 from sys import platform
 from tempfile import NamedTemporaryFile
@@ -20,7 +14,6 @@ from psutil import AccessDenied
 
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
-from node_launcher.services.process_checker import process_checker
 from node_launcher.constants import (
     IS_LINUX,
     IS_MACOS,
@@ -47,7 +40,6 @@ class Lnd(object):
         self.is_unlocked = False
         self.bitcoin = bitcoin
         self.file = ConfigurationFile(configuration_file_path)
-        self.task_list_output = None
         self.process = self.find_running_node()
         self.software = LndSoftware()
 
@@ -129,41 +121,49 @@ class Lnd(object):
         if self.process is not None:
             self.stop()
 
-    def get_task_list_output(self):
-        self.task_list_output = subprocess.check_output('tasklist')
-
     def find_running_node(self) -> Optional[psutil.Process]:
         self.is_unlocked = False
         self.running = False
         self.process = None
         found_ports = []
-        lnd_processes = process_checker.get_processes_by_name('lnd')
+        try:
+            processes = psutil.process_iter()
+        except:
+            return None
 
-        for process in lnd_processes:
+        for process in processes:
+            if not process.is_running():
+                continue
             try:
-                log_file = process.open_files()[0]
-            except (IndexError, AccessDenied):
+                process_name = process.name()
+            except:
                 continue
-            if str(self.network) not in log_file.path:
-                continue
-            self.process = process
-            self.running = True
-            try:
-                is_unlocked = False
-                connections = process.connections()
-                for connection in connections:
-                    found_ports.append((connection.laddr, connection.raddr))
-                    if 8080 <= connection.laddr.port <= 9000:
-                        self.rest_port = connection.laddr.port
-                    elif 10009 <= connection.laddr.port <= 10100:
-                        self.grpc_port = connection.laddr.port
-                    elif 9735 <= connection.laddr.port < 9800:
-                        self.node_port = connection.laddr.port
-                        is_unlocked = True
-                self.is_unlocked = is_unlocked
-                return process
-            except AccessDenied:
-                continue
+            if 'lnd' in process_name:
+                lnd_process = process
+                try:
+                    log_file = lnd_process.open_files()[0]
+                except (IndexError, AccessDenied) as e:
+                    continue
+                if str(self.bitcoin.network) not in log_file.path:
+                    continue
+                self.process = lnd_process
+                self.running = True
+                try:
+                    is_unlocked = False
+                    connections = process.connections()
+                    for connection in connections:
+                        found_ports.append((connection.laddr, connection.raddr))
+                        if 8080 <= connection.laddr.port <= 9000:
+                            self.rest_port = connection.laddr.port
+                        elif 10009 <= connection.laddr.port <= 10100:
+                            self.grpc_port = connection.laddr.port
+                        elif 9735 <= connection.laddr.port < 9800:
+                            self.node_port = connection.laddr.port
+                            is_unlocked = True
+                    self.is_unlocked = is_unlocked
+                    return lnd_process
+                except AccessDenied:
+                    continue
         return None
 
     @property
