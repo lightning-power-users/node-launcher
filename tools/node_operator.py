@@ -112,6 +112,24 @@ if __name__ == '__main__':
         type=str
     )
 
+    parser.add_argument(
+        '--pubkey',
+        '-p',
+        type=str
+    )
+
+    parser.add_argument(
+        '--size',
+        '-s',
+        type=int
+    )
+
+    parser.add_argument(
+        '--fee',
+        '-f',
+        type=int
+    )
+
     args = parser.parse_args()
 
     node_operator = NodeOperator()
