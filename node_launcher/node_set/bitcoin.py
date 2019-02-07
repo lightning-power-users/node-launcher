@@ -104,8 +104,6 @@ class Bitcoin(object):
         datadir = self.file['datadir']
         for file in os.listdir(datadir):
             if file not in exclude_files:
-                if datadir is None or file is None:
-                    print('here')
                 path = os.path.join(datadir, file)
                 candidate_paths.append(path)
         default_walletdir = os.path.join(self.file['datadir'], 'wallets')
