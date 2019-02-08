@@ -74,7 +74,7 @@ class LndClient(object):
     @property
     def lnddir(self) -> str:
         if self.lnd is not None:
-            return self.lnd.file['lnddir']
+            return self.lnd.lnddir
         else:
             return self._lnddir
 
