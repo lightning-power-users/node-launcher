@@ -22,9 +22,7 @@ from node_launcher.constants import (
     LND_DEFAULT_PEER_PORT,
     LND_DEFAULT_REST_PORT,
     LND_DIR_PATH,
-    MAINNET,
-    OPERATING_SYSTEM,
-    TESTNET
+    OPERATING_SYSTEM
 )
 from node_launcher.services.lnd_software import LndSoftware
 from node_launcher.utilities.utilities import get_port
@@ -44,6 +42,11 @@ class Lnd(object):
         self.software = LndSoftware()
 
         self.lnddir = LND_DIR_PATH[OPERATING_SYSTEM]
+
+        # Previous versions of the launcher set lnddir in the config file,
+        # but it is not a valid key so this helps old users upgrading
+        if self.file['lnddir'] is not None:
+            self.file['lnddir'] = None
 
         if self.file['debuglevel'] is None:
             self.file['debuglevel'] = 'info'
