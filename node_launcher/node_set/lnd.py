@@ -22,9 +22,7 @@ from node_launcher.constants import (
     LND_DEFAULT_PEER_PORT,
     LND_DEFAULT_REST_PORT,
     LND_DIR_PATH,
-    MAINNET,
-    OPERATING_SYSTEM,
-    TESTNET
+    OPERATING_SYSTEM
 )
 from node_launcher.services.lnd_software import LndSoftware
 from node_launcher.utilities.utilities import get_port
@@ -43,7 +41,12 @@ class Lnd(object):
         self.process = self.find_running_node()
         self.software = LndSoftware()
 
-        self.file['lnddir'] = LND_DIR_PATH[OPERATING_SYSTEM]
+        self.lnddir = LND_DIR_PATH[OPERATING_SYSTEM]
+
+        # Previous versions of the launcher set lnddir in the config file,
+        # but it is not a valid key so this helps old users upgrading
+        if self.file['lnddir'] is not None:
+            self.file['lnddir'] = None
 
         if self.file['debuglevel'] is None:
             self.file['debuglevel'] = 'info'
@@ -88,7 +91,7 @@ class Lnd(object):
             self.file['color'] = '#000000'
 
         self.macaroon_path = os.path.join(
-            self.file['lnddir'],
+            self.lnddir,
             'data',
             'chain',
             'bitcoin',
@@ -182,7 +185,7 @@ class Lnd(object):
 
     @property
     def tls_cert_path(self) -> str:
-        tls_cert_path = os.path.join(self.file['lnddir'], 'tls.cert')
+        tls_cert_path = os.path.join(self.lnddir, 'tls.cert')
         return tls_cert_path
 
     def lnd(self) -> List[str]:
@@ -209,8 +212,8 @@ class Lnd(object):
             base_command.append(f'--rpcserver=127.0.0.1:{self.grpc_port}')
         if self.bitcoin.file['testnet']:
             base_command.append(f'--network={self.bitcoin.network}')
-        if self.file['lnddir'] != LND_DIR_PATH[OPERATING_SYSTEM]:
-            base_command.append(f'''--lnddir="{self.file['lnddir']}"''')
+        if self.lnddir != LND_DIR_PATH[OPERATING_SYSTEM]:
+            base_command.append(f'''--lnddir="{self.lnddir}"''')
             base_command.append(f'--macaroonpath="{self.macaroon_path}"')
             base_command.append(f'--tlscertpath="{self.tls_cert_path}"')
         return ' '.join(base_command)

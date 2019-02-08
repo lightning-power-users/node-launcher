@@ -62,6 +62,8 @@ class ConfigurationFile(dict):
             for item in value:
                 assert isinstance(item, str)
             pass
+        elif value is None:
+            pass
         else:
             raise NotImplementedError(f'setattr for {type(value)}')
 
@@ -74,9 +76,10 @@ class ConfigurationFile(dict):
                           if l.startswith(name)]
         for property_line_index in property_lines:
             lines.pop(property_line_index)
-        for value in value_list:
-            property_string = os.linesep + f'{name}={value}' + os.linesep
-            lines.append(property_string)
+        if value_list is not None:
+            for value in value_list:
+                property_string = os.linesep + f'{name}={value}' + os.linesep
+                lines.append(property_string)
         with open(self.path, 'w') as f:
             f.writelines(lines)
 
