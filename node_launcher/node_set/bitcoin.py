@@ -6,6 +6,7 @@ from typing import Optional, List
 import psutil
 
 from node_launcher.exceptions import ZmqPortsNotOpenError
+from node_launcher.logging import log
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.constants import (
@@ -40,6 +41,11 @@ class Bitcoin(object):
 
         if 'bitcoin.conf' in os.listdir(self.file['datadir']):
             actual_conf_file = os.path.join(self.file['datadir'], 'bitcoin.conf')
+            log.info(
+                'datadir_redirect',
+                configuration_file_path=configuration_file_path,
+                actual_conf_file=actual_conf_file
+            )
             self.file = ConfigurationFile(actual_conf_file)
             if self.file['datadir'] is None:
                 self.autoconfigure_datadir()
@@ -82,6 +88,10 @@ class Bitcoin(object):
             free_mb -= int(free_mb * .3)
             self.file['dbcache'] = free_mb
         except:
+            log.warning(
+                'dbcache psutil.virtual_memory',
+                exc_info=True
+            )
             self.file['dbcache'] = 1000
 
         self.check_process()
@@ -161,18 +171,38 @@ class Bitcoin(object):
         default_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
         big_drive = self.hard_drives.get_big_drive()
         default_is_big_enough = not self.hard_drives.should_prune(
-            default_datadir, True)
+            input_directory=default_datadir,
+            has_bitcoin=True
+        )
         default_is_biggest = self.hard_drives.is_default_partition(big_drive)
+        log.info(
+            'autoconfigure_datadir',
+            default_is_big_enough=default_is_big_enough,
+            default_is_biggest=default_is_biggest
+        )
         if default_is_big_enough or default_is_biggest:
             self.file['datadir'] = default_datadir
+            log.info(
+                'autoconfigure_datadir',
+                datadir=default_datadir
+            )
             return
 
         if not self.hard_drives.should_prune(big_drive.mountpoint, False):
-            self.file['datadir'] = os.path.join(big_drive.mountpoint, 'Bitcoin')
+            datadir = os.path.join(big_drive.mountpoint, 'Bitcoin')
+            self.file['datadir'] = datadir
+            log.info(
+                'autoconfigure_datadir',
+                datadir=datadir
+            )
             if not os.path.exists(self.file['datadir']):
                 os.mkdir(self.file['datadir'])
         else:
             self.file['datadir'] = default_datadir
+            log.info(
+                'autoconfigure_datadir',
+                datadir=default_datadir
+            )
 
     def check_process(self):
         if self.process is not None:
@@ -190,17 +220,29 @@ class Bitcoin(object):
         try:
             processes = psutil.process_iter()
         except:
+            log.warning(
+                'Bitcoin.find_running_node',
+                exc_info=True
+            )
             return None
         for process in processes:
             try:
                 if not process.is_running() or process.status() == 'zombie':
                     continue
-            except psutil.NoSuchProcess:
+            except:
+                log.warning(
+                    'Bitcoin.find_running_node',
+                    exc_info=True
+                )
                 continue
             # noinspection PyBroadException
             try:
                 process_name = process.name()
             except:
+                log.warning(
+                    'Bitcoin.find_running_node',
+                    exc_info=True
+                )
                 continue
             if 'bitcoin' in process_name:
                 # noinspection PyBroadException
@@ -211,6 +253,10 @@ class Bitcoin(object):
                             self.running = True
                             return process
                 except:
+                    log.warning(
+                        'Bitcoin.find_running_node',
+                        exc_info=True
+                    )
                     continue
         return None
 
@@ -235,14 +281,17 @@ class Bitcoin(object):
         command = [self.software.bitcoin_qt]
         args = [
             f'-conf={self.file.path}',
-            f'-datadir={self.file["datadir"]}'
         ]
         if IS_WINDOWS:
             args = [
                 f'-conf="{self.file.path}"',
-                f'-datadir="{self.file["datadir"]}"'
             ]
         command += args
+        log.info(
+            'bitcoin_qt',
+            command=command,
+            **self.file.cache
+        )
         return command
 
     @property

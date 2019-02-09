@@ -11,7 +11,7 @@ from typing import List, Optional
 import psutil
 from psutil import AccessDenied
 
-
+from node_launcher.logging import log
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.constants import (
@@ -132,20 +132,36 @@ class Lnd(object):
         try:
             processes = psutil.process_iter()
         except:
+            log.warning(
+                'Lnd.find_running_node',
+                exc_info=True
+            )
             return None
 
         for process in processes:
             if not process.is_running():
+                log.warning(
+                    'Lnd.find_running_node',
+                    exc_info=True
+                )
                 continue
             try:
                 process_name = process.name()
             except:
+                log.warning(
+                    'Lnd.find_running_node',
+                    exc_info=True
+                )
                 continue
             if 'lnd' in process_name:
                 lnd_process = process
                 try:
                     log_file = lnd_process.open_files()[0]
-                except (IndexError, AccessDenied) as e:
+                except:
+                    log.warning(
+                        'Lnd.find_running_node',
+                        exc_info=True
+                    )
                     continue
                 if str(self.bitcoin.network) not in log_file.path:
                     continue
@@ -165,7 +181,11 @@ class Lnd(object):
                             is_unlocked = True
                     self.is_unlocked = is_unlocked
                     return lnd_process
-                except AccessDenied:
+                except:
+                    log.warning(
+                        'Lnd.find_running_node',
+                        exc_info=True
+                    )
                     continue
         return None
 
@@ -201,6 +221,11 @@ class Lnd(object):
             command += [
                 '--bitcoin.mainnet'
             ]
+        log.info(
+            'lnd',
+            command=command,
+            **self.file.cache
+        )
         return command
 
     @property
