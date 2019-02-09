@@ -7,6 +7,7 @@ from typing import List
 import psutil as psutil
 
 from node_launcher.constants import GIGABYTE, BITCOIN_DATA_PATH, OPERATING_SYSTEM
+from node_launcher.logging import log
 from node_launcher.utilities.utilities import get_dir_size
 
 
@@ -27,8 +28,23 @@ class HardDrives(object):
         try:
             capacity, used, free, percent = psutil.disk_usage(path)
         except:
+            log.warning(
+                'get_gb',
+                path=path,
+                exc_info=True
+            )
             return 0
+
         free_gb = math.floor(free / GIGABYTE)
+        log.info(
+            'get_gb',
+            path=path,
+            capacity=capacity,
+            used=used,
+            free=free,
+            percent=percent,
+            free_gb=free_gb
+        )
         return free_gb
 
     def list_partitions(self) -> List[Partition]:
@@ -38,6 +54,10 @@ class HardDrives(object):
         except:
             return partitions
         partition_paths = [p.mountpoint for p in ps if 'removable' not in p.opts]
+        log.info(
+            'partition_paths',
+            partition_paths=partition_paths
+        )
         for path in partition_paths:
             free_gb = self.get_gb(path)
             partitions.append(Partition(path, free_gb), )
