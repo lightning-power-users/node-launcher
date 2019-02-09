@@ -3,6 +3,8 @@ from os.path import expanduser
 import platform
 from typing import Dict
 
+from node_launcher.logging import log
+
 NODE_LAUNCHER_RELEASE = '.'.join(map(str, (5, 6, 0)))
 
 TARGET_BITCOIN_RELEASE = 'v0.17.1'
@@ -24,6 +26,9 @@ class StringConstant(object):
 
     def __ne__(self, other):
         return str(other).lower() != self.name
+
+    def __repr__(self):
+        return self.name
 
 
 class Network(StringConstant):
@@ -106,3 +111,12 @@ BITCOIN_MAINNET_RPC_PORT = 8332
 LND_DEFAULT_PEER_PORT = 9735
 LND_DEFAULT_GRPC_PORT = 10009
 LND_DEFAULT_REST_PORT = 8080
+
+
+log.info(
+    'constants',
+    OPERATING_SYSTEM=OPERATING_SYSTEM,
+    NODE_LAUNCHER_RELEASE=NODE_LAUNCHER_RELEASE,
+    TARGET_BITCOIN_RELEASE=TARGET_BITCOIN_RELEASE,
+    TARGET_LND_RELEASE=TARGET_LND_RELEASE
+)
