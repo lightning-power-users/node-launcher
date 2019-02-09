@@ -289,6 +289,7 @@ class Bitcoin(object):
         command += args
         log.info(
             'bitcoin_qt',
+            command=command,
             **self.file.cache
         )
         return command

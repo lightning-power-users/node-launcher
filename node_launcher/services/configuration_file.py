@@ -37,7 +37,7 @@ class ConfigurationFile(object):
         for property_line in property_lines:
             key_value = property_line.split('=')
             key = key_value[0]
-            if not key.strip() or 'rpcpass' in key:
+            if not key.strip():
                 continue
             value = key_value[1:]
             value = '='.join(value).strip()

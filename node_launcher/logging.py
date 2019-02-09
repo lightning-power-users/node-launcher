@@ -1,5 +1,6 @@
 import logging.config
 import structlog
+from structlog import DropEvent
 
 timestamper = structlog.processors.TimeStamper(fmt='%Y-%m-%d %H:%M:%S')
 pre_chain = [
@@ -45,6 +46,15 @@ logging.config.dictConfig({
         },
     }
 })
+
+
+def dropper(logger, method_name, event_dict):
+    for key in event_dict[0][0].keys():
+        if 'rpcpass' in key:
+            event_dict[0][0][key] = 'masked_password'
+    return event_dict
+
+
 structlog.configure(
     processors=[
         structlog.stdlib.add_log_level,
@@ -53,6 +63,7 @@ structlog.configure(
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
         structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+        dropper
     ],
     context_class=dict,
     logger_factory=structlog.stdlib.LoggerFactory(),
