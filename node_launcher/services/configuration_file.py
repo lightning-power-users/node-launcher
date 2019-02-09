@@ -6,7 +6,7 @@ from node_launcher.constants import NODE_LAUNCHER_RELEASE
 from node_launcher.logging import log
 
 
-class ConfigurationFile(dict):
+class ConfigurationFile(object):
     def __init__(self, path, **kwargs):
         super().__init__(**kwargs)
         self.path = path
@@ -27,6 +27,34 @@ class ConfigurationFile(dict):
                 f.write(f'# Node Launcher version {NODE_LAUNCHER_RELEASE}' + os.linesep + os.linesep)
                 f.flush()
 
+        self.cache = {}
+        self.populate_cache()
+
+    def populate_cache(self):
+        with open(self.path, 'r') as f:
+            property_lines = f.readlines()
+        self.cache = {}
+        for property_line in property_lines:
+            key_value = property_line.split('=')
+            key = key_value[0]
+            if not key.strip() or 'rpcpass' in key:
+                continue
+            value = key_value[1:]
+            value = '='.join(value).strip()
+            value = value.replace('"', '')
+            if len(value) == 1 and value.isdigit():
+                value = bool(int(value))
+            elif value.isdigit():
+                value = int(value)
+
+            existing_value = self.cache.get(key, 'no_key')
+            if existing_value == 'no_key':
+                self.cache[key] = value
+            elif isinstance(existing_value, list):
+                self.cache[key].append(value)
+            else:
+                self.cache[key] = [existing_value, value]
+
     def __repr__(self):
         return f'ConfigurationFile: {self.path}'
 
@@ -40,27 +68,10 @@ class ConfigurationFile(dict):
         raise NotImplementedError()
 
     def __getitem__(self, name):
-        with open(self.path, 'r') as f:
-            lines = f.readlines()
-        property_lines = [l for l in lines if l.startswith(name)]
-        values = []
-        for property_line in property_lines:
-            value = property_line.split('=')[1:]
-            value = '='.join(value).strip()
-            value = value.replace('"', '')
-            if len(value) == 1 and value.isdigit():
-                value = bool(int(value))
-            elif value.isdigit():
-                value = int(value)
-            values.append(value)
-
-        if not values:
-            return None
-        elif len(values) == 1:
-            return values[0]
-        return values
+        return self.cache.get(name, None)
 
     def __setitem__(self, name: str, value: Any) -> None:
+        self.cache[name] = value
         if isinstance(value, str):
             value = [value]
         elif isinstance(value, bool):

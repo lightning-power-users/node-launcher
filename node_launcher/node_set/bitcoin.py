@@ -41,6 +41,11 @@ class Bitcoin(object):
 
         if 'bitcoin.conf' in os.listdir(self.file['datadir']):
             actual_conf_file = os.path.join(self.file['datadir'], 'bitcoin.conf')
+            log.info(
+                'datadir_redirect',
+                configuration_file_path=configuration_file_path,
+                actual_conf_file=actual_conf_file
+            )
             self.file = ConfigurationFile(actual_conf_file)
             if self.file['datadir'] is None:
                 self.autoconfigure_datadir()
@@ -83,6 +88,10 @@ class Bitcoin(object):
             free_mb -= int(free_mb * .3)
             self.file['dbcache'] = free_mb
         except:
+            log.warning(
+                'dbcache psutil.virtual_memory',
+                exc_info=True
+            )
             self.file['dbcache'] = 1000
 
         self.check_process()
@@ -211,17 +220,29 @@ class Bitcoin(object):
         try:
             processes = psutil.process_iter()
         except:
+            log.warning(
+                'Bitcoin.find_running_node',
+                exc_info=True
+            )
             return None
         for process in processes:
             try:
                 if not process.is_running() or process.status() == 'zombie':
                     continue
-            except psutil.NoSuchProcess:
+            except:
+                log.warning(
+                    'Bitcoin.find_running_node',
+                    exc_info=True
+                )
                 continue
             # noinspection PyBroadException
             try:
                 process_name = process.name()
             except:
+                log.warning(
+                    'Bitcoin.find_running_node',
+                    exc_info=True
+                )
                 continue
             if 'bitcoin' in process_name:
                 # noinspection PyBroadException
@@ -232,6 +253,10 @@ class Bitcoin(object):
                             self.running = True
                             return process
                 except:
+                    log.warning(
+                        'Bitcoin.find_running_node',
+                        exc_info=True
+                    )
                     continue
         return None
 
@@ -256,14 +281,16 @@ class Bitcoin(object):
         command = [self.software.bitcoin_qt]
         args = [
             f'-conf={self.file.path}',
-            f'-datadir={self.file["datadir"]}'
         ]
         if IS_WINDOWS:
             args = [
                 f'-conf="{self.file.path}"',
-                f'-datadir="{self.file["datadir"]}"'
             ]
         command += args
+        log.info(
+            'bitcoin_qt',
+            **self.file.cache
+        )
         return command
 
     @property
