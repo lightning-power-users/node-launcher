@@ -1,3 +1,4 @@
+colorama
 dataclasses
 flask
 flask-admin
@@ -19,5 +20,6 @@ PyTest
 pytest-qt
 qrcode
 requests
+structlog
 webassets
 wtforms

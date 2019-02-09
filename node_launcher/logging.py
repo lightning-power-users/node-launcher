@@ -1,6 +1,5 @@
 import logging.config
 import structlog
-from structlog import DropEvent
 
 timestamper = structlog.processors.TimeStamper(fmt='%Y-%m-%d %H:%M:%S')
 pre_chain = [
