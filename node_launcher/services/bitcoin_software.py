@@ -1,6 +1,12 @@
 import os
 
-from node_launcher.constants import TARGET_BITCOIN_RELEASE, OPERATING_SYSTEM, DARWIN, IS_WINDOWS, IS_MACOS, IS_LINUX
+from node_launcher.constants import (
+    IS_LINUX,
+    IS_MACOS,
+    IS_WINDOWS,
+    OPERATING_SYSTEM,
+    TARGET_BITCOIN_RELEASE
+)
 from node_launcher.services.node_software import NodeSoftwareABC
 
 

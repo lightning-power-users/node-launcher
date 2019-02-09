@@ -3,6 +3,7 @@ from os.path import isfile, isdir, pardir
 from typing import List, Any
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
+from node_launcher.logging import log
 
 
 class ConfigurationFile(dict):
@@ -11,8 +12,16 @@ class ConfigurationFile(dict):
         self.path = path
         parent = os.path.abspath(os.path.join(path, pardir))
         if not isdir(parent):
+            log.info(
+                'Creating directory',
+                path=parent
+            )
             os.mkdir(parent)
         if not isfile(self.path):
+            log.info(
+                'Creating file',
+                path=self.path
+            )
             with open(self.path, 'w') as f:
                 f.write('# Auto-Generated Configuration File' + os.linesep + os.linesep)
                 f.write(f'# Node Launcher version {NODE_LAUNCHER_RELEASE}' + os.linesep + os.linesep)

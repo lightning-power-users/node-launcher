@@ -4,17 +4,27 @@ import socket
 from random import choice
 from string import ascii_lowercase, digits
 
+from node_launcher.logging import log
+
 
 def get_dir_size(start_path: str) -> int:
     total_size = 0
+    entries = None
     try:
-        for entry in os.scandir(start_path):
+        entries = os.scandir(start_path)
+        for entry in entries:
             if entry.is_dir(follow_symlinks=False):
                 total_size += get_dir_size(entry.path)
             elif entry.is_file(follow_symlinks=False):
                 total_size += entry.stat().st_size
-    except PermissionError:
-        pass
+    except:
+        log.warning(
+            'get_dir_size',
+            start_path=start_path,
+            total_size=total_size,
+            entries=entries,
+            exc_info=True
+        )
     return total_size
 
 

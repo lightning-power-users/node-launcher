@@ -95,6 +95,7 @@ if IS_LINUX:
     from keyring.backends.SecretService import Keyring
     keyring = Keyring()
 
+AUTOPRUNE_GB = 150
 # How many megabytes to keep
 # Total Bitcoin (mainnet) data directory size minus blocks is ~3 GB
 # We are targeting 10 GB, so 10 - 3 = 7
