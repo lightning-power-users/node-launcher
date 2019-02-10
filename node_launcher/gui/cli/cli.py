@@ -1,7 +1,11 @@
+import json
 from typing import List
 
 from PySide2.QtCore import SIGNAL, QProcess, QByteArray
 from PySide2.QtWidgets import QWidget, QTextEdit, QLineEdit
+from pygments import highlight
+from pygments.formatters.html import HtmlFormatter
+from pygments.lexers.data import JsonLexer
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.logging import log
@@ -17,6 +21,8 @@ class CliWidget(QWidget):
         self.layout = QGridLayout()
 
         self.output = QTextEdit()
+        self.output.acceptRichText = True
+
         self.input = QLineEdit()
 
         self.process = QProcess()
@@ -43,13 +49,12 @@ class CliWidget(QWidget):
             args=self.args,
             cmd=cmd
         )
-        self.output.append(f'> {cmd}')
+        self.output.append(f'> {cmd}\n')
         self.input.clear()
         self.process.kill()
         args = list(self.args)
         args.append(cmd)
         self.process.setArguments(args)
-
         self.process.start()
 
     def handle_error(self):
@@ -58,9 +63,18 @@ class CliWidget(QWidget):
         self.output.append(message)
 
     def handle_output(self):
-        output: QByteArray = self.process.readLine()
+        output: QByteArray = self.process.readAllStandardOutput()
         message = output.data().decode('utf-8').strip()
-        while message:
-            output = self.process.readLine()
-            message = output.data().decode('utf-8').strip()
+        if message.startswith('{') or message.startswith('['):
+            message = json.loads(message)
+            message = json.dumps(message, sort_keys=True, indent=4)
+            formatter = HtmlFormatter()
+            formatter.noclasses = True
+            formatter.linenos = False
+            formatter.nobackground = True
+            message = highlight(message, JsonLexer(), formatter)
+            self.output.insertHtml(message)
+        else:
             self.output.append(message)
+        max_scroll = self.output.verticalScrollBar().maximum()
+        self.output.verticalScrollBar().setValue(max_scroll)

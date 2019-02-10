@@ -9,10 +9,14 @@ class Tabs(QTabWidget):
         super(Tabs, self).__init__(parent)
         self.setTabPosition(QTabWidget.North)
         self.addTab(network_widget, 'Network')
-        self.lncli_widget = CliWidget(network_widget.node_set.lnd.software.lncli,
-                                 network_widget.node_set.lnd.lncli_arguments())
+        self.lncli_widget = CliWidget(
+            program=network_widget.node_set.lnd.software.lncli,
+            args=network_widget.node_set.lnd.lncli_arguments()
+        )
         self.addTab(self.lncli_widget, 'lncli')
 
-        self.bitcoin_cli_widget = CliWidget(network_widget.node_set.bitcoin.software.bitcoin_cli,
-                                 network_widget.node_set.bitcoin.bitcoin_cli_arguments())
+        self.bitcoin_cli_widget = CliWidget(
+            program=network_widget.node_set.bitcoin.software.bitcoin_cli,
+            args=network_widget.node_set.bitcoin.bitcoin_cli_arguments()
+        )
         self.addTab(self.bitcoin_cli_widget, 'bitcoin-cli')
