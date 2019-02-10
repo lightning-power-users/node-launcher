@@ -4,6 +4,7 @@ from PySide2.QtCore import SIGNAL, QProcess, QByteArray
 from PySide2.QtWidgets import QWidget, QTextEdit, QLineEdit
 
 from node_launcher.gui.components.grid_layout import QGridLayout
+from node_launcher.logging import log
 
 
 class CliWidget(QWidget):
@@ -36,10 +37,16 @@ class CliWidget(QWidget):
 
     def run_command(self):
         cmd = str(self.input.text())
+        log.info(
+            'run_command',
+            program=self.program,
+            args=self.args,
+            cmd=cmd
+        )
         self.output.append(f'> {cmd}')
         self.input.clear()
         self.process.kill()
-        args = self.args
+        args = list(self.args)
         args.append(cmd)
         self.process.setArguments(args)
 
@@ -48,7 +55,7 @@ class CliWidget(QWidget):
     def handle_error(self):
         output: QByteArray = self.process.readAllStandardError()
         message = output.data().decode('utf-8').strip()
-        self.output.setText(message)
+        self.output.append(message)
 
     def handle_output(self):
         output: QByteArray = self.process.readLine()
