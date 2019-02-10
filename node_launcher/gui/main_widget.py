@@ -23,6 +23,7 @@ from node_launcher.gui.components.tabs import Tabs
 from node_launcher.gui.settings.data_directories.data_directory_box import DataDirectoryBox
 from node_launcher.gui.network_buttons.network_widget import NetworkWidget
 from node_launcher.gui.settings.settings_tab_dialog import SettingsTabDialog
+from node_launcher.logging import log
 from node_launcher.services.launcher_software import LauncherSoftware
 
 
@@ -46,6 +47,7 @@ class MainWidget(QWidget):
             sys.exit(0)
 
         self.network_grid = Tabs(self, self.network_widget)
+        self.network_grid.currentChanged.connect(self.on_tab_change)
 
         self.grid = QVBoxLayout()
 
@@ -69,6 +71,13 @@ class MainWidget(QWidget):
 
         timer = QTimer()
         timer.singleShot(1000, self.check_version)
+
+    def on_tab_change(self, index: int):
+        log.info('on_tab_change', index=index)
+        if index == 1:
+            self.network_grid.lncli_widget.input.setFocus()
+        elif index == 2:
+            self.network_grid.bitcoin_cli_widget.input.setFocus()
 
     def check_version(self):
         latest_version = LauncherSoftware().get_latest_release_version()

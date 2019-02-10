@@ -17,6 +17,7 @@ class CliWidget(QWidget):
 
         self.output = QTextEdit()
         self.input = QLineEdit()
+
         self.process = QProcess()
         self.process.setProgram(self.program)
         self.process.setCurrentReadChannel(0)
