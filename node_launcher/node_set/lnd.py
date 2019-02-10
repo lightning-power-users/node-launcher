@@ -9,7 +9,6 @@ from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
 import psutil
-from psutil import AccessDenied
 
 from node_launcher.logging import log
 from node_launcher.node_set.bitcoin import Bitcoin
@@ -155,11 +154,14 @@ class Lnd(object):
                 continue
             if 'lnd' in process_name:
                 lnd_process = process
+                open_files = None
                 try:
-                    log_file = lnd_process.open_files()[0]
+                    open_files = lnd_process.open_files()
+                    log_file = open_files[0]
                 except:
                     log.warning(
                         'Lnd.find_running_node',
+                        open_files=open_files,
                         exc_info=True
                     )
                     continue
