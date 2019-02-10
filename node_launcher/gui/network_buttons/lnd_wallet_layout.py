@@ -199,13 +199,21 @@ class LndWalletLayout(QGridLayout):
             self.error_message.showMessage(e._state.details)
             return
 
+        timestamp = str(time.time())
+        keyring_service_name = f'lnd_{self.node_set.bitcoin.network}_wallet_password'
+        log.info(
+            'unlock_wallet',
+            keyring_service_name=keyring_service_name,
+            keyring_user_name=timestamp
+        )
+
         keyring.set_password(
-            service=f'lnd_{self.node_set.bitcoin.network}_wallet_password',
-            username=str(time.time()),
+            service=keyring_service_name,
+            username=timestamp,
             password=password)
 
         keyring.set_password(
-            service=f'lnd_{self.node_set.bitcoin.network}_wallet_password',
+            service=keyring_service_name,
             username=self.node_set.bitcoin.file['rpcuser'],
             password=password)
 
@@ -245,16 +253,24 @@ class LndWalletLayout(QGridLayout):
 
         seed = generate_seed_response.cipher_seed_mnemonic
 
+        keyring_service_name = f'lnd_{self.node_set.bitcoin.network}_seed'
+        keyring_user_name = ''.join(seed[0:2])
+        log.info(
+            'generate_seed',
+            keyring_service_name=keyring_service_name,
+            keyring_user_name=keyring_user_name
+        )
+
         keyring.set_password(
-            service=f'lnd_{self.node_set.bitcoin.network}_seed',
-            username=''.join(seed[0:2]),
+            service=keyring_service_name,
+            username=keyring_user_name,
             password=' '.join(seed)
         )
 
         if new_seed_password is not None:
             keyring.set_password(
-                service=f'lnd_{self.node_set.bitcoin.network}_seed_password',
-                username=''.join(seed[0:2]),
+                service=f'{keyring_service_name}_password',
+                username=keyring_user_name,
                 password=new_seed_password
             )
         return seed
@@ -272,9 +288,18 @@ class LndWalletLayout(QGridLayout):
             title=f'Create {self.node_set.bitcoin.network} LND Wallet',
             password_name='LND Wallet'
         )
+
+        keyring_service_name = f'lnd_{self.node_set.bitcoin.network}_wallet_password'
+        keyring_user_name = str(time.time())
+        log.info(
+            'create_wallet',
+            keyring_service_name=keyring_service_name,
+            keyring_user_name=keyring_user_name
+        )
+
         keyring.set_password(
-            service=f'lnd_{self.node_set.bitcoin.network}_wallet_password',
-            username=str(time.time()),
+            service=keyring_service_name,
+            username=keyring_user_name,
             password=new_wallet_password
         )
 
@@ -328,21 +353,28 @@ class LndWalletLayout(QGridLayout):
             raise Exception()
         seed_list = seed.split(' ')
 
-        timestamp = str(time.time())
+        keyring_service_name = f'lnd_{self.node_set.bitcoin.network}'
+        keyring_user_name = str(time.time())
+        log.info(
+            'recover_wallet',
+            keyring_service_name=keyring_service_name,
+            keyring_user_name=keyring_user_name
+        )
+
         keyring.set_password(
-            service=f'lnd_{self.node_set.bitcoin.network}_wallet_password',
-            username=timestamp,
+            service=f'{keyring_service_name}_wallet_password',
+            username=keyring_user_name,
             password=new_wallet_password
         )
         keyring.set_password(
-            service=f'lnd_{self.node_set.bitcoin.network}_seed',
-            username=timestamp,
+            service=f'{keyring_service_name}_seed',
+            username=keyring_user_name,
             password=seed
         )
         if seed_password is not None:
             keyring.set_password(
-                service=f'lnd_{self.node_set.bitcoin.network}_seed_password',
-                username=timestamp,
+                service=f'{keyring_service_name}_seed_password',
+                username=keyring_user_name,
                 password=seed_password
             )
 
@@ -355,7 +387,7 @@ class LndWalletLayout(QGridLayout):
             )
         except _Rendezvous as e:
             log.error(
-                'initialize_wallet',
+                'recover_wallet_initialize_wallet',
                 exc_info=True
             )
             # noinspection PyProtectedMember
