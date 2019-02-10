@@ -70,6 +70,12 @@ LND_DIR_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(LOCALAPPDATA, 'Lnd')
 }
 
+BACKUP_DIR_PATH: Dict[OperatingSystem, str] = {
+    DARWIN: expanduser('~/Library/Application Support/Backups/Node Launcher'),
+    LINUX: expanduser('~/.backups/node_launcher'),
+    WINDOWS: os.path.join(LOCALAPPDATA, 'Backups', 'Node Launcher')
+}
+
 BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Bitcoin/'),
     LINUX: expanduser('~/.bitcoin'),

@@ -1,20 +1,23 @@
-import os
-import socket
-import ssl
-import time
+from datetime import datetime
+from os.path import pardir, isdir
 from signal import SIGINT, SIGTERM
 from subprocess import call, Popen, PIPE
 from sys import platform
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
+import os
+import socket
+import ssl
+import tarfile
+import time
 
 import psutil
-from psutil import AccessDenied
 
 from node_launcher.logging import log
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.constants import (
+    BACKUP_DIR_PATH,
     IS_LINUX,
     IS_MACOS,
     IS_WINDOWS,
@@ -252,6 +255,7 @@ class Lnd(object):
         return f'127.0.0.1:{self.grpc_port}'
 
     def launch(self):
+        self.backup()
         command = self.lnd()
         command[0] = '"' + command[0] + '"'
         cmd = ' '.join(command)
@@ -280,3 +284,27 @@ class Lnd(object):
         else:
             raise NotImplementedError()
         return result
+
+    def backup(self):
+        node_launcher_backup_path = BACKUP_DIR_PATH[OPERATING_SYSTEM]
+        backup_path = os.path.join(node_launcher_backup_path, pardir)
+        parent = os.path.abspath(backup_path)
+        if not isdir(parent):
+            log.info(
+                'Creating directory',
+                path=parent
+            )
+            os.mkdir(parent)
+
+        if not isdir(node_launcher_backup_path):
+            log.info(
+                'Creating directory',
+                path=node_launcher_backup_path
+            )
+            os.mkdir(node_launcher_backup_path)
+
+        filename = f'{datetime.now():%Y-%m-%d}.tar.gz'
+        backup_file = os.path.join(node_launcher_backup_path, filename)
+        if not os.path.exists(backup_file):
+            with tarfile.open(backup_file, 'w:gz') as tar_file:
+                tar_file.add(os.path.join(self.lnddir))
