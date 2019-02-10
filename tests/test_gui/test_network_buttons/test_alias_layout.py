@@ -1,6 +1,6 @@
 import pytest
 
-from node_launcher.gui.network_buttons.alias_layout import AliasLayout
+from node_launcher.gui.settings.alias_layout import AliasLayout
 
 
 @pytest.fixture

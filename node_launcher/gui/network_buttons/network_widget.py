@@ -2,6 +2,7 @@ from PySide2.QtCore import QTimer
 from PySide2.QtWidgets import QWidget
 
 from node_launcher.gui.components.grid_layout import QGridLayout
+from node_launcher.gui.network_buttons.advanced import CliLayout
 from node_launcher.node_set import NodeSet
 from . import JouleLayout, LndWalletLayout, NodesLayout, ZapLayout
 
@@ -27,8 +28,8 @@ class NetworkWidget(QWidget):
         self.lnd_wallet_layout = LndWalletLayout(node_set=self.node_set)
         layout.addLayout(self.lnd_wallet_layout, column_span=columns)
 
-        self.zap_layout = ZapLayout(node_set=self.node_set)
-        layout.addLayout(self.zap_layout, column_span=columns)
+        self.cli_layout = CliLayout(node_set=self.node_set)
+        layout.addLayout(self.cli_layout, column_span=columns)
 
         self.joule_layout = JouleLayout(node_set=self.node_set)
         layout.addLayout(self.joule_layout, column_span=columns)
@@ -47,5 +48,4 @@ class NetworkWidget(QWidget):
 
         self.nodes_layout.set_button_state()
         self.lnd_wallet_layout.set_button_state()
-        self.zap_layout.set_button_state()
         self.joule_layout.set_button_state()
