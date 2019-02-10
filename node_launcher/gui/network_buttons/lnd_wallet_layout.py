@@ -12,6 +12,7 @@ from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.section_name import SectionName
 from node_launcher.gui.components.seed_dialog import SeedDialog
 from node_launcher.gui.components.thread_worker import Worker
+from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
 from node_launcher.node_set.lnd import Lnd
 from node_launcher.node_set.lnd_client import LndClient
@@ -25,6 +26,8 @@ class LndWalletLayout(QGridLayout):
         self.node_set = node_set
         self.password_dialog = QInputDialog()
         self.error_message = QErrorMessage()
+
+        self.state = None
 
         self.threadpool = QThreadPool()
 
@@ -54,22 +57,51 @@ class LndWalletLayout(QGridLayout):
         self.addWidget(HorizontalLine(), column_span=columns)
 
     def set_button_state(self):
+        old_state = self.state
         if self.node_set.lnd.running and not self.node_set.lnd.is_unlocked:
             if self.node_set.lnd.has_wallet:
-                self.set_unlock_state()
-                self.auto_unlock_wallet()
+                if self.state != 'unlock':
+                    self.set_unlock_state()
+                    self.auto_unlock_wallet()
+                else:
+                    return
             else:
-                self.set_create_recover_state()
+                if self.state != 'create':
+                    self.set_create_recover_state()
+                else:
+                    return
         elif self.node_set.lnd.running and self.node_set.lnd.is_unlocked:
-            self.set_open_state()
+            if self.state != 'open':
+                self.set_open_state()
+            else:
+                return
         elif not self.node_set.lnd.running:
             self.node_set.lnd.is_unlocked = False
-            self.set_closed_state()
+            if self.state != 'closed':
+                self.set_closed_state()
+            else:
+                return
+
+        log.info(
+            'set_button_state',
+            lnd_is_running=self.node_set.lnd.running,
+            lnd_is_unlocked=self.node_set.lnd.is_unlocked,
+            lnd_has_wallet=self.node_set.lnd.has_wallet,
+            old_state=old_state,
+            new_state=self.state
+        )
 
     def auto_unlock_wallet(self):
+        keyring_service_name = f'lnd_{self.node_set.bitcoin.network}_wallet_password'
+        keyring_user_name = self.node_set.bitcoin.file['rpcuser']
+        log.info(
+            'auto_unlock_wallet_get_password',
+            keyring_service_name=keyring_service_name,
+            keyring_user_name=keyring_user_name
+        )
         password = keyring.get_password(
-            service=f'lnd_{self.node_set.bitcoin.network}_wallet_password',
-            username=self.node_set.bitcoin.file['rpcuser'],
+            service=keyring_service_name,
+            username=keyring_user_name,
         )
         if password is not None:
             worker = Worker(
@@ -87,6 +119,11 @@ class LndWalletLayout(QGridLayout):
             client.unlock(password)
         except _Rendezvous as e:
             details = e.details()
+            log.warning(
+                'lnd_poll',
+                details=details,
+                exc_info=True
+            )
             return details
 
     def handle_lnd_poll(self, details: str):
@@ -111,21 +148,25 @@ class LndWalletLayout(QGridLayout):
             self.set_open_state()
 
     def set_unlock_state(self):
+        self.state = 'unlock'
         self.create_wallet_button.setDisabled(True)
         self.recover_wallet_button.setDisabled(True)
         self.unlock_wallet_button.setDisabled(False)
 
     def set_create_recover_state(self):
+        self.state = 'create'
         self.create_wallet_button.setDisabled(False)
         self.recover_wallet_button.setDisabled(False)
         self.unlock_wallet_button.setDisabled(True)
 
     def set_open_state(self):
+        self.state = 'open'
         self.create_wallet_button.setDisabled(True)
         self.recover_wallet_button.setDisabled(True)
         self.unlock_wallet_button.setDisabled(True)
 
     def set_closed_state(self):
+        self.state = 'closed'
         self.create_wallet_button.setDisabled(True)
         self.recover_wallet_button.setDisabled(True)
         self.unlock_wallet_button.setDisabled(True)
@@ -150,6 +191,10 @@ class LndWalletLayout(QGridLayout):
         try:
             self.node_set.lnd_client.unlock(wallet_password=password)
         except _Rendezvous as e:
+            log.error(
+                'unlock_wallet',
+                exc_info=True
+            )
             # noinspection PyProtectedMember
             self.error_message.showMessage(e._state.details)
             return
@@ -190,6 +235,10 @@ class LndWalletLayout(QGridLayout):
                 seed_password=new_seed_password
             )
         except _Rendezvous as e:
+            log.error(
+                'generate_seed',
+                exc_info=True
+            )
             # noinspection PyProtectedMember
             self.error_message.showMessage(e._state.details)
             return
@@ -244,6 +293,10 @@ class LndWalletLayout(QGridLayout):
                 seed_password=new_seed_password
             )
         except _Rendezvous as e:
+            log.error(
+                'initialize_wallet',
+                exc_info=True
+            )
             # noinspection PyProtectedMember
             self.error_message.showMessage(e._state.details)
             return
@@ -301,6 +354,10 @@ class LndWalletLayout(QGridLayout):
                 recovery_window=10000
             )
         except _Rendezvous as e:
+            log.error(
+                'initialize_wallet',
+                exc_info=True
+            )
             # noinspection PyProtectedMember
             self.error_message.showMessage(e._state.details)
             return
