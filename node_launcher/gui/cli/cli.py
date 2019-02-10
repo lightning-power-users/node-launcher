@@ -1,8 +1,7 @@
-import json
 from typing import List
 
 from PySide2.QtCore import SIGNAL, QProcess, QByteArray, Qt
-from PySide2.QtWidgets import QWidget, QTextEdit, QLineEdit, QCompleter
+from PySide2.QtWidgets import QTextEdit, QLineEdit, QCompleter, QDialog
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.data import JsonLexer
@@ -11,10 +10,11 @@ from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.logging import log
 
 
-class CliWidget(QWidget):
-    def __init__(self, program: str, args: List[str], commands: List[str]):
+class CliWidget(QDialog):
+    def __init__(self, title: str, program: str, args: List[str], commands: List[str]):
         super().__init__()
 
+        self.setWindowTitle(title)
         self.program = program
         self.args = args
 
@@ -27,6 +27,7 @@ class CliWidget(QWidget):
         self.completer = QCompleter(commands, self)
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.input.setCompleter(self.completer)
+        self.input.setFocus()
 
         self.process = QProcess()
         self.process.setProgram(self.program)
@@ -72,8 +73,6 @@ class CliWidget(QWidget):
         output: QByteArray = self.process.readAllStandardOutput()
         message = output.data().decode('utf-8').strip()
         if message.startswith('{') or message.startswith('['):
-            message = json.loads(message)
-            message = json.dumps(message, sort_keys=True, indent=4)
             formatter = HtmlFormatter()
             formatter.noclasses = True
             formatter.linenos = False
