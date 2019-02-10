@@ -46,7 +46,6 @@ class CliLayout(QGridLayout):
         self.addWidget(self.section_name, column_span=columns)
         self.addWidget(self.open_bitcoin_cli_button)
         self.addWidget(self.open_lncli_button, same_row=True, column=columns)
-        self.addWidget(HorizontalLine(), column_span=columns)
 
     def set_button_state(self):
         self.copy_bitcoin_cli.button.setEnabled(self.node_set.bitcoin.running)

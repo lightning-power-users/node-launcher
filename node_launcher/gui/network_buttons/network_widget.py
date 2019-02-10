@@ -28,11 +28,11 @@ class NetworkWidget(QWidget):
         self.lnd_wallet_layout = LndWalletLayout(node_set=self.node_set)
         layout.addLayout(self.lnd_wallet_layout, column_span=columns)
 
-        self.cli_layout = CliLayout(node_set=self.node_set)
-        layout.addLayout(self.cli_layout, column_span=columns)
-
         self.joule_layout = JouleLayout(node_set=self.node_set)
         layout.addLayout(self.joule_layout, column_span=columns)
+
+        self.cli_layout = CliLayout(node_set=self.node_set)
+        layout.addLayout(self.cli_layout, column_span=columns)
 
         self.setLayout(layout)
 
