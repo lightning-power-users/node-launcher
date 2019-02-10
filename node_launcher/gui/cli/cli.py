@@ -1,8 +1,8 @@
 import json
 from typing import List
 
-from PySide2.QtCore import SIGNAL, QProcess, QByteArray
-from PySide2.QtWidgets import QWidget, QTextEdit, QLineEdit
+from PySide2.QtCore import SIGNAL, QProcess, QByteArray, Qt
+from PySide2.QtWidgets import QWidget, QTextEdit, QLineEdit, QCompleter
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.data import JsonLexer
@@ -12,7 +12,7 @@ from node_launcher.logging import log
 
 
 class CliWidget(QWidget):
-    def __init__(self, program: str, args: List[str]):
+    def __init__(self, program: str, args: List[str], commands: List[str]):
         super().__init__()
 
         self.program = program
@@ -24,6 +24,9 @@ class CliWidget(QWidget):
         self.output.acceptRichText = True
 
         self.input = QLineEdit()
+        self.completer = QCompleter(commands, self)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.input.setCompleter(self.completer)
 
         self.process = QProcess()
         self.process.setProgram(self.program)
@@ -40,6 +43,9 @@ class CliWidget(QWidget):
 
         self.connect(self.input, SIGNAL("returnPressed(void)"),
                      self.run_command)
+
+        self.connect(self.completer, SIGNAL("activated(const QString&)"),
+                     self.input.clear, Qt.QueuedConnection)
 
     def run_command(self):
         cmd = str(self.input.text())
@@ -76,5 +82,48 @@ class CliWidget(QWidget):
             self.output.insertHtml(message)
         else:
             self.output.append(message)
+
+        commands = None
+        if '== Blockchain ==' in message:
+            commands = self.parse_bitcoin_cli_commands(message)
+        elif 'lncli [global options] command [command options]' in message:
+            commands = self.parse_lncli_commands(message)
+        if commands is not None:
+            log.debug('commands', commands=commands)
+
         max_scroll = self.output.verticalScrollBar().maximum()
         self.output.verticalScrollBar().setValue(max_scroll)
+
+    def parse_bitcoin_cli_commands(self, message: str):
+        log.debug('parse_bitcoin_cli_commands')
+        commands = []
+        for line in message.split(sep='\n'):
+            line = line.strip()
+            if not line or line.startswith('=='):
+                continue
+            command = line.split()[0]
+            command = command.strip()
+            commands.append(command)
+        return commands
+
+    def parse_lncli_commands(self, message: str):
+        log.debug('parse_lncli_commands')
+        at_commands = False
+        commands = []
+        for line in message.split(sep='\n'):
+            line = line.strip()
+            if not at_commands:
+                if 'COMMANDS:' in line:
+                    at_commands = True
+                    log.debug('commands line',
+                              line=line)
+                continue
+            elif 'GLOBAL OPTIONS' in line:
+                return commands
+            elif line.endswith(':') or not line:
+                continue
+
+            command = line.split()[0]
+            command = command.strip().replace(',', '')
+            commands.append(command)
+        return commands
