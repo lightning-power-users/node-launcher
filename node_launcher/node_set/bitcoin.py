@@ -295,7 +295,7 @@ class Bitcoin(object):
         return command
 
     def bitcoin_cli_arguments(self) -> List[str]:
-        return ['-conf', f'"{self.file.path}"']
+        return [f'-conf={self.file.path}']
 
     @property
     def bitcoin_cli(self) -> str:
