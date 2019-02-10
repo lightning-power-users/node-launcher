@@ -43,13 +43,16 @@ class CliWidget(QDialog):
         self.setLayout(self.layout)
 
         self.connect(self.input, SIGNAL("returnPressed(void)"),
-                     self.run_command)
+                     self.execute_user_command)
 
         self.connect(self.completer, SIGNAL("activated(const QString&)"),
                      self.input.clear, Qt.QueuedConnection)
 
-    def run_command(self):
+    def execute_user_command(self):
         cmd = str(self.input.text())
+        self.run_command(cmd)
+
+    def run_command(self, cmd: str):
         log.info(
             'run_command',
             program=self.program,
@@ -82,13 +85,14 @@ class CliWidget(QDialog):
         else:
             self.output.append(message)
 
-        commands = None
-        if '== Blockchain ==' in message:
-            commands = self.parse_bitcoin_cli_commands(message)
-        elif 'lncli [global options] command [command options]' in message:
-            commands = self.parse_lncli_commands(message)
-        if commands is not None:
-            log.debug('commands', commands=commands)
+        # This is just for generating the command lists in constants
+        # commands = None
+        # if '== Blockchain ==' in message:
+        #     commands = self.parse_bitcoin_cli_commands(message)
+        # elif 'lncli [global options] command [command options]' in message:
+        #     commands = self.parse_lncli_commands(message)
+        # if commands is not None:
+        #     log.debug('commands', commands=commands)
 
         max_scroll = self.output.verticalScrollBar().maximum()
         self.output.verticalScrollBar().setValue(max_scroll)
@@ -126,3 +130,8 @@ class CliWidget(QDialog):
             command = command.strip().replace(',', '')
             commands.append(command)
         return commands
+
+    def show(self):
+        self.showMaximized()
+        self.input.setFocus()
+        self.run_command('help')

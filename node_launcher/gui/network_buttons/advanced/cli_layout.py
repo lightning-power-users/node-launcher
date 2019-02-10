@@ -34,11 +34,11 @@ class CliLayout(QGridLayout):
 
         self.open_bitcoin_cli_button = QPushButton('bitcoin-cli')
         self.open_bitcoin_cli_button.clicked.connect(
-            lambda: self.show_cli_widget(self.bitcoin_cli_widget)
+            self.bitcoin_cli_widget.show
         )
         self.open_lncli_button = QPushButton('lncli')
         self.open_lncli_button.clicked.connect(
-            lambda: self.show_cli_widget(self.lncli_widget)
+            self.lncli_widget.show
         )
 
         columns = 2
@@ -51,7 +51,3 @@ class CliLayout(QGridLayout):
     def set_button_state(self):
         self.copy_bitcoin_cli.button.setEnabled(self.node_set.bitcoin.running)
         self.copy_lncli.button.setEnabled(self.node_set.lnd.is_unlocked)
-
-    def show_cli_widget(self, widget):
-        widget.show()
-        widget.input.setFocus()
