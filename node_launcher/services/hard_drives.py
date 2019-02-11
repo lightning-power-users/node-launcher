@@ -23,8 +23,6 @@ class Partition(object):
 
 
 class HardDrives(object):
-    partitions: List[Partition]
-
     @staticmethod
     def get_gb(path: str) -> int:
         try:

@@ -12,7 +12,7 @@ from node_launcher.utilities.utilities import is_port_in_use
 
 class TestDirectoryConfiguration(object):
     def test_lnd_data_path(self, lnd: Lnd):
-        assert os.path.isdir(lnd.file['lnddir'])
+        assert os.path.isdir(lnd.lnddir)
 
     def test_multi_property(self, lnd: Lnd):
         lnd.file['multi_property'] = [
