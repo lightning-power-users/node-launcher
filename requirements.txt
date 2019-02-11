@@ -14,6 +14,7 @@ keyring
 pillow
 protobuf
 psutil
+pygments
 pyinstaller
 PySide2
 PyTest

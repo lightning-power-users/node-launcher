@@ -9,7 +9,6 @@ from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
 import psutil
-from psutil import AccessDenied
 
 from node_launcher.logging import log
 from node_launcher.node_set.bitcoin import Bitcoin
@@ -155,11 +154,14 @@ class Lnd(object):
                 continue
             if 'lnd' in process_name:
                 lnd_process = process
+                open_files = None
                 try:
-                    log_file = lnd_process.open_files()[0]
+                    open_files = lnd_process.open_files()
+                    log_file = open_files[0]
                 except:
                     log.warning(
                         'Lnd.find_running_node',
+                        open_files=open_files,
                         exc_info=True
                     )
                     continue
@@ -228,19 +230,24 @@ class Lnd(object):
         )
         return command
 
+    def lncli_arguments(self) -> List[str]:
+        args = []
+        if self.grpc_port != LND_DEFAULT_GRPC_PORT:
+            args.append(f'--rpcserver=127.0.0.1:{self.grpc_port}')
+        if self.bitcoin.file['testnet']:
+            args.append(f'--network={self.bitcoin.network}')
+        if self.lnddir != LND_DIR_PATH[OPERATING_SYSTEM]:
+            args.append(f'''--lnddir="{self.lnddir}"''')
+            args.append(f'--macaroonpath="{self.macaroon_path}"')
+            args.append(f'--tlscertpath="{self.tls_cert_path}"')
+        return args
+
     @property
     def lncli(self) -> str:
         base_command = [
             f'"{self.software.lncli}"',
         ]
-        if self.grpc_port != LND_DEFAULT_GRPC_PORT:
-            base_command.append(f'--rpcserver=127.0.0.1:{self.grpc_port}')
-        if self.bitcoin.file['testnet']:
-            base_command.append(f'--network={self.bitcoin.network}')
-        if self.lnddir != LND_DIR_PATH[OPERATING_SYSTEM]:
-            base_command.append(f'''--lnddir="{self.lnddir}"''')
-            base_command.append(f'--macaroonpath="{self.macaroon_path}"')
-            base_command.append(f'--tlscertpath="{self.tls_cert_path}"')
+        base_command += self.lncli_arguments()
         return ' '.join(base_command)
 
     @property
