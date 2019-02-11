@@ -21,6 +21,13 @@ class TestDirectoryConfiguration(object):
         ]
         assert len(lnd.file['multi_property']) == 2
 
+    def test_multi_listen(self, lnd: Lnd):
+        lnd.file['listen'] = [
+            '127.0.0.1:9835',
+            '192.168.1.1:9736',
+        ]
+        assert lnd.node_port == '9835'
+
     def test_rest(self, lnd: Lnd):
         assert not is_port_in_use(lnd.rest_port)
 
