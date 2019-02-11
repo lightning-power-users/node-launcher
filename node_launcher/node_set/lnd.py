@@ -68,15 +68,6 @@ class Lnd(object):
         else:
             self.rest_port = self.file['restlisten'].split(':')[-1]
 
-        if self.file['listen'] is None:
-            if self.bitcoin.file['testnet']:
-                self.node_port = get_port(LND_DEFAULT_PEER_PORT + 1)
-            else:
-                self.node_port = get_port(LND_DEFAULT_PEER_PORT)
-            self.file['listen'] = f'127.0.0.1:{self.node_port}'
-        else:
-            self.node_port = self.file['listen'].split(':')[-1]
-
         if not self.file['rpclisten']:
             if self.bitcoin.file['testnet']:
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT + 1)
@@ -96,6 +87,21 @@ class Lnd(object):
             'bitcoin',
             str(self.bitcoin.network)
         )
+
+    @property
+    def node_port(self) -> str:
+        if self.file['listen'] is None:
+            if self.bitcoin.file['testnet']:
+                port = get_port(LND_DEFAULT_PEER_PORT + 1)
+            else:
+                port = get_port(LND_DEFAULT_PEER_PORT)
+            self.file['listen'] = f'127.0.0.1:{port}'
+        else:
+            if not isinstance(self.file['listen'], list):
+                port = self.file['listen'].split(':')[-1]
+            else:
+                port = self.file['listen'][0].split(':')[-1]
+        return port
 
     def test_tls_cert(self):
         context = ssl.create_default_context()
