@@ -5,8 +5,9 @@ from google.protobuf.json_format import MessageToDict
 # noinspection PyProtectedMember
 from grpc._channel import _Rendezvous
 
+from node_launcher.logging import log
 from tools.channel import Channel
-from tools.lnd_client import lnd_client
+from tools.lnd_client import lnd_remote_client
 
 
 class Node(object):
@@ -19,17 +20,47 @@ class Node(object):
         self.channels = []
         self.peer_info = None
         self.info = None
+        self.state = None
         try:
-            self.info = MessageToDict(lnd_client.get_node_info(pubkey))
+            self.info = MessageToDict(lnd_remote_client.get_node_info(pubkey))
+            self.state = 'online'
         except _Rendezvous as e:
             details = e.details().lower()
-            print(details)
             if details == 'unable to find node':
-                pass
-            elif 'invalid byte' in details:
-                pass
+                self.state = 'offline'
             else:
-                raise
+                self.state = 'error'
+                log.warn('get_node_info', error=details, pubkey=pubkey)
+
+    def reconnect(self) -> bool:
+        if self.info is None:
+            log.warning('Insufficient information to reconnect', pubkey=self.pubkey)
+            return False
+        if self.peer_info is not None:
+            log.debug('Already connected', pubkey=self.pubkey)
+            return False
+        log.debug(
+            'Attempting to reconnect',
+            pubkey=self.pubkey
+        )
+        for address in self.info['node'].get('addresses', []):
+            try:
+                lnd_remote_client.connect_peer(self.pubkey,
+                                               address['addr'],
+                                               timeout=5)
+                log.info(
+                    'Successfully reconnected',
+                    pubkey=self.pubkey,
+                    address=address
+                )
+                return True
+            except _Rendezvous as e:
+                log.debug(
+                    'Failed to reconnect',
+                    pubkey=self.pubkey,
+                    address=address
+                )
+                return False
 
     def add_channel(self, channel: Channel):
         if not [c for c in self.channels if c.chan_id == channel.chan_id]:

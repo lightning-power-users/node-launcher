@@ -7,10 +7,11 @@ from google.protobuf.json_format import MessageToDict
 # noinspection PyProtectedMember
 from grpc._channel import _Rendezvous
 
+from node_launcher.logging import log
 from node_launcher.node_set.lnd_client.rpc_pb2 import OpenStatusUpdate
 from tools.channel import Channel
 from tools.google_sheet import get_google_sheet_data
-from tools.lnd_client import lnd_client
+from tools.lnd_client import lnd_remote_client
 from tools.node import Node
 
 
@@ -29,37 +30,39 @@ class NodeOperator(object):
         self.get_peers()
 
     def get_channels(self):
-        channels = lnd_client.list_channels()
+        channels = lnd_remote_client.list_channels()
         [self.nodes[m.remote_pubkey].add_channel(Channel(**MessageToDict(m)))
          for m in channels]
 
-        pending_channels = [c for c in lnd_client.list_pending_channels()]
+        pending_channels = [c for c in lnd_remote_client.list_pending_channels()]
         [self.nodes[m.remote_node_pub].add_channel(Channel(**m))
          for m in pending_channels]
 
-        closed_channels = [c for c in lnd_client.closed_channels()]
+        closed_channels = [c for c in lnd_remote_client.closed_channels()]
         [self.nodes[m.remote_pubkey].add_channel(Channel(**MessageToDict((m))))
          for m in closed_channels]
 
+        log.debug(
+            'Got channels',
+            open_channels=len(channels),
+            pending_channels=len(pending_channels),
+            closed_channels=len(closed_channels)
+        )
+
     def get_peers(self):
-        peers = lnd_client.list_peers()
+        peers = lnd_remote_client.list_peers()
+        log.debug(
+            'Got peers',
+            peers=len(peers)
+        )
         for peer in peers:
             data = MessageToDict(peer)
             node = self.nodes[data['pub_key']]
             node.peer_info = data
 
-    def reconnect(self):
+    def reconnect_all(self):
         for node in self.nodes.values():
-            if node.info is None or node.peer_info is not None:
-                continue
-            for address in node.info['node'].get('addresses', []):
-                print(node.pubkey, address['addr'])
-                try:
-                    lnd_client.connect_peer(node.pubkey,
-                                            address['addr'],
-                                            timeout=5)
-                except _Rendezvous as e:
-                    print(e.details())
+            node.reconnect()
 
     def close_channels(self, ip_address: str):
         for node in self.nodes.values():
@@ -71,7 +74,7 @@ class NodeOperator(object):
                 if ip_address in address['addr']:
                     for channel in node.channels:
                         force = not channel.is_active
-                        txid = lnd_client.close_channel(
+                        txid = lnd_remote_client.close_channel(
                             channel_point=channel.channel_point,
                             force=force,
                             sat_per_byte=1
@@ -138,13 +141,13 @@ if __name__ == '__main__':
         node_operator.close_channels(ip_address=args.ip_address)
 
     elif args.action == 'reconnect':
-        node_operator.reconnect()
+        node_operator.reconnect_all()
 
     elif args.action == 'sheet':
         get_google_sheet_data(node_operator)
 
     elif args.action == 'open':
-        response = lnd_client.open_channel(
+        response = lnd_remote_client.open_channel(
             node_pubkey_string=args.pubkey,
             local_funding_amount=args.size,
             push_sat=0,
@@ -153,13 +156,14 @@ if __name__ == '__main__':
         )
         try:
             for update in response:
+                log.info(str(type(update)), **MessageToDict(update))
                 if isinstance(update, OpenStatusUpdate):
-                    print(update)
                     break
-                else:
-                    print(update)
         except _Rendezvous as e:
-            print(datetime.now(), e)
+            log.error(
+                'open_channel',
+                exc_info=True
+            )
 
     elif args.action == 'dupes':
         node_operator.identify_dupes()
