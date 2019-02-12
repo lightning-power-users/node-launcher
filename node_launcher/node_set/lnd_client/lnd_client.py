@@ -10,6 +10,7 @@ from google.protobuf.json_format import MessageToDict
 from grpc._plugin_wrapping import (_AuthMetadataContext,
                                    _AuthMetadataPluginCallback)
 
+from node_launcher.logging import log
 from . import rpc_pb2 as ln
 from . import rpc_pb2_grpc as lnrpc
 
@@ -212,6 +213,7 @@ class LndClient(object):
         kwargs['node_pubkey'] = codecs.decode(kwargs['node_pubkey_string'],
                                               'hex')
         request = ln.OpenChannelRequest(**kwargs)
+        log.debug('open_channel', request=MessageToDict(request))
         response = self.lnd_client.OpenChannel(request)
         return response
 
@@ -228,6 +230,7 @@ class LndClient(object):
     def get_graph(self) -> ln.ChannelGraph:
         request = ln.ChannelGraphRequest()
         request.include_unannounced = True
+        log.debug('get_graph', request=MessageToDict(request))
         response = self.lnd_client.DescribeGraph(request)
         return response
 

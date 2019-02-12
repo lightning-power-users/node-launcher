@@ -3,7 +3,7 @@ import time
 from grpc._channel import _Rendezvous
 
 from node_launcher.node_set.lnd_client.rpc_pb2 import OpenStatusUpdate
-from tools.lnd_client import lnd_client
+from tools.lnd_client import lnd_remote_client
 from tools.secrets import spreadsheet_id
 
 
@@ -53,7 +53,7 @@ def get_google_sheet_data(node_operator):
                 if len(node.channels) == 1 and node.remote_balance:
                     total += node.capacity
                     print(node.pubkey, "{0:,d}".format(node.capacity))
-                    response = lnd_client.open_channel(
+                    response = lnd_remote_client.open_channel(
                         node_pubkey_string=node.pubkey,
                         local_funding_amount=max(node.capacity, 200000),
                         push_sat=0,
