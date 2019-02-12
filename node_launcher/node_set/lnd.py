@@ -9,7 +9,6 @@ from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
 import psutil
-
 from node_launcher.logging import log
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
@@ -52,7 +51,7 @@ class Lnd(object):
 
         self.file['bitcoin.active'] = True
         self.file['bitcoin.node'] = 'bitcoind'
-        self.file['bitcoind.rpchost'] = '127.0.0.1'
+        self.file['bitcoind.rpchost'] = f'127.0.0.1:{self.bitcoin.rpc_port}'
         self.file['bitcoind.rpcuser'] = self.bitcoin.file['rpcuser']
         self.file['bitcoind.rpcpass'] = self.bitcoin.file['rpcpassword']
         self.file['bitcoind.zmqpubrawblock'] = self.bitcoin.file[
@@ -87,6 +86,9 @@ class Lnd(object):
             'bitcoin',
             str(self.bitcoin.network)
         )
+        self.config_snapshot = self.file.snapshot.copy()
+        self.file.file_watcher.fileChanged.connect(self.config_file_changed)
+        self.bitcoin.file.file_watcher.fileChanged.connect(self.bitcoin_config_file_changed)
 
     @property
     def node_port(self) -> str:
@@ -265,6 +267,7 @@ class Lnd(object):
         return f'127.0.0.1:{self.grpc_port}'
 
     def launch(self):
+        self.config_snapshot = self.file.snapshot.copy()
         command = self.lnd()
         command[0] = '"' + command[0] + '"'
         cmd = ' '.join(command)
@@ -293,3 +296,56 @@ class Lnd(object):
         else:
             raise NotImplementedError()
         return result
+
+    def config_file_changed(self):
+        # Refresh config file
+        self.file.file_watcher.blockSignals(True)
+        self.file.populate_cache()
+        self.file.file_watcher.blockSignals(False)
+        self.rest_port = int(self.file['restlisten'].split(':')[-1])
+        self.grpc_port = int(self.file['rpclisten'].split(':')[-1])
+
+        # Some text editors do not modify the file, they delete and replace the file
+        # Check if file is still in file_watcher list of files, if not add back
+        files_watched = self.file.file_watcher.files()
+        if len(files_watched) == 0:
+            self.file.file_watcher.addPath(self.file.path)
+
+    def bitcoin_config_file_changed(self):
+        # Refresh config file
+        self.file.file_watcher.blockSignals(True)
+        self.file.populate_cache()
+        self.file.file_watcher.blockSignals(False)
+        self.file['bitcoind.rpchost'] = f'127.0.0.1:{self.bitcoin.rpc_port}'
+        self.file['bitcoind.rpcuser'] = self.bitcoin.file['rpcuser']
+        self.file['bitcoind.rpcpass'] = self.bitcoin.file['rpcpassword']
+        self.file['bitcoind.zmqpubrawblock'] = self.bitcoin.file['zmqpubrawblock']
+        self.file['bitcoind.zmqpubrawtx'] = self.bitcoin.file['zmqpubrawtx']
+
+    @property
+    def restart_required(self):
+        if self.running:
+            # Did bitcoin details change
+            if self.bitcoin.restart_required:
+                return True and self.running
+
+            old_config = self.config_snapshot.copy()
+            new_config = self.file.snapshot
+
+            fields = [
+                'restlisten', 'listen', 'rpclisten'
+            ]
+
+            for field in fields:
+                # First check if field is found in both configs
+                found_in_old_config = field in old_config.keys()
+                found_in_new_config = field in new_config.keys()
+                if found_in_old_config != found_in_new_config:
+                    return True
+
+                # Now check that values are the same
+                if found_in_old_config:
+                    if old_config[field] != new_config[field]:
+                        return True
+
+        return False
