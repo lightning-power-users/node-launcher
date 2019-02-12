@@ -86,3 +86,22 @@ class TestBitcoinConfiguration(object):
         bitcoin.bitcoin_qt = MagicMock(return_value=command)
         result = bitcoin.launch()
         assert result.pid
+
+    def test_file_changed(self, bitcoin: Bitcoin):
+        bitcoin.file['rpcport'] = 8338
+        bitcoin.config_file_changed()
+        new_config = bitcoin.file.snapshot
+        bitcoin.running = False
+        assert bitcoin.rpc_port == new_config['rpcport'] == new_config['main.rpcport'] == 8338
+        assert bitcoin.restart_required == False
+        bitcoin.running = True
+        assert bitcoin.restart_required == True
+        bitcoin.file['port'] = 8336
+        bitcoin.config_file_changed()
+        new_config = bitcoin.file.snapshot
+        bitcoin.running = False
+        assert bitcoin.node_port == new_config['port'] == new_config['main.port'] == 8336
+        assert bitcoin.restart_required == False
+        bitcoin.running = True
+        assert bitcoin.restart_required == True
+
