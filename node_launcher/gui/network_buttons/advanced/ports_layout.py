@@ -2,6 +2,7 @@ from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.section_name import SectionName
 from node_launcher.gui.components.selectable_text import SelectableText
+from node_launcher.gui.components.warning_text import WarningText
 from node_launcher.node_set import NodeSet
 
 
@@ -56,3 +57,54 @@ class PortsLayout(QGridLayout):
             f'LND REST port: {self.node_set.lnd.rest_port}'
         )
         self.addWidget(self.rest_port)
+        self.bitcoin_restart_required = WarningText(
+            'Config file changed: Restart Bitcoin'
+        )
+        self.addWidget(self.bitcoin_restart_required)
+        self.bitcoin_restart_required.hide()
+        self.lnd_restart_required = WarningText(
+            'Config file changed: Restart LND'
+        )
+        self.addWidget(self.lnd_restart_required)
+        self.lnd_restart_required.hide()
+
+        self.node_set.bitcoin.file.file_watcher.fileChanged.connect(self.refresh_bitcoin_ports)
+        self.node_set.lnd.file.file_watcher.fileChanged.connect(self.refresh_lnd_ports)
+
+
+    def refresh_bitcoin_ports(self):
+        self.bitcoin_network_port.setText(
+            f'Bitcoin network peer port: {self.node_set.bitcoin.node_port}'
+        )
+        self.zmq_ports.setText(
+            f'Bitcoin ZMQ block/tx ports:'
+            f' {self.node_set.bitcoin.zmq_block_port}'
+            f'/{self.node_set.bitcoin.zmq_tx_port}'
+        )
+        self.rpc_port.setText(
+            f'Bitcoin RPC port: {self.node_set.bitcoin.rpc_port}'
+        )
+        self.check_restart_required()
+
+    def refresh_lnd_ports(self):
+        self.lnd_network_port.setText(
+            f'LND network peer port: {self.node_set.lnd.node_port}'
+        )
+        self.grpc_port.setText(
+            f'LND gRPC port: {self.node_set.lnd.grpc_port}'
+        )
+        self.rest_port.setText(
+            f'LND REST port: {self.node_set.lnd.rest_port}'
+        )
+        self.check_restart_required()
+
+    def check_restart_required(self):
+        if self.node_set.bitcoin.restart_required:
+            self.bitcoin_restart_required.show()
+        else:
+            self.bitcoin_restart_required.hide()
+
+        if self.node_set.lnd.restart_required:
+            self.lnd_restart_required.show()
+        else:
+            self.lnd_restart_required.hide()
