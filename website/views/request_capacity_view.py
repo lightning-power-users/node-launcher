@@ -2,30 +2,29 @@ from flask import request, render_template
 from flask_admin import BaseView, expose
 
 from node_launcher.node_set import NodeSet
-from website.constants import network
-from website.forms.payment_request_form import PaymentRequestForm
+from website.forms.request_capacity_form import RequestCapacityForm
 
 
-class RequestChannelView(BaseView):
+class RequestCapacityView(BaseView):
 
     @expose('/')
     def index(self):
-        form = PaymentRequestForm()
-        node_set = NodeSet(network)
+        form = RequestCapacityForm()
+        node_set = NodeSet()
         address = node_set.lnd_client.get_new_address()
-        return render_template('request_channel.html',
+        return render_template('request_capacity.html',
                                form=form,
                                address=address)
 
-    @expose('/payreq', methods=['GET', 'POST'])
-    def tip(self):
+    @expose('/buy_capacity', methods=['GET', 'POST'])
+    def buy_channel(self):
         if request.method == 'POST':
             value = int(request.form['value'])
             memo = request.form['memo']
         else:
             value = 50000
             memo = 'Tip'
-        node_set = NodeSet(network)
+        node_set = NodeSet()
         payment_request = node_set.lnd_client.create_invoice(
             value=value,
             memo=memo

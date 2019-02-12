@@ -28,7 +28,6 @@ class HomeView(BaseView):
             best_header_datetime = datetime.fromtimestamp(best_header_timestamp)
             best_header_strftime = best_header_datetime.strftime('%c')
             best_header_humanized = humanize.naturaltime(best_header_datetime)
-
             info['best_header_timestamp'] = f'{best_header_strftime} ({best_header_humanized})'
             with open(info_cache_file, 'w') as f:
                 json.dump(info, f)

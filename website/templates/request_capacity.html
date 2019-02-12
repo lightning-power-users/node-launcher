@@ -1,0 +1,44 @@
+{% extends 'admin/base.html' %}
+
+{% import 'macros/definition_list_macro.html' as dl %}
+
+{% block body %}
+    <div class="album py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <h4>
+                        Request Capacity
+                    </h4>
+                    <form action="{{ url_for('tip.tip') }}" method="post" novalidate>
+                        {{ form.hidden_tag() }}
+                        <p>
+                            {{ form.pub_key.label }}<br>
+                            {{ form.pub_key(size=32) }}
+                        </p>
+                        <p>
+                            {{ form.twitter_username.label }}<br>
+                            {{ form.twitter_username(size=32) }}
+                        </p>
+                        <p>
+                            {{ form.email_address.label }}<br>
+                            {{ form.email_address(size=32) }}
+                        </p>
+                        <p>
+                            {{ form.fee_rate.label }}<br>
+                            {{ form.fee_rate() }}
+                        </p>
+                        <p>
+                            {{ form.capacity.label }}<br>
+                            {{ form.capacity() }}
+                        </p>
+                        <p>{{ form.request_capacity() }}</p>
+                    </form>
+                </div>
+                <div class="col-md-4"></div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

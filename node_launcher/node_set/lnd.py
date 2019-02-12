@@ -185,7 +185,6 @@ class Lnd(object):
                         elif 10009 <= connection.laddr.port <= 10100:
                             self.grpc_port = connection.laddr.port
                         elif 9735 <= connection.laddr.port < 9800:
-                            self.node_port = connection.laddr.port
                             is_unlocked = True
                     self.is_unlocked = is_unlocked
                     return lnd_process

@@ -8,6 +8,7 @@ from website.models import Channels, PendingChannels
 from website.views.pending_channels_model_view import PendingChannelsModelView
 from website.views.open_channels_model_view import OpenChannelsModelView
 from website.constants import FLASK_SECRET_KEY
+from website.views.request_capacity_view import RequestCapacityView
 from website.views.tip_view import TipView
 
 
@@ -33,6 +34,11 @@ class App(Flask):
 
         home_view = HomeView(name='Home', endpoint='home')
 
+        request_capacity_view = RequestCapacityView(
+            name='Request Capacity',
+            endpoint='request-capacity'
+        )
+
         tip_view = TipView(name='Send a Tip', endpoint='tip')
 
         pending_channels_view = PendingChannelsModelView(
@@ -51,6 +57,7 @@ class App(Flask):
 
         self.admin.add_view(home_view)
         self.admin.add_view(tip_view)
+        self.admin.add_view(request_capacity_view)
         self.admin.add_view(pending_channels_view)
         self.admin.add_view(open_channels_view)
 
