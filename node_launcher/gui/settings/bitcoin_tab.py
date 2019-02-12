@@ -46,8 +46,8 @@ class BitcoinTab(QWidget):
             lambda x: self.update_config('testnet', bool(x))
         )
         self.bitcoin_layout.addWidget(self.enable_testnet_widget)
-
         self.setLayout(self.bitcoin_layout)
+        self.bitcoin.file.file_watcher.fileChanged.connect(self.bitcoin_config_changed)
 
     def change_datadir(self, new_datadir: str):
         self.bitcoin.file['datadir'] = new_datadir
@@ -71,3 +71,13 @@ class BitcoinTab(QWidget):
             self.change_network.emit(TESTNET)
         elif name == 'testnet' and not state:
             self.change_network.emit(MAINNET)
+
+    def bitcoin_config_changed(self):
+        if self.bitcoin.file['testnet']:
+            self.enable_testnet_widget.blockSignals(True)
+            self.set_checked(self.enable_testnet_widget, True)
+            self.enable_testnet_widget.blockSignals(False)
+        else:
+            self.enable_testnet_widget.blockSignals(True)
+            self.set_checked(self.enable_testnet_widget, False)
+            self.enable_testnet_widget.blockSignals(False)
