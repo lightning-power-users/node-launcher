@@ -4,7 +4,7 @@ from PySide2.QtWidgets import QWidget
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.network_buttons.advanced import CliLayout
 from node_launcher.node_set import NodeSet
-from . import JouleLayout, LndWalletLayout, NodesLayout, ZapLayout
+from . import JouleLayout, LndWalletLayout, NodesLayout, ZapLayout, RestartLayout
 
 
 class NetworkWidget(QWidget):
@@ -33,6 +33,9 @@ class NetworkWidget(QWidget):
 
         self.cli_layout = CliLayout(node_set=self.node_set)
         layout.addLayout(self.cli_layout, column_span=columns)
+
+        self.restart_layout = RestartLayout(node_set=self.node_set)
+        layout.addLayout(self.restart_layout)
 
         self.setLayout(layout)
 
