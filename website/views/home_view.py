@@ -8,7 +8,7 @@ from flask_admin import BaseView, expose
 from google.protobuf.json_format import MessageToDict
 
 from node_launcher.node_set import NodeSet
-from website.constants import cache_path, network
+from website.constants import CACHE_PATH
 from website.extensions import cache
 
 
@@ -18,9 +18,9 @@ class HomeView(BaseView):
     def index(self):
 
         # noinspection PyBroadException
-        info_cache_file = os.path.join(cache_path, 'info.json')
+        info_cache_file = os.path.join(CACHE_PATH, 'info.json')
         try:
-            node_set = NodeSet(network)
+            node_set = NodeSet()
             info = MessageToDict(node_set.lnd_client.get_info())
             with open(info_cache_file, 'w') as f:
                 json.dump(info, f)

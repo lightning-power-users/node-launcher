@@ -1,16 +1,11 @@
 from flask_admin import expose
 from flask_admin.model import BaseModelView
-# noinspection PyPackageRequirements
-from google.protobuf.json_format import MessageToDict
 from wtforms import Form
 
 from node_launcher.node_set import NodeSet
-from website.constants import network
 from website.extensions import cache
 from website.formatters.common import satoshi_formatter
-from website.formatters.lnd import pub_key_formatter, tx_hash_formatter, \
-    channel_point_formatter
-from website.models.pending_channel import PendingChannels
+from website.formatters.lnd import channel_point_formatter, tx_hash_formatter
 
 
 class PendingChannelsModelView(BaseModelView):
@@ -80,7 +75,7 @@ class PendingChannelsModelView(BaseModelView):
 
     def get_list(self, page, sort_field, sort_desc, search, filters,
                  page_size=None):
-        node_set = NodeSet(network)
+        node_set = NodeSet()
         try:
             pending_channels = node_set.lnd_client.list_pending_channels()
             return len(pending_channels), pending_channels
