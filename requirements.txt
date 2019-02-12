@@ -11,6 +11,7 @@ grpcio
 grpcio-tools
 jinja2
 keyring
+marshmallow
 pillow
 protobuf
 psutil

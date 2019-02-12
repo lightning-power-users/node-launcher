@@ -12,12 +12,11 @@ from node_launcher.constants import (
     WINDOWS,
     LOCALAPPDATA)
 
+
 default_secret_key = ''.join(
     random.choice(string.ascii_uppercase + string.digits) for _ in
     range(20))
 FLASK_SECRET_KEY = os.environ.get('FLASK_SECRET_KEY', default_secret_key)
-
-network = 'mainnet'
 
 WEBSITE_DATA_PATHS: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Node Website/'),

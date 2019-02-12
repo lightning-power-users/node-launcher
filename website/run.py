@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, url_for
+from flask import Flask, redirect, url_for
 from flask_admin import Admin
 from flask_qrcode import QRcode
 
@@ -29,21 +29,34 @@ class App(Flask):
         def page_not_found(e):
             return redirect(url_for('home.index'))
 
-        self.admin = Admin(app=self,
-                           url='/')
-        self.admin.add_view(HomeView(name='Home', endpoint='home'))
-        self.admin.add_view(TipView(name='Send a Tip', endpoint='tip'))
-        self.admin.add_view(PendingChannelsModelView(PendingChannels,
-                                                     endpoint='pending-channels',
-                                                     name='Pending Channels',
-                                                     category='LND'))
-        self.admin.add_view(OpenChannelsModelView(Channels,
-                                                  endpoint='channels',
-                                                  name='Open Channels',
-                                                  category='LND'))
+        self.admin = Admin(app=self, url='/')
+
+        home_view = HomeView(name='Home', endpoint='home')
+
+        tip_view = TipView(name='Send a Tip', endpoint='tip')
+
+        pending_channels_view = PendingChannelsModelView(
+            PendingChannels,
+            endpoint='pending-channels',
+            name='Pending Channels',
+            category='LND'
+        )
+
+        open_channels_view = OpenChannelsModelView(
+            Channels,
+            endpoint='channels',
+            name='Open Channels',
+            category='LND'
+        )
+
+        self.admin.add_view(home_view)
+        self.admin.add_view(tip_view)
+        self.admin.add_view(pending_channels_view)
+        self.admin.add_view(open_channels_view)
 
 
 if __name__ == '__main__':
     app = App()
     app.debug = True
     app.run(port=5002)
+

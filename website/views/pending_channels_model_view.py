@@ -5,7 +5,7 @@ from wtforms import Form
 from node_launcher.node_set import NodeSet
 from website.extensions import cache
 from website.formatters.common import satoshi_formatter
-from website.formatters.lnd import channel_point_formatter, tx_hash_formatter
+from website.formatters.lnd import tx_hash_formatter, channel_point_formatter
 
 
 class PendingChannelsModelView(BaseModelView):

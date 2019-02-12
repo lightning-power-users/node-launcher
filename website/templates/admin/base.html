@@ -62,8 +62,22 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
                     {{ navbar_item(url_for('home.index'), 'Home') }}
-                    {{ navbar_item(url_for('channels.index_view'), 'Open Channels') }}
-                    {{ navbar_item(url_for('pending-channels.index_view'), 'Pending Channels') }}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle"
+                           href="#" id="navbarDropdown"
+                           role="button"
+                           data-toggle="dropdown"
+                           aria-haspopup="true"
+                           aria-expanded="false">
+                            Channels
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item" href="#">Request a Channel</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{{url_for('channels.index_view')}}">Open Channels</a>
+                            <a class="dropdown-item" href="{{url_for('pending-channels.index_view')}}">Pending Channels</a>
+                        </div>
+                    </li>
                     {{ navbar_item('https://medium.com/lightning-power-users', 'Guides') }}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
