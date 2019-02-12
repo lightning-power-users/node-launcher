@@ -386,7 +386,6 @@ class Bitcoin(object):
 
                 # Now check that values are the same
                 if found_in_old_config:
-                    print(f"Common {old_config[field]} vs {new_config[field]}")
                     if old_config[field] != new_config[field]:
                         return True
 
@@ -405,7 +404,6 @@ class Bitcoin(object):
 
                     # Now check that values are the same
                     if found_in_old_config:
-                        print(f"Testnet {old_config[field]} vs {new_config[field]}")
                         if old_config[field] != new_config[field]:
                             return True
 
@@ -431,7 +429,6 @@ class Bitcoin(object):
             return False
         elif self.running:
             # Network has changed and the node is running - Restart is required
-            print(f"{old_config_network} vs {new_config_network}")
             return True
 
         return False
