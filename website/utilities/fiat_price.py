@@ -1,13 +1,12 @@
 import hashlib
 import hmac
-import json
 import os
 import time
 from datetime import datetime
 
 import requests
 
-from website.utilities.cache_directory import get_directory, dump_json
+from website.utilities.cache_directory import dump_json
 
 
 class BitcoinAverage(object):

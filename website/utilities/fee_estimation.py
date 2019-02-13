@@ -1,49 +1,44 @@
-import json
-import os
-from datetime import datetime, date
-from time import struct_time, mktime
-import decimal
+from datetime import datetime
 
-from bitcoin.core import COIN
 from bitcoin.rpc import Proxy
 
 from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
-from website.utilities.cache_directory import get_directory, dump_json
+from website.utilities.cache_directory import dump_json
 
 
 def output_fee_estimates():
     node_set = NodeSet()
     proxy = Proxy(btc_conf_file=node_set.bitcoin.file.path)
-    fee_estimates = dict(
-        ten_minutes=dict(conf_target=1),
-        one_hour=dict(conf_target=6),
-        six_hours=dict(conf_target=36),
-        twelve_hours=dict(conf_target=72),
-        one_day=dict(conf_target=144),
-        two_days=dict(conf_target=288),
-        three_days=dict(conf_target=432),
-        one_week=dict(conf_target=1008)
-    )
+    fee_estimates = [
+        dict(conf_target=1, label='Ten minutes'),
+        dict(conf_target=6, label='One_hour'),
+        dict(conf_target=36, label='Six hours'),
+        dict(conf_target=72, label='Twelve hours'),
+        dict(conf_target=144, label='One day'),
+        dict(conf_target=288, label='Two days'),
+        dict(conf_target=432, label='Three days'),
+        dict(conf_target=1008, label='One week')
+    ]
 
-    for key in fee_estimates.keys():
+    for fee_estimate in fee_estimates:
         # noinspection PyProtectedMember
-        fee_estimates[key]['conservative'] = proxy._call(
+        fee_estimate['conservative'] = proxy._call(
             'estimatesmartfee',
-            fee_estimates[key]['conf_target'],
+            fee_estimate['conf_target'],
             'CONSERVATIVE'
         )
 
         # noinspection PyProtectedMember
-        fee_estimates[key]['economical'] = proxy._call(
+        fee_estimate['economical'] = proxy._call(
             'estimatesmartfee',
-            fee_estimates[key]['conf_target'],
+            fee_estimate['conf_target'],
             'ECONOMICAL'
         )
 
         log.info(
             'estimatesmartfee',
-            fee_estimate=fee_estimates[key],
+            fee_estimate=fee_estimate,
         )
 
     today = datetime.now()

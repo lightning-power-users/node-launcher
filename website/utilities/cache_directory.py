@@ -2,6 +2,7 @@ import json
 import os
 from datetime import datetime
 from decimal import Decimal
+from pprint import pformat
 
 from bitcoin.core import COIN
 
@@ -39,3 +40,20 @@ def dump_json(data, name, date):
             indent=4,
             sort_keys=True
         )
+
+
+def get_latest(name, date=datetime.today()):
+    directory = get_directory(date)
+    files = [f for f in os.listdir(directory) if name in f]
+    latest = max([f.split('-')[0] for f in files])
+    file_path = os.path.join(directory, f'{latest}-{name}.json')
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+    return data
+
+
+if __name__ == '__main__':
+    price = get_latest('usd_price')
+    fee_estimate = get_latest('fee_estimate')
+    print(pformat(price))
+    print(pformat(fee_estimate))
