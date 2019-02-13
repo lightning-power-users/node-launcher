@@ -7,7 +7,7 @@ from datetime import datetime
 
 import requests
 
-from website.constants import CACHE_PATH
+from website.utilities.cache_directory import get_directory, dump_json
 
 
 class BitcoinAverage(object):
@@ -54,23 +54,12 @@ class BitcoinAverage(object):
         return result.json()
 
 
-if __name__ == '__main__':
+def output_price():
     price = BitcoinAverage().get_ticker()
     timestamp = price['timestamp']
     price_datetime = datetime.fromtimestamp(timestamp)
+    dump_json(data=price, name='usd_price', date=price_datetime)
 
-    year_directory = os.path.join(CACHE_PATH, str(price_datetime.year))
-    if not os.path.exists(year_directory):
-        os.mkdir(year_directory)
-    month_directory = os.path.join(year_directory, str(price_datetime.month))
-    if not os.path.exists(month_directory):
-        os.mkdir(month_directory)
-    day_directory = os.path.join(month_directory, str(price_datetime.day))
-    if not os.path.exists(day_directory):
-        os.mkdir(day_directory)
 
-    file_path = os.path.join(day_directory, f'{timestamp}.json')
-
-    with open(file_path, 'w') as f:
-        json.dump(price, f)
-
+if __name__ == '__main__':
+    output_price()
