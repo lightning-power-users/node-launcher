@@ -11,7 +11,131 @@
                     <h4>
                         Request Capacity
                     </h4>
-                    <form action="{{ url_for('tip.tip') }}" method="post" novalidate>
+                    <form action="{{ url_for('tip.tip') }}" method="post"
+                          novalidate>
+                        {{ form.hidden_tag() }}
+                        <p>
+                            {{ form.capacity.label }}<br>
+                            {{ form.capacity() }}
+                        </p>
+                        <p>
+                            {{ form.minimum_time_open.label }}<br>
+                            {{ form.minimum_time_open() }}
+                        </p>
+                        <p>
+                            {{ form.fee_rate.label }}<br>
+                            {{ form.fee_rate() }}
+                        </p>
+                    </form>
+                </div>
+                <div class="col-md-4"></div>
+            </div>
+            <div class="row"><br></div>
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>
+                                Sats
+                            </th>
+                            <th>
+                                ~USD
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                Capacity
+                            </td>
+                            <td id="selected-capacity">
+                                500,000
+                            </td>
+                            <td id="selected-capacity-usd">
+                                {{ "%.2f" | format(500000*price_per_sat) }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Capacity fee rate
+                            </td>
+                            <td id="capacity-fee-rate">
+                                Free
+                            </td>
+                            <td id="capacity-fee-rate-usd">
+                                -
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Capacity fee
+                            </td>
+                            <td id="capacity-fee">
+                                Free
+                            </td>
+                            <td id="capacity-fee-usd">
+                                -
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Sats per byte
+                            </td>
+                            <td id="sats-per-byte">
+                                30
+                            </td>
+                            <td id="sats-per-byte-usd">
+                                {{ "%.2f" | format(30*price_per_sat) }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Expected bytes
+                            </td>
+                            <td id="expected-bytes">
+                                500
+                            </td>
+                            <td id="expected-bytes-usd">
+                                -
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Transaction fee
+                            </td>
+                            <td id="transaction-fee">
+                                15,000
+                            </td>
+                            <td id="transaction-fee-usd">
+                                {{ "%.2f" | format(15000*price_per_sat) }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                Total fee
+                            </td>
+                            <td id="total-fee">
+                                15,000
+                            </td>
+                            <td id="total-fee-usd">
+                                {{ "%.2f" | format(15000*price_per_sat) }}
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-4"></div>
+            </div>
+            <div class="row"><br></div>
+            <div class="row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <form action="{{ url_for('request-capacity.process_request') }}" method="post"
+                          novalidate>
                         {{ form.hidden_tag() }}
                         <p>
                             {{ form.pub_key.label }}<br>
@@ -25,23 +149,12 @@
                             {{ form.email_address.label }}<br>
                             {{ form.email_address(size=32) }}
                         </p>
-                        <p>
-                            {{ form.capacity.label }}<br>
-                            {{ form.capacity() }}
-                        </p>
-                        <p>
-                            {{ form.minimum_time_open.label }}<br>
-                            {{ form.minimum_time_open() }}
-                        </p>
-                        <p>
-                            {{ form.fee_rate.label }}<br>
-                            {{ form.fee_rate() }}
-                        </p>
                         <p>{{ form.request_capacity() }}</p>
                     </form>
                 </div>
                 <div class="col-md-4"></div>
             </div>
+
         </div>
     </div>
 
