@@ -6,7 +6,7 @@ from datetime import datetime
 
 import requests
 
-from website.utilities.cache_directory import dump_json
+from website.utilities.dump_json import dump_json
 
 
 class BitcoinAverage(object):
@@ -53,12 +53,12 @@ class BitcoinAverage(object):
         return result.json()
 
 
-def output_price():
-    price = BitcoinAverage().get_ticker()
-    timestamp = price['timestamp']
+def cache_usd_price():
+    usd_price = BitcoinAverage().get_ticker()
+    timestamp = usd_price['timestamp']
     price_datetime = datetime.fromtimestamp(timestamp)
-    dump_json(data=price, name='usd_price', date=price_datetime)
+    dump_json(data=usd_price, name='usd_price', date=price_datetime)
 
 
 if __name__ == '__main__':
-    output_price()
+    cache_usd_price()

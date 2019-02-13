@@ -26,12 +26,16 @@
                             {{ form.email_address(size=32) }}
                         </p>
                         <p>
-                            {{ form.fee_rate.label }}<br>
-                            {{ form.fee_rate() }}
-                        </p>
-                        <p>
                             {{ form.capacity.label }}<br>
                             {{ form.capacity() }}
+                        </p>
+                        <p>
+                            {{ form.minimum_time_open.label }}<br>
+                            {{ form.minimum_time_open() }}
+                        </p>
+                        <p>
+                            {{ form.fee_rate.label }}<br>
+                            {{ form.fee_rate() }}
                         </p>
                         <p>{{ form.request_capacity() }}</p>
                     </form>

@@ -4,10 +4,10 @@ from bitcoin.rpc import Proxy
 
 from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
-from website.utilities.cache_directory import dump_json
+from website.utilities.dump_json import dump_json
 
 
-def output_fee_estimates():
+def cache_fee_estimate():
     node_set = NodeSet()
     proxy = Proxy(btc_conf_file=node_set.bitcoin.file.path)
     fee_estimates = [
@@ -46,4 +46,4 @@ def output_fee_estimates():
 
 
 if __name__ == '__main__':
-    output_fee_estimates()
+    cache_fee_estimate()
