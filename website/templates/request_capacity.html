@@ -57,7 +57,6 @@
 
             const selectedTransactionFeeRate = parseInt(transactionFeeRateSelect.selectedOptions[0].value);
             document.querySelector('#transaction-fee-rate').innerHTML = selectedTransactionFeeRate.toLocaleString();
-            document.querySelector('#transaction-fee-rate-usd').innerHTML = selectedTransactionFeeRate.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
 
             const expectedBytes = parseInt(document.querySelector('#expected-bytes').innerHTML);
             const transactionFee = selectedTransactionFeeRate * expectedBytes;
