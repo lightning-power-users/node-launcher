@@ -59,11 +59,15 @@
             <form action="{{ url_for('request-capacity.process_request') }}"
                   method="post"
                   novalidate>
+                <h2>
+                    Request Inbound Capacity
+                </h2>
+                <hr>
                 <div class="row">
                     <div class="col-md-4"></div>
                     <div class="col-md-4">
                         <h4>
-                            Request Capacity
+                            Capacity Fee
                         </h4>
                         {{ form.hidden_tag() }}
                         <p>
@@ -74,10 +78,6 @@
                             {{ form.capacity_fee_rate.label }}<br>
                             {{ form.capacity_fee_rate() }}
                         </p>
-                        <p>
-                            {{ form.transaction_fee_rate.label }}<br>
-                            {{ form.transaction_fee_rate() }}
-                        </p>
                     </div>
                     <div class="col-md-4"></div>
                 </div>
@@ -85,7 +85,7 @@
                 <div class="row">
                     <div class="col-md-4"></div>
                     <div class="col-md-4">
-                        <table>
+                        <table class="table table-striped table-bordered table-hover model-list table-sm">
                             <thead>
                             <tr>
                                 <th></th>
@@ -131,6 +131,43 @@
                                     0
                                 </td>
                             </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+                <div class="row"><br></div>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <h4>
+                            On-chain Transaction Fee
+                        </h4>
+                        {{ form.hidden_tag() }}
+                        <p>
+                            {{ form.transaction_fee_rate.label }}<br>
+                            {{ form.transaction_fee_rate() }}
+                        </p>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+                <div class="row"><br></div>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <table class="table table-striped table-bordered table-hover model-list table-sm">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>
+                                    Satoshis
+                                </th>
+                                <th>
+                                    ~USD
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
                             <tr>
                                 <td>
                                     Sats per byte
@@ -162,27 +199,20 @@
                                     {{ "%.2f" | format(15000*price_per_sat) }}
                                 </td>
                             </tr>
-                            <tr>
-                                <td>
-                                    Total fee
-                                </td>
-                                <td id="total-fee">
-                                    15,000
-                                </td>
-                                <td id="total-fee-usd">
-                                    {{ "%.2f" | format(15000*price_per_sat) }}
-                                </td>
-                            </tr>
 
                             </tbody>
                         </table>
                     </div>
                     <div class="col-md-4"></div>
                 </div>
+
                 <div class="row"><br></div>
                 <div class="row">
                     <div class="col-md-4"></div>
                     <div class="col-md-4">
+                        <h4>
+                            Contact Information
+                        </h4>
                         {{ form.hidden_tag() }}
                         <p>
                             {{ form.pub_key.label }}<br>
@@ -196,12 +226,112 @@
                             {{ form.email_address.label }}<br>
                             {{ form.email_address(size=32) }}
                         </p>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+                <div class="row"><br></div>
+
+
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <table class="table table-striped table-bordered table-hover model-list table-sm">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>
+                                    Satoshis
+                                </th>
+                                <th>
+                                    ~USD
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    Total fee
+                                </td>
+                                <td id="total-fee">
+                                    15,000
+                                </td>
+                                <td id="total-fee-usd">
+                                    {{ "%.2f" | format(15000*price_per_sat) }}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+
+                <div class="row"><br></div>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        {{ form.hidden_tag() }}
                         <p>{{ form.request_capacity() }}</p>
                     </div>
                     <div class="col-md-4"></div>
                 </div>
 
             </form>
+
+            {% if payment_request %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card mb-4 shadow-sm">
+                        <div style="height: 400px;">
+                            <img style="max-width:100%;
+                                    max-height:100%;
+                                    display: block;
+                                    margin-left: auto;
+                                    margin-right: auto;"
+                                 src="{{ qrcode(uri, border=10) }}">
+                        </div>
+                        <div class="card-body">
+                            <div class="col-md-12">
+                                <h4>Send Payment</h4>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="row">
+                                        <div class="col-md-12 text-center">
+                                            <label for="foo">
+                                                PayReq
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <input class="form-control"
+                                                   style="width: 100%;
+                                                          text-align: center;"
+                                                   id="foo"
+                                                   value="{{ payment_request }}">
+                                        </div>
+                                    </div>
+                                    <div class="row" style="padding-top: 20px;">
+                                        <div class="col-md-12 text-center">
+                                            <button type="button"
+                                                    class="btn btn-lg btn-outline-secondary"
+                                                    data-clipboard-target="#foo">
+                                                Copy
+                                            </button>
+
+                                            <a class="btn navbar-btn btn-success"
+                                               href="{{ uri }}">
+                                                Pay Invoice
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 

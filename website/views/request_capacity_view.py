@@ -12,6 +12,9 @@ class RequestCapacityView(BaseView):
 
     @expose('/')
     def index(self):
+        payment_request = None
+        uri = None
+
         form = RequestCapacityForm()
         price = get_latest('usd_price')
         last_price = price['last']
@@ -49,7 +52,9 @@ class RequestCapacityView(BaseView):
         return render_template('request_capacity.html',
                                form=form,
                                address=address,
-                               price_per_sat=price_per_sat)
+                               price_per_sat=price_per_sat,
+                               payment_request=payment_request,
+                               uri=uri)
 
     @expose('/process_request', methods=['GET', 'POST'])
     def process_request(self):
