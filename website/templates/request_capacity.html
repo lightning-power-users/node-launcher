@@ -24,34 +24,51 @@
 
             const selectedCapacity = parseInt(capacitySelect.selectedOptions[0].value);
             const selectedCapacityUsd = Math.round(selectedCapacity * pricePerSat * 100)/100;
-            document.querySelector('#selected-capacity').innerHTML = selectedCapacity.toLocaleString();
-            document.querySelector('#selected-capacity-usd').innerHTML = selectedCapacityUsd.toLocaleString();
+            if (selectedCapacity > 0) {
+                capacityFeeRateSelect.disabled = false;
+                console.log(capacityFeeRateSelect.value);
+                if (Math.round(capacityFeeRateSelect.value*100) === 0) {
+                    capacityFeeRateSelect.value = 0.02;
+                }
+                capacityFeeRateSelect.options[0].disabled = true;
+                document.querySelector('#selected-capacity').innerHTML = selectedCapacity.toLocaleString();
+                document.querySelector('#selected-capacity-usd').innerHTML = selectedCapacityUsd.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+            } else {
+                capacityFeeRateSelect.options[0].disabled = false;
+                capacityFeeRateSelect.value = 0;
+                capacityFeeRateSelect.disabled = true;
+                document.querySelector('#selected-capacity').innerHTML = '-';
+                document.querySelector('#selected-capacity-usd').innerHTML = '-';
+            }
 
-            console.log(capacityFeeRateSelect);
             const selectedCapacityFeeRate = parseFloat(capacityFeeRateSelect.selectedOptions[0].value);
-            console.log(selectedCapacityFeeRate);
             document.querySelector('#capacity-fee-rate').innerHTML = selectedCapacityFeeRate.toLocaleString(undefined, {style: 'percent'});
             document.querySelector('#capacity-fee-rate-usd').innerHTML = selectedCapacityFeeRate.toLocaleString(undefined, {style: 'percent'});
 
             const capacityFee = Math.round(selectedCapacity * selectedCapacityFeeRate);
             const capacityFeeUsd = Math.round(capacityFee * pricePerSat * 100)/100;
-            document.querySelector('#capacity-fee').innerHTML = capacityFee.toLocaleString();
-            document.querySelector('#capacity-fee-usd').innerHTML = capacityFeeUsd.toLocaleString();
+            if (capacityFee > 0) {
+                document.querySelector('#capacity-fee').innerHTML = capacityFee.toLocaleString();
+                document.querySelector('#capacity-fee-usd').innerHTML = capacityFeeUsd.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+            } else {
+                document.querySelector('#capacity-fee').innerHTML = '-';
+                document.querySelector('#capacity-fee-usd').innerHTML = '-';
+            }
 
             const selectedTransactionFeeRate = parseInt(transactionFeeRateSelect.selectedOptions[0].value);
             document.querySelector('#transaction-fee-rate').innerHTML = selectedTransactionFeeRate.toLocaleString();
-            document.querySelector('#transaction-fee-rate-usd').innerHTML = selectedTransactionFeeRate.toLocaleString();
+            document.querySelector('#transaction-fee-rate-usd').innerHTML = selectedTransactionFeeRate.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
 
             const expectedBytes = parseInt(document.querySelector('#expected-bytes').innerHTML);
             const transactionFee = selectedTransactionFeeRate * expectedBytes;
             const transactionFeeUsd = Math.round(transactionFee * pricePerSat * 100)/100;
             document.querySelector('#transaction-fee').innerHTML = transactionFee.toLocaleString();
-            document.querySelector('#transaction-fee-usd').innerHTML = transactionFeeUsd.toLocaleString();
+            document.querySelector('#transaction-fee-usd').innerHTML = transactionFeeUsd.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
 
             const totalFee = transactionFee + capacityFee;
             const totalFeeUsd = Math.round(totalFee * pricePerSat * 100)/100;
             document.querySelector('#total-fee').innerHTML = totalFee.toLocaleString();
-            document.querySelector('#total-fee-usd').innerHTML = totalFeeUsd.toLocaleString();
+            document.querySelector('#total-fee-usd').innerHTML = totalFeeUsd.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
         }
     </script>
     <div class="album py-5">

@@ -33,6 +33,7 @@ def get_request_capacity_form() -> RequestCapacityForm:
     form.transaction_fee_rate.choices = fee_estimate_choices
     form.capacity.choices = []
     capacity_choices = [500000, 1000000, 2000000, 5000000, 16777215]
+    form.capacity.choices.append((0, 'Reciprocate'))
     for capacity_choice in capacity_choices:
         form.capacity.choices.append((capacity_choice, f'{capacity_choice:,}'))
 
