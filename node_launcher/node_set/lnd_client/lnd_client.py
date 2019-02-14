@@ -171,11 +171,13 @@ class LndClient(object):
     def connect_peer(self, pubkey: str, host: str, timeout: int = 3) -> ln.ConnectPeerResponse:
         address = ln.LightningAddress(pubkey=pubkey, host=host)
         request = ln.ConnectPeerRequest(addr=address)
+        log.debug('connect_peer', request=MessageToDict(request))
         response = self.lnd_client.ConnectPeer(request, timeout=timeout)
         return response
 
     def list_peers(self) -> List[ln.Peer]:
         request = ln.ListPeersRequest()
+        log.debug('list_peers', request=MessageToDict(request))
         response = self.lnd_client.ListPeers(request)
         return response.peers
 
@@ -219,6 +221,7 @@ class LndClient(object):
 
     def create_invoice(self, **kwargs) -> ln.AddInvoiceResponse:
         request = ln.Invoice(**kwargs)
+        log.debug('create_invoice', request=MessageToDict(request))
         response = self.lnd_client.AddInvoice(request)
         return response
 

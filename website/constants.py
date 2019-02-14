@@ -1,6 +1,7 @@
 import os
 import string
 import random
+from decimal import Decimal
 from os.path import expanduser
 from typing import Dict
 
@@ -32,3 +33,14 @@ CACHE_PATH = os.path.join(WEBSITE_DATA_PATH, 'cache')
 
 if not os.path.exists(CACHE_PATH):
     os.mkdir(CACHE_PATH)
+
+EXPECTED_BYTES = 500
+
+CAPACITY_CHOICES = [500000, 1000000, 2000000, 5000000, 16777215]
+
+CAPACITY_FEE_RATES = [
+    (Decimal('0'), 'One week free'),
+    (Decimal('0.02'), 'One month 2%'),
+    (Decimal('0.1'), 'Six months 10%'),
+    (Decimal('0.18'), 'One year 18%')
+]

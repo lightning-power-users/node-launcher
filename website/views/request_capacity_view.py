@@ -1,4 +1,5 @@
 import uuid
+from decimal import Decimal
 
 from bitcoin.core import COIN
 from flask import request, render_template, redirect, url_for, flash
@@ -7,9 +8,13 @@ from grpc._channel import _Rendezvous
 
 from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
+from website.constants import EXPECTED_BYTES, CAPACITY_CHOICES, \
+    CAPACITY_FEE_RATES
 from website.forms.request_capacity_form import RequestCapacityForm
 from website.utilities.cache.cache import get_latest
 from website.utilities.dump_json import dump_json
+
+
 
 
 def get_request_capacity_form() -> RequestCapacityForm:
@@ -33,17 +38,11 @@ def get_request_capacity_form() -> RequestCapacityForm:
 
     form.transaction_fee_rate.choices = fee_estimate_choices
     form.capacity.choices = []
-    capacity_choices = [500000, 1000000, 2000000, 5000000, 16777215]
     form.capacity.choices.append((0, 'Reciprocate'))
-    for capacity_choice in capacity_choices:
+    for capacity_choice in CAPACITY_CHOICES:
         form.capacity.choices.append((capacity_choice, f'{capacity_choice:,}'))
 
-    form.capacity_fee_rate.choices = [
-        (0, 'One week free'),
-        (0.02, 'One month 2%'),
-        (0.1, 'Six months 10%'),
-        (0.18, 'One year 18%')
-    ]
+    form.capacity_fee_rate.choices = CAPACITY_FEE_RATES
     return form
 
 
@@ -60,7 +59,8 @@ class RequestCapacityView(BaseView):
         return render_template('request_capacity.html',
                                form=form,
                                address=address,
-                               price_per_sat=price_per_sat)
+                               price_per_sat=price_per_sat,
+                               EXPECTED_BYTES=EXPECTED_BYTES)
 
     @expose('/process_request', methods=['GET', 'POST'])
     def process_request(self):
@@ -98,6 +98,8 @@ class RequestCapacityView(BaseView):
                     pass
                 else:
                     flash(f'Error: {details}', category='danger')
+                    log.error('request-capacity.process_request POST',
+                              data=data, details=details)
                     return redirect(url_for('request-capacity.index'))
         else:
             peers = node_set.lnd_client.list_peers()
@@ -107,12 +109,32 @@ class RequestCapacityView(BaseView):
                 flash('Error: unknown PubKey, please provide pubkey@host:port', category='danger')
                 return redirect(url_for('request-capacity.index'))
 
+        requested_capacity = int(data['capacity'])
+        if requested_capacity != 0 and requested_capacity not in CAPACITY_CHOICES:
+            flash('Error: invalid capacity request', category='danger')
+            return redirect(url_for('request-capacity.index'))
+
+        requested_capacity_fee_rate = Decimal(data.get('capacity_fee_rate', '0'))
+        if requested_capacity_fee_rate not in dict(CAPACITY_FEE_RATES):
+            flash('Error: invalid capacity fee rate request', category='danger')
+            return redirect(url_for('request-capacity.index'))
+
+        capacity_fee = requested_capacity * requested_capacity_fee_rate
+
+        transaction_fee_rate = int(data['transaction_fee_rate'])
+        if not transaction_fee_rate >= 1:
+            flash('Error: invalid transaction fee rate request', category='danger')
+            return redirect(url_for('request-capacity.index'))
+
+        transaction_fee = transaction_fee_rate * EXPECTED_BYTES
+        total_fee = capacity_fee + transaction_fee
+
         tracker = uuid.uuid4().hex
         dump_json(data=data, name='capacity_request', label=tracker)
         log.info('request-capacity.process_request POST', data=data)
 
         payment_request = node_set.lnd_client.create_invoice(
-            value=100,
+            value=int(total_fee),
             memo='Capacity request'
         ).payment_request
         uri = ':'.join(['lightning', payment_request])
