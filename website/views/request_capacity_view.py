@@ -4,6 +4,7 @@ from decimal import Decimal
 from bitcoin.core import COIN
 from flask import request, render_template, redirect, url_for, flash
 from flask_admin import BaseView, expose
+from google.protobuf.json_format import MessageToDict
 from grpc._channel import _Rendezvous
 
 from node_launcher.logging import log
@@ -13,8 +14,6 @@ from website.constants import EXPECTED_BYTES, CAPACITY_CHOICES, \
 from website.forms.request_capacity_form import RequestCapacityForm
 from website.utilities.cache.cache import get_latest
 from website.utilities.dump_json import dump_json
-
-
 
 
 def get_request_capacity_form() -> RequestCapacityForm:
@@ -133,10 +132,18 @@ class RequestCapacityView(BaseView):
         dump_json(data=data, name='capacity_request', label=tracker)
         log.info('request-capacity.process_request POST', data=data)
 
-        payment_request = node_set.lnd_client.create_invoice(
+        memo = 'Lightning Power Users capacity request: '
+        if requested_capacity == 0:
+            memo += 'reciprocate'
+        else:
+            memo += f'{requested_capacity} @ {requested_capacity_fee_rate}'
+
+        invoice = node_set.lnd_client.create_invoice(
             value=int(total_fee),
-            memo='Capacity request'
-        ).payment_request
+            memo=f'Capacity request: '
+        )
+        invoice = MessageToDict(invoice)
+        payment_request = invoice['payment_request']
         uri = ':'.join(['lightning', payment_request])
 
         return render_template('payment_request.html',
