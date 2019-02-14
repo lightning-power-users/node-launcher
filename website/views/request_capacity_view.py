@@ -61,13 +61,15 @@ class RequestCapacityView(BaseView):
                                price_per_sat=price_per_sat,
                                EXPECTED_BYTES=EXPECTED_BYTES)
 
-    @expose('/process_request', methods=['GET', 'POST'])
+    @expose('/pay-req', methods=['GET', 'POST'])
     def process_request(self):
         if request.method != 'POST':
             return redirect(url_for('request-capacity.index'))
 
-        data = request.form
-        pub_key_data = data['pub_key'].strip()
+        form_data = request.form
+        log.info('request-capacity.process_request POST', data=form_data)
+
+        pub_key_data = form_data['pub_key'].strip()
         if not pub_key_data:
             flash('Error: please enter your PubKey', category='danger')
             return redirect(url_for('request-capacity.index'))
@@ -98,7 +100,7 @@ class RequestCapacityView(BaseView):
                 else:
                     flash(f'Error: {details}', category='danger')
                     log.error('request-capacity.process_request POST',
-                              data=data, details=details)
+                              data=form_data, details=details)
                     return redirect(url_for('request-capacity.index'))
         else:
             peers = node_set.lnd_client.list_peers()
@@ -108,29 +110,25 @@ class RequestCapacityView(BaseView):
                 flash('Error: unknown PubKey, please provide pubkey@host:port', category='danger')
                 return redirect(url_for('request-capacity.index'))
 
-        requested_capacity = int(data['capacity'])
+        requested_capacity = int(form_data['capacity'])
         if requested_capacity != 0 and requested_capacity not in CAPACITY_CHOICES:
             flash('Error: invalid capacity request', category='danger')
             return redirect(url_for('request-capacity.index'))
 
-        requested_capacity_fee_rate = Decimal(data.get('capacity_fee_rate', '0'))
+        requested_capacity_fee_rate = Decimal(form_data.get('capacity_fee_rate', '0'))
         if requested_capacity_fee_rate not in dict(CAPACITY_FEE_RATES):
             flash('Error: invalid capacity fee rate request', category='danger')
             return redirect(url_for('request-capacity.index'))
 
         capacity_fee = requested_capacity * requested_capacity_fee_rate
 
-        transaction_fee_rate = int(data['transaction_fee_rate'])
+        transaction_fee_rate = int(form_data['transaction_fee_rate'])
         if not transaction_fee_rate >= 1:
             flash('Error: invalid transaction fee rate request', category='danger')
             return redirect(url_for('request-capacity.index'))
 
         transaction_fee = transaction_fee_rate * EXPECTED_BYTES
         total_fee = capacity_fee + transaction_fee
-
-        tracker = uuid.uuid4().hex
-        dump_json(data=data, name='capacity_request', label=tracker)
-        log.info('request-capacity.process_request POST', data=data)
 
         memo = 'Lightning Power Users capacity request: '
         if requested_capacity == 0:
@@ -140,11 +138,21 @@ class RequestCapacityView(BaseView):
 
         invoice = node_set.lnd_client.create_invoice(
             value=int(total_fee),
-            memo=f'Capacity request: '
+            memo=memo
         )
         invoice = MessageToDict(invoice)
         payment_request = invoice['payment_request']
         uri = ':'.join(['lightning', payment_request])
+
+        tracker = uuid.uuid4().hex
+        data = {
+            'form_data': form_data,
+            'tracker': tracker,
+            'invoice': invoice,
+            'EXPECTED_BYTES': EXPECTED_BYTES
+        }
+
+        dump_json(data=data, name='capacity_request', label=tracker)
 
         return render_template('payment_request.html',
                                payment_request=payment_request,
