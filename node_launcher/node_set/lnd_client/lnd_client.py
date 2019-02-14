@@ -249,3 +249,14 @@ class LndClient(object):
         request = ln.ClosedChannelsRequest()
         response = self.lnd_client.ClosedChannels(request)
         return response.channels
+
+    def subscribe_invoices(self, add_index: int = None,
+                           settle_index: int = None) -> ln.InvoiceSubscription:
+        request = ln.InvoiceSubscription()
+        if add_index is not None:
+            request.add_index = add_index
+        if settle_index is not None:
+            request.settle_index = settle_index
+        log.debug('subscribe_invoices', request=MessageToDict(request))
+        response = self.lnd_client.SubscribeInvoices(request)
+        return response

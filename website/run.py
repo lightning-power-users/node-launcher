@@ -1,8 +1,13 @@
+from gevent import monkey
+monkey.patch_all()
+
+
 from flask import Flask, redirect, url_for
 from flask_admin import Admin
 from flask_qrcode import QRcode
+from flask_socketio import emit
 
-from website.extensions import cache
+from website.extensions import cache, socketio
 from website.views.home_view import HomeView
 from website.models import Channels, PendingChannels
 from website.views.pending_channels_model_view import PendingChannelsModelView
@@ -16,6 +21,7 @@ class App(Flask):
     def __init__(self):
         super().__init__(__name__)
         cache.init_app(self)
+        socketio.init_app(self)
         QRcode(self)
         self.debug = False
         self.config['SECRET_KEY'] = FLASK_SECRET_KEY
@@ -61,9 +67,17 @@ class App(Flask):
         self.admin.add_view(pending_channels_view)
         self.admin.add_view(open_channels_view)
 
+        @socketio.on('connect')
+        def test_connect():
+            emit('my response')
+
+        @socketio.on('disconnect')
+        def test_disconnect():
+            print('Client disconnected')
+
 
 if __name__ == '__main__':
     app = App()
     app.debug = True
-    app.run(port=5002)
 
+    socketio.run(app, port=5003, use_reloader=False)
