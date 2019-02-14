@@ -4,15 +4,15 @@
 <html lang="en">
 <head>
     {% block head %}
-    <meta charset="utf-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet"
-          type="text/css"
-          href="{{ url_for('static',filename='css/cyborg_bootstrap.min.css') }}">
-    <link rel="stylesheet"
-          type="text/css"
-          href="{{ url_for('static',filename='css/font_awesome.css') }}">
+        <meta charset="utf-8">
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ url_for('static',filename='css/cyborg_bootstrap.min.css') }}">
+        <link rel="stylesheet"
+              type="text/css"
+              href="{{ url_for('static',filename='css/font_awesome.css') }}">
 
         <style>/* unvisited link */
         a:link {
@@ -36,14 +36,18 @@
 
         </style>
 
-    <script src="{{ url_for('static',filename='js/jquery-3.2.1.slim.min.js') }}" async></script>
-    <script src="{{ url_for('static',filename='js/popper.min.js') }}" async></script>
-    <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}" async></script>
-    <script src="{{ url_for('static',filename='js/clipboard.min.js') }}" async></script>
-    <script async>
-        var clipboard = new ClipboardJS('.btn');
-    </script>
-    <title>Lightning Power Users</title>
+        <script src="{{ url_for('static',filename='js/jquery-3.2.1.slim.min.js') }}"
+                async></script>
+        <script src="{{ url_for('static',filename='js/popper.min.js') }}"
+                async></script>
+        <script src="{{ url_for('static',filename='js/bootstrap.min.js') }}"
+                async></script>
+        <script src="{{ url_for('static',filename='js/clipboard.min.js') }}"
+                async></script>
+        <script async>
+            var clipboard = new ClipboardJS('.btn');
+        </script>
+        <title>Lightning Power Users</title>
     {% endblock %}
 </head>
 <body>
@@ -71,11 +75,18 @@
                            aria-expanded="false">
                             Channels
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="{{ url_for('request-capacity.index') }}">Request Capacity</a>
+                        <div class="dropdown-menu"
+                             aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item"
+                               href="{{ url_for('request-capacity.index') }}">Request
+                                Capacity</a>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{url_for('channels.index_view')}}">Open Channels</a>
-                            <a class="dropdown-item" href="{{url_for('pending-channels.index_view')}}">Pending Channels</a>
+                            <a class="dropdown-item"
+                               href="{{ url_for('channels.index_view') }}">Open
+                                Channels</a>
+                            <a class="dropdown-item"
+                               href="{{ url_for('pending-channels.index_view') }}">Pending
+                                Channels</a>
                         </div>
                     </li>
                     {{ navbar_item('https://medium.com/lightning-power-users', 'Guides') }}
@@ -83,7 +94,7 @@
                 <ul class="nav navbar-nav navbar-right">
                     <li>
                         <a class="btn navbar-btn btn-success"
-                            href="{{ url_for('tip.index') }}">
+                           href="{{ url_for('tip.index') }}">
                             Send a Tip
                         </a>
                     </li>
@@ -92,6 +103,29 @@
         </div>
     </div>
 </header>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible"
+                         role="alert">
+                        <button type="button" class="close" data-dismiss="alert"
+                                aria-label="Close"><span aria-hidden="true">&times;</span>
+                        </button>
+                        <!-- <strong>Title</strong> --> {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        </div>
+        <div class="col-md-4"></div>
+    </div>
+</div>
 
 {% block body %}{% endblock %}
 

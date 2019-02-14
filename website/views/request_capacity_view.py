@@ -1,8 +1,9 @@
 import uuid
 
 from bitcoin.core import COIN
-from flask import request, render_template
+from flask import request, render_template, redirect, url_for, flash
 from flask_admin import BaseView, expose
+from grpc._channel import _Rendezvous
 
 from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
@@ -63,14 +64,53 @@ class RequestCapacityView(BaseView):
 
     @expose('/process_request', methods=['GET', 'POST'])
     def process_request(self):
-        if request.method == 'POST':
-            tracker = uuid.uuid4().hex
-            data = request.form
-            dump_json(data=data, name='capacity_request', label=tracker)
-            log.info('request-capacity.process_request POST', data=data)
+        if request.method != 'POST':
+            return redirect(url_for('request-capacity.index'))
 
+        data = request.form
+        pub_key_data = data['pub_key'].strip()
+        if not pub_key_data:
+            flash('Error: please enter your PubKey', category='danger')
+            return redirect(url_for('request-capacity.index'))
+
+        if '@' in pub_key_data:
+            try:
+                pub_key, ip_address = pub_key_data.split('@')
+            except ValueError:
+                flash('Error: invalid PubKey format', category='danger')
+                return redirect(url_for('request-capacity.index'))
+        else:
+            pub_key = pub_key_data
+            ip_address = None
+
+        if len(pub_key) != 66:
+            flash('Error: invalid PubKey length, expected 66 characters', category='danger')
+            return redirect(url_for('request-capacity.index'))
 
         node_set = NodeSet()
+
+        if ip_address is not None:
+            try:
+                node_set.lnd_client.connect_peer(pub_key, ip_address)
+            except _Rendezvous as e:
+                details = e.details()
+                if 'already connected to peer' in details:
+                    pass
+                else:
+                    flash(f'Error: {details}', category='danger')
+                    return redirect(url_for('request-capacity.index'))
+        else:
+            peers = node_set.lnd_client.list_peers()
+            try:
+                peer = [p for p in peers if p.pub_key == pub_key][0]
+            except IndexError:
+                flash('Error: unknown PubKey, please provide pubkey@host:port', category='danger')
+                return redirect(url_for('request-capacity.index'))
+
+        tracker = uuid.uuid4().hex
+        dump_json(data=data, name='capacity_request', label=tracker)
+        log.info('request-capacity.process_request POST', data=data)
+
         payment_request = node_set.lnd_client.create_invoice(
             value=100,
             memo='Capacity request'
