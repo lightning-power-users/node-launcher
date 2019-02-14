@@ -32,17 +32,17 @@ class RequestCapacityView(BaseView):
                 select_label = f'{select_label_time_estimate} (1 sat per byte)'
             select_value = estimated_fee_per_byte
             fee_estimate_choices.append((select_value, select_label))
-        form.fee_rate.choices = fee_estimate_choices
+        form.transaction_fee_rate.choices = fee_estimate_choices
         form.capacity.choices = []
         capacity_choices = [500000, 1000000, 2000000, 5000000, 16777215]
         for capacity_choice in capacity_choices:
             form.capacity.choices.append((capacity_choice, f'{capacity_choice:,}'))
 
-        form.minimum_time_open.choices = [
+        form.capacity_fee_rate.choices = [
                 (0, 'One week free'),
-                (2, 'One month 2%'),
-                (10, 'Six months 10%'),
-                (18, 'One year 18%')
+                (0.02, 'One month 2%'),
+                (0.1, 'Six months 10%'),
+                (0.18, 'One year 18%')
         ]
         node_set = NodeSet()
         address = node_set.lnd_client.get_new_address()

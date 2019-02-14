@@ -3,139 +3,186 @@
 {% import 'macros/definition_list_macro.html' as dl %}
 
 {% block body %}
+
+    <script>
+        const pricePerSat = {{ price_per_sat }};
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const capacitySelect = document.querySelector('select[name="capacity"]');
+            const capacityFeeRateSelect = document.querySelector('select[name="capacity_fee_rate"]');
+            const transactionFeeRateSelect = document.querySelector('select[name="transaction_fee_rate"]');
+            capacitySelect.onchange = changeEventHandler;
+            transactionFeeRateSelect.onchange = changeEventHandler;
+            capacityFeeRateSelect.onchange = changeEventHandler;
+            changeEventHandler();
+        }, false);
+
+        function changeEventHandler() {
+            const capacitySelect = document.querySelector('select[name="capacity"]');
+            const capacityFeeRateSelect = document.querySelector('select[name="capacity_fee_rate"]');
+            const transactionFeeRateSelect = document.querySelector('select[name="transaction_fee_rate"]');
+
+            const selectedCapacity = parseInt(capacitySelect.selectedOptions[0].value);
+            const selectedCapacityUsd = Math.round(selectedCapacity * pricePerSat * 100)/100;
+            document.querySelector('#selected-capacity').innerHTML = selectedCapacity.toLocaleString();
+            document.querySelector('#selected-capacity-usd').innerHTML = selectedCapacityUsd.toLocaleString();
+
+            console.log(capacityFeeRateSelect);
+            const selectedCapacityFeeRate = parseFloat(capacityFeeRateSelect.selectedOptions[0].value);
+            console.log(selectedCapacityFeeRate);
+            document.querySelector('#capacity-fee-rate').innerHTML = selectedCapacityFeeRate.toLocaleString(undefined, {style: 'percent'});
+            document.querySelector('#capacity-fee-rate-usd').innerHTML = selectedCapacityFeeRate.toLocaleString(undefined, {style: 'percent'});
+
+            const capacityFee = Math.round(selectedCapacity * selectedCapacityFeeRate);
+            const capacityFeeUsd = Math.round(capacityFee * pricePerSat * 100)/100;
+            document.querySelector('#capacity-fee').innerHTML = capacityFee.toLocaleString();
+            document.querySelector('#capacity-fee-usd').innerHTML = capacityFeeUsd.toLocaleString();
+
+            const selectedTransactionFeeRate = parseInt(transactionFeeRateSelect.selectedOptions[0].value);
+            document.querySelector('#transaction-fee-rate').innerHTML = selectedTransactionFeeRate.toLocaleString();
+            document.querySelector('#transaction-fee-rate-usd').innerHTML = selectedTransactionFeeRate.toLocaleString();
+
+            const expectedBytes = parseInt(document.querySelector('#expected-bytes').innerHTML);
+            const transactionFee = selectedTransactionFeeRate * expectedBytes;
+            const transactionFeeUsd = Math.round(transactionFee * pricePerSat * 100)/100;
+            document.querySelector('#transaction-fee').innerHTML = transactionFee.toLocaleString();
+            document.querySelector('#transaction-fee-usd').innerHTML = transactionFeeUsd.toLocaleString();
+
+            const totalFee = transactionFee + capacityFee;
+            const totalFeeUsd = Math.round(totalFee * pricePerSat * 100)/100;
+            document.querySelector('#total-fee').innerHTML = totalFee.toLocaleString();
+            document.querySelector('#total-fee-usd').innerHTML = totalFeeUsd.toLocaleString();
+        }
+    </script>
     <div class="album py-5">
         <div class="container">
-            <div class="row">
-                <div class="col-md-4"></div>
-                <div class="col-md-4">
-                    <h4>
-                        Request Capacity
-                    </h4>
-                    <form action="{{ url_for('tip.tip') }}" method="post"
-                          novalidate>
+            <form action="{{ url_for('request-capacity.process_request') }}"
+                  method="post"
+                  novalidate>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <h4>
+                            Request Capacity
+                        </h4>
                         {{ form.hidden_tag() }}
                         <p>
                             {{ form.capacity.label }}<br>
                             {{ form.capacity() }}
                         </p>
                         <p>
-                            {{ form.minimum_time_open.label }}<br>
-                            {{ form.minimum_time_open() }}
+                            {{ form.capacity_fee_rate.label }}<br>
+                            {{ form.capacity_fee_rate() }}
                         </p>
                         <p>
-                            {{ form.fee_rate.label }}<br>
-                            {{ form.fee_rate() }}
+                            {{ form.transaction_fee_rate.label }}<br>
+                            {{ form.transaction_fee_rate() }}
                         </p>
-                    </form>
+                    </div>
+                    <div class="col-md-4"></div>
                 </div>
-                <div class="col-md-4"></div>
-            </div>
-            <div class="row"><br></div>
-            <div class="row">
-                <div class="col-md-4"></div>
-                <div class="col-md-4">
-                    <table>
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>
-                                Sats
-                            </th>
-                            <th>
-                                ~USD
-                            </th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>
-                                Capacity
-                            </td>
-                            <td id="selected-capacity">
-                                500,000
-                            </td>
-                            <td id="selected-capacity-usd">
-                                {{ "%.2f" | format(500000*price_per_sat) }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Capacity fee rate
-                            </td>
-                            <td id="capacity-fee-rate">
-                                Free
-                            </td>
-                            <td id="capacity-fee-rate-usd">
-                                -
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Capacity fee
-                            </td>
-                            <td id="capacity-fee">
-                                Free
-                            </td>
-                            <td id="capacity-fee-usd">
-                                -
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Sats per byte
-                            </td>
-                            <td id="sats-per-byte">
-                                30
-                            </td>
-                            <td id="sats-per-byte-usd">
-                                {{ "%.2f" | format(30*price_per_sat) }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Expected bytes
-                            </td>
-                            <td id="expected-bytes">
-                                500
-                            </td>
-                            <td id="expected-bytes-usd">
-                                -
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Transaction fee
-                            </td>
-                            <td id="transaction-fee">
-                                15,000
-                            </td>
-                            <td id="transaction-fee-usd">
-                                {{ "%.2f" | format(15000*price_per_sat) }}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Total fee
-                            </td>
-                            <td id="total-fee">
-                                15,000
-                            </td>
-                            <td id="total-fee-usd">
-                                {{ "%.2f" | format(15000*price_per_sat) }}
-                            </td>
-                        </tr>
+                <div class="row"><br></div>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>
+                                    Satoshis
+                                </th>
+                                <th>
+                                    ~USD
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    Capacity
+                                </td>
+                                <td id="selected-capacity">
+                                    500,000
+                                </td>
+                                <td id="selected-capacity-usd">
+                                    {{ "%.2f" | format(500000*price_per_sat) }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Capacity fee rate
+                                </td>
+                                <td id="capacity-fee-rate">
+                                    0%
+                                </td>
+                                <td id="capacity-fee-rate-usd">
+                                    0%
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Capacity fee
+                                </td>
+                                <td id="capacity-fee">
+                                    0
+                                </td>
+                                <td id="capacity-fee-usd">
+                                    0
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Sats per byte
+                                </td>
+                                <td id="transaction-fee-rate">
+                                    30
+                                </td>
+                                <td id="transaction-fee-rate-usd">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Expected bytes
+                                </td>
+                                <td id="expected-bytes">
+                                    500
+                                </td>
+                                <td id="expected-bytes-usd">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Transaction fee
+                                </td>
+                                <td id="transaction-fee">
+                                    15,000
+                                </td>
+                                <td id="transaction-fee-usd">
+                                    {{ "%.2f" | format(15000*price_per_sat) }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Total fee
+                                </td>
+                                <td id="total-fee">
+                                    15,000
+                                </td>
+                                <td id="total-fee-usd">
+                                    {{ "%.2f" | format(15000*price_per_sat) }}
+                                </td>
+                            </tr>
 
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-4"></div>
                 </div>
-                <div class="col-md-4"></div>
-            </div>
-            <div class="row"><br></div>
-            <div class="row">
-                <div class="col-md-4"></div>
-                <div class="col-md-4">
-                    <form action="{{ url_for('request-capacity.process_request') }}" method="post"
-                          novalidate>
+                <div class="row"><br></div>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
                         {{ form.hidden_tag() }}
                         <p>
                             {{ form.pub_key.label }}<br>
@@ -150,11 +197,11 @@
                             {{ form.email_address(size=32) }}
                         </p>
                         <p>{{ form.request_capacity() }}</p>
-                    </form>
+                    </div>
+                    <div class="col-md-4"></div>
                 </div>
-                <div class="col-md-4"></div>
-            </div>
 
+            </form>
         </div>
     </div>
 
