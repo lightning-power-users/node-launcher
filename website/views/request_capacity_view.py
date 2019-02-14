@@ -1,3 +1,5 @@
+import uuid
+
 from bitcoin.core import COIN
 from flask import request, render_template
 from flask_admin import BaseView, expose
@@ -6,15 +8,13 @@ from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
 from website.forms.request_capacity_form import RequestCapacityForm
 from website.utilities.cache.cache import get_latest
+from website.utilities.dump_json import dump_json
 
 
 class RequestCapacityView(BaseView):
 
     @expose('/')
     def index(self):
-        payment_request = None
-        uri = None
-
         form = RequestCapacityForm()
         price = get_latest('usd_price')
         last_price = price['last']
@@ -52,14 +52,14 @@ class RequestCapacityView(BaseView):
         return render_template('request_capacity.html',
                                form=form,
                                address=address,
-                               price_per_sat=price_per_sat,
-                               payment_request=payment_request,
-                               uri=uri)
+                               price_per_sat=price_per_sat)
 
     @expose('/process_request', methods=['GET', 'POST'])
     def process_request(self):
         if request.method == 'POST':
+            tracker = uuid.uuid4().hex
             data = request.form
+            dump_json(data=data, name='capacity_request', label=tracker)
             log.info('request-capacity.process_request POST', data=data)
 
         node_set = NodeSet()
