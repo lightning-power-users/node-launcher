@@ -1,13 +1,9 @@
-eventlet
 flask
 flask-admin
 flask-caching
 Flask-QRcode
-flask-socketio
 flask-wtf
 Frozen-Flask
-gevent
 humanize
 python-bitcoinlib
-redis
-python-socketio
+websockets
