@@ -16,7 +16,7 @@ class TipView(BaseView):
                                form=form,
                                address=address)
 
-    @expose('/payreq', methods=['GET', 'POST'])
+    @expose('/pay-req', methods=['GET', 'POST'])
     def tip(self):
         if request.method == 'POST':
             value = int(request.form['value'])
@@ -31,6 +31,8 @@ class TipView(BaseView):
         ).payment_request
         uri = ':'.join(['lightning', payment_request])
 
-        return render_template('payment_request.html',
-                               payment_request=payment_request,
-                               uri=uri)
+        return render_template(
+            'payment_request.html',
+            payment_request=payment_request,
+            uri=uri
+        )
