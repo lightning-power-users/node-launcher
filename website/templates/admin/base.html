@@ -44,8 +44,10 @@
                 async></script>
         <script src="{{ url_for('static',filename='js/clipboard.min.js') }}"
                 async></script>
-        <script async>
-            var clipboard = new ClipboardJS('.btn');
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const clipboard = new ClipboardJS('.btn');
+            }, false);
         </script>
 
         <title>Lightning Power Users</title>
