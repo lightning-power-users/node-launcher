@@ -14,6 +14,7 @@ from website.constants import EXPECTED_BYTES, CAPACITY_CHOICES, \
 from website.forms.request_capacity_form import RequestCapacityForm
 from website.utilities.cache.cache import get_latest
 from website.utilities.dump_json import dump_json
+from website.utilities.websocket_client import send_websocket_message
 
 
 def get_request_capacity_form() -> RequestCapacityForm:
@@ -147,6 +148,9 @@ class RequestCapacityView(BaseView):
         payment_request = invoice['payment_request']
         uri = ':'.join(['lightning', payment_request])
 
+        if not session.get('tracker', None):
+            session['tracker'] = uuid.uuid4().hex
+
         data = {
             'form_data': form_data,
             'tracker': session['tracker'],
@@ -157,6 +161,8 @@ class RequestCapacityView(BaseView):
         log.debug('request-capacity.process_request', data=data)
 
         dump_json(data=data, name='capacity_request', label=session['tracker'])
+
+        send_websocket_message(data=data)
 
         return render_template('payment_request.html',
                                payment_request=payment_request,
