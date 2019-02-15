@@ -55,7 +55,9 @@ class RequestCapacityView(BaseView):
         form = get_request_capacity_form()
         node_set = NodeSet()
         address = node_set.lnd_client.get_new_address()
-        session['tracker'] = uuid.uuid4().hex
+        if session.get('tracker', None) is None:
+            session['tracker'] = uuid.uuid4().hex
+        log.debug('RequestCapacityView.index', tracker=session['tracker'])
         return render_template('request_capacity.html',
                                form=form,
                                address=address,
@@ -145,15 +147,16 @@ class RequestCapacityView(BaseView):
         payment_request = invoice['payment_request']
         uri = ':'.join(['lightning', payment_request])
 
-        tracker = uuid.uuid4().hex
         data = {
             'form_data': form_data,
-            'tracker': tracker,
+            'tracker': session['tracker'],
             'invoice': invoice,
             'EXPECTED_BYTES': EXPECTED_BYTES
         }
 
-        dump_json(data=data, name='capacity_request', label=tracker)
+        log.debug('request-capacity.process_request', data=data)
+
+        dump_json(data=data, name='capacity_request', label=session['tracker'])
 
         return render_template('payment_request.html',
                                payment_request=payment_request,

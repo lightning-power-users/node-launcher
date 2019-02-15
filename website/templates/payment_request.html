@@ -7,7 +7,9 @@
     <script type="text/javascript" charset="utf-8">
         var exampleSocket = new WebSocket("ws://localhost:8765");
         exampleSocket.onopen = function (event) {
-            exampleSocket.send({tracker: {{ session['tracker'] }}});
+            const tracker = "{{ session['tracker'] }}";
+            const tracker_object = JSON.stringify({tracker: tracker});
+            exampleSocket.send(tracker_object);
         };
         exampleSocket.onmessage = function (event) {
             console.log(event.data);
