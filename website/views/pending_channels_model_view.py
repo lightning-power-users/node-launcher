@@ -4,6 +4,7 @@ from flask_admin.model import BaseModelView
 from google.protobuf.json_format import MessageToDict
 from wtforms import Form
 
+from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
 from website.constants import network
 from website.extensions import cache
@@ -80,14 +81,19 @@ class PendingChannelsModelView(BaseModelView):
 
     def get_list(self, page, sort_field, sort_desc, search, filters,
                  page_size=None):
-        node_set = NodeSet(network)
+        node_set = NodeSet()
         try:
             pending_channels = node_set.lnd_client.list_pending_channels()
-            return len(pending_channels), pending_channels
         except Exception as e:
-            # todo add error handling
-            # todo add error logging
-            print(e)
+            log.error(
+                'PendingChannelsModelView.get_list exception',
+                exc_info=True)
+            return 0, []
+
+        if pending_channels is not None:
+            return len(pending_channels), pending_channels
+        else:
+            return 0, []
 
     # noinspection PyShadowingBuiltins
     def get_one(self, id):

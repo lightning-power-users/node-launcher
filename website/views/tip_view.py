@@ -11,7 +11,7 @@ class TipView(BaseView):
     @expose('/')
     def index(self):
         form = PaymentRequestForm()
-        node_set = NodeSet(network)
+        node_set = NodeSet()
         address = node_set.lnd_client.get_new_address()
         return render_template('tip.html',
                                form=form,
@@ -25,7 +25,7 @@ class TipView(BaseView):
         else:
             value = 50000
             memo = 'Tip'
-        node_set = NodeSet(network)
+        node_set = NodeSet()
         payment_request = node_set.lnd_client.create_invoice(
             value=value,
             memo=memo

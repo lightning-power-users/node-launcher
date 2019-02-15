@@ -20,7 +20,7 @@ class HomeView(BaseView):
         # noinspection PyBroadException
         info_cache_file = os.path.join(cache_path, 'info.json')
         try:
-            node_set = NodeSet(network)
+            node_set = NodeSet()
             info = MessageToDict(node_set.lnd_client.get_info())
             with open(info_cache_file, 'w') as f:
                 json.dump(info, f)

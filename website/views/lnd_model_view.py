@@ -82,7 +82,7 @@ class LNDModelView(BaseModelView):
 
     def get_list(self, page=None, sort_field=None, sort_desc=False, search=None,
                  filters=None, page_size=None):
-        node_set = NodeSet('mainnet')
+        node_set = NodeSet()
         cache_file = os.path.join(cache_path, self.get_query + '.json')
         try:
             results = getattr(node_set.lnd_client, self.get_query)()
