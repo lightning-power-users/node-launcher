@@ -129,7 +129,7 @@ class RequestCapacityView(BaseView):
             flash('Error: invalid capacity fee rate request', category='danger')
             return redirect(url_for('request-capacity.index'))
 
-        capacity_fee = requested_capacity * requested_capacity_fee_rate
+        capacity_fee = int(requested_capacity * requested_capacity_fee_rate)
 
         transaction_fee_rate = int(form_data['transaction_fee_rate'])
         if not transaction_fee_rate >= 1:
@@ -157,17 +157,27 @@ class RequestCapacityView(BaseView):
         if not session.get('tracker', None):
             session['tracker'] = uuid.uuid4().hex
 
+        if requested_capacity == 0:
+            requested_capacity_copy = 'Reciprocate'
+            capacity_fee_rate_copy = '0%'
+            capacity_fee_copy = '-'
+        else:
+            requested_capacity_copy = f'{requested_capacity:,d}'
+            capacity_fee_rate_copy = f'{requested_capacity_fee_rate:.0%}'
+            capacity_fee_copy = f'{capacity_fee:,d}'
+
         bill = [
-            ('Requested capacity', requested_capacity),
-            ('Capacity fee rate', requested_capacity_fee_rate),
-            ('Capacity fee', capacity_fee),
-            ('Transaction fee rate', transaction_fee_rate),
-            ('Expected bytes', EXPECTED_BYTES),
-            ('Transaction fee', transaction_fee),
-            ('Total fee', total_fee)
+            ('Requested capacity', requested_capacity_copy),
+            ('Capacity fee rate', capacity_fee_rate_copy),
+            ('Capacity fee', capacity_fee_copy),
+            ('Transaction fee rate', f'{transaction_fee_rate:,d}'),
+            ('Expected bytes', f'{EXPECTED_BYTES:,d}'),
+            ('Transaction fee', f'{transaction_fee:,d}'),
+            ('Total fee', f'{total_fee:,d}')
         ]
 
         data = {
+            'bill': bill,
             'form_data': form_data,
             'tracker': session['tracker'],
             'invoice': invoice,
