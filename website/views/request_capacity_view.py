@@ -5,6 +5,7 @@ from bitcoin.core import COIN
 from flask import request, render_template, redirect, url_for, flash, session
 from flask_admin import BaseView, expose
 from google.protobuf.json_format import MessageToDict
+# noinspection PyProtectedMember
 from grpc._channel import _Rendezvous
 
 from node_launcher.logging import log
@@ -28,7 +29,8 @@ def get_request_capacity_form() -> RequestCapacityForm:
         if estimated_fee_per_byte == previous_estimate:
             continue
         previous_estimate = estimated_fee_per_byte
-        select_label_time_estimate = fee_estimate['label'].replace('_', ' ').capitalize()
+        select_label_time_estimate = fee_estimate['label'].replace('_',
+                                                                   ' ').capitalize()
         if estimated_fee_per_byte > 1:
             select_label = f'{select_label_time_estimate} ({estimated_fee_per_byte} sats per byte)'
         else:
@@ -52,7 +54,7 @@ class RequestCapacityView(BaseView):
     def index(self):
         price = get_latest('usd_price')
         last_price = price['last']
-        price_per_sat = last_price/COIN
+        price_per_sat = last_price / COIN
         form = get_request_capacity_form()
         node_set = NodeSet()
         address = node_set.lnd_client.get_new_address()
@@ -89,7 +91,8 @@ class RequestCapacityView(BaseView):
             ip_address = None
 
         if len(pub_key) != 66:
-            flash('Error: invalid PubKey length, expected 66 characters', category='danger')
+            flash('Error: invalid PubKey length, expected 66 characters',
+                  category='danger')
             return redirect(url_for('request-capacity.index'))
 
         node_set = NodeSet()
@@ -111,7 +114,8 @@ class RequestCapacityView(BaseView):
             try:
                 peer = [p for p in peers if p.pub_key == pub_key][0]
             except IndexError:
-                flash('Error: unknown PubKey, please provide pubkey@host:port', category='danger')
+                flash('Error: unknown PubKey, please provide pubkey@host:port',
+                      category='danger')
                 return redirect(url_for('request-capacity.index'))
 
         requested_capacity = int(form_data['capacity'])
@@ -119,7 +123,8 @@ class RequestCapacityView(BaseView):
             flash('Error: invalid capacity request', category='danger')
             return redirect(url_for('request-capacity.index'))
 
-        requested_capacity_fee_rate = Decimal(form_data.get('capacity_fee_rate', '0'))
+        requested_capacity_fee_rate = Decimal(
+            form_data.get('capacity_fee_rate', '0'))
         if requested_capacity_fee_rate not in dict(CAPACITY_FEE_RATES):
             flash('Error: invalid capacity fee rate request', category='danger')
             return redirect(url_for('request-capacity.index'))
@@ -128,7 +133,8 @@ class RequestCapacityView(BaseView):
 
         transaction_fee_rate = int(form_data['transaction_fee_rate'])
         if not transaction_fee_rate >= 1:
-            flash('Error: invalid transaction fee rate request', category='danger')
+            flash('Error: invalid transaction fee rate request',
+                  category='danger')
             return redirect(url_for('request-capacity.index'))
 
         transaction_fee = transaction_fee_rate * EXPECTED_BYTES
@@ -151,6 +157,16 @@ class RequestCapacityView(BaseView):
         if not session.get('tracker', None):
             session['tracker'] = uuid.uuid4().hex
 
+        bill = [
+            ('Requested capacity', requested_capacity),
+            ('Capacity fee rate', requested_capacity_fee_rate),
+            ('Capacity fee', capacity_fee),
+            ('Transaction fee rate', transaction_fee_rate),
+            ('Expected bytes', EXPECTED_BYTES),
+            ('Transaction fee', transaction_fee),
+            ('Total fee', total_fee)
+        ]
+
         data = {
             'form_data': form_data,
             'tracker': session['tracker'],
@@ -164,6 +180,9 @@ class RequestCapacityView(BaseView):
 
         send_websocket_message(data=data)
 
-        return render_template('payment_request.html',
-                               payment_request=payment_request,
-                               uri=uri)
+        return render_template(
+            'payment_request.html',
+            bill=bill,
+            payment_request=payment_request,
+            uri=uri
+        )
