@@ -1,6 +1,7 @@
 import uuid
 from decimal import Decimal
 
+import structlog
 from bitcoin.core import COIN
 from flask import request, render_template, redirect, url_for, flash, session
 from flask_admin import BaseView, expose
@@ -8,7 +9,6 @@ from google.protobuf.json_format import MessageToDict
 # noinspection PyProtectedMember
 from grpc._channel import _Rendezvous
 
-from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
 from website.constants import EXPECTED_BYTES, CAPACITY_CHOICES, \
     CAPACITY_FEE_RATES
@@ -52,38 +52,55 @@ class RequestCapacityView(BaseView):
 
     @expose('/')
     def index(self):
+        logger = structlog.get_logger()
+        log = logger.new(request_id=str(uuid.uuid4()))
         price = get_latest('usd_price')
         last_price = price['last']
         price_per_sat = last_price / COIN
         form = get_request_capacity_form()
-        node_set = NodeSet()
-        address = node_set.lnd_client.get_new_address()
         if session.get('tracker', None) is None:
             session['tracker'] = uuid.uuid4().hex
         log.debug('RequestCapacityView.index', tracker=session['tracker'])
         return render_template('request_capacity.html',
                                form=form,
-                               address=address,
                                price_per_sat=price_per_sat,
                                EXPECTED_BYTES=EXPECTED_BYTES)
 
     @expose('/pay-req', methods=['GET', 'POST'])
     def process_request(self):
+        logger = structlog.get_logger()
+        log = logger.new(request_id=str(uuid.uuid4()))
         if request.method != 'POST':
+            log.warn(
+                'RequestCapacityView.process_request invalid request method',
+                request_method=request.method
+            )
             return redirect(url_for('request-capacity.index'))
 
         form_data = request.form
-        log.info('request-capacity.process_request POST', data=form_data)
+        log.info(
+            'request-capacity.process_request POST request',
+            form_data=form_data
+        )
 
-        pub_key_data = form_data['pub_key'].strip()
+        pub_key_data = form_data.get('pub_key', '').strip()
         if not pub_key_data:
+            log.debug(
+                'request-capacity.process_request no pubkey provided',
+                pub_key_data=pub_key_data
+            )
             flash('Error: please enter your PubKey', category='danger')
             return redirect(url_for('request-capacity.index'))
 
         if '@' in pub_key_data:
             try:
                 pub_key, ip_address = pub_key_data.split('@')
+                log.debug('Parsed host', ip_address=ip_address)
             except ValueError:
+                log.debug(
+                    'request-capacity.process_request invalid pubkey format',
+                    pub_key_data=pub_key_data
+                )
                 flash('Error: invalid PubKey format', category='danger')
                 return redirect(url_for('request-capacity.index'))
         else:
@@ -188,6 +205,9 @@ class RequestCapacityView(BaseView):
 
         dump_json(data=data, name='capacity_request', label=session['tracker'])
 
+        log.debug(
+            'request-capacity.process_request sending websocket data'
+        )
         send_websocket_message(data=data)
 
         return render_template(

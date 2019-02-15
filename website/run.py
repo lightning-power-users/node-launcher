@@ -1,3 +1,7 @@
+import logging
+import sys
+
+import structlog
 from flask import Flask, redirect, url_for
 from flask_admin import Admin
 from flask_qrcode import QRcode
@@ -14,6 +18,24 @@ from website.views.request_capacity_view import RequestCapacityView
 class App(Flask):
     def __init__(self):
         super().__init__(__name__)
+        if __name__ != '__main__':
+            gunicorn_logger = logging.getLogger('gunicorn.error')
+            self.logger.handlers = gunicorn_logger.handlers
+            self.logger.setLevel(gunicorn_logger.level)
+
+        logging.basicConfig(
+            format="%(message)s", stream=sys.stdout, level=logging.INFO
+        )
+        structlog.configure(
+            processors=[
+                structlog.processors.KeyValueRenderer(
+                    key_order=["event", "request_id"]
+                )
+            ],
+            context_class=structlog.threadlocal.wrap_dict(dict),
+            logger_factory=structlog.stdlib.LoggerFactory(),
+        )
+
         cache.init_app(self)
         QRcode(self)
         self.debug = False
@@ -56,7 +78,6 @@ class App(Flask):
         self.admin.add_view(request_capacity_view)
         self.admin.add_view(pending_channels_view)
         self.admin.add_view(open_channels_view)
-
 
 
 if __name__ == '__main__':
