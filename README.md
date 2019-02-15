@@ -8,7 +8,9 @@
 2. ~10 GB of disk space (~300 GB if you want the Bitcoin transaction index, makes for a faster LND)
 3. Windows 7+ or macOS 10.12.6+
 
-Please submit a pull request if you want to add Linux support! Next year is the Year of Desktop Linux...
+Linux works but it is not packaged, follow the developer steps below to run it from the Linux command line. 
+
+Please submit a pull request if you want to add Linux packaging! A .deb and .rpm would help grow the Lightning network...
 
 
 # Install 
