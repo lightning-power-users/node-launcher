@@ -1,9 +1,7 @@
 # User Guides
 
 1. [Please start here!](https://medium.com/@pierre_rochard/windows-macos-lightning-network-284bd5034340)
-2. [Set up Zap Desktop](https://medium.com/@pierre_rochard/easy-lightning-with-node-launcher-zap-488133edfbd)
-3. [Open a channel with Zap Desktop](https://medium.com/@pierre_rochard/send-a-lightning-payment-with-zap-desktop-17b74b65b9b8)
-4. [Send a payment with the Joule Chrome extension](https://medium.com/@pierre_rochard/bitcoin-lightning-joule-chrome-extension-ac149bb05cb9)
+2. [Send a payment with the Joule Chrome extension](https://medium.com/@pierre_rochard/bitcoin-lightning-joule-chrome-extension-ac149bb05cb9)
 
 # Requirements
 1. ~300 GB of download bandwidth
