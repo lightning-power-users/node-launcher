@@ -1,7 +1,6 @@
 from flask import Flask, redirect, url_for
 from flask_admin import Admin
 from flask_qrcode import QRcode
-from flask_socketio import emit
 
 from website.extensions import cache
 from website.views.home_view import HomeView
@@ -10,7 +9,6 @@ from website.views.pending_channels_model_view import PendingChannelsModelView
 from website.views.open_channels_model_view import OpenChannelsModelView
 from website.constants import FLASK_SECRET_KEY
 from website.views.request_capacity_view import RequestCapacityView
-from website.views.tip_view import TipView
 
 
 class App(Flask):
@@ -40,8 +38,6 @@ class App(Flask):
             endpoint='request-capacity'
         )
 
-        tip_view = TipView(name='Send a Tip', endpoint='tip')
-
         pending_channels_view = PendingChannelsModelView(
             PendingChannels,
             endpoint='pending-channels',
@@ -57,7 +53,6 @@ class App(Flask):
         )
 
         self.admin.add_view(home_view)
-        self.admin.add_view(tip_view)
         self.admin.add_view(request_capacity_view)
         self.admin.add_view(pending_channels_view)
         self.admin.add_view(open_channels_view)
