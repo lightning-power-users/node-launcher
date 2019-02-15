@@ -35,6 +35,7 @@ async def serve_invoices(websocket, path):
         for invoice in subscription:
             invoice_data = MessageToDict(invoice)
             if invoice_data['r_hash'] not in invoices:
+                time.sleep(2)
                 await websocket.send(json.dumps(invoice_data))
                 break
                 # TODO: check on disk
