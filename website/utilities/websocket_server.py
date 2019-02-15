@@ -1,4 +1,5 @@
 import asyncio
+import json
 import time
 
 import websockets
@@ -12,11 +13,18 @@ async def hello(websocket, path):
 
     subscription = lnd_remote_client.subscribe_invoices(settle_index=1)
 
+    while True:
+        tracker_data = await websocket.recv()
+        tracker_data = json.loads(tracker_data)
+        tracker = tracker_data['tracker']
+        log.debug('tracker', tracker=tracker)
+        break
+
     for invoice in subscription:
         invoice_data = MessageToDict(invoice)
         log.debug('emit invoice', invoice=invoice)
         time.sleep(1)
-        await websocket.send(invoice_data)
+        await websocket.send(json.dumps(invoice_data))
 
 
 start_server = websockets.serve(hello, 'localhost', 8765)

@@ -3,10 +3,16 @@
 {% import 'macros/definition_list_macro.html' as dl %}
 
 {% block body %}
-    <script>
-        var clipboard = new ClipboardJS('.btn');
-    </script>
 
+    <script type="text/javascript" charset="utf-8">
+        var exampleSocket = new WebSocket("ws://localhost:8765");
+        exampleSocket.onopen = function (event) {
+            exampleSocket.send({tracker: {{ session['tracker'] }}});
+        };
+        exampleSocket.onmessage = function (event) {
+            console.log(event.data);
+        }
+    </script>
     <div class="album py-5">
         <div class="container">
             <div class="row">

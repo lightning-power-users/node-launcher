@@ -2,7 +2,7 @@ import uuid
 from decimal import Decimal
 
 from bitcoin.core import COIN
-from flask import request, render_template, redirect, url_for, flash
+from flask import request, render_template, redirect, url_for, flash, session
 from flask_admin import BaseView, expose
 from google.protobuf.json_format import MessageToDict
 from grpc._channel import _Rendezvous
@@ -55,6 +55,7 @@ class RequestCapacityView(BaseView):
         form = get_request_capacity_form()
         node_set = NodeSet()
         address = node_set.lnd_client.get_new_address()
+        session['tracker'] = uuid.uuid4().hex
         return render_template('request_capacity.html',
                                form=form,
                                address=address,
