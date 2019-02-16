@@ -163,7 +163,18 @@ class RequestCapacityView(BaseView):
 
         reciprocation_capacity = None
         if requested_capacity == 0:
-            reciprocation_capacity = max(channels.net_remote_balance, 500000)
+            if len(channels) != 1:
+                flash(f'Error: you do not currently have an open channel with our node for us to reciprocate',
+                      category='danger')
+                return redirect(url_for('request-capacity.index'))
+
+            if channels.net_remote_balance < 100000:
+                flash(f'Error: your remote balance minus our local balance '
+                      f'is {channels.net_remote_balance:,d}, 100,000 is the minimum for reciprocation',
+                      category='danger')
+                return redirect(url_for('request-capacity.index'))
+
+            reciprocation_capacity = max(channels.net_remote_balance, 200000)
 
         requested_capacity_fee_rate = Decimal(
             form_data.get('capacity_fee_rate', '0'))
@@ -220,6 +231,7 @@ class RequestCapacityView(BaseView):
 
         data = {
             'bill': bill,
+            'reciprocation_capacity': reciprocation_capacity,
             'form_data': form_data,
             'tracker': session['tracker'],
             'invoice': invoice,
