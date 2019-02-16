@@ -11,7 +11,7 @@ def list_open_channels():
     return r
 
 
-@cache.cached(timeout=3600, key_prefix='list_pending_channels')
+@cache.cached(timeout=5, key_prefix='list_pending_channels')
 def list_pending_channels():
     r = [dict(c) for c in lnd_remote_client.list_pending_channels()]
     return r
