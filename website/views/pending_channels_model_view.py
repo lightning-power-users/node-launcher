@@ -1,17 +1,12 @@
 from flask_admin import expose
 from flask_admin.model import BaseModelView
-# noinspection PyPackageRequirements
-from google.protobuf.json_format import MessageToDict
 from wtforms import Form
 
 from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
-from website.constants import network
 from website.extensions import cache
 from website.formatters.common import satoshi_formatter
-from website.formatters.lnd import pub_key_formatter, tx_hash_formatter, \
-    channel_point_formatter
-from website.models.pending_channel import PendingChannels
+from website.formatters.lnd import tx_hash_formatter, channel_point_formatter
 
 
 class PendingChannelsModelView(BaseModelView):

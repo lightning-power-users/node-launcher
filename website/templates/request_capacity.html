@@ -1,0 +1,298 @@
+{% extends 'admin/base.html' %}
+
+{% import 'macros/definition_list_macro.html' as dl %}
+
+{% block body %}
+
+    <script>
+        const pricePerSat = {{ price_per_sat }};
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const capacitySelect = document.querySelector('select[name="capacity"]');
+            const capacityFeeRateSelect = document.querySelector('select[name="capacity_fee_rate"]');
+            const transactionFeeRateSelect = document.querySelector('select[name="transaction_fee_rate"]');
+            capacitySelect.onchange = changeEventHandler;
+            transactionFeeRateSelect.onchange = changeEventHandler;
+            capacityFeeRateSelect.onchange = changeEventHandler;
+            changeEventHandler();
+        }, false);
+
+        function changeEventHandler() {
+            const capacitySelect = document.querySelector('select[name="capacity"]');
+            const capacityFeeRateSelect = document.querySelector('select[name="capacity_fee_rate"]');
+            const transactionFeeRateSelect = document.querySelector('select[name="transaction_fee_rate"]');
+
+            const selectedCapacity = parseInt(capacitySelect.selectedOptions[0].value);
+            const selectedCapacityUsd = Math.round(selectedCapacity * pricePerSat * 100)/100;
+            if (selectedCapacity > 0) {
+                capacityFeeRateSelect.disabled = false;
+                console.log(capacityFeeRateSelect.value);
+                if (Math.round(capacityFeeRateSelect.value*100) === 0) {
+                    capacityFeeRateSelect.value = 0.02;
+                }
+                capacityFeeRateSelect.options[0].disabled = true;
+                document.querySelector('#selected-capacity').innerHTML = selectedCapacity.toLocaleString();
+                document.querySelector('#selected-capacity-usd').innerHTML = selectedCapacityUsd.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+            } else {
+                capacityFeeRateSelect.options[0].disabled = false;
+                capacityFeeRateSelect.value = 0;
+                capacityFeeRateSelect.disabled = true;
+                document.querySelector('#selected-capacity').innerHTML = '-';
+                document.querySelector('#selected-capacity-usd').innerHTML = '-';
+            }
+
+            const selectedCapacityFeeRate = parseFloat(capacityFeeRateSelect.selectedOptions[0].value);
+            document.querySelector('#capacity-fee-rate').innerHTML = selectedCapacityFeeRate.toLocaleString(undefined, {style: 'percent'});
+            document.querySelector('#capacity-fee-rate-usd').innerHTML = selectedCapacityFeeRate.toLocaleString(undefined, {style: 'percent'});
+
+            const capacityFee = Math.round(selectedCapacity * selectedCapacityFeeRate);
+            const capacityFeeUsd = Math.round(capacityFee * pricePerSat * 100)/100;
+            if (capacityFee > 0) {
+                document.querySelector('#capacity-fee').innerHTML = capacityFee.toLocaleString();
+                document.querySelector('#capacity-fee-usd').innerHTML = capacityFeeUsd.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+            } else {
+                document.querySelector('#capacity-fee').innerHTML = '-';
+                document.querySelector('#capacity-fee-usd').innerHTML = '-';
+            }
+
+            const selectedTransactionFeeRate = parseInt(transactionFeeRateSelect.selectedOptions[0].value);
+            document.querySelector('#transaction-fee-rate').innerHTML = selectedTransactionFeeRate.toLocaleString();
+
+            const expectedBytes = parseInt(document.querySelector('#expected-bytes').innerHTML);
+            const transactionFee = selectedTransactionFeeRate * expectedBytes;
+            const transactionFeeUsd = Math.round(transactionFee * pricePerSat * 100)/100;
+            document.querySelector('#transaction-fee').innerHTML = transactionFee.toLocaleString();
+            document.querySelector('#transaction-fee-usd').innerHTML = transactionFeeUsd.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+
+            const totalFee = transactionFee + capacityFee;
+            const totalFeeUsd = Math.round(totalFee * pricePerSat * 100)/100;
+            document.querySelector('#total-fee').innerHTML = totalFee.toLocaleString();
+            document.querySelector('#total-fee-usd').innerHTML = totalFeeUsd.toLocaleString(undefined, {maximumFractionDigits: 2, minimumFractionDigits: 2});
+        }
+    </script>
+    <div class="album py-5">
+        <div class="container">
+            <form action="{{ url_for('request-capacity.process_request') }}"
+                  method="post"
+                  novalidate>
+                <h2>
+                    Request Inbound Capacity
+                </h2>
+                <hr>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <h4>
+                            Capacity Fee
+                        </h4>
+                        {{ form.hidden_tag() }}
+                        <p>
+                            {{ form.capacity.label }}<br>
+                            {{ form.capacity() }}
+                        </p>
+                        <p>
+                            {{ form.capacity_fee_rate.label }}<br>
+                            {{ form.capacity_fee_rate() }}
+                        </p>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+                <div class="row"><br></div>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <table class="table table-striped table-bordered table-hover model-list table-sm">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>
+                                    Satoshis
+                                </th>
+                                <th>
+                                    ~USD
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    Capacity
+                                </td>
+                                <td id="selected-capacity">
+                                    500,000
+                                </td>
+                                <td id="selected-capacity-usd">
+                                    {{ "%.2f" | format(500000*price_per_sat) }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Capacity fee rate
+                                </td>
+                                <td id="capacity-fee-rate">
+                                    0%
+                                </td>
+                                <td id="capacity-fee-rate-usd">
+                                    0%
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Capacity fee
+                                </td>
+                                <td id="capacity-fee">
+                                    0
+                                </td>
+                                <td id="capacity-fee-usd">
+                                    0
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+                <div class="row"><br></div>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <h4>
+                            On-chain Transaction Fee
+                        </h4>
+                        {{ form.hidden_tag() }}
+                        <p>
+                            {{ form.transaction_fee_rate.label }}<br>
+                            {{ form.transaction_fee_rate() }}
+                        </p>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+                <div class="row"><br></div>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <table class="table table-striped table-bordered table-hover model-list table-sm">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>
+                                    Satoshis
+                                </th>
+                                <th>
+                                    ~USD
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    Sats per byte
+                                </td>
+                                <td id="transaction-fee-rate">
+                                    30
+                                </td>
+                                <td id="transaction-fee-rate-usd">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Expected bytes
+                                </td>
+                                <td id="expected-bytes">
+                                    {{ EXPECTED_BYTES }}
+                                </td>
+                                <td id="expected-bytes-usd">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Transaction fee
+                                </td>
+                                <td id="transaction-fee">
+                                    15,000
+                                </td>
+                                <td id="transaction-fee-usd">
+                                    {{ "%.2f" | format(15000*price_per_sat) }}
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+
+                <div class="row"><br></div>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <h4>
+                            Contact Information
+                        </h4>
+                        {{ form.hidden_tag() }}
+                        <p>
+                            {{ form.pub_key.label }}<br>
+                            {{ form.pub_key(cols=35, rows=4) }}
+                        </p>
+                        <p>
+                            {{ form.twitter_username.label }}<br>
+                            {{ form.twitter_username(size=32) }}
+                        </p>
+                        <p>
+                            {{ form.email_address.label }}<br>
+                            {{ form.email_address(size=32) }}
+                        </p>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+                <div class="row"><br></div>
+
+
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        <table class="table table-striped table-bordered table-hover model-list table-sm">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>
+                                    Satoshis
+                                </th>
+                                <th>
+                                    ~USD
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    Total fee
+                                </td>
+                                <td id="total-fee">
+                                    15,000
+                                </td>
+                                <td id="total-fee-usd">
+                                    {{ "%.2f" | format(15000*price_per_sat) }}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+
+                <div class="row"><br></div>
+                <div class="row">
+                    <div class="col-md-4"></div>
+                    <div class="col-md-4">
+                        {{ form.hidden_tag() }}
+                        <p>{{ form.request_capacity() }}</p>
+                    </div>
+                    <div class="col-md-4"></div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

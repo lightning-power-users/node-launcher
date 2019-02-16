@@ -39,17 +39,6 @@ class Bitcoin(object):
         if self.file['datadir'] is None:
             self.autoconfigure_datadir()
 
-        if 'bitcoin.conf' in os.listdir(self.file['datadir']):
-            actual_conf_file = os.path.join(self.file['datadir'], 'bitcoin.conf')
-            log.info(
-                'datadir_redirect',
-                configuration_file_path=configuration_file_path,
-                actual_conf_file=actual_conf_file
-            )
-            self.file = ConfigurationFile(actual_conf_file)
-            if self.file['datadir'] is None:
-                self.autoconfigure_datadir()
-
         self.wallet_paths = self.get_wallet_paths()
 
         if self.file['server'] is None:

@@ -1,16 +1,11 @@
 colorama
 dataclasses
-flask
-flask-admin
-flask-caching
-Flask-QRcode
-flask-wtf
-Frozen-Flask
 googleapis-common-protos
 grpcio
 grpcio-tools
 jinja2
 keyring
+marshmallow
 pillow
 protobuf
 psutil

@@ -1,0 +1,9 @@
+flask
+flask-admin
+flask-caching
+Flask-QRcode
+flask-wtf
+Frozen-Flask
+humanize
+python-bitcoinlib
+websockets

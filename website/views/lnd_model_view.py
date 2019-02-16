@@ -1,7 +1,6 @@
 import functools
 import json
 import os
-import pickle
 from json import JSONDecodeError
 
 from flask import flash
@@ -12,7 +11,7 @@ from grpc import StatusCode
 from wtforms import Form, StringField, IntegerField, BooleanField, validators
 
 from node_launcher.node_set import NodeSet
-from website.constants import cache_path
+from website.constants import CACHE_PATH
 
 wtforms_type_map = {
     3: IntegerField,  # int64
@@ -33,12 +32,14 @@ def grpc_error_handling(func):
             response = func(*a, **kw)
         except Exception as exc:
             if hasattr(exc, '_state'):
+                # noinspection PyProtectedMember
                 flash(gettext(exc._state.details), 'error')
             else:
                 flash(gettext(str(exc)), 'error')
             return False
 
         if hasattr(response, 'code') and response.code() == StatusCode.UNKNOWN:
+            # noinspection PyProtectedMember
             flash(gettext(response._state.details), 'error')
             return False
         elif hasattr(response, 'payment_error') and response.payment_error:
@@ -83,7 +84,8 @@ class LNDModelView(BaseModelView):
     def get_list(self, page=None, sort_field=None, sort_desc=False, search=None,
                  filters=None, page_size=None):
         node_set = NodeSet()
-        cache_file = os.path.join(cache_path, self.get_query + '.json')
+        cache_file = os.path.join(CACHE_PATH, self.get_query + '.json')
+
         try:
             results = getattr(node_set.lnd_client, self.get_query)()
             with open(cache_file, 'w') as f:
@@ -141,6 +143,7 @@ class LNDModelView(BaseModelView):
             if field_type == 11:  # Todo: handle "message" type, which is a nested object
                 continue
 
+            # noinspection PyPep8Naming
             FormClass = wtforms_type_map[field_type]
             description = self.swagger['definitions'][
                 'lnrpc' + self.create_form_class.__name__]['properties'][
@@ -157,6 +160,7 @@ class LNDModelView(BaseModelView):
             setattr(NewForm, field.name, form_field)
         return NewForm
 
+    # noinspection PyShadowingNames
     def scaffold_list_form(self, widget=None, validators=None):
         pass
 
