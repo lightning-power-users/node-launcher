@@ -235,7 +235,9 @@ class RequestCapacityView(BaseView):
             'form_data': form_data,
             'tracker': session['tracker'],
             'invoice': invoice,
-            'EXPECTED_BYTES': EXPECTED_BYTES
+            'EXPECTED_BYTES': EXPECTED_BYTES,
+            'parsed_pubkey': pub_key,
+            'parsed_host': ip_address
         }
 
         log.debug('request-capacity.process_request', data=data)
