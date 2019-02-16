@@ -15,9 +15,23 @@ from . import rpc_pb2 as ln
 from . import rpc_pb2_grpc as lnrpc
 
 from node_launcher.node_set.lnd import Lnd
-from website.models import PendingChannels
 
 os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
+
+
+class DefaultModel(dict):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
+class PendingChannels(DefaultModel):
+    def __getattribute__(self, name):
+        try:
+            return object.__getattribute__(self, name)
+        except AttributeError:
+            return None
 
 
 class LndClient(object):
@@ -168,7 +182,8 @@ class LndClient(object):
         response = self.lnd_client.GetChanInfo(request)
         return response
 
-    def connect_peer(self, pubkey: str, host: str, timeout: int = 3) -> ln.ConnectPeerResponse:
+    def connect_peer(self, pubkey: str, host: str,
+                     timeout: int = 3) -> ln.ConnectPeerResponse:
         address = ln.LightningAddress(pubkey=pubkey, host=host)
         request = ln.ConnectPeerRequest(addr=address)
         response = self.lnd_client.ConnectPeer(request, timeout=timeout)

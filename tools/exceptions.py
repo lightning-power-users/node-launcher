@@ -1,2 +1,0 @@
-class OutOfFundsException(Exception):
-    pass
