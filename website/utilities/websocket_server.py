@@ -69,20 +69,13 @@ async def serve_invoices(websocket, path):
                 )
                 return
 
-            channel_opening_data = channel_opening_invoices[invoice_data['r_hash']]
+            r_hash = invoice_data['r_hash']
+            channel_opening_data = channel_opening_invoices.get(r_hash, None)
+            if channel_opening_data is None:
+                return
             log.debug('emit invoice_data', invoice_data=invoice_data)
             await notify_user(channel_opening_data['tracker'], invoice_data)
-            return
 
-    await register(tracker, websocket)
-    try:
-        channel_opening_data = None
-        # Todo find the minimum index of the cached invoices for settle_index
-        invoice_subscription = lnd_remote_client.subscribe_invoices(settle_index=1)
-        for invoice in invoice_subscription:
-            invoice_data = MessageToDict(invoice)
-
-        if channel_opening_data is not None:
             if channel_opening_data.get('reciprocation_capacity', None):
                 local_funding_amount = channel_opening_data[
                     'reciprocation_capacity']
@@ -112,8 +105,7 @@ async def serve_invoices(websocket, path):
                 error_details = e.details()
                 error_message = {'error': error_details}
                 await websocket.send(json.dumps(error_message))
-    finally:
-        await unregister(tracker)
+
 
 start_server = websockets.serve(serve_invoices, 'localhost', 8765)
 
