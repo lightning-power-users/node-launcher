@@ -230,6 +230,7 @@ class RequestCapacityView(BaseView):
         ]
 
         data = {
+            'type': 'inbound_capacity_request',
             'bill': bill,
             'reciprocation_capacity': reciprocation_capacity,
             'form_data': form_data,

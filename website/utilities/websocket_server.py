@@ -23,6 +23,13 @@ async def unregister(tracker):
     del USERS[tracker]
 
 
+async def notify_user(tracker, message):
+    ws = USERS.get(tracker, None)
+    if ws is None:
+        return
+    await ws.send(json.dumps(message))
+
+
 async def serve_invoices(websocket, path):
     data_string_from_client = await websocket.recv()
 
@@ -43,19 +50,14 @@ async def serve_invoices(websocket, path):
 
     if tracker == FLASK_SECRET_KEY:
         data_from_server = data_from_client
-        invoice_data = data_from_server['invoice']
-        # Todo: populate invoices from disk as well
-        channel_opening_invoices[invoice_data['r_hash']] = data_from_server
-        log.debug('Received from server', data_from_server=data_from_server)
-        return
-
-    await register(tracker, websocket)
-    try:
-        channel_opening_data = None
-        # Todo find the minimum index of the cached invoices for settle_index
-        invoice_subscription = lnd_remote_client.subscribe_invoices(settle_index=1)
-        for invoice in invoice_subscription:
-            invoice_data = MessageToDict(invoice)
+        if data_from_server['type'] == 'inbound_capacity_request':
+            invoice_data = data_from_server['invoice']
+            # Todo: populate invoices from disk as well
+            channel_opening_invoices[invoice_data['r_hash']] = data_from_server
+            log.debug('Received from server', data_from_server=data_from_server)
+            return
+        elif data_from_server['type'] == 'invoice_paid':
+            invoice_data = data_from_server['invoice_data']
             # Todo: always resolves to true for testing, remove
             if not True and invoice_data['r_hash'] not in channel_opening_invoices:
                 # TODO: remove
@@ -65,15 +67,20 @@ async def serve_invoices(websocket, path):
                     'r_hash not found in channel_opening_invoices',
                     invoice_data=invoice_data
                 )
-                continue
+                return
 
             channel_opening_data = channel_opening_invoices[invoice_data['r_hash']]
-            if channel_opening_data.get('tracker', None) != tracker:
-                continue
+            log.debug('emit invoice_data', invoice_data=invoice_data)
+            await notify_user(channel_opening_data['tracker'], invoice_data)
+            return
 
-            log.debug('emit invoice', invoice=invoice)
-            await websocket.send(json.dumps(invoice_data))
-            break
+    await register(tracker, websocket)
+    try:
+        channel_opening_data = None
+        # Todo find the minimum index of the cached invoices for settle_index
+        invoice_subscription = lnd_remote_client.subscribe_invoices(settle_index=1)
+        for invoice in invoice_subscription:
+            invoice_data = MessageToDict(invoice)
 
         if channel_opening_data is not None:
             if channel_opening_data.get('reciprocation_capacity', None):
