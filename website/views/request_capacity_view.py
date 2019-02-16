@@ -13,6 +13,7 @@ from node_launcher.node_set import NodeSet
 from website.constants import EXPECTED_BYTES, CAPACITY_CHOICES, \
     CAPACITY_FEE_RATES
 from website.forms.request_capacity_form import RequestCapacityForm
+from website.lnd_queries.channels import Channels
 from website.utilities.cache.cache import get_latest
 from website.utilities.dump_json import dump_json
 from website.utilities.websocket_client import send_websocket_message
@@ -83,6 +84,7 @@ class RequestCapacityView(BaseView):
             form_data=form_data
         )
 
+        # PubKey processing
         pub_key_data = form_data.get('pub_key', '').strip()
         if not pub_key_data:
             log.debug(
@@ -112,6 +114,7 @@ class RequestCapacityView(BaseView):
                   category='danger')
             return redirect(url_for('request-capacity.index'))
 
+        # Connect to peer
         node_set = NodeSet()
 
         if ip_address is not None:
@@ -135,10 +138,32 @@ class RequestCapacityView(BaseView):
                       category='danger')
                 return redirect(url_for('request-capacity.index'))
 
+        # Check channels
+        channels = Channels(pubkey=pub_key)
+        if len(channels.pending_channels) > 0:
+            if len(channels.pending_channels) > 1:
+                flash(f'Error: you already have {len(channels.pending_channels)} channels pending with our node, please wait for them to confirm',
+                      category='danger')
+                return redirect(url_for('request-capacity.index'))
+            else:
+                flash(f'Error: you already have a channel pending with our node, please wait for it to confirm',
+                      category='danger')
+                return redirect(url_for('request-capacity.index'))
+
+        if len(channels) >= 2:
+            flash(f'Error: you already have {len(channels)} open or pending channels',
+                  category='danger')
+            return redirect(url_for('request-capacity.index'))
+
+        # Validate inputs
         requested_capacity = int(form_data['capacity'])
         if requested_capacity != 0 and requested_capacity not in CAPACITY_CHOICES:
             flash('Error: invalid capacity request', category='danger')
             return redirect(url_for('request-capacity.index'))
+
+        reciprocation_capacity = None
+        if requested_capacity == 0:
+            reciprocation_capacity = max(channels.net_remote_balance, 500000)
 
         requested_capacity_fee_rate = Decimal(
             form_data.get('capacity_fee_rate', '0'))
@@ -175,7 +200,7 @@ class RequestCapacityView(BaseView):
             session['tracker'] = uuid.uuid4().hex
 
         if requested_capacity == 0:
-            requested_capacity_copy = 'Reciprocate'
+            requested_capacity_copy = f'Reciprocate {reciprocation_capacity:,d}'
             capacity_fee_rate_copy = '0%'
             capacity_fee_copy = '-'
         else:
