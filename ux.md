@@ -11,7 +11,7 @@ Launcher button that is front and center
 Recommended nudges and Advanced options), installer flow ends with check marked 
 "Open Node Launcher". I'd really want this to have a minimalist Default path 
 where you can hit enter a couple of times and be done
-3. An icon appears in their System Tray (top right on macOS, bottom left on 
+3. An icon appears in their System Tray (top right on macOS, bottom right on 
 Windows), with the a mini Node Launcher logo and an orange status dot. If the 
 user clicks on it, they see a progress bar with "Syncing with the Lightning 
 Network..." What the Node Launcher is doing in the background is using neutrino 
