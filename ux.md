@@ -18,7 +18,8 @@ Network..." What the Node Launcher is doing in the background is using neutrino
 "SPV" to quickly sync Lightning, and launches bitcoind in the background so 
 they can start syncing their full node. When the neutrino sync is done, the 
 status dot becomes blue. When the bitcoind full node sync is done, LND connects 
-to it directly and the status dot becomes green.
+to it directly and the status dot becomes green. Both nodes default to using 
+Tor.
 4. User receives a Node Launcher desktop notification to install the Joule 
 browser extension, with a link to https://lightningjoule.com/
 5. User installs Joule, and Joule automatically connects to the local LND node 
