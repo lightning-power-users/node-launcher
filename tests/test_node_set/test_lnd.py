@@ -7,12 +7,26 @@ from node_launcher.constants import IS_WINDOWS
 from node_launcher.node_set.lnd import (
     Lnd
 )
-from node_launcher.utilities import is_port_in_use
+from node_launcher.utilities.utilities import is_port_in_use
 
 
 class TestDirectoryConfiguration(object):
     def test_lnd_data_path(self, lnd: Lnd):
-        assert os.path.isdir(lnd.file['lnddir'])
+        assert os.path.isdir(lnd.lnddir)
+
+    def test_multi_property(self, lnd: Lnd):
+        lnd.file['multi_property'] = [
+            'test1',
+            'test2'
+        ]
+        assert len(lnd.file['multi_property']) == 2
+
+    def test_multi_listen(self, lnd: Lnd):
+        lnd.file['listen'] = [
+            '127.0.0.1:9835',
+            '192.168.1.1:9736',
+        ]
+        assert lnd.node_port == '9835'
 
     def test_rest(self, lnd: Lnd):
         assert not is_port_in_use(lnd.rest_port)

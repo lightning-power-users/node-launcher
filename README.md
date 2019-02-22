@@ -1,16 +1,16 @@
 # User Guides
 
 1. [Please start here!](https://medium.com/@pierre_rochard/windows-macos-lightning-network-284bd5034340)
-2. [Set up Zap Desktop](https://medium.com/@pierre_rochard/easy-lightning-with-node-launcher-zap-488133edfbd)
-3. [Open a channel with Zap Desktop](https://medium.com/@pierre_rochard/send-a-lightning-payment-with-zap-desktop-17b74b65b9b8)
-4. [Send a payment with the Joule Chrome extension](https://medium.com/@pierre_rochard/bitcoin-lightning-joule-chrome-extension-ac149bb05cb9)
+2. [Send a payment with the Joule Chrome extension](https://medium.com/@pierre_rochard/bitcoin-lightning-joule-chrome-extension-ac149bb05cb9)
 
 # Requirements
 1. ~300 GB of download bandwidth
 2. ~10 GB of disk space (~300 GB if you want the Bitcoin transaction index, makes for a faster LND)
 3. Windows 7+ or macOS 10.12.6+
 
-Please submit a pull request if you want to add Linux support! Next year is the Year of Desktop Linux...
+Linux works but it is not packaged, follow the developer steps below to run it from the Linux command line. 
+
+Please submit a pull request if you want to add Linux packaging! A .deb and .rpm would help grow the Lightning network...
 
 
 # Install 
@@ -33,6 +33,8 @@ https://github.com/PierreRochard/node-launcher/releases
 ![windows](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/windows.png)
 
 # Development
+
+Review the contributing.md file https://github.com/PierreRochard/node-launcher/blob/master/contributing.md
 
 0. `git clone https://github.com/PierreRochard/node-launcher && cd node-launcher`
 1. Setup a Python 3.7+ virtual environment

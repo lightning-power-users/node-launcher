@@ -1,62 +1,107 @@
 import os
 from os.path import isfile, isdir, pardir
+from typing import List, Any
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
+from node_launcher.logging import log
 
 
-class ConfigurationFile(dict):
+class ConfigurationFile(object):
     def __init__(self, path, **kwargs):
         super().__init__(**kwargs)
         self.path = path
         parent = os.path.abspath(os.path.join(path, pardir))
         if not isdir(parent):
+            log.info(
+                'Creating directory',
+                path=parent
+            )
             os.mkdir(parent)
         if not isfile(self.path):
+            log.info(
+                'Creating file',
+                path=self.path
+            )
             with open(self.path, 'w') as f:
-                f.write('# Auto-Generated Configuration File\n\n')
-                f.write(f'# Node Launcher version {NODE_LAUNCHER_RELEASE}\n\n')
+                f.write('# Auto-Generated Configuration File' + os.linesep + os.linesep)
+                f.write(f'# Node Launcher version {NODE_LAUNCHER_RELEASE}' + os.linesep + os.linesep)
                 f.flush()
 
-    def __setitem__(self, name, value) -> None:
-        if isinstance(value, str):
-            pass
-        elif isinstance(value, bool):
-            value = str(int(value))
-        elif isinstance(value, int):
-            value = str(value)
-        else:
-            raise NotImplementedError(f'setattr for {type(value)}')
+        self.cache = {}
+        self.populate_cache()
 
-        self.write_property(name, value)
-
-    def __delitem__(self, v) -> None:
-        pass
-
-    def __getitem__(self, name):
+    def populate_cache(self):
         with open(self.path, 'r') as f:
-            lines = f.readlines()
-        property_lines = [l for l in lines if l.startswith(name)]
-        if len(property_lines) > 1:
-            raise Exception(
-                f'Multiple occurrences of {name} in {self.path}')
-        elif len(property_lines) == 1:
-            property_line = property_lines[0]
-            value = property_line.split('=')[1:]
+            property_lines = f.readlines()
+        self.cache = {}
+        for property_line in property_lines:
+            key_value = property_line.split('=')
+            key = key_value[0]
+            if not key.strip():
+                continue
+            value = key_value[1:]
             value = '='.join(value).strip()
             value = value.replace('"', '')
             if len(value) == 1 and value.isdigit():
                 value = bool(int(value))
             elif value.isdigit():
                 value = int(value)
-            return value
-        else:
-            return None
+
+            existing_value = self.cache.get(key, 'no_key')
+            if existing_value == 'no_key':
+                self.cache[key] = value
+            elif isinstance(existing_value, list):
+                self.cache[key].append(value)
+            else:
+                self.cache[key] = [existing_value, value]
+
+    def __repr__(self):
+        return f'ConfigurationFile: {self.path}'
+
+    def __delitem__(self, v) -> None:
+        raise NotImplementedError()
 
     def __len__(self) -> int:
-        pass
+        raise NotImplementedError()
 
     def __iter__(self):
-        pass
+        raise NotImplementedError()
+
+    def __getitem__(self, name):
+        return self.cache.get(name, None)
+
+    def __setitem__(self, name: str, value: Any) -> None:
+        self.cache[name] = value
+        if isinstance(value, str):
+            value = [value]
+        elif isinstance(value, bool):
+            value = [str(int(value))]
+        elif isinstance(value, int):
+            value = [str(value)]
+        elif isinstance(value, List):
+            for item in value:
+                assert isinstance(item, str)
+            pass
+        elif value is None:
+            pass
+        else:
+            raise NotImplementedError(f'setattr for {type(value)}')
+
+        self.write_property(name, value)
+
+    def write_property(self, name: str, value_list: List[str]):
+        with open(self.path, 'r') as f:
+            lines = f.readlines()
+        property_lines = [line_number for line_number, l in enumerate(lines)
+                          if l.startswith(name)]
+        for property_line_index in property_lines:
+            lines.pop(property_line_index)
+        if value_list is not None:
+            for value in value_list:
+                property_string = os.linesep + f'{name}={value}' + os.linesep
+                lines.append(property_string)
+        with open(self.path, 'w') as f:
+            f.writelines(lines)
 
     @property
     def directory(self):
@@ -64,23 +109,3 @@ class ConfigurationFile(dict):
             os.path.join(self.path, os.pardir)
         )
         return directory_path
-
-    def write_property(self, name: str, value: str):
-        property_string = f'{name}={value}\n'
-
-        with open(self.path, 'r') as f:
-            lines = f.readlines()
-
-        property_lines = [line_number for line_number, l in enumerate(lines)
-                          if l.startswith(name)]
-        if len(property_lines) > 1:
-            raise Exception(
-                f'Multiple occurrences of {name} in {self.path}')
-        elif len(property_lines) == 1:
-            property_line = property_lines[0]
-            lines[property_line] = property_string
-        else:
-            lines.append(property_string)
-
-        with open(self.path, 'w') as f:
-            f.writelines(lines)

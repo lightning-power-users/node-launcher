@@ -47,7 +47,7 @@ class TestBitcoinSoftware(object):
     def test_download_url(self, bitcoin_software: BitcoinSoftware):
         url = bitcoin_software.download_url
         if OPERATING_SYSTEM == WINDOWS:
-            assert url == 'https://bitcoincore.org/bin/bitcoin-core-0.17.0.1/bitcoin-0.17.0.1-win64.zip'
+            assert url == 'https://bitcoincore.org/bin/bitcoin-core-0.17.1/bitcoin-0.17.1-win64.zip'
         assert url
 
     @pytest.mark.slow

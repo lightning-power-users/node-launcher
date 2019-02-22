@@ -3,15 +3,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 from PySide2.QtTest import QTest
 
-from node_launcher.constants import MAINNET
 from node_launcher.gui.network_buttons.network_widget import NetworkWidget
 
 
 @pytest.fixture
 def network_widget() -> NetworkWidget:
-    network_widget = NetworkWidget(
-        network=MAINNET
-    )
+    network_widget = NetworkWidget()
     network_widget.timer = MagicMock()
     network_widget.node_set = MagicMock()
     return network_widget

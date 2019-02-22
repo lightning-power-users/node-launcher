@@ -1,14 +1,12 @@
 import os
 
+from node_launcher.logging import log
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.node_set.lnd import Lnd
 from node_launcher.constants import (
     BITCOIN_DATA_PATH,
     LND_DIR_PATH,
-    MAINNET,
-    Network,
     OPERATING_SYSTEM,
-    TESTNET
 )
 from node_launcher.node_set.lnd_client import LndClient
 from node_launcher.node_set.setup_tor import SetupTor
@@ -24,12 +22,27 @@ class NodeSet(object):
     def __init__(self, network: Network):
         self.network = network
 
+    def __init__(self):
+        file_name = 'bitcoin.conf'
+        bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
+        self.bitcoin_configuration_file_path = os.path.join(bitcoin_data_path,
+                                                            file_name)
+        log.info(
+            'bitcoin_configuration_file_path',
+            bitcoin_configuration_file_path=self.bitcoin_configuration_file_path
+        )
         self.bitcoin = Bitcoin(
-            network=self.network,
             configuration_file_path=self.bitcoin_configuration_file_path
         )
+
+        file_name = 'lnd.conf'
+        lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
+        self.lnd_configuration_file_path = os.path.join(lnd_dir_path, file_name)
+        log.info(
+            'lnd_configuration_file_path',
+            lnd_configuration_file_path=self.lnd_configuration_file_path
+        )
         self.lnd = Lnd(
-            network=self.network,
             configuration_file_path=self.lnd_configuration_file_path,
             bitcoin=self.bitcoin
         )
@@ -38,27 +51,11 @@ class NodeSet(object):
 
     @property
     def is_testnet(self) -> bool:
-        return self.network == TESTNET
+        return self.bitcoin.file['testnet']
 
     @property
     def is_mainnet(self) -> bool:
-        return self.network == MAINNET
-
-    @property
-    def lnd_configuration_file_path(self) -> str:
-        file_name = 'lnd.conf'
-        if self.is_testnet:
-            file_name = 'lnd-testnet.conf'
-        lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
-        return os.path.join(lnd_dir_path, file_name)
-
-    @property
-    def bitcoin_configuration_file_path(self) -> str:
-        file_name = 'bitcoin.conf'
-        if self.is_testnet:
-            file_name = 'bitcoin-testnet.conf'
-        bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
-        return os.path.join(bitcoin_data_path, file_name)
+        return not self.bitcoin.file['testnet']
 
     def reset_tls(self):
         was_running = self.lnd.running

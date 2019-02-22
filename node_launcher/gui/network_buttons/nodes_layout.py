@@ -1,6 +1,6 @@
 from PySide2.QtWidgets import QPushButton
 
-from node_launcher.gui.advanced.advanced_widget import AdvancedWidget
+from node_launcher.gui.network_buttons.advanced.advanced_widget import AdvancedWidget
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.image_label import ImageLabel
@@ -15,8 +15,9 @@ class NodesLayout(QGridLayout):
         self.advanced_widget = AdvancedWidget(node_set)
 
         self.columns = 2
-        image_label = ImageLabel(f'bitcoin-{self.node_set.network}.png')
-        self.addWidget(image_label, row_span=5)
+        self.image_label = ImageLabel()
+        self.image_label.set_image(f'bitcoin-{self.node_set.bitcoin.network}.png')
+        self.addWidget(self.image_label, row_span=5)
 
         self.addWidget(SectionName('Nodes'), column=self.columns)
         # Bitcoin-Qt button

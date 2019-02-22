@@ -1,28 +1,30 @@
 import os
-import time
-from signal import SIGINT
-
-import psutil
 import socket
+import ssl
+import time
+from signal import SIGINT, SIGTERM
 from subprocess import call, Popen, PIPE
+from sys import platform
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
-from psutil import AccessDenied
+import psutil
 
+from node_launcher.logging import log
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.constants import (
     IS_LINUX,
     IS_MACOS,
     IS_WINDOWS,
+    LND_DEFAULT_GRPC_PORT,
+    LND_DEFAULT_PEER_PORT,
+    LND_DEFAULT_REST_PORT,
     LND_DIR_PATH,
-    Network,
-    OPERATING_SYSTEM,
-    TESTNET, MAINNET, LND_DEFAULT_PEER_PORT, LND_DEFAULT_GRPC_PORT,
-    LND_DEFAULT_REST_PORT)
+    OPERATING_SYSTEM
+)
 from node_launcher.services.lnd_software import LndSoftware
-from node_launcher.utilities import get_port
+from node_launcher.utilities.utilities import get_port
 
 
 class Lnd(object):
@@ -30,18 +32,20 @@ class Lnd(object):
     software: LndSoftware
     process: Optional[psutil.Process]
 
-    def __init__(self, network: Network,
-                 configuration_file_path: str,
-                 bitcoin: Bitcoin):
+    def __init__(self, configuration_file_path: str, bitcoin: Bitcoin):
         self.running = False
         self.is_unlocked = False
-        self.network = network
         self.bitcoin = bitcoin
         self.file = ConfigurationFile(configuration_file_path)
         self.process = self.find_running_node()
         self.software = LndSoftware()
 
-        self.file['lnddir'] = LND_DIR_PATH[OPERATING_SYSTEM]
+        self.lnddir = LND_DIR_PATH[OPERATING_SYSTEM]
+
+        # Previous versions of the launcher set lnddir in the config file,
+        # but it is not a valid key so this helps old users upgrading
+        if self.file['lnddir'] is not None:
+            self.file['lnddir'] = None
 
         if self.file['debuglevel'] is None:
             self.file['debuglevel'] = 'info'
@@ -56,7 +60,7 @@ class Lnd(object):
         self.file['bitcoind.zmqpubrawtx'] = self.bitcoin.file['zmqpubrawtx']
 
         if self.file['restlisten'] is None:
-            if self.network == TESTNET:
+            if self.bitcoin.file['testnet']:
                 self.rest_port = get_port(LND_DEFAULT_REST_PORT + 1)
             else:
                 self.rest_port = get_port(LND_DEFAULT_REST_PORT)
@@ -64,37 +68,62 @@ class Lnd(object):
         else:
             self.rest_port = self.file['restlisten'].split(':')[-1]
 
-        if self.file['listen'] is None:
-            if self.network == TESTNET:
-                self.node_port = get_port(LND_DEFAULT_PEER_PORT + 1)
-            else:
-                self.node_port = get_port(LND_DEFAULT_PEER_PORT)
-            self.file['listen'] = f'127.0.0.1:{self.node_port}'
-        else:
-            self.node_port = self.file['listen'].split(':')[-1]
-
-        if self.file['rpclisten'] is None:
-            if self.network == TESTNET:
+        if not self.file['rpclisten']:
+            if self.bitcoin.file['testnet']:
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT + 1)
             else:
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT)
-            self.file['rpclisten'] = f'0.0.0.0:{self.grpc_port}'
+            self.file['rpclisten'] = f'127.0.0.1:{self.grpc_port}'
         else:
-            self.grpc_port = self.file['rpclisten'].split(':')[-1]
+            self.grpc_port = int(self.file['rpclisten'].split(':')[-1])
 
-        if self.file['tlsextraip'] is None:
-            self.tlsextraip = socket.gethostbyname(socket.gethostname())
-            self.file['tlsextraip'] = f'{self.tlsextraip}'
+        if self.file['color'] is None:
+            self.file['color'] = '#000000'
+
+        self.macaroon_path = os.path.join(
+            self.lnddir,
+            'data',
+            'chain',
+            'bitcoin',
+            str(self.bitcoin.network)
+        )
+
+    @property
+    def node_port(self) -> str:
+        if self.file['listen'] is None:
+            if self.bitcoin.file['testnet']:
+                port = get_port(LND_DEFAULT_PEER_PORT + 1)
+            else:
+                port = get_port(LND_DEFAULT_PEER_PORT)
+            self.file['listen'] = f'127.0.0.1:{port}'
         else:
-            self.tlsextraip = self.file['tlsextraip'].split('=')[-1]
+            if not isinstance(self.file['listen'], list):
+                port = self.file['listen'].split(':')[-1]
+            else:
+                port = self.file['listen'][0].split(':')[-1]
+        return port
+
+    def test_tls_cert(self):
+        context = ssl.create_default_context()
+        context.load_verify_locations(cafile=self.tls_cert_path)
+        conn = context.wrap_socket(socket.socket(socket.AF_INET),
+                                   server_hostname='127.0.0.1')
+        conn.connect(('127.0.0.1', int(self.rest_port)))
+        cert = conn.getpeercert()
+        return cert
 
     def check_process(self):
-        if self.process is None or not self.process.is_running():
+        if (self.process is None
+                or not self.process.is_running()
+                or not self.is_unlocked):
             self.find_running_node()
 
     def stop(self):
         self.check_process()
-        self.process.send_signal(SIGINT)
+        if platform == 'win32':
+            self.process.send_signal(SIGTERM)
+        else:
+            self.process.send_signal(SIGINT)
         time.sleep(0.1)
         self.check_process()
         if self.process is not None:
@@ -105,20 +134,44 @@ class Lnd(object):
         self.running = False
         self.process = None
         found_ports = []
-        for process in psutil.process_iter():
+        try:
+            processes = psutil.process_iter()
+        except:
+            log.warning(
+                'Lnd.find_running_node',
+                exc_info=True
+            )
+            return None
+
+        for process in processes:
             if not process.is_running():
+                log.warning(
+                    'Lnd.find_running_node',
+                    exc_info=True
+                )
                 continue
             try:
                 process_name = process.name()
             except:
+                log.warning(
+                    'Lnd.find_running_node',
+                    exc_info=True
+                )
                 continue
             if 'lnd' in process_name:
                 lnd_process = process
+                open_files = None
                 try:
-                    log_file = lnd_process.open_files()[0]
-                except (IndexError, AccessDenied):
+                    open_files = lnd_process.open_files()
+                    log_file = open_files[0]
+                except:
+                    log.warning(
+                        'Lnd.find_running_node',
+                        open_files=open_files,
+                        exc_info=True
+                    )
                     continue
-                if str(self.network) not in log_file.path:
+                if str(self.bitcoin.network) not in log_file.path:
                     continue
                 self.process = lnd_process
                 self.running = True
@@ -136,20 +189,13 @@ class Lnd(object):
                             is_unlocked = True
                     self.is_unlocked = is_unlocked
                     return lnd_process
-                except AccessDenied:
+                except:
+                    log.warning(
+                        'Lnd.find_running_node',
+                        exc_info=True
+                    )
                     continue
         return None
-
-    @property
-    def macaroon_path(self) -> str:
-        macaroons_path = os.path.join(
-            self.file['lnddir'],
-            'data',
-            'chain',
-            'bitcoin',
-            str(self.network)
-        )
-        return macaroons_path
 
     @property
     def admin_macaroon_path(self) -> str:
@@ -167,16 +213,15 @@ class Lnd(object):
 
     @property
     def tls_cert_path(self) -> str:
-        tls_cert_path = os.path.join(self.file['lnddir'], 'tls.cert')
+        tls_cert_path = os.path.join(self.lnddir, 'tls.cert')
         return tls_cert_path
 
     def lnd(self) -> List[str]:
         command = [
             self.software.lnd,
-            f'--configfile="{self.file.path}"',
-            '--debuglevel=info'
+            f'--configfile="{self.file.path}"'
         ]
-        if self.network == TESTNET:
+        if self.bitcoin.file['testnet']:
             command += [
                 '--bitcoin.testnet'
             ]
@@ -184,30 +229,40 @@ class Lnd(object):
             command += [
                 '--bitcoin.mainnet'
             ]
+        log.info(
+            'lnd',
+            command=command,
+            **self.file.cache
+        )
         return command
+
+    def lncli_arguments(self) -> List[str]:
+        args = []
+        if self.grpc_port != LND_DEFAULT_GRPC_PORT:
+            args.append(f'--rpcserver=127.0.0.1:{self.grpc_port}')
+        if self.bitcoin.file['testnet']:
+            args.append(f'--network={self.bitcoin.network}')
+        if self.lnddir != LND_DIR_PATH[OPERATING_SYSTEM]:
+            args.append(f'''--lnddir="{self.lnddir}"''')
+            args.append(f'--macaroonpath="{self.macaroon_path}"')
+            args.append(f'--tlscertpath="{self.tls_cert_path}"')
+        return args
 
     @property
     def lncli(self) -> str:
         base_command = [
             f'"{self.software.lncli}"',
         ]
-        if self.grpc_port != 10009:
-            base_command.append(f'--rpcserver=localhost:{self.grpc_port}')
-        if self.network != MAINNET:
-            base_command.append(f'--network={self.network}')
-        if self.file['lnddir'] != LND_DIR_PATH[OPERATING_SYSTEM]:
-            base_command.append(f'''--lnddir="{self.file['lnddir']}"''')
-            base_command.append(f'--macaroonpath="{self.macaroon_path}"')
-            base_command.append(f'--tlscertpath="{self.tls_cert_path}"')
+        base_command += self.lncli_arguments()
         return ' '.join(base_command)
 
     @property
     def rest_url(self) -> str:
-        return f'https://localhost:{self.rest_port}'
+        return f'https://127.0.0.1:{self.rest_port}'
 
     @property
     def grpc_url(self) -> str:
-        return f'localhost:{self.grpc_port}'
+        return f'127.0.0.1:{self.grpc_port}'
 
     def launch(self):
         command = self.lnd()
