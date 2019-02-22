@@ -1,7 +1,11 @@
 # The UX Vision for the Node Launcher
 
-1. User goes to LightningPowerUsers.com, clicks the Download Node Launcher 
-button that is front and center
+Website and Node Launcher user interface would be translated to at least every 
+major language using Transifex.
+
+1. User goes to LightningPowerUsers.com, the macOS App Store (or HomeBrew), the
+Windows App Store, or their Linux package manager clicks the Download Node 
+Launcher button that is front and center
 2. User performs macOS dmg with installer app or Windows setup.exe install 
 (this part needs to be filled in, there should be a configuration flow with 
 Recommended nudges and Advanced options), installer flow ends with check marked 
