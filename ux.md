@@ -6,11 +6,11 @@ major language using Transifex.
 1. User goes to LightningPowerUsers.com, the macOS App Store (or HomeBrew), the
 Windows App Store, or their Linux package manager clicks the Download Node 
 Launcher button that is front and center
-2. User performs macOS dmg with installer app or Windows setup.exe install 
-(this part needs to be filled in, there should be a configuration flow with 
-Recommended nudges and Advanced options), installer flow ends with check marked 
-"Open Node Launcher". I'd really want this to have a minimalist Default path 
-where you can hit enter a couple of times and be done
+2. User performs macOS dmg with installer app or Windows setup.exe / MSI Package
+install (this part needs to be filled in, there should be a configuration flow 
+with Recommended nudges and Advanced options), installer flow ends with check 
+marked "Open Node Launcher". I'd really want this to have a minimalist Default 
+path where you can hit enter a couple of times and be done
 3. An icon appears in their System Tray (top right on macOS, bottom right on 
 Windows), with the a mini Node Launcher logo and an orange status dot. If the 
 user clicks on it, they see a progress bar with "Syncing with the Lightning 
