@@ -43,7 +43,7 @@ class NodesLayout(QGridLayout):
         # Tor button
         self.tor_button = QPushButton('Tor')
         # noinspection PyUnresolvedReferences
-        self.tor_button.clicked.connect(self.node_set.setup_tor.launch)
+        self.tor_button.clicked.connect(self.node_set.setup_tor.run)
         self.addWidget(self.tor_button, column=self.columns)
 
         self.addWidget(HorizontalLine(), column=self.columns)
