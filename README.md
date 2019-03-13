@@ -41,9 +41,10 @@ Install Python3.7+ (macOS: `brew install python3`)
 0. `git clone https://github.com/PierreRochard/node-launcher`
 1. `cd node-launcher`
 2. `python3.7 -m venv venv`
-3. `pip3.7 install -r requirements.txt`
-4. `python setup.py develop`
-5. `python run.py`
+3. `. venv/bin/activate`
+4. `pip3.7 install -r requirements.txt`
+5. `python setup.py develop`
+6. `python run.py`
 
 # Testing
 
