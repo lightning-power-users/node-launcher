@@ -36,11 +36,14 @@ https://github.com/PierreRochard/node-launcher/releases
 
 Review the contributing.md file https://github.com/PierreRochard/node-launcher/blob/master/contributing.md
 
-0. `git clone https://github.com/PierreRochard/node-launcher && cd node-launcher`
-1. Setup a Python 3.7+ virtual environment
-2. `pip install -r requirements.txt`
-3. `python setup.py develop`
-4. `python run.py`
+Install Python3.7+ (macOS: `brew install python3`)
+
+0. `git clone https://github.com/PierreRochard/node-launcher
+1. `cd node-launcher`
+2. `python3.7 -m venv venv`
+3. `pip install -r requirements.txt`
+4. `python setup.py develop`
+5. `python run.py`
 
 # Testing
 
