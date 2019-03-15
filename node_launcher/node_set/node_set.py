@@ -41,6 +41,20 @@ class NodeSet(object):
         )
         self.lnd_client = LndClient(self.lnd)
 
+        file_name = 'torrc'
+        tor_dir_path = TOR_DIR_PATH[OPERATING_SYSTEM]
+        self.tor_configuration_file_path = os.path.join(tor_dir_path, file_name)
+        log.info(
+            'tor_configuration_file_path',
+            tor_configuration_file_path=self.tor_configuration_file_path
+        )
+        self.tor = Tor(
+            configuration_file_path=self.tor_configuration_file_path,
+            lnd=self.lnd
+        )
+
+
+
     @property
     def is_testnet(self) -> bool:
         return self.bitcoin.file['testnet']
