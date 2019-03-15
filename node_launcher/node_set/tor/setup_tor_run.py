@@ -16,8 +16,8 @@ class SetupTorRun(object):
     def run(self):
 
         if IS_MACOS:
-            path= expanduser('~/node-launcher/setup_tor.py')
-            command= 'python3 '
+            path= expanduser('~/node-launcher/node_launcher/node_set/setup_tor.py')
+            command = expanduser('~/node-launcher/venv/bin/python ')
             cmd = command + path
             with NamedTemporaryFile(suffix='-tor.command', delete=False) as f:
                 f.write(f'#!/bin/sh\n{cmd}\n'.encode('utf-8'))
