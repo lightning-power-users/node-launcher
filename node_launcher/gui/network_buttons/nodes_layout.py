@@ -6,6 +6,7 @@ from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.image_label import ImageLabel
 from node_launcher.gui.components.section_name import SectionName
 from node_launcher.node_set import NodeSet
+from node_launcher.node_set.setup_tor import run_tor
 
 
 class NodesLayout(QGridLayout):
@@ -43,7 +44,7 @@ class NodesLayout(QGridLayout):
         # Tor button
         self.tor_button = QPushButton('Tor')
         # noinspection PyUnresolvedReferences
-        self.tor_button.clicked.connect(self.node_set.setup_tor.run)
+        self.tor_button.clicked.connect(run_tor)
         self.addWidget(self.tor_button, column=self.columns)
 
         self.addWidget(HorizontalLine(), column=self.columns)
