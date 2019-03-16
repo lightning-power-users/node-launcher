@@ -36,6 +36,7 @@ class Tor(object):
         self.file['HiddenServicePort'] = '8333 127.0.0.1:8333'
         self.file['HiddenServicePort'] = '18333 127.0.0.1:18333'
 
+        # TODO add lnd- & bitcoind-specific configs
         # TODO add any relevant Tor methods
 
     def launch(self):
