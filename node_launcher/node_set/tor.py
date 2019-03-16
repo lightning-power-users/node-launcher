@@ -18,7 +18,7 @@ from node_launcher.constants import (
 )
 
 class Tor(object):
-    file: ConfigurationFile  # Figure how to edit this for ! the '=' assignment operator
+    file: ConfigurationFile
     software: TorSoftware
     process: Optional[psutil.Process]
 
