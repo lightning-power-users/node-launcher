@@ -7,9 +7,10 @@ from node_launcher.logging import log
 
 
 class ConfigurationFile(object):
-    def __init__(self, path, **kwargs):
+    def __init__(self, path, assign_op='=', **kwargs):
         super().__init__(**kwargs)
         self.path = path
+        self.assign_op = assign_op
         parent = os.path.abspath(os.path.join(path, pardir))
         if not isdir(parent):
             log.info(
@@ -35,12 +36,12 @@ class ConfigurationFile(object):
             property_lines = f.readlines()
         self.cache = {}
         for property_line in property_lines:
-            key_value = property_line.split('=')
+            key_value = property_line.split(self.assign_op)
             key = key_value[0]
             if not key.strip():
                 continue
             value = key_value[1:]
-            value = '='.join(value).strip()
+            value = self.assign_op.join(value).strip()
             value = value.replace('"', '')
             if len(value) == 1 and value.isdigit():
                 value = bool(int(value))
