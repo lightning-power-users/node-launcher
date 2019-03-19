@@ -36,7 +36,19 @@ class Tor(object):
         self.file['HiddenServicePort'] = '8333 127.0.0.1:8333'
         self.file['HiddenServicePort'] = '18333 127.0.0.1:18333'
 
-        # TODO add lnd- & bitcoind-specific configs
+        # bitcoin.conf edits
+        self.bitcoin.file['proxy'] = '127.0.0.1:9050'
+        self.bitcoin.file['listen'] = '1'
+        self.bitcoin.file['bind'] = '127.0.0.1'
+        self.bitcoin.file['debug'] = 'tor'
+
+        # lnd.conf edits
+        self.lnd.file['listen'] = 'localhost'
+        self.lnd.file['tor.active'] = '1'
+        self.lnd.file['tor.v3'] = '1'
+        self.lnd.file['tor.streamisolation'] = '1'
+
+
         # TODO add any relevant Tor methods
 
     def launch(self):
