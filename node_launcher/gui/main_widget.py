@@ -126,5 +126,9 @@ class MainWidget(QWidget):
     def quit_app(self):
         self.removeEventFilter(self)
         self.network_widget.node_set.lnd.process.terminate()
-        self.network_widget.node_set.lnd.process.waitForFinished()
+        self.network_widget.node_set.lnd.process.waitForFinished(2000)
+        self.network_widget.node_set.bitcoin.process.terminate()
+        self.network_widget.node_set.bitcoin.process.waitForFinished(2000)
+        self.network_widget.node_set.bitcoin.process.kill()
+
         QCoreApplication.exit(0)

@@ -16,10 +16,10 @@ class LndOutputWidget(QDialog):
     node_set: NodeSet
     process: QProcess
 
-    def __init__(self, node_set, process):
+    def __init__(self, node_set: NodeSet):
         super().__init__()
         self.node_set = node_set
-        self.process = process
+        self.process = node_set.lnd.process
         self.setWindowTitle('LND Output')
         self.layout = QGridLayout()
 
@@ -91,6 +91,9 @@ class LndOutputWidget(QDialog):
             self.output.append(line)
             if 'Waiting for wallet encryption password' in line:
                 self.auto_unlock_wallet()
+            elif 'Shutdown complete' in line:
+                self.process.waitForFinished()
+                self.process.start()
 
     def show(self):
         self.showMaximized()

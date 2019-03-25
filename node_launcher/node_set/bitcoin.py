@@ -1,21 +1,19 @@
 import os
-from subprocess import Popen, PIPE
-from tempfile import NamedTemporaryFile
-from typing import Optional, List
+from typing import List
 
 import psutil
-from node_launcher.exceptions import ZmqPortsNotOpenError
+from PySide2.QtCore import QProcess
+
+from node_launcher.constants import (BITCOIN_DATA_PATH,
+                                     BITCOIN_MAINNET_PEER_PORT,
+                                     BITCOIN_MAINNET_RPC_PORT,
+                                     BITCOIN_TESTNET_PEER_PORT,
+                                     BITCOIN_TESTNET_RPC_PORT, MAINNET,
+                                     MAINNET_PRUNE, OPERATING_SYSTEM, TESTNET,
+                                     TESTNET_PRUNE)
 from node_launcher.logging import log
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
-from node_launcher.constants import (
-    BITCOIN_DATA_PATH,
-    OPERATING_SYSTEM,
-    IS_WINDOWS,
-    TESTNET_PRUNE,
-    MAINNET_PRUNE,
-    TESTNET, MAINNET, BITCOIN_MAINNET_PEER_PORT, BITCOIN_MAINNET_RPC_PORT,
-    BITCOIN_TESTNET_RPC_PORT, BITCOIN_TESTNET_PEER_PORT)
 from node_launcher.services.hard_drives import HardDrives
 from node_launcher.utilities.utilities import get_random_password, get_zmq_port
 
@@ -23,7 +21,7 @@ from node_launcher.utilities.utilities import get_random_password, get_zmq_port
 class Bitcoin(object):
     file: ConfigurationFile
     hard_drives: HardDrives
-    process: Optional[psutil.Process]
+    process: QProcess
     software: BitcoinSoftware
     zmq_block_port: int
     zmq_tx_port: int
@@ -76,9 +74,8 @@ class Bitcoin(object):
             should_prune = self.hard_drives.should_prune(self.file['datadir'], has_bitcoin=True)
             self.set_prune(should_prune)
 
-        if not self.detect_zmq_ports():
-            self.zmq_block_port = get_zmq_port()
-            self.zmq_tx_port = get_zmq_port()
+        self.zmq_block_port = get_zmq_port()
+        self.zmq_tx_port = get_zmq_port()
 
         self.file['zmqpubrawblock'] = f'tcp://127.0.0.1:{self.zmq_block_port}'
         self.file['zmqpubrawtx'] = f'tcp://127.0.0.1:{self.zmq_tx_port}'
@@ -96,9 +93,14 @@ class Bitcoin(object):
             )
             self.file['dbcache'] = 1000
 
-        self.check_process()
         self.config_snapshot = self.file.snapshot.copy()
         self.file.file_watcher.fileChanged.connect(self.config_file_changed)
+
+        self.process = QProcess()
+        self.process.setProgram(self.software.bitcoind)
+        self.process.setCurrentReadChannel(0)
+        self.process.setArguments(self.args)
+        self.process.start()
 
     @property
     def network(self):
@@ -226,97 +228,8 @@ class Bitcoin(object):
                 datadir=default_datadir
             )
 
-    def check_process(self):
-        if self.process is not None:
-            if (not self.process.is_running()
-                    or self.process.status() == 'zombie'):
-                self.process = None
-
-        if self.process is None:
-            self.running = False
-            self.process = self.find_running_node()
-            self.detect_zmq_ports()
-
-    def find_running_node(self) -> Optional[psutil.Process]:
-        # noinspection PyBroadException
-        try:
-            processes = psutil.process_iter()
-        except:
-            log.warning(
-                'Bitcoin.find_running_node',
-                exc_info=True
-            )
-            return None
-        for process in processes:
-            try:
-                if not process.is_running() or process.status() == 'zombie':
-                    continue
-            except:
-                log.warning(
-                    'Bitcoin.find_running_node',
-                    exc_info=True
-                )
-                continue
-            # noinspection PyBroadException
-            try:
-                process_name = process.name()
-            except:
-                log.warning(
-                    'Bitcoin.find_running_node',
-                    exc_info=True
-                )
-                continue
-            if 'bitcoin' in process_name:
-                # noinspection PyBroadException
-                try:
-                    for connection in process.connections():
-                        ports = [self.rpc_port, self.node_port]
-                        if connection.laddr.port in ports:
-                            self.running = True
-                            return process
-                except:
-                    log.warning(
-                        'Bitcoin.find_running_node',
-                        exc_info=True
-                    )
-                    continue
-        return None
-
-    def detect_zmq_ports(self) -> bool:
-        if self.process is None:
-            return False
-        ports = [c.laddr.port for c in self.process.connections()
-                 if 18500 <= c.laddr.port <= 18600]
-        ports = set(ports)
-        if len(ports) != 2:
-            raise ZmqPortsNotOpenError(
-                'ZMQ ports are not open on your node, '
-                'please close Bitcoin Core and launch it with the Node Launcher'
-            )
-        self.zmq_block_port = min(ports)
-        self.zmq_tx_port = max(ports)
-        self.file['zmqpubrawblock'] = f'tcp://127.0.0.1:{self.zmq_block_port}'
-        self.file['zmqpubrawtx'] = f'tcp://127.0.0.1:{self.zmq_tx_port}'
-        return True
-
-    def bitcoin_qt(self) -> List[str]:
-        command = [self.software.bitcoin_qt]
-        args = [
-            f'-conf={self.file.path}',
-        ]
-        if IS_WINDOWS:
-            args = [
-                f'-conf="{self.file.path}"',
-            ]
-        command += args
-        log.info(
-            'bitcoin_qt',
-            command=command,
-            **self.file.cache
-        )
-        return command
-
-    def bitcoin_cli_arguments(self) -> List[str]:
+    @property
+    def args(self) -> List[str]:
         return [f'-conf={self.file.path}']
 
     @property
@@ -326,27 +239,6 @@ class Bitcoin(object):
             f'-conf="{self.file.path}"',
         ]
         return ' '.join(command)
-
-    def launch(self):
-        self.config_snapshot = self.file.snapshot.copy()
-        command = self.bitcoin_qt()
-        if IS_WINDOWS:
-            from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
-            command[0] = '"' + command[0] + '"'
-            cmd = ' '.join(command)
-            with NamedTemporaryFile(suffix='-btc.bat', delete=False) as f:
-                f.write(cmd.encode('utf-8'))
-                f.flush()
-                result = Popen(
-                    ['start', 'powershell', '-noexit', '-windowstyle', 'hidden',
-                     '-Command', f.name],
-                    stdin=PIPE, stdout=PIPE, stderr=PIPE,
-                    creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
-                    close_fds=True, shell=True)
-        else:
-            result = Popen(command, close_fds=True, shell=False)
-
-        return result
 
     def config_file_changed(self):
         # Refresh config file

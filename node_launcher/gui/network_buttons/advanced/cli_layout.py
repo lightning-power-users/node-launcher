@@ -31,7 +31,7 @@ class CliLayout(QGridLayout):
         self.bitcoin_cli_widget = CliWidget(
             title='bitcoin-cli',
             program=self.node_set.bitcoin.software.bitcoin_cli,
-            args=self.node_set.bitcoin.bitcoin_cli_arguments(),
+            args=self.node_set.bitcoin.args,
             commands=BITCOIN_CLI_COMMANDS
         )
 
