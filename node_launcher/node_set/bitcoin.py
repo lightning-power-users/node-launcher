@@ -35,10 +35,6 @@ class Bitcoin(object):
         self.running = False
         self.process = None
 
-        if self.file['main.uacomment'] is None:
-            self.file['main.uacomment'] = 'bitcoin'
-            self.file['test.uacomment'] = 'bitcoin-testnet'
-
         if self.file['datadir'] is None:
             self.autoconfigure_datadir()
 
