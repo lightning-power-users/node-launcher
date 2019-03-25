@@ -49,6 +49,10 @@ class Bitcoin(object):
             if self.file['datadir'] is None:
                 self.autoconfigure_datadir()
 
+        if os.path.exists(os.path.join(self.file['datadir'], 'blocks')):
+            if self.file['prune'] is None:
+                self.set_prune(False)
+
         self.wallet_paths = self.get_wallet_paths()
 
         if self.file['server'] is None:
