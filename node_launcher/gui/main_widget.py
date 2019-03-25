@@ -1,6 +1,7 @@
 import sys
 
-from PySide2.QtCore import Qt, QTimer
+from PySide2 import QtCore
+from PySide2.QtCore import Qt, QTimer, Slot, QCoreApplication
 from PySide2.QtGui import QKeySequence
 from PySide2.QtWidgets import (
     QAction,
@@ -113,3 +114,17 @@ class MainWidget(QWidget):
         if isinstance(focused_widget, QLineEdit):
             focused_widget.clearFocus()
         QMainWindow.mousePressEvent(self, event)
+
+    def eventFilter(self, obj, event):
+        if obj is self and event.type() == QtCore.QEvent.Close:
+            self.quit_app()
+            event.ignore()
+            return True
+        return super(MainWidget, self).eventFilter(obj, event)
+
+    @Slot()
+    def quit_app(self):
+        self.removeEventFilter(self)
+        self.network_widget.node_set.lnd.process.terminate()
+        self.network_widget.node_set.lnd.process.waitForFinished()
+        QCoreApplication.exit(0)

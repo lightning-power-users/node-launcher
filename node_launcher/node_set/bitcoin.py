@@ -418,7 +418,6 @@ class Bitcoin(object):
 
                     # Now check that values are the same
                     if found_in_old_config:
-                        print(f"Mainnet {old_config[field]} vs {new_config[field]}")
                         if old_config[field] != new_config[field]:
                             return True
 

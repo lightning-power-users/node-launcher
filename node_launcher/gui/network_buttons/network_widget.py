@@ -47,7 +47,6 @@ class NetworkWidget(QWidget):
 
     def refresh(self):
         self.node_set.bitcoin.check_process()
-        self.node_set.lnd.check_process()
 
         self.nodes_layout.set_button_state()
         self.lnd_wallet_layout.set_button_state()

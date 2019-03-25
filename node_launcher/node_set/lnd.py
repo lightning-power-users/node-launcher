@@ -1,42 +1,33 @@
 import os
 import socket
 import ssl
-import time
-from signal import SIGINT, SIGTERM
-from subprocess import call, Popen, PIPE
-from sys import platform
-from tempfile import NamedTemporaryFile
-from typing import List, Optional
+from typing import List
 
-import psutil
-from node_launcher.logging import log
-from node_launcher.node_set.bitcoin import Bitcoin
-from node_launcher.services.configuration_file import ConfigurationFile
+from PySide2.QtCore import QProcess
+
 from node_launcher.constants import (
-    IS_LINUX,
-    IS_MACOS,
-    IS_WINDOWS,
     LND_DEFAULT_GRPC_PORT,
     LND_DEFAULT_PEER_PORT,
     LND_DEFAULT_REST_PORT,
     LND_DIR_PATH,
-    OPERATING_SYSTEM
-)
+    OPERATING_SYSTEM)
+from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.services.lnd_software import LndSoftware
 from node_launcher.utilities.utilities import get_port
 
 
 class Lnd(object):
+    bitcoin: Bitcoin
     file: ConfigurationFile
     software: LndSoftware
-    process: Optional[psutil.Process]
+    process: QProcess
 
     def __init__(self, configuration_file_path: str, bitcoin: Bitcoin):
         self.running = False
         self.is_unlocked = False
         self.bitcoin = bitcoin
         self.file = ConfigurationFile(configuration_file_path)
-        self.process = self.find_running_node()
         self.software = LndSoftware()
 
         self.lnddir = LND_DIR_PATH[OPERATING_SYSTEM]
@@ -90,6 +81,28 @@ class Lnd(object):
         self.file.file_watcher.fileChanged.connect(self.config_file_changed)
         self.bitcoin.file.file_watcher.fileChanged.connect(self.bitcoin_config_file_changed)
 
+        self.process = QProcess()
+        self.process.setProgram(self.software.lnd)
+        self.process.setCurrentReadChannel(0)
+        self.process.setArguments(self.args)
+        self.process.start()
+
+    @property
+    def args(self):
+        arg_list = [
+            f'--configfile="{self.file.path}"',
+
+        ]
+        if self.bitcoin.file['testnet']:
+            arg_list += [
+                '--bitcoin.testnet'
+            ]
+        else:
+            arg_list += [
+                '--bitcoin.mainnet'
+            ]
+        return arg_list
+
     @property
     def node_port(self) -> str:
         if self.file['listen'] is None:
@@ -114,91 +127,6 @@ class Lnd(object):
         cert = conn.getpeercert()
         return cert
 
-    def check_process(self):
-        if (self.process is None
-                or not self.process.is_running()
-                or not self.is_unlocked):
-            self.find_running_node()
-
-    def stop(self):
-        self.check_process()
-        if platform == 'win32':
-            self.process.send_signal(SIGTERM)
-        else:
-            self.process.send_signal(SIGINT)
-        time.sleep(0.1)
-        self.check_process()
-        if self.process is not None:
-            self.stop()
-
-    def find_running_node(self) -> Optional[psutil.Process]:
-        self.is_unlocked = False
-        self.running = False
-        self.process = None
-        found_ports = []
-        try:
-            processes = psutil.process_iter()
-        except:
-            log.warning(
-                'Lnd.find_running_node',
-                exc_info=True
-            )
-            return None
-
-        for process in processes:
-            if not process.is_running():
-                log.warning(
-                    'Lnd.find_running_node',
-                    exc_info=True
-                )
-                continue
-            try:
-                process_name = process.name()
-            except:
-                log.warning(
-                    'Lnd.find_running_node',
-                    exc_info=True
-                )
-                continue
-            if 'lnd' in process_name:
-                lnd_process = process
-                open_files = None
-                try:
-                    open_files = lnd_process.open_files()
-                    log_file = open_files[0]
-                except:
-                    log.warning(
-                        'Lnd.find_running_node',
-                        open_files=open_files,
-                        exc_info=True
-                    )
-                    continue
-                if str(self.bitcoin.network) not in log_file.path:
-                    continue
-                self.process = lnd_process
-                self.running = True
-                try:
-                    is_unlocked = False
-                    connections = process.connections()
-                    for connection in connections:
-                        found_ports.append((connection.laddr, connection.raddr))
-                        if 8080 <= connection.laddr.port <= 9000:
-                            self.rest_port = connection.laddr.port
-                        elif 10009 <= connection.laddr.port <= 10100:
-                            self.grpc_port = connection.laddr.port
-                        elif 9735 <= connection.laddr.port < 9800:
-                            self.node_port = connection.laddr.port
-                            is_unlocked = True
-                    self.is_unlocked = is_unlocked
-                    return lnd_process
-                except:
-                    log.warning(
-                        'Lnd.find_running_node',
-                        exc_info=True
-                    )
-                    continue
-        return None
-
     @property
     def admin_macaroon_path(self) -> str:
         path = os.path.join(self.macaroon_path, 'admin.macaroon')
@@ -217,26 +145,6 @@ class Lnd(object):
     def tls_cert_path(self) -> str:
         tls_cert_path = os.path.join(self.lnddir, 'tls.cert')
         return tls_cert_path
-
-    def lnd(self) -> List[str]:
-        command = [
-            self.software.lnd,
-            f'--configfile="{self.file.path}"'
-        ]
-        if self.bitcoin.file['testnet']:
-            command += [
-                '--bitcoin.testnet'
-            ]
-        else:
-            command += [
-                '--bitcoin.mainnet'
-            ]
-        log.info(
-            'lnd',
-            command=command,
-            **self.file.cache
-        )
-        return command
 
     def lncli_arguments(self) -> List[str]:
         args = []
@@ -265,37 +173,6 @@ class Lnd(object):
     @property
     def grpc_url(self) -> str:
         return f'127.0.0.1:{self.grpc_port}'
-
-    def launch(self):
-        self.config_snapshot = self.file.snapshot.copy()
-        command = self.lnd()
-        command[0] = '"' + command[0] + '"'
-        cmd = ' '.join(command)
-        if IS_MACOS:
-            with NamedTemporaryFile(suffix='-lnd.command', delete=False) as f:
-                f.write(f'#!/bin/sh\n{cmd}\n'.encode('utf-8'))
-                f.flush()
-                call(['chmod', 'u+x', f.name])
-                result = Popen(['open', '-W', f.name], close_fds=True)
-        elif IS_WINDOWS:
-            from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
-            with NamedTemporaryFile(suffix='-lnd.bat', delete=False) as f:
-                f.write(cmd.encode('utf-8'))
-                f.flush()
-                result = Popen(
-                    ['start', 'powershell', '-noexit', '-Command', f.name],
-                    stdin=PIPE, stdout=PIPE, stderr=PIPE,
-                    creationflags=DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP,
-                    close_fds=True, shell=True)
-        elif IS_LINUX:
-            with NamedTemporaryFile(suffix='-lnd.command', delete=False) as f:
-                f.write(f'#!/bin/sh\n{cmd}\n'.encode('utf-8'))
-                f.flush()
-                call(['chmod', 'u+x', f.name])
-                result = Popen(['gnome-terminal', '-e', f.name], close_fds=True)
-        else:
-            raise NotImplementedError()
-        return result
 
     def config_file_changed(self):
         # Refresh config file
