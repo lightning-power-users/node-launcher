@@ -1,4 +1,4 @@
-from PySide2.QtCore import QTimer
+from PySide2.QtCore import QTimer, Slot, QEvent, QCoreApplication
 from PySide2.QtWidgets import QWidget
 
 from node_launcher.gui.components.grid_layout import QGridLayout

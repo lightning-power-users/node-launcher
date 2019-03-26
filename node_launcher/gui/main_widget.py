@@ -1,7 +1,7 @@
 import sys
 
 from PySide2 import QtCore
-from PySide2.QtCore import Qt, QTimer, Slot, QCoreApplication
+from PySide2.QtCore import Qt, QTimer, QCoreApplication, Slot, QEvent
 from PySide2.QtGui import QKeySequence
 from PySide2.QtWidgets import (
     QAction,
@@ -12,8 +12,8 @@ from PySide2.QtWidgets import (
     QMenuBar,
     QMessageBox,
     QVBoxLayout,
-    QWidget
-)
+    QWidget,
+    QSystemTrayIcon)
 
 from node_launcher.constants import (
     NODE_LAUNCHER_RELEASE,
@@ -28,7 +28,7 @@ from node_launcher.logging import log
 from node_launcher.services.launcher_software import LauncherSoftware
 
 
-class MainWidget(QWidget):
+class MainWidget(QSystemTrayIcon):
     data_directory_group_box: DataDirectoryBox
     error_message: QErrorMessage
     grid: QVBoxLayout
@@ -38,17 +38,12 @@ class MainWidget(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Node Launcher')
-        self.error_message = QErrorMessage(self)
         try:
             self.network_widget = NetworkWidget()
         except ZmqPortsNotOpenError as e:
             self.error_message.showMessage(str(e))
             self.error_message.exec_()
             sys.exit(0)
-
-        self.network_grid = Tabs(self, self.network_widget)
-        self.network_grid.currentChanged.connect(self.on_tab_change)
 
         self.grid = QVBoxLayout()
 
@@ -63,10 +58,6 @@ class MainWidget(QWidget):
         file_menu = self.menubar.addMenu('&File')
         file_menu.addAction(settings_action)
         self.grid.addWidget(self.menubar)
-
-        self.grid.addStretch()
-        self.grid.addWidget(self.network_grid)
-        self.setLayout(self.grid)
 
         self.settings_tab.bitcoin_tab.change_network.connect(self.change_network)
 
@@ -114,21 +105,3 @@ class MainWidget(QWidget):
         if isinstance(focused_widget, QLineEdit):
             focused_widget.clearFocus()
         QMainWindow.mousePressEvent(self, event)
-
-    def eventFilter(self, obj, event):
-        if obj is self and event.type() == QtCore.QEvent.Close:
-            self.quit_app()
-            event.ignore()
-            return True
-        return super(MainWidget, self).eventFilter(obj, event)
-
-    @Slot()
-    def quit_app(self):
-        self.removeEventFilter(self)
-        self.network_widget.node_set.lnd.process.terminate()
-        self.network_widget.node_set.lnd.process.waitForFinished(2000)
-        self.network_widget.node_set.bitcoin.process.terminate()
-        self.network_widget.node_set.bitcoin.process.waitForFinished(2000)
-        self.network_widget.node_set.bitcoin.process.kill()
-
-        QCoreApplication.exit(0)
