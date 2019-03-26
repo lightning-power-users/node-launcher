@@ -32,10 +32,18 @@ class BitcoindOutputWidget(QDialog):
         self.old_progress = None
         self.old_timestamp = None
 
+        self.timestamp_changes = []
+
     def handle_error(self):
         output: QByteArray = self.process.readAllStandardError()
         message = output.data().decode('utf-8').strip()
         self.output.append(message)
+
+    @staticmethod
+    def average(items):
+        total = sum((next - last).seconds + (next - last).days * 86400
+                    for next, last in zip(items[1:], items))
+        return total / (len(items) - 1)
 
     def handle_output(self):
         output: QByteArray = self.process.readAllStandardOutput()
@@ -56,8 +64,12 @@ class BitcoindOutputWidget(QDialog):
                             if self.old_progress is not None:
                                 change = new_progress - self.old_progress
                                 timestamp_change = new_timestamp - self.old_timestamp
+                                self.timestamp_changes.append(timestamp_change)
+                                if len(self.timestamp_changes) > 100:
+                                    self.timestamp_changes.pop(0)
+                                average_change = self.average(self.timestamp_changes)
                                 total_left = 1 - new_progress
-                                time_left = (total_left / change)*timestamp_change
+                                time_left = (total_left / change)*average_change
                                 humanized = humanize.naturaltime(-time_left)
                                 self.system_tray.menu.bitcoind_status_action.setText(
                                     f'ETA: {humanized}, {new_progress*100:.2f}% done'
