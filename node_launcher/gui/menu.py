@@ -1,5 +1,5 @@
 from PySide2.QtGui import QKeySequence
-from PySide2.QtWidgets import QMenu, QAction
+from PySide2.QtWidgets import QMenu
 
 
 class Menu(QMenu):

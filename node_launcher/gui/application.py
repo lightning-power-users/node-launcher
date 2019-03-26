@@ -19,18 +19,13 @@ class Application(QApplication):
         super().__init__()
 
         self.node_set = NodeSet()
-
-        path = asset_access.get_asset_full_path('system_tray_icon_red.png')
-        pixmap = QPixmap(path)
-        icon = QIcon(pixmap)
-
         self.parent = QWidget()
         self.parent.hide()
         self.parent.setWindowFlags(self.parent.windowFlags() & ~QtCore.Qt.Tool)
 
-        self.system_tray = SystemTray(icon, self.parent)
+        self.system_tray = SystemTray(self.parent)
         self.menu = Menu()
-        self.lnd_output_widget = LndOutputWidget(self.node_set)
+        self.lnd_output_widget = LndOutputWidget(self.node_set, self.system_tray)
         self.bitcoind_output_widget = BitcoindOutputWidget(
             self.node_set
         )
