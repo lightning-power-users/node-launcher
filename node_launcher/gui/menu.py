@@ -12,8 +12,8 @@ class Menu(QMenu):
 
         self.addSeparator()
 
-        self.bitcoind_status_action = self.addAction('lnd off')
-        self.bitcoind_status_action.setEnabled(False)
+        self.lnd_status_action = self.addAction('lnd off')
+        self.lnd_status_action.setEnabled(False)
         self.lnd_output_action = self.addAction('See LND Output')
 
         self.addSeparator()
