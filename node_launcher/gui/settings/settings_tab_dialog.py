@@ -1,3 +1,4 @@
+from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QDialog, QTabWidget, QDialogButtonBox, QVBoxLayout
 
 from node_launcher.gui.settings.bitcoin_tab import BitcoinTab
@@ -28,3 +29,9 @@ class SettingsTabDialog(QDialog):
         self.setLayout(self.main_layout)
 
         self.setWindowTitle('Settings')
+
+    def show(self):
+        super().show()
+        self.raise_()
+        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        self.activateWindow()

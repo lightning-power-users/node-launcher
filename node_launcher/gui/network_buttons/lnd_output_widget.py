@@ -1,6 +1,6 @@
 import os
 
-from PySide2.QtCore import QByteArray, QThreadPool, QProcess
+from PySide2.QtCore import QByteArray, QThreadPool, QProcess, Qt
 from PySide2.QtWidgets import QDialog, QTextEdit
 from grpc._channel import _Rendezvous
 
@@ -97,3 +97,6 @@ class LndOutputWidget(QDialog):
 
     def show(self):
         self.showMaximized()
+        self.raise_()
+        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        self.activateWindow()

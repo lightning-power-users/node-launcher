@@ -1,6 +1,6 @@
 import os
 
-from PySide2.QtCore import QByteArray, QProcess, QThreadPool
+from PySide2.QtCore import QByteArray, QProcess, QThreadPool, Qt
 from PySide2.QtWidgets import QDialog, QTextEdit
 
 from node_launcher.gui.components.grid_layout import QGridLayout
@@ -40,3 +40,6 @@ class BitcoindOutputWidget(QDialog):
 
     def show(self):
         self.showMaximized()
+        self.raise_()
+        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        self.activateWindow()

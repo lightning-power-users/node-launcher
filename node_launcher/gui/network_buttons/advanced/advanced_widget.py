@@ -1,3 +1,4 @@
+from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget
 
 from node_launcher.gui.network_buttons.advanced.zap_layout import ZapLayout
@@ -37,3 +38,9 @@ class AdvancedWidget(QWidget):
         self.layout.addLayout(self.tls_layout, column_span=self.columns)
 
         self.setLayout(self.layout)
+
+    def show(self):
+        super().show()
+        self.raise_()
+        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        self.activateWindow()
