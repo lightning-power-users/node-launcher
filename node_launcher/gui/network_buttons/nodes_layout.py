@@ -5,9 +5,6 @@ from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.image_label import ImageLabel
 from node_launcher.gui.components.section_name import SectionName
-from node_launcher.gui.network_buttons.bitcoind_output_widget import \
-    BitcoindOutputWidget
-from node_launcher.gui.network_buttons.lnd_output_widget import LndOutputWidget
 from node_launcher.node_set import NodeSet
 
 
@@ -16,10 +13,6 @@ class NodesLayout(QGridLayout):
         super(NodesLayout, self).__init__()
         self.node_set = node_set
         self.advanced_widget = AdvancedWidget(node_set)
-        self.lnd_output_widget = LndOutputWidget(self.node_set)
-        self.bitcoind_output_widget = BitcoindOutputWidget(
-            self.node_set
-        )
         
         self.columns = 2
         self.image_label = ImageLabel()
