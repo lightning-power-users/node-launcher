@@ -4,6 +4,7 @@ googleapis-common-protos
 grpcio
 grpcio-tools
 jinja2
+humanize
 keyring
 pillow
 protobuf

@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 
+import humanize
 from PySide2.QtCore import QByteArray, QProcess, QThreadPool, Qt
 from PySide2.QtWidgets import QDialog, QTextEdit
 
@@ -46,8 +47,7 @@ class BitcoindOutputWidget(QDialog):
                 timestamp = line_segments[0]
                 for line_segment in line_segments:
                     if 'progress' in line_segment:
-                        new_progress = float(line_segment.split('=')[-1])
-                        self.system_tray.menu.bitcoind_status_action.setText(f'{new_progress*100:.4f}%')
+                        new_progress = round(float(line_segment.split('=')[-1]), 4)
                         new_timestamp = datetime.strptime(
                             timestamp,
                             '%Y-%m-%dT%H:%M:%SZ'
@@ -56,6 +56,17 @@ class BitcoindOutputWidget(QDialog):
                             if self.old_progress is not None:
                                 change = new_progress - self.old_progress
                                 timestamp_change = new_timestamp - self.old_timestamp
+                                total_left = 1 - new_progress
+                                time_left = (total_left / change)*timestamp_change
+                                humanized = humanize.naturaltime(-time_left)
+                                self.system_tray.menu.bitcoind_status_action.setText(
+                                    f'ETA: {humanized}, {new_progress*100:.2f}% done'
+                                )
+                            else:
+                                self.system_tray.menu.bitcoind_status_action.setText(
+                                    f'{new_progress*100:.2f}%'
+                                )
+
                             self.old_progress = new_progress
                             self.old_timestamp = new_timestamp
 
