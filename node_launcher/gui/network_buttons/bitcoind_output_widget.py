@@ -11,7 +11,7 @@ class BitcoindOutputWidget(QDialog):
     node_set: NodeSet
     process: QProcess
 
-    def __init__(self, node_set: NodeSet):
+    def __init__(self, node_set: NodeSet, system_tray):
         super().__init__()
         self.node_set = node_set
         self.process = node_set.bitcoin.process

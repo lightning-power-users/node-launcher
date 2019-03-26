@@ -1,13 +1,69 @@
+from PySide2.QtCore import QCoreApplication
 from PySide2.QtGui import QIcon, QPixmap
 from PySide2.QtWidgets import QSystemTrayIcon, QWidget
 
 from node_launcher.assets.asset_access import asset_access
+from node_launcher.gui.menu import Menu
+from node_launcher.gui.network_buttons.advanced import AdvancedWidget
+from node_launcher.gui.network_buttons.bitcoind_output_widget import \
+    BitcoindOutputWidget
+from node_launcher.gui.network_buttons.lnd_output_widget import LndOutputWidget
+from node_launcher.gui.settings.settings_tab_dialog import SettingsTabDialog
+from node_launcher.node_set import NodeSet
 
 
 class SystemTray(QSystemTrayIcon):
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget, node_set: NodeSet):
         super(SystemTray, self).__init__(parent=parent)
+        self.node_set = node_set
         self.set_red()
+        self.menu = Menu()
+
+        self.lnd_output_widget = LndOutputWidget(
+            node_set=self.node_set,
+            system_tray=self
+        )
+        self.bitcoind_output_widget = BitcoindOutputWidget(
+            node_set=self.node_set,
+            system_tray=self
+        )
+
+        # bitcoind output
+        self.node_set.bitcoin.process.readyReadStandardError.connect(
+            self.bitcoind_output_widget.handle_error
+        )
+        self.node_set.bitcoin.process.readyReadStandardOutput.connect(
+            self.bitcoind_output_widget.handle_output
+        )
+        self.menu.bitcoind_output_action.triggered.connect(
+            self.bitcoind_output_widget.show
+        )
+
+        # lnd output
+        self.node_set.lnd.process.readyReadStandardError.connect(
+            self.lnd_output_widget.handle_error
+        )
+        self.node_set.lnd.process.readyReadStandardOutput.connect(
+            self.lnd_output_widget.handle_output
+        )
+        self.menu.lnd_output_action.triggered.connect(
+            self.lnd_output_widget.show
+        )
+
+        # advanced
+
+        self.advanced_widget = AdvancedWidget(self.node_set)
+        self.menu.advanced_action.triggered.connect(self.advanced_widget.show)
+
+        # quit
+        self.menu.quit_action.triggered.connect(lambda _: QCoreApplication.exit(0))
+
+        self.setContextMenu(self.menu)
+
+        # settings
+
+        self.settings_tab = SettingsTabDialog(node_set=self.node_set)
+        self.menu.settings_action.triggered.connect(self.settings_tab.show)
 
     def set_icon(self, color: str):
         path = asset_access.get_asset_full_path(f'system_tray_icon_{color}.png')

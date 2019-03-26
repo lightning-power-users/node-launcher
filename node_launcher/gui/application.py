@@ -1,15 +1,7 @@
 from PySide2 import QtCore
 from PySide2.QtCore import QCoreApplication, Slot
-from PySide2.QtGui import QIcon, QPixmap
 from PySide2.QtWidgets import QApplication, QWidget
 
-from node_launcher.assets.asset_access import asset_access
-from node_launcher.gui.menu import Menu
-from node_launcher.gui.network_buttons.advanced import AdvancedWidget
-from node_launcher.gui.network_buttons.bitcoind_output_widget import \
-    BitcoindOutputWidget
-from node_launcher.gui.network_buttons.lnd_output_widget import LndOutputWidget
-from node_launcher.gui.settings.settings_tab_dialog import SettingsTabDialog
 from node_launcher.gui.system_tray import SystemTray
 from node_launcher.node_set import NodeSet
 
@@ -23,45 +15,7 @@ class Application(QApplication):
         self.parent.hide()
         self.parent.setWindowFlags(self.parent.windowFlags() & ~QtCore.Qt.Tool)
 
-        self.system_tray = SystemTray(self.parent)
-        self.menu = Menu()
-        self.lnd_output_widget = LndOutputWidget(self.node_set, self.system_tray)
-        self.bitcoind_output_widget = BitcoindOutputWidget(
-            self.node_set
-        )
-
-        # bitcoind output
-        self.node_set.bitcoin.process.readyReadStandardError.connect(
-            self.bitcoind_output_widget.handle_error
-        )
-        self.node_set.bitcoin.process.readyReadStandardOutput.connect(
-            self.bitcoind_output_widget.handle_output
-        )
-        self.menu.bitcoind_output_action.triggered.connect(self.bitcoind_output_widget.show)
-
-        # lnd output
-        self.node_set.lnd.process.readyReadStandardError.connect(
-            self.lnd_output_widget.handle_error
-        )
-        self.node_set.lnd.process.readyReadStandardOutput.connect(
-            self.lnd_output_widget.handle_output
-        )
-        self.menu.lnd_output_action.triggered.connect(self.lnd_output_widget.show)
-
-        # advanced
-
-        self.advanced_widget = AdvancedWidget(self.node_set)
-        self.menu.advanced_action.triggered.connect(self.advanced_widget.show)
-
-        # quit
-        self.menu.quit_action.triggered.connect(self.quit)
-
-        self.system_tray.setContextMenu(self.menu)
-
-        # settings
-
-        self.settings_tab = SettingsTabDialog(node_set=self.node_set)
-        self.menu.settings_action.triggered.connect(self.settings_tab.show)
+        self.system_tray = SystemTray(self.parent, self.node_set)
 
         self.setQuitOnLastWindowClosed(False)
 
