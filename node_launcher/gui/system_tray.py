@@ -4,13 +4,13 @@ from PySide2.QtWidgets import QSystemTrayIcon, QWidget
 
 from node_launcher.assets.asset_access import asset_access
 from node_launcher.constants import BITCOIN_CLI_COMMANDS, LNCLI_COMMANDS
-from node_launcher.gui.cli.cli import CliWidget
+from node_launcher.gui.components.cli import CliWidget
 from node_launcher.gui.menu import Menu
-from node_launcher.gui.network_buttons.advanced import AdvancedWidget
-from node_launcher.gui.network_buttons.bitcoind_output_widget import \
+from node_launcher.gui.system_tray_widgets.advanced import AdvancedWidget
+from node_launcher.gui.system_tray_widgets.bitcoind_output_widget import \
     BitcoindOutputWidget
-from node_launcher.gui.network_buttons.lnd_output_widget import LndOutputWidget
-from node_launcher.gui.settings.settings_tab_dialog import SettingsTabDialog
+from node_launcher.gui.system_tray_widgets.lnd_output_widget import LndOutputWidget
+from node_launcher.gui.system_tray_widgets.settings.settings_tab_dialog import SettingsTabDialog
 from node_launcher.gui.utilities import reveal
 from node_launcher.node_set import NodeSet
 

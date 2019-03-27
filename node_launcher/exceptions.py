@@ -1,2 +1,0 @@
-class ZmqPortsNotOpenError(Exception):
-    pass
