@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import humanize
 from PySide2.QtCore import QByteArray, QProcess, QThreadPool, Qt
@@ -39,12 +39,6 @@ class BitcoindOutputWidget(QDialog):
         message = output.data().decode('utf-8').strip()
         self.output.append(message)
 
-    @staticmethod
-    def average(items):
-        total = sum((next - last).seconds + (next - last).days * 86400
-                    for next, last in zip(items[1:], items))
-        return total / (len(items) - 1)
-
     def handle_output(self):
         output: QByteArray = self.process.readAllStandardOutput()
         message = output.data().decode('utf-8').strip()
@@ -64,13 +58,13 @@ class BitcoindOutputWidget(QDialog):
                             if self.old_progress is not None:
                                 change = new_progress - self.old_progress
                                 timestamp_change = new_timestamp - self.old_timestamp
-                                self.timestamp_changes.append(timestamp_change)
+                                total_left = 1 - new_progress
+                                time_left = ((total_left / change)*timestamp_change).seconds
+                                self.timestamp_changes.append(time_left)
                                 if len(self.timestamp_changes) > 100:
                                     self.timestamp_changes.pop(0)
-                                average_change = self.average(self.timestamp_changes)
-                                total_left = 1 - new_progress
-                                time_left = (total_left / change)*average_change
-                                humanized = humanize.naturaltime(-time_left)
+                                average_time_left = sum(self.timestamp_changes)/len(self.timestamp_changes)
+                                humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
                                 self.system_tray.menu.bitcoind_status_action.setText(
                                     f'ETA: {humanized}, {new_progress*100:.2f}% done'
                                 )
