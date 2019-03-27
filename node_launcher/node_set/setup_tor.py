@@ -125,9 +125,9 @@ def deb_install():
         deb_modify_user()
 
 def installtor():
+    torrunpath = str(TOR_RUN_PATH[OPERATING_SYSTEM])
     if IS_WINDOWS:
         print('Installing Tor...')
-        torrunpath = str(TOR_RUN_PATH[OPERATING_SYSTEM])
         if not os.path.exists(torrunpath):
             os.makedirs(torrunpath)
         zip_ref = zipfile.ZipFile(r'tor-win32-0.3.5.7.zip', 'r')
@@ -135,8 +135,8 @@ def installtor():
         zip_ref.close()
     elif IS_MACOS:
         print('Installing Tor...')
+        # TODO see if this below is covered by `torrunpath` variable
         bash_torrunpath = expanduser('~/Library/Application\ Support/Tor/')
-        torrunpath = expanduser('~/Library/Application Support/Tor/')
         if not os.path.exists(torrunpath):
             os.makedirs(torrunpath)
         bashcommand_attach = 'hdiutil attach ~/Downloads/TorBrowser-8.0.6-osx64_en-US.dmg'
