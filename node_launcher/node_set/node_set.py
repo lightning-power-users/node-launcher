@@ -4,7 +4,7 @@ from node_launcher.logging import log
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.node_set.lnd import Lnd
 from node_launcher.constants import (
-    BITCOIN_DATA_PATH,
+    BITCOIN_DIR_PATH,
     LND_DIR_PATH,
     OPERATING_SYSTEM,
 )
@@ -17,7 +17,7 @@ class NodeSet(object):
 
     def __init__(self):
         file_name = 'bitcoin.conf'
-        bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
+        bitcoin_data_path = BITCOIN_DIR_PATH[OPERATING_SYSTEM]
         self.bitcoin_configuration_file_path = os.path.join(bitcoin_data_path,
                                                             file_name)
         log.info(

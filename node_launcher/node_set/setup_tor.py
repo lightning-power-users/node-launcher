@@ -11,7 +11,7 @@ from urllib.request import urlopen, urlretrieve
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
-from node_launcher.constants import BITCOIN_DATA_PATH, TOR_DATA_PATH, \
+from node_launcher.constants import BITCOIN_DIR_PATH, TOR_DATA_PATH, \
     TOR_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
     IS_MACOS, IS_LINUX, LND_DIR_PATH
 
@@ -28,7 +28,7 @@ def edit_bitcoin_conf():
     time.sleep(2)
     print('Configruing bitcoin.conf...')
     file_name = 'bitcoin.conf'
-    bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
+    bitcoin_data_path = BITCOIN_DIR_PATH[OPERATING_SYSTEM]
     bitcoin_configuration_file_path = os.path.join(bitcoin_data_path,
                                                    file_name)
     f = open(str(bitcoin_configuration_file_path), 'a')

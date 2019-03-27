@@ -70,7 +70,7 @@ LND_DIR_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(LOCALAPPDATA, 'Lnd')
 }
 
-BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
+BITCOIN_DIR_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Bitcoin/'),
     LINUX: expanduser('~/.bitcoin'),
     WINDOWS: os.path.join(APPDATA, 'Bitcoin')

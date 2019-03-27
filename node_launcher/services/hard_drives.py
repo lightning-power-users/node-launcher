@@ -8,7 +8,7 @@ import psutil as psutil
 
 from node_launcher.constants import (
     AUTOPRUNE_GB,
-    BITCOIN_DATA_PATH,
+    BITCOIN_DIR_PATH,
     GIGABYTE,
     OPERATING_SYSTEM
 )
@@ -80,7 +80,7 @@ class HardDrives(object):
 
     @staticmethod
     def is_default_partition(partition: Partition):
-        default_partition = os.path.join(BITCOIN_DATA_PATH[OPERATING_SYSTEM], os.pardir)
+        default_partition = os.path.join(BITCOIN_DIR_PATH[OPERATING_SYSTEM], os.pardir)
         default_partition = Path(default_partition).drive
         partition = Path(partition.mountpoint).drive
         return default_partition == partition

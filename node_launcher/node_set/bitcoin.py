@@ -10,7 +10,7 @@ from node_launcher.logging import log
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.constants import (
-    BITCOIN_DATA_PATH,
+    BITCOIN_DIR_PATH,
     OPERATING_SYSTEM,
     IS_WINDOWS,
     TESTNET_PRUNE,
@@ -168,7 +168,7 @@ class Bitcoin(object):
         self.file['txindex'] = not should_prune
 
     def autoconfigure_datadir(self):
-        default_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
+        default_datadir = BITCOIN_DIR_PATH[OPERATING_SYSTEM]
         big_drive = self.hard_drives.get_big_drive()
         default_is_big_enough = not self.hard_drives.should_prune(
             input_directory=default_datadir,
