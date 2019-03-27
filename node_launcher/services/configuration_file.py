@@ -4,9 +4,12 @@ from typing import List, Any
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
 from node_launcher.logging import log
+from PySide2.QtCore import QFileSystemWatcher
 
 
-class ConfigurationFile(object):
+class ConfigurationFile(dict):
+    file_watcher: QFileSystemWatcher
+
     def __init__(self, path, **kwargs):
         super().__init__(**kwargs)
         self.path = path
@@ -28,7 +31,13 @@ class ConfigurationFile(object):
                 f.flush()
 
         self.cache = {}
+        self.aliases = {
+            'rpcport': 'main.rpcport', 'main.rpcport': 'rpcport', 'port': 'main.port', 'main.port': 'port',
+            'walletdir': 'main.walletdir', 'main.walletdir': 'walletdir'
+        }
         self.populate_cache()
+        self.file_watcher = QFileSystemWatcher()
+        self.file_watcher.addPath(self.path)
 
     def populate_cache(self):
         with open(self.path, 'r') as f:
@@ -50,10 +59,16 @@ class ConfigurationFile(object):
             existing_value = self.cache.get(key, 'no_key')
             if existing_value == 'no_key':
                 self.cache[key] = value
+                if key in self.aliases.keys():
+                    self.cache[self.aliases[key]] = value
             elif isinstance(existing_value, list):
                 self.cache[key].append(value)
+                if key in self.aliases.keys():
+                    self.cache[self.aliases[key]].append(value)
             else:
                 self.cache[key] = [existing_value, value]
+                if key in self.aliases.keys():
+                    self.cache[self.aliases[key]] = [existing_value, value]
 
     def __repr__(self):
         return f'ConfigurationFile: {self.path}'
@@ -68,10 +83,17 @@ class ConfigurationFile(object):
         raise NotImplementedError()
 
     def __getitem__(self, name):
+        if name in self.aliases.keys():
+            if self.cache.get(self.aliases[name], None) is not None:
+                return self.cache[self.aliases[name]]
+            else:
+                return self.cache.get(name, None)
         return self.cache.get(name, None)
 
     def __setitem__(self, name: str, value: Any) -> None:
         self.cache[name] = value
+        if name in self.aliases.keys():
+            self.cache[self.aliases[name]] = value
         if isinstance(value, str):
             value = [value]
         elif isinstance(value, bool):
@@ -109,3 +131,7 @@ class ConfigurationFile(object):
             os.path.join(self.path, os.pardir)
         )
         return directory_path
+
+    @property
+    def snapshot(self):
+        return self.cache.copy()
