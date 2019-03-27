@@ -97,7 +97,8 @@ class CliWidget(QDialog):
         max_scroll = self.output.verticalScrollBar().maximum()
         self.output.verticalScrollBar().setValue(max_scroll)
 
-    def parse_bitcoin_cli_commands(self, message: str):
+    @staticmethod
+    def parse_bitcoin_cli_commands(message: str):
         log.debug('parse_bitcoin_cli_commands')
         commands = []
         for line in message.split(sep='\n'):
@@ -109,7 +110,8 @@ class CliWidget(QDialog):
             commands.append(command)
         return commands
 
-    def parse_lncli_commands(self, message: str):
+    @staticmethod
+    def parse_lncli_commands(message: str):
         log.debug('parse_lncli_commands')
         at_commands = False
         commands = []
@@ -133,5 +135,9 @@ class CliWidget(QDialog):
 
     def show(self):
         self.showMaximized()
+        self.raise_()
+        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        self.activateWindow()
+
         self.input.setFocus()
         self.run_command('help')

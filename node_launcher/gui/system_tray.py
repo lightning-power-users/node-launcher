@@ -1,5 +1,5 @@
 from PySide2.QtCore import QCoreApplication
-from PySide2.QtGui import QIcon, QPixmap
+from PySide2.QtGui import QIcon, QPixmap, QClipboard
 from PySide2.QtWidgets import QSystemTrayIcon, QWidget
 
 from node_launcher.assets.asset_access import asset_access
@@ -11,6 +11,7 @@ from node_launcher.gui.network_buttons.bitcoind_output_widget import \
     BitcoindOutputWidget
 from node_launcher.gui.network_buttons.lnd_output_widget import LndOutputWidget
 from node_launcher.gui.settings.settings_tab_dialog import SettingsTabDialog
+from node_launcher.gui.utilities import reveal
 from node_launcher.node_set import NodeSet
 
 
@@ -20,8 +21,6 @@ class SystemTray(QSystemTrayIcon):
         self.node_set = node_set
         self.set_red()
         self.menu = Menu()
-
-
 
         # bitcoind output
         self.bitcoind_output_widget = BitcoindOutputWidget(
@@ -73,6 +72,16 @@ class SystemTray(QSystemTrayIcon):
         )
         self.menu.lnd_console_action.triggered.connect(
             self.lncli_widget.show
+        )
+
+        # Joule
+
+        self.menu.joule_url_action.triggered.connect(
+            lambda: QClipboard().setText(self.node_set.lnd.rest_url)
+        )
+
+        self.menu.joule_macaroons_action.triggered.connect(
+            lambda: reveal(self.node_set.lnd.macaroon_path)
         )
 
         # advanced

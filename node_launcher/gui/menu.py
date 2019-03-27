@@ -20,6 +20,13 @@ class Menu(QMenu):
 
         self.addSeparator()
 
+        self.joule_status_action = self.addAction('Joule Browser Extension')
+        self.joule_status_action.setEnabled(False)
+        self.joule_url_action = self.addAction('Copy Node URL (REST)')
+        self.joule_macaroons_action = self.addAction('Show Macaroons')
+
+        self.addSeparator()
+
         self.settings_action = self.addAction('&Settings')
         self.settings_action.setShortcut(QKeySequence.Preferences)
         self.advanced_action = self.addAction('Advanced...')
