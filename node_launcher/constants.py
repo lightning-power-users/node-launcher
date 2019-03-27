@@ -93,9 +93,10 @@ TOR_DATA_PATH: Dict[OperatingSystem, str] = {
     DARWIN: '/var/tmp/dist/tor/etc/tor/'
 }
 
-TOR_TORRC_PATH: Dict[OperatingSystem, str] = {
-    WINDOWS: os.path.join(APPDATA, r'tor\torrc'),
+TOR_CONF_PATH: Dict[OperatingSystem, str] = {
     DARWIN: '/var/tmp/dist/tor/etc/tor/torrc'
+    LINUX: '/etc/tor/torrc'
+    WINDOWS: os.path.join(APPDATA, r'tor\torrc'),
 }
 
 TOR_PATH: Dict[OperatingSystem, str] = {

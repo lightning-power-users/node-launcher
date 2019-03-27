@@ -13,7 +13,7 @@ from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
 from node_launcher.constants import BITCOIN_DATA_PATH, BITCOIN_CONF_PATH, TOR_DATA_PATH, \
-    TOR_TORRC_PATH, LND_CONF_PATH , TOR_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
+    TOR_CONF_PATH, LND_CONF_PATH , TOR_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
     IS_MACOS, IS_LINUX, LND_DIR_PATH
 
 
@@ -175,7 +175,7 @@ def write_torrc():
     tordatapath = str(TOR_DATA_PATH[OPERATING_SYSTEM])
     if not os.path.exists(tordatapath):
         os.makedirs(tordatapath)
-    f = open(str(TOR_TORRC_PATH[OPERATING_SYSTEM]), 'a')
+    f = open(str(TOR_CONF_PATH[OPERATING_SYSTEM]), 'a')
     f.write(' \n')
     f.write('ControlPort 9051\n')
     f.write('CookieAuthentication 1\n')

@@ -12,7 +12,7 @@ from node_launcher.constants import (
     #BITCOIN_DATA_PATH,
     #BITCOIN_CONF_PATH,
     #TOR_DATA_PATH,
-    #TOR_TORRC_PATH,
+    #TOR_CONF_PATH,
     #LND_CONF_PATH,
     #TOR_EXE_PATH,
 )
