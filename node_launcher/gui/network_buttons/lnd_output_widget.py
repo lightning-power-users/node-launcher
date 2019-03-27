@@ -1,6 +1,8 @@
 import os
 import uuid
+from datetime import datetime
 
+import humanize
 from PySide2.QtCore import QByteArray, QThreadPool, QProcess, Qt
 from PySide2.QtWidgets import QDialog, QTextEdit
 from grpc._channel import _Rendezvous
@@ -32,6 +34,9 @@ class LndOutputWidget(QDialog):
 
         self.layout.addWidget(self.output)
         self.setLayout(self.layout)
+
+        self.old_height = None
+        self.old_timestamp = None
 
     def handle_error(self):
         output: QByteArray = self.process.readAllStandardError()
@@ -161,16 +166,55 @@ class LndOutputWidget(QDialog):
         lines = message.split(os.linesep)
         for line in lines:
             self.output.append(line)
-            if 'Waiting for wallet encryption password' in line:
+            if 'Active chain: Bitcoin' in line:
+                self.system_tray.menu.lnd_status_action.setText(
+                    'LND starting...'
+                )
+            elif 'Waiting for wallet encryption password' in line:
+                self.system_tray.menu.lnd_status_action.setText(
+                    'LND unlocking wallet...'
+                )
                 self.auto_unlock_wallet()
             elif 'Shutdown complete' in line:
                 self.process.waitForFinished()
                 self.process.start()
                 self.process.waitForStarted()
+            elif 'Unable to synchronize wallet to chain' in line:
+                self.process.terminate()
+                self.process.waitForFinished()
+                self.process.start()
+                self.process.waitForStarted()
             elif 'LightningWallet opened' in line:
                 self.system_tray.set_orange()
+                self.system_tray.menu.lnd_status_action.setText(
+                    'LND syncing with network...'
+                )
             elif 'Starting HTLC Switch' in line:
                 self.system_tray.set_green()
+                self.system_tray.menu.lnd_status_action.setText(
+                    'LND synced with network'
+                )
+            elif 'Caught up to height' in line:
+                new_height = int(line.split(' ')[-1])
+                timestamp = line.split('[INF]')[0].strip()
+                new_timestamp = datetime.strptime(
+                    timestamp,
+                    '%Y-%m-%d %H:%M:%S.%f'
+                )
+                if self.old_height is not None:
+                    change = new_height - self.old_height
+                    timestamp_change = new_timestamp - self.old_timestamp
+                    total_left = 600000 - new_height
+                    time_left = (total_left / change)*timestamp_change
+                    humanized = humanize.naturaltime(-time_left)
+                    self.system_tray.menu.lnd_status_action.setText(
+                        f'ETA: {humanized}, caught up to height {new_height}'
+                    )
+
+                self.old_height = new_height
+                self.old_timestamp = new_timestamp
+
+
 
     def show(self):
         self.showMaximized()
