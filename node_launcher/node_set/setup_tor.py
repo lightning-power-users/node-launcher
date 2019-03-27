@@ -150,9 +150,9 @@ def installtor():
 
 def runtor():
     print('Launching Tor...')    
+    path= TOR_EXE_PATH[OPERATING_SYSTEM]
+    cmd = path
     if IS_MACOS:
-        path= TOR_EXE_PATH[OPERATING_SYSTEM]
-        cmd = path
         with NamedTemporaryFile(suffix='-run_tor.command', delete=False) as f:
             f.write(f'#!/bin/sh\n{cmd}\n'.encode('utf-8'))
             f.flush()
@@ -161,8 +161,6 @@ def runtor():
         time.sleep(2)
         print('Tor setup is complete!')
     elif IS_WINDOWS:
-        path = TOR_EXE_PATH[OPERATING_SYSTEM]
-        cmd = path
         from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
         with NamedTemporaryFile(suffix='-run_tor.bat', delete=False) as f:
             f.write(cmd.encode('utf-8'))
