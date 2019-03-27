@@ -63,7 +63,7 @@ class CliWidget(QDialog):
         self.input.clear()
         self.process.kill()
         args = list(self.args)
-        args.append(cmd)
+        args.extend(cmd.split(' '))
         self.process.setArguments(args)
         self.process.start()
 

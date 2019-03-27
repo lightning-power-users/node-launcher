@@ -98,7 +98,7 @@ class ConfigurationFile(object):
             lines.pop(property_line_index)
         if value_list is not None:
             for value in value_list:
-                property_string = os.linesep + f'{name}={value}' + os.linesep
+                property_string = os.linesep + f'{name.strip()}={value.strip()}' + os.linesep
                 lines.append(property_string)
         with open(self.path, 'w') as f:
             f.writelines(lines)
