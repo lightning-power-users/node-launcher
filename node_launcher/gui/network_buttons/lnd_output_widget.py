@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from PySide2.QtCore import QByteArray, QThreadPool, QProcess, Qt
 from PySide2.QtWidgets import QDialog, QTextEdit
@@ -44,12 +45,45 @@ class LndOutputWidget(QDialog):
             client.unlock(password)
         except _Rendezvous as e:
             details = e.details()
-            log.warning(
-                'unlock_wallet failed',
-                details=details,
+            return details
+
+    def generate_seed(self, new_seed_password: str):
+        try:
+            generate_seed_response = self.node_set.lnd_client.generate_seed(
+                seed_password=new_seed_password
+            )
+        except _Rendezvous as e:
+            log.error(
+                'generate_seed',
                 exc_info=True
             )
-            return details
+            # noinspection PyProtectedMember
+            self.error_message.showMessage(e._state.details)
+            return
+
+        seed = generate_seed_response.cipher_seed_mnemonic
+
+        keyring_service_name = f'lnd_seed'
+        keyring_user_name = ''.join(seed[0:2])
+        log.info(
+            'generate_seed',
+            keyring_service_name=keyring_service_name,
+            keyring_user_name=keyring_user_name
+        )
+
+        keyring.set_password(
+            service=keyring_service_name,
+            username=keyring_user_name,
+            password=' '.join(seed)
+        )
+
+        if new_seed_password is not None:
+            keyring.set_password(
+                service=f'{keyring_service_name}_password',
+                username=keyring_user_name,
+                password=new_seed_password
+            )
+        return seed
 
     def handle_unlock_wallet(self, details: str):
         if details is None:
@@ -61,7 +95,44 @@ class LndOutputWidget(QDialog):
             pass
         # User needs to create a new wallet
         elif 'wallet not found' in details:
-            pass
+            new_wallet_password = uuid.uuid4().hex
+            keyring_service_name = keyring_user_name = f'lnd_wallet_password'
+            log.info(
+                'create_wallet',
+                keyring_service_name=keyring_service_name,
+                keyring_user_name=keyring_user_name
+            )
+            keyring.set_password(
+                service=keyring_service_name,
+                username=keyring_user_name,
+                password=new_wallet_password
+            )
+            seed = self.generate_seed(new_wallet_password)
+            try:
+                self.node_set.lnd_client.initialize_wallet(
+                    wallet_password=new_wallet_password,
+                    seed=seed,
+                    seed_password=new_wallet_password
+                )
+            except _Rendezvous as e:
+                log.error(
+                    'initialize_wallet',
+                    exc_info=True
+                )
+                # noinspection PyProtectedMember
+                self.error_message.showMessage(e._state.details)
+                return
+            keyring.set_password(
+                service=f'lnd_{self.node_set.bitcoin.network}_wallet_password',
+                username=self.node_set.bitcoin.file['rpcuser'],
+                password=new_wallet_password
+            )
+        else:
+            log.warning(
+                'unlock_wallet failed',
+                details=details,
+                exc_info=True
+            )
 
     def auto_unlock_wallet(self):
         keyring_service_name = f'lnd_{self.node_set.bitcoin.network}_wallet_password'
@@ -95,6 +166,7 @@ class LndOutputWidget(QDialog):
             elif 'Shutdown complete' in line:
                 self.process.waitForFinished()
                 self.process.start()
+                self.process.waitForStarted()
             elif 'LightningWallet opened' in line:
                 self.system_tray.set_orange()
             elif 'Starting HTLC Switch' in line:

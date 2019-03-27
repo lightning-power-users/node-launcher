@@ -28,7 +28,7 @@ class Application(QApplication):
         self.node_set.lnd.process.terminate()
         self.node_set.lnd.process.waitForFinished(2000)
         self.node_set.bitcoin.process.terminate()
-        self.node_set.bitcoin.process.waitForFinished(2000)
+        self.node_set.bitcoin.process.waitForFinished(20000)
         self.node_set.bitcoin.process.kill()
 
         QCoreApplication.exit(0)
