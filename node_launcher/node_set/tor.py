@@ -10,7 +10,6 @@ from node_launcher.constants import (
     TOR_PATH, # Change to TOR_DIR_PATH
     OPERATING_SYSTEM,
     #BITCOIN_DATA_PATH,
-    #BITCOIN_CONF_PATH,
     #TOR_DATA_PATH,
     #TOR_CONF_PATH,
     #TOR_EXE_PATH,

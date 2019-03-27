@@ -11,7 +11,7 @@ from urllib.request import urlopen, urlretrieve
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
-from node_launcher.constants import BITCOIN_DATA_PATH, BITCOIN_CONF_PATH, TOR_DATA_PATH, \
+from node_launcher.constants import BITCOIN_DATA_PATH, TOR_DATA_PATH, \
     TOR_CONF_PATH, TOR_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
     IS_MACOS, IS_LINUX, LND_DIR_PATH
 
@@ -27,7 +27,11 @@ def edit_bitcoin_conf():
     print('NOTE: Restart Bitcoin Core and LND after running this script for changes to take effect')
     time.sleep(2)
     print('Configruing bitcoin.conf...')
-    f = open(str(BITCOIN_CONF_PATH[OPERATING_SYSTEM]) , 'a')
+    file_name = 'bitcoin.conf'
+    bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
+    bitcoin_configuration_file_path = os.path.join(bitcoin_data_path,
+                                                   file_name)
+    f = open(str(bitcoin_configuration_file_path), 'a')
     f.write('proxy=127.0.0.1:9050\n')
     f.write('listen=1\n')
     f.write('bind=127.0.0.1\n')
