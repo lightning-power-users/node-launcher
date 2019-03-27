@@ -1,5 +1,5 @@
 from PySide2 import QtCore
-from PySide2.QtCore import QCoreApplication, Slot
+from PySide2.QtCore import QCoreApplication, Slot, QTimer
 from PySide2.QtWidgets import QApplication, QWidget
 
 from node_launcher.gui.system_tray import SystemTray
@@ -22,6 +22,19 @@ class Application(QApplication):
         self.aboutToQuit.connect(self.quit_app)
 
         self.system_tray.show()
+
+        self.node_set.bitcoin.file.file_watcher.fileChanged.connect(self.check_restart_required)
+        self.node_set.lnd.file.file_watcher.fileChanged.connect(self.check_restart_required)
+
+        self.timer = QTimer(self)
+        self.timer.start(1000)
+        self.timer.timeout.connect(self.check_restart_required)
+
+    def check_restart_required(self):
+        if self.node_set.bitcoin.restart_required or self.node_set.lnd.restart_required:
+            pass
+        else:
+            pass
 
     @Slot()
     def quit_app(self):

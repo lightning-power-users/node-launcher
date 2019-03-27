@@ -3,6 +3,8 @@ from PySide2.QtGui import QIcon, QPixmap
 from PySide2.QtWidgets import QSystemTrayIcon, QWidget
 
 from node_launcher.assets.asset_access import asset_access
+from node_launcher.constants import BITCOIN_CLI_COMMANDS, LNCLI_COMMANDS
+from node_launcher.gui.cli.cli import CliWidget
 from node_launcher.gui.menu import Menu
 from node_launcher.gui.network_buttons.advanced import AdvancedWidget
 from node_launcher.gui.network_buttons.bitcoind_output_widget import \
@@ -19,16 +21,13 @@ class SystemTray(QSystemTrayIcon):
         self.set_red()
         self.menu = Menu()
 
-        self.lnd_output_widget = LndOutputWidget(
-            node_set=self.node_set,
-            system_tray=self
-        )
+
+
+        # bitcoind output
         self.bitcoind_output_widget = BitcoindOutputWidget(
             node_set=self.node_set,
             system_tray=self
         )
-
-        # bitcoind output
         self.node_set.bitcoin.process.readyReadStandardError.connect(
             self.bitcoind_output_widget.handle_error
         )
@@ -39,7 +38,22 @@ class SystemTray(QSystemTrayIcon):
             self.bitcoind_output_widget.show
         )
 
+        # bitcoin console
+        self.bitcoin_cli_widget = CliWidget(
+            title='bitcoin-cli',
+            program=self.node_set.bitcoin.software.bitcoin_cli,
+            args=self.node_set.bitcoin.args,
+            commands=BITCOIN_CLI_COMMANDS
+        )
+        self.menu.bitcoin_console_action.triggered.connect(
+            self.bitcoin_cli_widget.show
+        )
+
         # lnd output
+        self.lnd_output_widget = LndOutputWidget(
+            node_set=self.node_set,
+            system_tray=self
+        )
         self.node_set.lnd.process.readyReadStandardError.connect(
             self.lnd_output_widget.handle_error
         )
@@ -48,6 +62,17 @@ class SystemTray(QSystemTrayIcon):
         )
         self.menu.lnd_output_action.triggered.connect(
             self.lnd_output_widget.show
+        )
+        # lnd console
+
+        self.lncli_widget = CliWidget(
+            title='lncli',
+            program=self.node_set.lnd.software.lncli,
+            args=self.node_set.lnd.lncli_arguments(),
+            commands=LNCLI_COMMANDS
+        )
+        self.menu.lnd_console_action.triggered.connect(
+            self.lncli_widget.show
         )
 
         # advanced

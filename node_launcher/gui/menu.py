@@ -8,12 +8,14 @@ class Menu(QMenu):
 
         self.bitcoind_status_action = self.addAction('bitcoind off')
         self.bitcoind_status_action.setEnabled(False)
+        self.bitcoin_console_action = self.addAction('Open Bitcoin Console')
         self.bitcoind_output_action = self.addAction('See Bitcoin Output')
 
         self.addSeparator()
 
         self.lnd_status_action = self.addAction('lnd off')
         self.lnd_status_action.setEnabled(False)
+        self.lnd_console_action = self.addAction('Open LND Console')
         self.lnd_output_action = self.addAction('See LND Output')
 
         self.addSeparator()
