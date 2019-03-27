@@ -168,11 +168,11 @@ class LndOutputWidget(QDialog):
             self.output.append(line)
             if 'Active chain: Bitcoin' in line:
                 self.system_tray.menu.lnd_status_action.setText(
-                    'LND starting...'
+                    'LND starting'
                 )
             elif 'Waiting for wallet encryption password' in line:
                 self.system_tray.menu.lnd_status_action.setText(
-                    'LND unlocking wallet...'
+                    'LND unlocking wallet'
                 )
                 self.auto_unlock_wallet()
             elif 'Shutdown complete' in line:
@@ -186,7 +186,7 @@ class LndOutputWidget(QDialog):
             elif 'LightningWallet opened' in line:
                 self.system_tray.set_orange()
                 self.system_tray.menu.lnd_status_action.setText(
-                    'LND syncing with network...'
+                    'LND syncing with network'
                 )
             elif 'Starting HTLC Switch' in line:
                 self.system_tray.set_green()

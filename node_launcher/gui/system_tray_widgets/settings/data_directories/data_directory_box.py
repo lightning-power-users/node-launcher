@@ -4,8 +4,9 @@ from PySide2.QtWidgets import (
     QPushButton
 )
 
-from .data_directories import DatadirLabel, PruneWarningLabel
-from .data_directories import SelectDirectoryDialog
+from .datadir_label import DatadirLabel
+from .prune_warning_label import PruneWarningLabel
+from .select_directory_dialog import SelectDirectoryDialog
 from node_launcher.gui.utilities import reveal
 
 
