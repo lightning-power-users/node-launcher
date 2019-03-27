@@ -191,7 +191,7 @@ class LndOutputWidget(QDialog):
             elif 'Starting HTLC Switch' in line:
                 self.system_tray.set_green()
                 self.system_tray.menu.lnd_status_action.setText(
-                    'LND synced with network'
+                    'LND synced'
                 )
             elif 'Caught up to height' in line:
                 new_height = int(line.split(' ')[-1])

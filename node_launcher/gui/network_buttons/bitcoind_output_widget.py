@@ -44,7 +44,15 @@ class BitcoindOutputWidget(QDialog):
         message = output.data().decode('utf-8').strip()
         lines = message.split(os.linesep)
         for line in lines:
-            if 'UpdateTip' in line:
+            if 'Bitcoin Core version' in line:
+                self.system_tray.menu.bitcoind_status_action.setText(
+                    'Bitcoin starting'
+                )
+            elif 'Leaving InitialBlockDownload' in line:
+                self.system_tray.menu.bitcoind_status_action.setText(
+                    'Bitcoin synced'
+                )
+            elif 'UpdateTip' in line:
                 line_segments = line.split(' ')
                 timestamp = line_segments[0]
                 for line_segment in line_segments:
@@ -69,6 +77,8 @@ class BitcoindOutputWidget(QDialog):
                                     f'ETA: {humanized}, {new_progress*100:.2f}% done'
                                 )
                             else:
+                                if round(new_progress*100) == 100:
+                                    continue
                                 self.system_tray.menu.bitcoind_status_action.setText(
                                     f'{new_progress*100:.2f}%'
                                 )
