@@ -4,7 +4,6 @@ import urllib
 import getpass
 import zipfile
 import os
-import os.path
 import time
 
 from os.path import expanduser
@@ -175,7 +174,10 @@ def write_torrc():
     tordatapath = str(TOR_DATA_PATH[OPERATING_SYSTEM])
     if not os.path.exists(tordatapath):
         os.makedirs(tordatapath)
-    f = open(str(TOR_CONF_PATH[OPERATING_SYSTEM]), 'a')
+    file_name = 'torrc'
+    tor_conf_path = TOR_CONF_PATH[OPERATING_SYSTEM])
+    tor_configuration_file_path = os.path.join(tor_conf_path, file_name)
+    f = open(str(tor_configuration_file_path, 'a')
     f.write(' \n')
     f.write('ControlPort 9051\n')
     f.write('CookieAuthentication 1\n')
