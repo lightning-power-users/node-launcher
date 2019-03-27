@@ -12,7 +12,7 @@ from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
 from node_launcher.constants import BITCOIN_DATA_PATH, BITCOIN_CONF_PATH, TOR_DATA_PATH, \
-    TOR_CONF_PATH, LND_CONF_PATH , TOR_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
+    TOR_CONF_PATH, TOR_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
     IS_MACOS, IS_LINUX, LND_DIR_PATH
 
 
@@ -37,7 +37,10 @@ def edit_bitcoin_conf():
 
 def edit_lnd_conf():
     print('Configuring lnd.conf...')
-    f = open(str(LND_CONF_PATH[OPERATING_SYSTEM]) , 'a')
+    file_name = 'lnd.conf'
+    lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
+    lnd_configuration_file_path = os.path.join(lnd_dir_path, file_name)
+    f = open(str(lnd_configuration_file_path), 'a')
     f.write(' \n')
     f.write('[Application Options]\n')
     f.write('listen=localhost\n')

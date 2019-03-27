@@ -70,12 +70,6 @@ LND_DIR_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(LOCALAPPDATA, 'Lnd')
 }
 
-LND_CONF_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: expanduser('~/Library/Application Support/Lnd/lnd.conf'),
-    LINUX: expanduser('~/.lnd/lnd.conf'),
-    WINDOWS: os.path.join(LOCALAPPDATA, r'Lnd\lnd.conf')
-}
-
 BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Bitcoin/'),
     LINUX: expanduser('~/.bitcoin'),
