@@ -11,7 +11,6 @@ from node_launcher.constants import (
     OPERATING_SYSTEM,
     #BITCOIN_DATA_PATH,
     #TOR_DATA_PATH,
-    #TOR_CONF_PATH,
     #TOR_EXE_PATH,
 )
 

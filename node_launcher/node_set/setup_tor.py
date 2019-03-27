@@ -12,7 +12,7 @@ from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
 from node_launcher.constants import BITCOIN_DATA_PATH, TOR_DATA_PATH, \
-    TOR_CONF_PATH, TOR_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
+    TOR_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
     IS_MACOS, IS_LINUX, LND_DIR_PATH
 
 
@@ -182,7 +182,7 @@ def write_torrc():
     if not os.path.exists(tordatapath):
         os.makedirs(tordatapath)
     file_name = 'torrc'
-    tor_conf_path = TOR_CONF_PATH[OPERATING_SYSTEM])
+    tor_conf_path = TOR_DATA_PATH[OPERATING_SYSTEM])
     tor_configuration_file_path = os.path.join(tor_conf_path, file_name)
     f = open(str(tor_configuration_file_path, 'a')
     f.write(' \n')
