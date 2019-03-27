@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 
 import humanize
-from PySide2.QtCore import QByteArray, QThreadPool, QProcess, Qt
+from PySide2.QtCore import QByteArray, QThreadPool, QProcess, Qt, QTimer
 from PySide2.QtWidgets import QDialog, QTextEdit
 from grpc._channel import _Rendezvous
 
@@ -177,8 +177,7 @@ class LndOutputWidget(QDialog):
                 self.auto_unlock_wallet()
             elif 'Shutdown complete' in line:
                 self.process.waitForFinished()
-                self.process.start()
-                self.process.waitForStarted()
+                QTimer.singleShot(1500, self.process.start)
             elif 'Unable to synchronize wallet to chain' in line:
                 self.process.terminate()
                 self.process.waitForFinished()
