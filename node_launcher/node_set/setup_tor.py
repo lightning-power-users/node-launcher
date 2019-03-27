@@ -11,8 +11,8 @@ from urllib.request import urlopen, urlretrieve
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
-from node_launcher.constants import BITCOIN_DIR_PATH, TOR_DATA_PATH, \
-    TOR_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
+from node_launcher.constants import BITCOIN_DIR_PATH, TOR_DIR_PATH, \
+    TOR_RUN_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
     IS_MACOS, IS_LINUX, LND_DIR_PATH
 
 
@@ -127,21 +127,21 @@ def deb_install():
 def installtor():
     if IS_WINDOWS:
         print('Installing Tor...')
-        torpath = str(TOR_PATH[OPERATING_SYSTEM])
-        if not os.path.exists(torpath):
-            os.makedirs(torpath)
+        torrunpath = str(TOR_RUN_PATH[OPERATING_SYSTEM])
+        if not os.path.exists(torrunpath):
+            os.makedirs(torrunpath)
         zip_ref = zipfile.ZipFile(r'tor-win32-0.3.5.7.zip', 'r')
-        zip_ref.extractall(torpath)
+        zip_ref.extractall(torrunpath)
         zip_ref.close()
     elif IS_MACOS:
         print('Installing Tor...')
-        bash_torpath = expanduser('~/Library/Application\ Support/Tor/')
-        torpath = expanduser('~/Library/Application Support/Tor/')
-        if not os.path.exists(torpath):
-            os.makedirs(torpath)
+        bash_torrunpath = expanduser('~/Library/Application\ Support/Tor/')
+        torrunpath = expanduser('~/Library/Application Support/Tor/')
+        if not os.path.exists(torrunpath):
+            os.makedirs(torrunpath)
         bashcommand_attach = 'hdiutil attach ~/Downloads/TorBrowser-8.0.6-osx64_en-US.dmg'
         bashcommand_detach = 'hdiutil detach /Volumes/Tor\ Browser'
-        cp = ["cp -R /Volumes/Tor\ Browser/Tor\ Browser.app ", str(bash_torpath)]
+        cp = ["cp -R /Volumes/Tor\ Browser/Tor\ Browser.app ", str(bash_torrunpath)]
         bashcommand_cp =  ""
         bashcommand_cp = bashcommand_cp.join(cp)
         subprocess.run(['bash', '-c', bashcommand_attach])
@@ -178,19 +178,19 @@ def runtor():
 
 
 def write_torrc():
-    tordatapath = str(TOR_DATA_PATH[OPERATING_SYSTEM])
-    if not os.path.exists(tordatapath):
-        os.makedirs(tordatapath)
     file_name = 'torrc'
-    tor_conf_path = TOR_DATA_PATH[OPERATING_SYSTEM])
-    tor_configuration_file_path = os.path.join(tor_conf_path, file_name)
+    tordirpath = str(TOR_DIR_PATH[OPERATING_SYSTEM])
+    # TODO check if this conitional is necessary
+    if not os.path.exists(tordirpath):
+        os.makedirs(tordirpath)
+    tor_configuration_file_path = os.path.join(tor_dir_path, file_name)
     f = open(str(tor_configuration_file_path, 'a')
     f.write(' \n')
     f.write('ControlPort 9051\n')
     f.write('CookieAuthentication 1\n')
     f.write(' \n')
     f.write('HiddenServiceDir ')
-    f.write(os.path.join(tordatapath, 'bitcoin-service'))
+    f.write(os.path.join(tordirpath, 'bitcoin-service'))
     f.write('\n')
     f.write('HiddenServicePort 8333 127.0.0.1:8333\n')
     f.write('HiddenServicePort 18333 127.0.0.1:18333\n')

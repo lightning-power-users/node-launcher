@@ -7,10 +7,10 @@ from node_launcher.constants import (
     IS_MACOS,
     IS_WINDOWS,
     LND_DIR_PATH,
-    TOR_PATH, # Change to TOR_DIR_PATH
+    TOR_DIR_PATH,
     OPERATING_SYSTEM,
     #BITCOIN_DIR_PATH,
-    #TOR_DATA_PATH,
+    #TOR_DIR_PATH,
     #TOR_EXE_PATH,
 )
 
