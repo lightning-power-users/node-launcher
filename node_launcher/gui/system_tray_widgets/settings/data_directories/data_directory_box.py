@@ -4,6 +4,7 @@ from PySide2.QtWidgets import (
     QPushButton
 )
 
+from node_launcher.node_set.bitcoin import Bitcoin
 from .datadir_label import DatadirLabel
 from .prune_warning_label import PruneWarningLabel
 from .select_directory_dialog import SelectDirectoryDialog
@@ -12,9 +13,10 @@ from node_launcher.gui.utilities import reveal
 
 class DataDirectoryBox(QGroupBox):
 
-    def __init__(self):
+    def __init__(self, bitcoin: Bitcoin):
         super().__init__('Bitcoin Data Directory')
         self.file_dialog = SelectDirectoryDialog(self)
+        self.bitcoin = bitcoin
 
         self.datadir = None
 
@@ -29,9 +31,7 @@ class DataDirectoryBox(QGroupBox):
 
         self.select_directory_button = QPushButton('Select Directory')
         # noinspection PyUnresolvedReferences
-        self.select_directory_button.clicked.connect(
-            lambda: self.file_dialog.select_new(current_datadir=self.datadir)
-        )
+        self.select_directory_button.clicked.connect(self.on_button)
 
         layout = QGridLayout(self)
         layout.addWidget(self.datadir_label, 1, 1, 1, 2)
@@ -40,6 +40,13 @@ class DataDirectoryBox(QGroupBox):
         layout.addWidget(self.select_directory_button, 3, 2)
         self.setLayout(layout)
         self.setFixedWidth(self.minimumSizeHint().width())
+
+    def on_button(self):
+        self.set_datadir(
+            self.bitcoin.file['datadir'],
+            self.bitcoin.file['prune']
+        )
+        self.file_dialog.select_new(current_datadir=self.datadir)
 
     def set_datadir(self, datadir: str, prune: bool):
         self.datadir = datadir

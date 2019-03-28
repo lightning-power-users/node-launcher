@@ -4,7 +4,7 @@ import pytest
 from PySide2.QtCore import Qt
 from PySide2.QtTest import QTest
 
-from node_launcher.gui.network_buttons.advanced import ConfigurationFilesLayout
+from node_launcher.gui.system_tray_widgets import ConfigurationFilesLayout
 
 
 @pytest.fixture

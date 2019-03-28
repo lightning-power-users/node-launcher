@@ -5,7 +5,7 @@ from PySide2.QtCore import Qt
 from PySide2.QtTest import QTest
 
 from node_launcher.constants import TESTNET
-from node_launcher.gui.network_buttons.advanced.zap_layout import ZapLayout
+from node_launcher.gui.system_tray_widgets import ZapLayout
 
 
 @pytest.fixture

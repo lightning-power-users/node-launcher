@@ -213,8 +213,6 @@ class LndOutputWidget(QDialog):
                 self.old_height = new_height
                 self.old_timestamp = new_timestamp
 
-
-
     def show(self):
         self.showMaximized()
         self.raise_()

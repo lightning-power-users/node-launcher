@@ -11,8 +11,6 @@ class LndTab(QWidget):
 
         self.lnd = lnd
         self.alias_layout = AliasLayout()
-        if self.lnd.file['alias'] is not None:
-            self.alias_layout.set_alias(self.lnd.file['alias'])
 
         color = self.lnd.file['color']
         self.alias_layout.set_color(color)

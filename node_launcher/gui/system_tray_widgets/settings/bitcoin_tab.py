@@ -16,14 +16,11 @@ class BitcoinTab(QWidget):
 
         self.bitcoin_layout = QVBoxLayout()
 
-        self.data_directory_group_box = DataDirectoryBox()
+        self.data_directory_group_box = DataDirectoryBox(bitcoin=self.bitcoin)
         self.data_directory_group_box.file_dialog.new_data_directory.connect(
             self.change_datadir
         )
-        self.data_directory_group_box.set_datadir(
-            self.bitcoin.file['datadir'],
-            self.bitcoin.file['prune']
-        )
+
         self.bitcoin_layout.addWidget(self.data_directory_group_box)
         self.bitcoin_layout.setAlignment(self.data_directory_group_box, Qt.AlignHCenter)
 

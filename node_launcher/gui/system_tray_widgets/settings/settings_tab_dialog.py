@@ -31,6 +31,8 @@ class SettingsTabDialog(QDialog):
         self.setWindowTitle('Settings')
 
     def show(self):
+        if self.node_set.lnd.file['alias'] is not None:
+            self.lnd_tab.alias_layout.set_alias(self.node_set.lnd.file['alias'])
         super().show()
         self.raise_()
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)

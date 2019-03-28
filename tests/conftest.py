@@ -6,7 +6,6 @@ from node_launcher.node_set.lnd import Lnd
 from node_launcher.node_set.lnd_client import LndClient
 from node_launcher.node_set import NodeSet
 from node_launcher.node_set.bitcoin import Bitcoin
-from node_launcher.gui.main_widget import MainWidget
 
 
 @pytest.fixture
@@ -42,8 +41,3 @@ def lnd_client(lnd: Lnd) -> LndClient:
     lnd_client = LndClient(lnd)
     return lnd_client
 
-
-@pytest.fixture
-def main_widget():
-    main_widget = MainWidget()
-    return main_widget

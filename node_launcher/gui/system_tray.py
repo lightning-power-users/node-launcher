@@ -4,7 +4,7 @@ from PySide2.QtWidgets import QSystemTrayIcon, QWidget
 
 from node_launcher.assets.asset_access import asset_access
 from node_launcher.constants import BITCOIN_CLI_COMMANDS, LNCLI_COMMANDS
-from node_launcher.gui.components.cli import CliWidget
+from node_launcher.gui.system_tray_widgets import ConsoleDialog
 from node_launcher.gui.menu import Menu
 from node_launcher.gui.system_tray_widgets.advanced import AdvancedWidget
 from node_launcher.gui.system_tray_widgets.bitcoind_output_widget import \
@@ -38,7 +38,7 @@ class SystemTray(QSystemTrayIcon):
         )
 
         # bitcoin console
-        self.bitcoin_cli_widget = CliWidget(
+        self.bitcoin_cli_widget = ConsoleDialog(
             title='bitcoin-cli',
             program=self.node_set.bitcoin.software.bitcoin_cli,
             args=self.node_set.bitcoin.args,
@@ -64,7 +64,7 @@ class SystemTray(QSystemTrayIcon):
         )
         # lnd console
 
-        self.lncli_widget = CliWidget(
+        self.lncli_widget = ConsoleDialog(
             title='lncli',
             program=self.node_set.lnd.software.lncli,
             args=self.node_set.lnd.lncli_arguments(),

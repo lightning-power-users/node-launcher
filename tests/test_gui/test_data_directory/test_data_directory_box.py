@@ -4,7 +4,7 @@ import pytest
 from PySide2.QtCore import Qt
 from PySide2.QtTest import QTest
 
-from node_launcher.gui.settings.data_directories.data_directory_box import DataDirectoryBox
+from node_launcher.gui.system_tray_widgets import DataDirectoryBox
 
 
 @pytest.fixture
@@ -14,8 +14,8 @@ def data_directory_box() -> DataDirectoryBox:
     return data_directory_box
 
 
-@patch('node_launcher.gui.settings.data_directories.data_directory_box.SelectDirectoryDialog')
-@patch('node_launcher.gui.settings.data_directories.data_directory_box.reveal')
+@patch('node_launcher.gui.system_tray_widgets.settings.data_directories.data_directory_box.SelectDirectoryDialog')
+@patch('node_launcher.gui.system_tray_widgets.settings.data_directories.data_directory_box.reveal')
 class TestDataDirectoryBox(object):
     def test_show_directory_button(self,
                                    reveal_patch: MagicMock,
