@@ -52,6 +52,10 @@ class BitcoindOutputWidget(QDialog):
                 self.system_tray.menu.bitcoind_status_action.setText(
                     'Bitcoin synced'
                 )
+            elif 'Shutdown: done' in line:
+                self.system_tray.menu.bitcoind_status_action.setText(
+                    'Error, please check Bitcoin Output'
+                )
             elif 'UpdateTip' in line:
                 line_segments = line.split(' ')
                 timestamp = line_segments[0]
