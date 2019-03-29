@@ -21,41 +21,6 @@ import subprocess
 from subprocess import call, Popen, PIPE
 
     
-def edit_bitcoin_conf():
-    print('Node Launcher is preparing your system...')
-    time.sleep(2)
-    print('NOTE: Restart Bitcoin Core and LND after running this script for changes to take effect')
-    time.sleep(2)
-    print('Configruing bitcoin.conf...')
-    file_name = 'bitcoin.conf'
-    bitcoin_data_path = BITCOIN_DIR_PATH[OPERATING_SYSTEM]
-    bitcoin_configuration_file_path = os.path.join(bitcoin_data_path,
-                                                   file_name)
-    f = open(str(bitcoin_configuration_file_path), 'a')
-    f.write('proxy=127.0.0.1:9050\n')
-    f.write('listen=1\n')
-    f.write('bind=127.0.0.1\n')
-    f.write('debug=tor\n')
-    f.close()
-    time.sleep(2)
-
-def edit_lnd_conf():
-    print('Configuring lnd.conf...')
-    file_name = 'lnd.conf'
-    lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
-    lnd_configuration_file_path = os.path.join(lnd_dir_path, file_name)
-    f = open(str(lnd_configuration_file_path), 'a')
-    f.write(' \n')
-    f.write('[Application Options]\n')
-    f.write('listen=localhost\n')
-    f.write(' \n')
-    f.write('[tor]\n')
-    f.write('tor.active=1\n')
-    f.write('tor.v3=1\n')
-    f.write('tor.streamisolation=1\n')
-    f.close()
-    time.sleep(2)
-   
 def downloadtor():
     print('Downloading Tor...')
     if IS_WINDOWS:
@@ -175,26 +140,6 @@ def runtor():
         input("Press enter to exit...")
 
 
-def write_torrc():
-    file_name = 'torrc'
-    tordirpath = str(TOR_DIR_PATH[OPERATING_SYSTEM])
-    # TODO check if this conditional is necessary
-    if not os.path.exists(tordirpath):
-        os.makedirs(tordirpath)
-    tor_configuration_file_path = os.path.join(tor_dir_path, file_name)
-    f = open(str(tor_configuration_file_path, 'a'))
-    f.write(' \n')
-    f.write('ControlPort 9051\n')
-    f.write('CookieAuthentication 1\n')
-    f.write(' \n')
-    f.write('HiddenServiceDir ')
-    f.write(os.path.join(tordirpath, 'bitcoin-service'))
-    f.write('\n')
-    f.write('HiddenServicePort 8333 127.0.0.1:8333\n')
-    f.write('HiddenServicePort 18333 127.0.0.1:18333\n')
-    f.close()
-
-
 
 def run_tor(self):
 
@@ -233,15 +178,11 @@ def run_tor(self):
 
 def launch():
     if IS_MACOS or IS_WINDOWS:
-        #edit_bitcoin_conf()
-        #edit_lnd_conf()
         downloadtor()
         installtor()
-        #write_torrc()
         runtor()
 
     elif IS_LINUX:
-        #edit_bitcoin_conf()
         deb_install()
 
 
