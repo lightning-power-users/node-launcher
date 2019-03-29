@@ -3,9 +3,11 @@ import os
 from node_launcher.logging import log
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.node_set.lnd import Lnd
+from node_launcher.node_set.tor import Tor
 from node_launcher.constants import (
     BITCOIN_DIR_PATH,
     LND_DIR_PATH,
+    TOR_DIR_PATH,
     OPERATING_SYSTEM,
 )
 from node_launcher.node_set.lnd_client import LndClient
@@ -14,6 +16,7 @@ class NodeSet(object):
     lnd_client: LndClient
     bitcoin: Bitcoin
     lnd: Lnd
+    tor: Tor
 
     def __init__(self):
         file_name = 'bitcoin.conf'

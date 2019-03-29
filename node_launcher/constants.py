@@ -77,8 +77,8 @@ BITCOIN_DIR_PATH: Dict[OperatingSystem, str] = {
 }
 
 TOR_DIR_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: '/var/tmp/dist/tor/etc/tor/'
-    LINUX: '/etc/tor'
+    DARWIN: '/var/tmp/dist/tor/etc/tor/',
+    LINUX: '/etc/tor',
     WINDOWS: os.path.join(APPDATA, 'tor'),
 }
 

@@ -26,6 +26,7 @@ class Tor(object):
 
         self.tordir = TOR_DIR_PATH[OPERATING_SYSTEM]
 
+        # torrc edits
         self.file['ControlPort'] = '9051'
         self.file['CookieAuthentication'] = '1'
         self.file['HiddenServiceDir'] = os.path.join(self.tordir, 'bitcoin-service')
