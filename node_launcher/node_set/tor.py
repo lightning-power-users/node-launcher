@@ -9,8 +9,6 @@ from node_launcher.constants import (
     LND_DIR_PATH,
     TOR_DIR_PATH,
     OPERATING_SYSTEM,
-    #BITCOIN_DIR_PATH,
-    #TOR_EXE_PATH,
 )
 
 class Tor(object):
