@@ -6,6 +6,7 @@ from node_launcher.node_set.lnd import Lnd
 from node_launcher.node_set.lnd_client import LndClient
 from node_launcher.node_set import NodeSet
 from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.node_set.tor import Tor
 from node_launcher.gui.main_widget import MainWidget
 
 
@@ -28,11 +29,19 @@ def lnd(network: str, bitcoin: Bitcoin) -> Lnd:
                   bitcoin=bitcoin)
     return lnd
 
+@pytest.fixture
+def tor(network: str, lnd: Lnd) -> Tor:
+    with NamedTemporaryFile(suffix='-torrc', delete=False) as f:
+        tor = Tor(configuration_file_path=f.name,
+                  lnd=lnd)
+    return tor
+
 
 @pytest.fixture
 def node_set(network: str,
              bitcoin: Bitcoin,
-             lnd: Lnd) -> NodeSet:
+             lnd: Lnd,
+             tor: Tor) -> NodeSet:
     configuration = NodeSet()
     return configuration
 
