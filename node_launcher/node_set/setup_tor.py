@@ -182,7 +182,7 @@ def write_torrc():
     if not os.path.exists(tordirpath):
         os.makedirs(tordirpath)
     tor_configuration_file_path = os.path.join(tor_dir_path, file_name)
-    f = open(str(tor_configuration_file_path, 'a')
+    f = open(str(tor_configuration_file_path, 'a'))
     f.write(' \n')
     f.write('ControlPort 9051\n')
     f.write('CookieAuthentication 1\n')

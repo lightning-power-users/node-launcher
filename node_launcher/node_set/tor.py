@@ -1,4 +1,4 @@
-import psutil
+import psutil, os
 
 from node_launcher.node_set.lnd import Lnd
 from node_launcher.services.configuration_file import ConfigurationFile
@@ -13,14 +13,14 @@ from node_launcher.constants import (
 
 class Tor(object):
     file: ConfigurationFile
-    software: TorSoftware
-    process: Optional[psutil.Process]
+    #software: TorSoftware
+    #process: Optional[psutil.Process]
 
     def __init__(self, configuration_file_path: str, lnd: Lnd):
         self.lnd = lnd
         self.bitcoin = lnd.bitcoin
         self.file = ConfigurationFile(configuration_file_path, ' ')
-        self.software = TorSoftware()
+        #self.software = TorSoftware()
 
         self.tordir = TOR_DIR_PATH[OPERATING_SYSTEM]
 
