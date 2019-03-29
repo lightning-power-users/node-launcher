@@ -9,7 +9,7 @@ from urllib.request import urlopen, urlretrieve
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
-from node_launcher.constants import TOR_RUN_PATH, \
+from node_launcher.constants import TOR_PATH, \
     TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
     IS_MACOS, IS_LINUX
 
@@ -88,23 +88,23 @@ def deb_install():
         deb_modify_user()
 
 def installtor():
-    torrunpath = str(TOR_RUN_PATH[OPERATING_SYSTEM])
+    torpath = str(TOR_PATH[OPERATING_SYSTEM])
     if IS_WINDOWS:
         print('Installing Tor...')
-        if not os.path.exists(torrunpath):
-            os.makedirs(torrunpath)
+        if not os.path.exists(torpath):
+            os.makedirs(torpath)
         zip_ref = zipfile.ZipFile(r'tor-win32-0.3.5.7.zip', 'r')
-        zip_ref.extractall(torrunpath)
+        zip_ref.extractall(torpath)
         zip_ref.close()
     elif IS_MACOS:
         print('Installing Tor...')
-        # TODO see if this below is covered by `torrunpath` variable
-        bash_torrunpath = expanduser('~/Library/Application\ Support/Tor/')
-        if not os.path.exists(torrunpath):
-            os.makedirs(torrunpath)
+        # TODO see if this below is covered by `torpath` variable
+        bash_torpath = expanduser('~/Library/Application\ Support/Tor/')
+        if not os.path.exists(torpath):
+            os.makedirs(torpath)
         bashcommand_attach = 'hdiutil attach ~/Downloads/TorBrowser-8.0.6-osx64_en-US.dmg'
         bashcommand_detach = 'hdiutil detach /Volumes/Tor\ Browser'
-        cp = ["cp -R /Volumes/Tor\ Browser/Tor\ Browser.app ", str(bash_torrunpath)]
+        cp = ["cp -R /Volumes/Tor\ Browser/Tor\ Browser.app ", str(bash_torpath)]
         bashcommand_cp =  ""
         bashcommand_cp = bashcommand_cp.join(cp)
         subprocess.run(['bash', '-c', bashcommand_attach])
