@@ -1,19 +1,17 @@
-import sys
 import time
 import urllib
 import getpass
 import zipfile
 import os
-import time
 
 from os.path import expanduser
 from urllib.request import urlopen, urlretrieve
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
-from node_launcher.constants import BITCOIN_DIR_PATH, TOR_DIR_PATH, \
-    TOR_RUN_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
-    IS_MACOS, IS_LINUX, LND_DIR_PATH
+from node_launcher.constants import TOR_RUN_PATH, \
+    TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
+    IS_MACOS, IS_LINUX
 
 
 # FIXME
