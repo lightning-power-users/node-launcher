@@ -17,11 +17,11 @@ def zap_layout() -> ZapLayout:
 
 
 @patch(
-    'node_launcher.gui.network_buttons.advanced.zap_layout.get_deprecated_lndconnect_url')
-@patch('node_launcher.gui.network_buttons.advanced.zap_layout.get_qrcode_img')
-@patch('node_launcher.gui.network_buttons.advanced.zap_layout.webbrowser')
-@patch('node_launcher.gui.network_buttons.advanced.zap_layout.QPixmap')
-@patch('node_launcher.gui.network_buttons.advanced.zap_layout.QLabel')
+    'node_launcher.gui.system_tray_widgets.advanced.zap_layout.get_deprecated_lndconnect_url')
+@patch('node_launcher.gui.system_tray_widgets.advanced.zap_layout.get_qrcode_img')
+@patch('node_launcher.gui.system_tray_widgets.advanced.zap_layout.webbrowser')
+@patch('node_launcher.gui.system_tray_widgets.advanced.zap_layout.QPixmap')
+@patch('node_launcher.gui.system_tray_widgets.advanced.zap_layout.QLabel')
 class TestZapLayout(object):
     def test_open_zap_desktop_button(self,
                                      qlabel_patch: MagicMock,

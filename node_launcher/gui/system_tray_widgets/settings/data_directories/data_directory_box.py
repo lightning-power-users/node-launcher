@@ -42,10 +42,6 @@ class DataDirectoryBox(QGroupBox):
         self.setFixedWidth(self.minimumSizeHint().width())
 
     def on_button(self):
-        self.set_datadir(
-            self.bitcoin.file['datadir'],
-            self.bitcoin.file['prune']
-        )
         self.file_dialog.select_new(current_datadir=self.datadir)
 
     def set_datadir(self, datadir: str, prune: bool):

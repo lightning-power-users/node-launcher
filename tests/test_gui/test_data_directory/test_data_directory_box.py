@@ -5,11 +5,12 @@ from PySide2.QtCore import Qt
 from PySide2.QtTest import QTest
 
 from node_launcher.gui.system_tray_widgets import DataDirectoryBox
+from node_launcher.node_set import NodeSet
 
 
 @pytest.fixture
 def data_directory_box() -> DataDirectoryBox:
-    data_directory_box = DataDirectoryBox()
+    data_directory_box = DataDirectoryBox(bitcoin=NodeSet().bitcoin)
     data_directory_box.file_dialog = MagicMock()
     return data_directory_box
 

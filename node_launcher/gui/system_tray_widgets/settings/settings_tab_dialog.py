@@ -33,6 +33,11 @@ class SettingsTabDialog(QDialog):
     def show(self):
         if self.node_set.lnd.file['alias'] is not None:
             self.lnd_tab.alias_layout.set_alias(self.node_set.lnd.file['alias'])
+
+        self.bitcoin_tab.data_directory_group_box.set_datadir(
+            self.node_set.bitcoin.file['datadir'],
+            self.node_set.bitcoin.file['prune']
+        )
         super().show()
         self.raise_()
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
