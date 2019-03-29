@@ -178,7 +178,7 @@ def runtor():
 def write_torrc():
     file_name = 'torrc'
     tordirpath = str(TOR_DIR_PATH[OPERATING_SYSTEM])
-    # TODO check if this conitional is necessary
+    # TODO check if this conditional is necessary
     if not os.path.exists(tordirpath):
         os.makedirs(tordirpath)
     tor_configuration_file_path = os.path.join(tor_dir_path, file_name)
@@ -233,15 +233,15 @@ def run_tor(self):
 
 def launch():
     if IS_MACOS or IS_WINDOWS:
-        edit_bitcoin_conf()
-        edit_lnd_conf()
+        #edit_bitcoin_conf()
+        #edit_lnd_conf()
         downloadtor()
         installtor()
-        write_torrc()
+        #write_torrc()
         runtor()
 
     elif IS_LINUX:
-        edit_bitcoin_conf()
+        #edit_bitcoin_conf()
         deb_install()
 
 
