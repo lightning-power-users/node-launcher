@@ -46,3 +46,15 @@ class TestConfigurationFile(object):
         new_object = ConfigurationFile(configuration_file.path)
         assert new_object['test_bool_true']
         assert not new_object['test_bool_false']
+
+    def test_assign_op(self, configuration_file: ConfigurationFile):
+        configuration_file['key'] = 'value'
+        new_object = ConfigurationFile(configuration_file.path, ' ')
+        with open(new_object.path, 'r') as f:
+            text = f.read()
+            assert 'key=value' in text
+        new_object['key'] = 'value'
+        with open(new_object.path, 'r') as f:
+            text = f.read()
+            assert 'key=value' not in text
+            assert 'key value' in text
