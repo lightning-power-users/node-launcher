@@ -1,11 +1,8 @@
-import sys
 import time
 import urllib
 import getpass
 import zipfile
 import os
-import os.path
-import time
 
 from os.path import expanduser
 from urllib.request import urlopen, urlretrieve
@@ -182,15 +179,11 @@ def run_tor(self):
 
 def launch():
     if IS_MACOS or IS_WINDOWS:
-        edit_bitcoin_conf()
-        edit_lnd_conf()
         downloadtor()
         installtor()
-        write_torrc()
         runtor()
 
     elif IS_LINUX:
-        edit_bitcoin_conf()
         deb_install()
 
 
