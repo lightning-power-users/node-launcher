@@ -10,9 +10,10 @@ from PySide2.QtCore import QFileSystemWatcher
 class ConfigurationFile(dict):
     file_watcher: QFileSystemWatcher
 
-    def __init__(self, path, **kwargs):
+    def __init__(self, path, assign_op='=', **kwargs):
         super().__init__(**kwargs)
         self.path = path
+        self.assign_op = assign_op
         parent = os.path.abspath(os.path.join(path, pardir))
         if not isdir(parent):
             log.info(
@@ -44,12 +45,12 @@ class ConfigurationFile(dict):
             property_lines = f.readlines()
         self.cache = {}
         for property_line in property_lines:
-            key_value = property_line.split('=')
+            key_value = property_line.split(self.assign_op)
             key = key_value[0]
             if not key.strip():
                 continue
             value = key_value[1:]
-            value = '='.join(value).strip()
+            value = self.assign_op.join(value).strip()
             value = value.replace('"', '')
             if len(value) == 1 and value.isdigit():
                 value = bool(int(value))
@@ -121,7 +122,7 @@ class ConfigurationFile(dict):
             lines.pop(property_line_index)
         if value_list is not None:
             for value in value_list:
-                property_string = f'{name.strip()}={value.strip()}'
+                property_string = f'{name.strip()}{self.assign_op}{value}'
                 lines.append(property_string)
         with open(self.path, 'w') as f:
             lines = [l + os.linesep for l in lines]
