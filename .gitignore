@@ -172,3 +172,6 @@ venv.bak/
 /tools/credentials.json
 /tools/secrets.py
 /tools/token.json
+
+# VSCode
+.vscode
