@@ -24,5 +24,25 @@ class Tor(object):
 
         self.tordir = TOR_DATA_PATH[OPERATING_SYSTEM]
 
+        # torrc edits
+        self.file['ControlPort'] = '9051'
+        self.file['CookieAuthentication'] = '1'
+        self.file['HiddenServiceDir'] = os.path.join(self.tordir, 'bitcoin-service')
+        self.file['HiddenServicePort'] = '8333 127.0.0.1:8333'
+        self.file['HiddenServicePort'] = '18333 127.0.0.1:18333'
+
+        # bitcoin.conf edits
+        self.bitcoin.file['proxy'] = '127.0.0.1:9050'
+        self.bitcoin.file['listen'] = '1'
+        self.bitcoin.file['bind'] = '127.0.0.1'
+        self.bitcoin.file['debug'] = 'tor'
+
+        # lnd.conf edits
+        self.lnd.file['listen'] = 'localhost'
+        self.lnd.file['tor.active'] = '1'
+        self.lnd.file['tor.v3'] = '1'
+        self.lnd.file['tor.streamisolation'] = '1'
+
+
     def launch(self):
         pass

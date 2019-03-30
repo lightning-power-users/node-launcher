@@ -22,34 +22,6 @@ import subprocess
 from subprocess import call, Popen, PIPE
 
     
-def edit_bitcoin_conf():
-    print('Node Launcher is preparing your system...')
-    time.sleep(2)
-    print('NOTE: Restart Bitcoin Core and LND after running this script for changes to take effect')
-    time.sleep(2)
-    print('Configruing bitcoin.conf...')
-    f = open(str(BITCOIN_CONF_PATH[OPERATING_SYSTEM]) , 'a')
-    f.write('proxy=127.0.0.1:9050\n')
-    f.write('listen=1\n')
-    f.write('bind=127.0.0.1\n')
-    f.write('debug=tor\n')
-    f.close()
-    time.sleep(2)
-
-def edit_lnd_conf():
-    print('Configuring lnd.conf...')
-    f = open(str(LND_CONF_PATH[OPERATING_SYSTEM]) , 'a')
-    f.write(' \n')
-    f.write('[Application Options]\n')
-    f.write('listen=localhost\n')
-    f.write(' \n')
-    f.write('[tor]\n')
-    f.write('tor.active=1\n')
-    f.write('tor.v3=1\n')
-    f.write('tor.streamisolation=1\n')
-    f.close()
-    time.sleep(2)
-   
 def downloadtor():
     print('Downloading Tor...')
     if IS_WINDOWS:
@@ -170,22 +142,6 @@ def runtor():
         print('Tor setup is complete!')
         input("Press enter to exit...")
 
-
-def write_torrc():
-    tordatapath = str(TOR_DATA_PATH[OPERATING_SYSTEM])
-    if not os.path.exists(tordatapath):
-        os.makedirs(tordatapath)
-    f = open(str(TOR_TORRC_PATH[OPERATING_SYSTEM]), 'a')
-    f.write(' \n')
-    f.write('ControlPort 9051\n')
-    f.write('CookieAuthentication 1\n')
-    f.write(' \n')
-    f.write('HiddenServiceDir ')
-    f.write(os.path.join(tordatapath, 'bitcoin-service'))
-    f.write('\n')
-    f.write('HiddenServicePort 8333 127.0.0.1:8333\n')
-    f.write('HiddenServicePort 18333 127.0.0.1:18333\n')
-    f.close()
 
 
 
