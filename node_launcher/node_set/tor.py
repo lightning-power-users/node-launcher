@@ -44,8 +44,5 @@ class Tor(object):
         self.lnd.file['tor.streamisolation'] = '1'
 
 
-        # TODO next, figure how to roll existing `launch` functions into this Class (Ctrl+Shift+F run_tor)
-        # TODO next, figure out how to actually replace existing Tor conf modifications with this Class
-
     def launch(self):
         pass
