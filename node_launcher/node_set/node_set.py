@@ -7,7 +7,7 @@ from node_launcher.node_set.tor import Tor
 from node_launcher.constants import (
     BITCOIN_DATA_PATH,
     LND_DIR_PATH,
-    TOR_DATA_PATH,
+    TOR_DIR_PATH,
     OPERATING_SYSTEM,
 )
 from node_launcher.node_set.lnd_client import LndClient
@@ -45,7 +45,7 @@ class NodeSet(object):
         self.lnd_client = LndClient(self.lnd)
 
         file_name = 'torrc'
-        tor_dir_path = TOR_DATA_PATH[OPERATING_SYSTEM]
+        tor_dir_path = TOR_DIR_PATH[OPERATING_SYSTEM]
         self.tor_configuration_file_path = os.path.join(tor_dir_path, file_name)
         log.info(
             'tor_configuration_file_path',

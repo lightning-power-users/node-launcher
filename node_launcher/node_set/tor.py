@@ -7,7 +7,7 @@ from node_launcher.constants import (
     IS_MACOS,
     IS_WINDOWS,
     LND_DIR_PATH,
-    TOR_DATA_PATH,
+    TOR_DIR_PATH,
     OPERATING_SYSTEM,
 )
 
@@ -22,7 +22,7 @@ class Tor(object):
         self.file = ConfigurationFile(configuration_file_path, ' ')
         #self.software = TorSoftware()
 
-        self.tordir = TOR_DATA_PATH[OPERATING_SYSTEM]
+        self.tordir = TOR_DIR_PATH[OPERATING_SYSTEM]
 
         # torrc edits
         self.file['ControlPort'] = '9051'
