@@ -70,32 +70,16 @@ LND_DIR_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(LOCALAPPDATA, 'Lnd')
 }
 
-LND_CONF_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: expanduser('~/Library/Application Support/Lnd/lnd.conf'),
-    LINUX: expanduser('~/.lnd/lnd.conf'),
-    WINDOWS: os.path.join(LOCALAPPDATA, r'Lnd\lnd.conf')
-}
-
 BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Bitcoin/'),
     LINUX: expanduser('~/.bitcoin'),
     WINDOWS: os.path.join(APPDATA, 'Bitcoin')
 }
 
-BITCOIN_CONF_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: expanduser('~/Library/Application Support/Bitcoin/bitcoin.cond'),
-    LINUX: expanduser('~/.bitcoin/bitcoin.conf'),
-    WINDOWS: os.path.join(APPDATA, r'Bitcoin\bitcoin.conf')
-}
-
 TOR_DATA_PATH: Dict[OperatingSystem, str] = {
-    WINDOWS: os.path.join(APPDATA, r'tor'),
-    DARWIN: '/var/tmp/dist/tor/etc/tor/'
-}
-
-TOR_TORRC_PATH: Dict[OperatingSystem, str] = {
-    WINDOWS: os.path.join(APPDATA, r'tor\torrc'),
-    DARWIN: '/var/tmp/dist/tor/etc/tor/torrc'
+    DARWIN: '/var/tmp/dist/tor/etc/tor/',
+    LINUX: expanduser('~/tor/etc/tor/'),  # should be '/etc/tor', permissions issue
+    WINDOWS: os.path.join(APPDATA, 'tor'),
 }
 
 TOR_PATH: Dict[OperatingSystem, str] = {

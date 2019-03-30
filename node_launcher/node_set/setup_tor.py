@@ -9,9 +9,9 @@ from urllib.request import urlopen, urlretrieve
 from tempfile import NamedTemporaryFile
 from typing import List, Optional
 
-from node_launcher.constants import BITCOIN_DATA_PATH, BITCOIN_CONF_PATH, TOR_DATA_PATH, \
-    TOR_TORRC_PATH, LND_CONF_PATH , TOR_PATH, TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
-    IS_MACOS, IS_LINUX, LND_DIR_PATH
+from node_launcher.constants import TOR_PATH, \
+    TOR_EXE_PATH, OPERATING_SYSTEM, IS_WINDOWS, \
+    IS_MACOS, IS_LINUX
 
 
 # FIXME
