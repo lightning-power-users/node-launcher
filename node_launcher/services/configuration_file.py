@@ -117,7 +117,8 @@ class ConfigurationFile(dict):
         property_lines = [line_number for line_number, l in enumerate(lines)
                           if l.startswith(name)]
         for property_line_index in reversed(property_lines):
-            for repeats in range(2):
+            lines.pop(property_line_index)
+            if lines[property_line_index - 1] == os.linesep:
                 lines.pop(property_line_index - 1)
         if value_list is not None:
             for value in value_list:
