@@ -88,9 +88,9 @@ def deb_install():
         deb_modify_user()
 
 def installtor():
+    torpath = str(TOR_PATH[OPERATING_SYSTEM])
     if IS_WINDOWS:
         print('Installing Tor...')
-        torpath = str(TOR_PATH[OPERATING_SYSTEM])
         if not os.path.exists(torpath):
             os.makedirs(torpath)
         zip_ref = zipfile.ZipFile(r'tor-win32-0.3.5.7.zip', 'r')
@@ -98,8 +98,8 @@ def installtor():
         zip_ref.close()
     elif IS_MACOS:
         print('Installing Tor...')
+        # TODO see if this below is covered by `torpath` variable
         bash_torpath = expanduser('~/Library/Application\ Support/Tor/')
-        torpath = expanduser('~/Library/Application Support/Tor/')
         if not os.path.exists(torpath):
             os.makedirs(torpath)
         bashcommand_attach = 'hdiutil attach ~/Downloads/TorBrowser-8.0.6-osx64_en-US.dmg'
@@ -113,9 +113,9 @@ def installtor():
 
 def runtor():
     print('Launching Tor...')    
+    path= TOR_EXE_PATH[OPERATING_SYSTEM]
+    cmd = path
     if IS_MACOS:
-        path= TOR_EXE_PATH[OPERATING_SYSTEM]
-        cmd = path
         with NamedTemporaryFile(suffix='-run_tor.command', delete=False) as f:
             f.write(f'#!/bin/sh\n{cmd}\n'.encode('utf-8'))
             f.flush()
@@ -124,8 +124,6 @@ def runtor():
         time.sleep(2)
         print('Tor setup is complete!')
     elif IS_WINDOWS:
-        path = TOR_EXE_PATH[OPERATING_SYSTEM]
-        cmd = path
         from subprocess import DETACHED_PROCESS, CREATE_NEW_PROCESS_GROUP
         with NamedTemporaryFile(suffix='-run_tor.bat', delete=False) as f:
             f.write(cmd.encode('utf-8'))
@@ -138,7 +136,6 @@ def runtor():
         time.sleep(2)
         print('Tor setup is complete!')
         input("Press enter to exit...")
-
 
 
 
