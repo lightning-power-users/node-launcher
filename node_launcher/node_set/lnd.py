@@ -6,11 +6,13 @@ from typing import List
 from PySide2.QtCore import QProcess
 
 from node_launcher.constants import (
+    IS_WINDOWS,
     LND_DEFAULT_GRPC_PORT,
     LND_DEFAULT_PEER_PORT,
     LND_DEFAULT_REST_PORT,
     LND_DIR_PATH,
-    OPERATING_SYSTEM)
+    OPERATING_SYSTEM
+)
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.services.lnd_software import LndSoftware
@@ -89,10 +91,15 @@ class Lnd(object):
 
     @property
     def args(self):
-        arg_list = [
-            f'--configfile="{self.file.path}"',
+        if IS_WINDOWS:
+            arg_list = [
+                f'--configfile={self.file.path}',
+            ]
+        else:
+            arg_list = [
+                f'--configfile="{self.file.path}"',
+            ]
 
-        ]
         if self.bitcoin.file['testnet']:
             arg_list += [
                 '--bitcoin.testnet'
