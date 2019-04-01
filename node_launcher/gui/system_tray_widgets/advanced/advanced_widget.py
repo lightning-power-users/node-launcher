@@ -1,10 +1,11 @@
+from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget
 
-from node_launcher.gui.network_buttons.advanced.zap_layout import ZapLayout
 from .configuration_files_layout import ConfigurationFilesLayout
 from .ports_layout import PortsLayout
 from .tls_layout import TlsLayout
 from .versions_layout import VersionsLayout
+from .zap_layout import ZapLayout
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.node_set import NodeSet
@@ -37,3 +38,9 @@ class AdvancedWidget(QWidget):
         self.layout.addLayout(self.tls_layout, column_span=self.columns)
 
         self.setLayout(self.layout)
+
+    def show(self):
+        super().show()
+        self.raise_()
+        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        self.activateWindow()

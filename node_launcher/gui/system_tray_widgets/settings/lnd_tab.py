@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import QWidget
 
 from node_launcher.gui.components.grid_layout import QGridLayout
-from node_launcher.gui.settings.alias_layout import AliasLayout
+from .alias_layout import AliasLayout
 from node_launcher.node_set.lnd import Lnd
 
 
@@ -11,8 +11,6 @@ class LndTab(QWidget):
 
         self.lnd = lnd
         self.alias_layout = AliasLayout()
-        if self.lnd.file['alias'] is not None:
-            self.alias_layout.set_alias(self.lnd.file['alias'])
 
         color = self.lnd.file['color']
         self.alias_layout.set_color(color)

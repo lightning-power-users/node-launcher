@@ -14,7 +14,6 @@ from node_launcher.logging import log
 from . import rpc_pb2 as ln
 from . import rpc_pb2_grpc as lnrpc
 
-from node_launcher.node_set.lnd import Lnd
 
 os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
 
@@ -35,7 +34,7 @@ class PendingChannels(DefaultModel):
 
 
 class LndClient(object):
-    def __init__(self, lnd: Lnd = None, lnddir: str = None,
+    def __init__(self, lnd = None, lnddir: str = None,
                  grpc_port: int = None, grpc_host: str = None,
                  macaroon_path: str = None):
         self.lnd = lnd

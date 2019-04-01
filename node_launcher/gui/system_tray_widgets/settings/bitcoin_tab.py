@@ -2,8 +2,7 @@ from PySide2.QtCore import Qt, Signal
 from PySide2.QtWidgets import QWidget, QLabel, QCheckBox, QVBoxLayout
 
 from node_launcher.constants import Network, MAINNET, TESTNET
-from node_launcher.gui.settings.data_directories.data_directory_box import \
-    DataDirectoryBox
+from .data_directories.data_directory_box import DataDirectoryBox
 from node_launcher.node_set.bitcoin import Bitcoin
 
 
@@ -17,14 +16,11 @@ class BitcoinTab(QWidget):
 
         self.bitcoin_layout = QVBoxLayout()
 
-        self.data_directory_group_box = DataDirectoryBox()
+        self.data_directory_group_box = DataDirectoryBox(bitcoin=self.bitcoin)
         self.data_directory_group_box.file_dialog.new_data_directory.connect(
             self.change_datadir
         )
-        self.data_directory_group_box.set_datadir(
-            self.bitcoin.file['datadir'],
-            self.bitcoin.file['prune']
-        )
+
         self.bitcoin_layout.addWidget(self.data_directory_group_box)
         self.bitcoin_layout.setAlignment(self.data_directory_group_box, Qt.AlignHCenter)
 

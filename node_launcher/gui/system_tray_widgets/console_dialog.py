@@ -10,7 +10,7 @@ from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.logging import log
 
 
-class CliWidget(QDialog):
+class ConsoleDialog(QDialog):
     def __init__(self, title: str, program: str, args: List[str], commands: List[str]):
         super().__init__()
 
@@ -29,14 +29,6 @@ class CliWidget(QDialog):
         self.input.setCompleter(self.completer)
         self.input.setFocus()
 
-        self.process = QProcess()
-        self.process.setProgram(self.program)
-        self.process.setCurrentReadChannel(0)
-
-        # noinspection PyUnresolvedReferences
-        self.process.readyReadStandardError.connect(self.handle_error)
-        # noinspection PyUnresolvedReferences
-        self.process.readyReadStandardOutput.connect(self.handle_output)
 
         self.layout.addWidget(self.output)
         self.layout.addWidget(self.input)
@@ -61,19 +53,32 @@ class CliWidget(QDialog):
         )
         self.output.append(f'> {cmd}\n')
         self.input.clear()
-        self.process.kill()
+
+        process = QProcess()
+        process.setProgram(self.program)
+        process.setCurrentReadChannel(0)
+
+        # noinspection PyUnresolvedReferences
+        process.readyReadStandardError.connect(
+            lambda: self.handle_error(process)
+        )
+        # noinspection PyUnresolvedReferences
+        process.readyReadStandardOutput.connect(
+            lambda: self.handle_output(process)
+        )
+
         args = list(self.args)
         args.extend(cmd.split(' '))
-        self.process.setArguments(args)
-        self.process.start()
+        process.setArguments(args)
+        process.start()
 
-    def handle_error(self):
-        output: QByteArray = self.process.readAllStandardError()
+    def handle_error(self, process: QProcess):
+        output: QByteArray = process.readAllStandardError()
         message = output.data().decode('utf-8').strip()
         self.output.append(message)
 
-    def handle_output(self):
-        output: QByteArray = self.process.readAllStandardOutput()
+    def handle_output(self, process: QProcess):
+        output: QByteArray = process.readAllStandardOutput()
         message = output.data().decode('utf-8').strip()
         if message.startswith('{') or message.startswith('['):
             formatter = HtmlFormatter()
@@ -97,7 +102,8 @@ class CliWidget(QDialog):
         max_scroll = self.output.verticalScrollBar().maximum()
         self.output.verticalScrollBar().setValue(max_scroll)
 
-    def parse_bitcoin_cli_commands(self, message: str):
+    @staticmethod
+    def parse_bitcoin_cli_commands(message: str):
         log.debug('parse_bitcoin_cli_commands')
         commands = []
         for line in message.split(sep='\n'):
@@ -109,7 +115,8 @@ class CliWidget(QDialog):
             commands.append(command)
         return commands
 
-    def parse_lncli_commands(self, message: str):
+    @staticmethod
+    def parse_lncli_commands(message: str):
         log.debug('parse_lncli_commands')
         at_commands = False
         commands = []
@@ -133,5 +140,9 @@ class CliWidget(QDialog):
 
     def show(self):
         self.showMaximized()
+        self.raise_()
+        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        self.activateWindow()
+
         self.input.setFocus()
         self.run_command('help')

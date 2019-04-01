@@ -114,17 +114,17 @@ class ConfigurationFile(dict):
     def write_property(self, name: str, value_list: List[str]):
         with open(self.path, 'r') as f:
             lines = f.readlines()
+            lines = [l.strip() for l in lines if l.strip()]
         property_lines = [line_number for line_number, l in enumerate(lines)
                           if l.startswith(name)]
-        for property_line_index in reversed(property_lines):
+        for property_line_index in property_lines:
             lines.pop(property_line_index)
-            if lines[property_line_index - 1] == os.linesep:
-                lines.pop(property_line_index - 1)
         if value_list is not None:
             for value in value_list:
-                property_string = os.linesep + f'{name.strip()}={value.strip()}' + os.linesep
+                property_string = f'{name.strip()}={value.strip()}'
                 lines.append(property_string)
         with open(self.path, 'w') as f:
+            lines = [l + os.linesep for l in lines]
             f.writelines(lines)
 
     @property

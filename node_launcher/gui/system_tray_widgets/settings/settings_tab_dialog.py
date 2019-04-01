@@ -1,7 +1,8 @@
+from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QDialog, QTabWidget, QDialogButtonBox, QVBoxLayout
 
-from node_launcher.gui.settings.bitcoin_tab import BitcoinTab
-from node_launcher.gui.settings.lnd_tab import LndTab
+from .bitcoin_tab import BitcoinTab
+from .lnd_tab import LndTab
 from node_launcher.node_set import NodeSet
 
 
@@ -28,3 +29,16 @@ class SettingsTabDialog(QDialog):
         self.setLayout(self.main_layout)
 
         self.setWindowTitle('Settings')
+
+    def show(self):
+        if self.node_set.lnd.file['alias'] is not None:
+            self.lnd_tab.alias_layout.set_alias(self.node_set.lnd.file['alias'])
+
+        self.bitcoin_tab.data_directory_group_box.set_datadir(
+            self.node_set.bitcoin.file['datadir'],
+            self.node_set.bitcoin.file['prune']
+        )
+        super().show()
+        self.raise_()
+        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
+        self.activateWindow()

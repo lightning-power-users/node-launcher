@@ -1,16 +1,12 @@
 import os
 from tempfile import TemporaryDirectory
-from unittest.mock import MagicMock
 
-import pytest
-
-from node_launcher.node_set.bitcoin import Bitcoin
-from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.constants import (
-    IS_WINDOWS,
     MAINNET_PRUNE,
     TESTNET_PRUNE
 )
+from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.services.configuration_file import ConfigurationFile
 
 
 class TestBitcoinConfiguration(object):
@@ -71,21 +67,6 @@ class TestBitcoinConfiguration(object):
         txindex = bitcoin.file['txindex']
         assert datadir
         assert prune != txindex
-
-    def test_detect_zmq_ports(self, bitcoin: Bitcoin):
-        result = bitcoin.detect_zmq_ports()
-        assert bitcoin.zmq_block_port < bitcoin.zmq_tx_port
-        assert isinstance(result, bool)
-
-    @pytest.mark.slow
-    def test_launch(self, bitcoin: Bitcoin):
-        if IS_WINDOWS:
-            command = ['set', 'path']
-        else:
-            command = ['echo', 'hello']
-        bitcoin.bitcoin_qt = MagicMock(return_value=command)
-        result = bitcoin.launch()
-        assert result.pid
 
     def test_file_changed(self, bitcoin: Bitcoin):
         bitcoin.file['rpcport'] = 8338
