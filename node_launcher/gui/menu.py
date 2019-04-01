@@ -74,12 +74,6 @@ class Menu(QMenu):
             node_set=self.node_set,
             system_tray=self.system_tray
         )
-        self.node_set.lnd.process.readyReadStandardError.connect(
-            self.lnd_output_widget.handle_error
-        )
-        self.node_set.lnd.process.readyReadStandardOutput.connect(
-            self.lnd_output_widget.handle_output
-        )
         self.lnd_output_action = self.addAction('See LND Output')
         self.lnd_output_action.triggered.connect(
             self.lnd_output_widget.show
