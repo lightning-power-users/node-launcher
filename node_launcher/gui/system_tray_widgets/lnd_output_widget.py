@@ -30,7 +30,6 @@ class LndOutputWidget(OutputWidget):
         self.old_timestamp = None
 
     def process_output_line(self, line: str):
-        self.output.append(line)
         if 'Active chain: Bitcoin' in line:
             self.system_tray.menu.lnd_status_action.setText(
                 'LND starting'
