@@ -42,7 +42,7 @@ class BitcoindOutputWidget(QDialog):
     def handle_output(self):
         output: QByteArray = self.process.readAllStandardOutput()
         message = output.data().decode('utf-8').strip()
-        lines = message.split(os.linesep)
+        lines = message.split('\n')
         for line in lines:
             if 'Bitcoin Core version' in line:
                 self.system_tray.menu.bitcoind_status_action.setText(

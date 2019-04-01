@@ -163,7 +163,7 @@ class LndOutputWidget(QDialog):
     def handle_output(self):
         output: QByteArray = self.process.readAllStandardOutput()
         message = output.data().decode('utf-8').strip()
-        lines = message.split(os.linesep)
+        lines = message.split('\n')
         for line in lines:
             self.output.append(line)
             if 'Active chain: Bitcoin' in line:
