@@ -50,6 +50,7 @@ app = BUNDLE(
         'NSPrincipleClass': 'NSApplication',
         'NSAppleScriptEnabled': False,
         'NSHighResolutionCapable': 'True',
-        'NSRequiresAquaSystemAppearance': 'True'
+        'NSRequiresAquaSystemAppearance': 'True',
+        'LSUIElement': 1
     }
 )
