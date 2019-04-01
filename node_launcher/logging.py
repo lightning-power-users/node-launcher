@@ -1,5 +1,9 @@
 import logging.config
+import os
+
 import structlog
+
+from node_launcher.constants import NODE_LAUNCHER_DATA_PATH, OPERATING_SYSTEM
 
 timestamper = structlog.processors.TimeStamper(fmt='%Y-%m-%d %H:%M:%S')
 pre_chain = [
@@ -33,7 +37,8 @@ logging.config.dictConfig({
         'file': {
             'level': 'DEBUG',
             'class': 'logging.handlers.WatchedFileHandler',
-            'filename': 'debug.log',
+            'filename': os.path.join(NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM],
+                                     'debug.log'),
             'formatter': 'plain',
         },
     },
