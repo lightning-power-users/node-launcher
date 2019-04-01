@@ -4,11 +4,9 @@ import uuid
 # noinspection PyPackageRequirements
 from grpc._channel import _Rendezvous
 import humanize
-from PySide2.QtCore import QByteArray, QThreadPool, QProcess, Qt, QTimer
-from PySide2.QtWidgets import QDialog, QTextEdit
+from PySide2.QtCore import QThreadPool, Qt, QTimer
 
 from node_launcher.constants import keyring
-from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.system_tray_widgets.output_widget import OutputWidget
 from node_launcher.logging import log
@@ -22,30 +20,61 @@ class LndOutputWidget(OutputWidget):
         self.node_set = node_set
         self.system_tray = system_tray
         self.process = node_set.lnd.process
-        self.process.readyReadStandardError.connect(
-            self.handle_error
-        )
-        self.process.readyReadStandardOutput.connect(
-            self.handle_output
-        )
+        self.process.readyReadStandardError.connect(self.handle_error)
+        self.process.readyReadStandardOutput.connect(self.handle_output)
         self.setWindowTitle('LND Output')
-        self.layout = QGridLayout()
 
         self.threadpool = QThreadPool()
-
-        self.output = QTextEdit()
-        self.output.acceptRichText = True
-
-        self.layout.addWidget(self.output)
-        self.setLayout(self.layout)
 
         self.old_height = None
         self.old_timestamp = None
 
-    def handle_error(self):
-        output: QByteArray = self.process.readAllStandardError()
-        message = output.data().decode('utf-8').strip()
-        self.output.append(message)
+    def process_output_line(self, line: str):
+        self.output.append(line)
+        if 'Active chain: Bitcoin' in line:
+            self.system_tray.menu.lnd_status_action.setText(
+                'LND starting'
+            )
+        elif 'Waiting for wallet encryption password' in line:
+            self.system_tray.menu.lnd_status_action.setText(
+                'LND unlocking wallet'
+            )
+            QTimer.singleShot(100, self.auto_unlock_wallet)
+        elif 'Shutdown complete' in line:
+            QTimer.singleShot(3000, self.process.start)
+        elif 'Unable to synchronize wallet to chain' in line:
+            self.process.terminate()
+            QTimer.singleShot(3000, self.process.start)
+        elif 'LightningWallet opened' in line:
+            self.system_tray.set_blue()
+            self.system_tray.menu.lnd_status_action.setText(
+                'LND syncing with network'
+            )
+        elif 'Starting HTLC Switch' in line:
+            self.system_tray.set_green()
+            self.system_tray.menu.lnd_status_action.setText(
+                'LND synced'
+            )
+        elif 'Caught up to height' in line:
+            new_height = int(line.split(' ')[-1])
+            timestamp = line.split('[INF]')[0].strip()
+            new_timestamp = datetime.strptime(
+                timestamp,
+                '%Y-%m-%d %H:%M:%S.%f'
+            )
+            if self.old_height is not None:
+                change = new_height - self.old_height
+                timestamp_change = new_timestamp - self.old_timestamp
+                total_left = 600000 - new_height
+                time_left = (total_left / change)*timestamp_change
+                humanized = humanize.naturaltime(-time_left)
+                self.system_tray.menu.lnd_status_action.setText(
+                    f'ETA: {humanized}, caught up to height {new_height}'
+                )
+
+            self.old_height = new_height
+            self.old_timestamp = new_timestamp
+
 
     @staticmethod
     def unlock_wallet(lnd, progress_callback, password: str):
@@ -164,52 +193,6 @@ class LndOutputWidget(OutputWidget):
         )
         worker.signals.result.connect(self.handle_unlock_wallet)
         self.threadpool.start(worker)
-
-    def process_output_line(self, line: str):
-        self.output.append(line)
-        if 'Active chain: Bitcoin' in line:
-            self.system_tray.menu.lnd_status_action.setText(
-                'LND starting'
-            )
-        elif 'Waiting for wallet encryption password' in line:
-            self.system_tray.menu.lnd_status_action.setText(
-                'LND unlocking wallet'
-            )
-            QTimer.singleShot(100, self.auto_unlock_wallet)
-        elif 'Shutdown complete' in line:
-            QTimer.singleShot(3000, self.process.start)
-        elif 'Unable to synchronize wallet to chain' in line:
-            self.process.terminate()
-            QTimer.singleShot(3000, self.process.start)
-        elif 'LightningWallet opened' in line:
-            self.system_tray.set_blue()
-            self.system_tray.menu.lnd_status_action.setText(
-                'LND syncing with network'
-            )
-        elif 'Starting HTLC Switch' in line:
-            self.system_tray.set_green()
-            self.system_tray.menu.lnd_status_action.setText(
-                'LND synced'
-            )
-        elif 'Caught up to height' in line:
-            new_height = int(line.split(' ')[-1])
-            timestamp = line.split('[INF]')[0].strip()
-            new_timestamp = datetime.strptime(
-                timestamp,
-                '%Y-%m-%d %H:%M:%S.%f'
-            )
-            if self.old_height is not None:
-                change = new_height - self.old_height
-                timestamp_change = new_timestamp - self.old_timestamp
-                total_left = 600000 - new_height
-                time_left = (total_left / change)*timestamp_change
-                humanized = humanize.naturaltime(-time_left)
-                self.system_tray.menu.lnd_status_action.setText(
-                    f'ETA: {humanized}, caught up to height {new_height}'
-                )
-
-            self.old_height = new_height
-            self.old_timestamp = new_timestamp
 
     def show(self):
         self.showMaximized()

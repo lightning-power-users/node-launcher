@@ -40,12 +40,6 @@ class Menu(QMenu):
             node_set=self.node_set,
             system_tray=self.system_tray
         )
-        self.node_set.bitcoin.process.readyReadStandardError.connect(
-            self.bitcoind_output_widget.handle_error
-        )
-        self.node_set.bitcoin.process.readyReadStandardOutput.connect(
-            self.bitcoind_output_widget.handle_output
-        )
         self.bitcoind_output_action = self.addAction('See Bitcoin Output')
         self.bitcoind_output_action.triggered.connect(
             self.bitcoind_output_widget.show
