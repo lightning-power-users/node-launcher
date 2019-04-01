@@ -1,11 +1,11 @@
-import os
-import uuid
 from datetime import datetime
+import uuid
 
+# noinspection PyPackageRequirements
+from grpc._channel import _Rendezvous
 import humanize
 from PySide2.QtCore import QByteArray, QThreadPool, QProcess, Qt, QTimer
 from PySide2.QtWidgets import QDialog, QTextEdit
-from grpc._channel import _Rendezvous
 
 from node_launcher.constants import keyring
 from node_launcher.gui.components.grid_layout import QGridLayout
@@ -45,9 +45,12 @@ class LndOutputWidget(QDialog):
 
     @staticmethod
     def unlock_wallet(lnd, progress_callback, password: str):
+        if password is None:
+            return 'wallet not found'
         client = LndClient(lnd)
         try:
             client.unlock(password)
+            return None
         except _Rendezvous as e:
             details = e.details()
             return details
@@ -82,12 +85,11 @@ class LndOutputWidget(QDialog):
             password=' '.join(seed)
         )
 
-        if new_seed_password is not None:
-            keyring.set_password(
-                service=f'{keyring_service_name}_password',
-                username=keyring_user_name,
-                password=new_seed_password
-            )
+        keyring.set_password(
+            service=f'{keyring_service_name}_seed_password',
+            username=keyring_user_name,
+            password=new_seed_password
+        )
         return seed
 
     def handle_unlock_wallet(self, details: str):
@@ -151,14 +153,13 @@ class LndOutputWidget(QDialog):
             service=keyring_service_name,
             username=keyring_user_name,
         )
-        if password is not None:
-            worker = Worker(
-                fn=self.unlock_wallet,
-                lnd=self.node_set.lnd,
-                password=password
-            )
-            worker.signals.result.connect(self.handle_unlock_wallet)
-            self.threadpool.start(worker)
+        worker = Worker(
+            fn=self.unlock_wallet,
+            lnd=self.node_set.lnd,
+            password=password
+        )
+        worker.signals.result.connect(self.handle_unlock_wallet)
+        self.threadpool.start(worker)
 
     def handle_output(self):
         output: QByteArray = self.process.readAllStandardOutput()
