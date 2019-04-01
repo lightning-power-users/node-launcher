@@ -185,7 +185,7 @@ class LndOutputWidget(QDialog):
                 self.process.start()
                 self.process.waitForStarted()
             elif 'LightningWallet opened' in line:
-                self.system_tray.set_orange()
+                self.system_tray.set_blue()
                 self.system_tray.menu.lnd_status_action.setText(
                     'LND syncing with network'
                 )

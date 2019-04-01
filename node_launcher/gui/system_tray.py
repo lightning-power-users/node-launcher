@@ -15,7 +15,7 @@ class SystemTray(QSystemTrayIcon):
         self.setContextMenu(self.menu)
 
     def set_icon(self, color: str):
-        path = asset_access.get_asset_full_path(f'system_tray_icon_{color}.png')
+        path = asset_access.get_asset_full_path(f'bitcoin_logo_{color}.png')
         pixmap = QPixmap(path)
         icon = QIcon(pixmap)
         self.setIcon(icon)
@@ -23,8 +23,8 @@ class SystemTray(QSystemTrayIcon):
     def set_red(self):
         self.set_icon('red')
 
-    def set_orange(self):
-        self.set_icon('orange')
+    def set_blue(self):
+        self.set_icon('blue')
 
     def set_green(self):
         self.set_icon('green')
