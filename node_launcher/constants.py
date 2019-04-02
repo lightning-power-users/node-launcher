@@ -62,6 +62,11 @@ NODE_LAUNCHER_DATA_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(LOCALAPPDATA, 'Node Launcher')
 }
 
+try:
+    os.mkdir(os.path.join(NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM]))
+except FileExistsError:
+    pass
+
 LND_DIR_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Lnd/'),
     LINUX: expanduser('~/.lnd/'),
