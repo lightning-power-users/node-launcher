@@ -1,8 +1,7 @@
 import errno
 import os
+import secrets
 import socket
-from random import choice
-from string import ascii_lowercase, digits
 
 from node_launcher.logging import log
 
@@ -29,7 +28,7 @@ def get_dir_size(start_path: str) -> int:
 
 
 def get_random_password() -> str:
-    return ''.join(choice(ascii_lowercase + digits) for _ in range(30))
+    return secrets.token_hex()
 
 
 claimed_ports = []

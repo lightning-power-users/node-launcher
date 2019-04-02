@@ -1,5 +1,4 @@
 from datetime import datetime
-import uuid
 
 # noinspection PyPackageRequirements
 from grpc._channel import _Rendezvous
@@ -12,6 +11,7 @@ from node_launcher.gui.system_tray_widgets.output_widget import OutputWidget
 from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
 from node_launcher.node_set.lnd_client import LndClient
+from node_launcher.utilities.utilities import get_random_password
 
 
 class LndOutputWidget(OutputWidget):
@@ -134,7 +134,7 @@ class LndOutputWidget(OutputWidget):
             pass
         # User needs to create a new wallet
         elif 'wallet not found' in details:
-            new_wallet_password = uuid.uuid4().hex
+            new_wallet_password = get_random_password()
             keyring_service_name = keyring_user_name = f'lnd_wallet_password'
             log.info(
                 'create_wallet',
