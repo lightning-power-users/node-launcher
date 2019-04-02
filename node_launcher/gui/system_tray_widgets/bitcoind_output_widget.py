@@ -76,7 +76,6 @@ class BitcoindOutputWidget(OutputWidget):
                         self.old_progress = new_progress
                         self.old_timestamp = new_timestamp
 
-
     def show(self):
         self.showMaximized()
         self.raise_()
