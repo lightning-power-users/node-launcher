@@ -28,6 +28,8 @@ class LndOutputWidget(OutputWidget):
 
         self.old_height = None
         self.old_timestamp = None
+        self.process.errorOccurred.connect(self.restart_process)
+        self.process.finished.connect(self.restart_process)
 
     def process_output_line(self, line: str):
         if 'Active chain: Bitcoin' in line:
@@ -39,16 +41,10 @@ class LndOutputWidget(OutputWidget):
                 'LND unlocking wallet'
             )
             QTimer.singleShot(100, self.auto_unlock_wallet)
-        elif 'Shutdown complete' in line:
-            QTimer.singleShot(3000, self.process.start)
         elif 'Unable to synchronize wallet to chain' in line:
             self.process.terminate()
-            QTimer.singleShot(3000, self.process.start)
-        elif 'LightningWallet opened' in line:
-            self.system_tray.set_blue()
-            self.system_tray.menu.lnd_status_action.setText(
-                'LND syncing with network'
-            )
+        elif 'operation timed out' in line:
+            self.process.terminate()
         elif 'Starting HTLC Switch' in line:
             self.system_tray.set_green()
             self.system_tray.menu.lnd_status_action.setText(
@@ -78,6 +74,8 @@ class LndOutputWidget(OutputWidget):
             self.old_height = new_height
             self.old_timestamp = new_timestamp
 
+    def restart_process(self):
+        QTimer.singleShot(3000, self.process.start)
 
     @staticmethod
     def unlock_wallet(lnd, progress_callback, password: str):
