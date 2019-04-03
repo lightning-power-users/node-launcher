@@ -11,7 +11,10 @@ from node_launcher.logging import log
 
 
 class ConsoleDialog(QDialog):
-    def __init__(self, title: str, program: str, args: List[str], commands: List[str]):
+    def __init__(self, title: str,
+                 program: str,
+                 args: List[str],
+                 commands: List[str]):
         super().__init__()
 
         self.setWindowTitle(title)
@@ -28,7 +31,6 @@ class ConsoleDialog(QDialog):
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.input.setCompleter(self.completer)
         self.input.setFocus()
-
 
         self.layout.addWidget(self.output)
         self.layout.addWidget(self.input)
@@ -67,9 +69,12 @@ class ConsoleDialog(QDialog):
             lambda: self.handle_output(process)
         )
 
-        args = list(self.args)
-        args.extend(cmd.split(' '))
-        process.setArguments(args)
+        connect_args = list(self.args)
+
+        args = cmd.split(' ')
+        if args[0] == self.program.split('/')[-1]:
+            args.pop(0)
+        process.setArguments(connect_args + args)
         process.start()
 
     def handle_error(self, process: QProcess):

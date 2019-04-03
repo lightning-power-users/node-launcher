@@ -54,6 +54,10 @@ class LndOutputWidget(OutputWidget):
             self.system_tray.menu.lnd_status_action.setText(
                 'LND synced'
             )
+            self.system_tray.showMessage(
+                'Lightning is ready',
+                ''
+            )
         elif 'Caught up to height' in line:
             new_height = int(line.split(' ')[-1])
             timestamp = line.split('[INF]')[0].strip()
