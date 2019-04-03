@@ -69,6 +69,9 @@ class Lnd(object):
         else:
             self.grpc_port = int(self.file['rpclisten'].split(':')[-1])
 
+        if not self.file['tlsextraip']:
+            self.file['tlsextraip'] = '127.0.0.1'
+
         if self.file['color'] is None:
             self.file['color'] = '#000000'
 
