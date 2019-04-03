@@ -43,7 +43,7 @@ class LndOutputWidget(OutputWidget):
             QTimer.singleShot(100, self.auto_unlock_wallet)
         elif 'Unable to synchronize wallet to chain' in line:
             self.process.terminate()
-        elif 'operation timed out' in line:
+        elif 'Unable to complete chain rescan' in line:
             self.process.terminate()
         elif 'Starting HTLC Switch' in line:
             self.system_tray.set_green()
