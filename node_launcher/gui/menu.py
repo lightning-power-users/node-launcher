@@ -10,6 +10,8 @@ from node_launcher.gui.system_tray_widgets import (
     LndOutputWidget,
     SettingsTabDialog
 )
+from node_launcher.gui.system_tray_widgets.channel_visualizer_widget import \
+    ChannelVisualizerWidget
 from node_launcher.gui.utilities import reveal
 from node_launcher.node_set import NodeSet
 
@@ -71,6 +73,18 @@ class Menu(QMenu):
         self.lnd_output_action = self.addAction('See LND Output')
         self.lnd_output_action.triggered.connect(
             self.lnd_output_widget.show
+        )
+
+        self.addSeparator()
+
+        # visualization
+        self.channel_visualizer_widget = ChannelVisualizerWidget(
+            node_set=self.node_set,
+            system_tray=self.system_tray
+        )
+        self.channel_visualizer_action = self.addAction('Channel Visualizer')
+        self.channel_visualizer_action.triggered.connect(
+            self.channel_visualizer_widget.show
         )
 
         self.addSeparator()

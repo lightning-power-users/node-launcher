@@ -260,3 +260,18 @@ class LndClient(object):
         request = ln.ClosedChannelsRequest()
         response = self.lnd_client.ClosedChannels(request)
         return response.channels
+
+    def forwarding_history(self, **kwargs):
+        request = ln.ForwardingHistoryRequest(**kwargs)
+        response = self.lnd_client.ForwardingHistory(request)
+        return response
+
+    def list_payments(self):
+        request = ln.ListPaymentsRequest()
+        response = self.lnd_client.ListPayments(request)
+        return response
+
+    def list_invoices(self, reversed: bool = 1, **kwargs):
+        request = ln.ListInvoiceRequest(reversed=reversed, **kwargs)
+        response = self.lnd_client.ListInvoices(request)
+        return response
