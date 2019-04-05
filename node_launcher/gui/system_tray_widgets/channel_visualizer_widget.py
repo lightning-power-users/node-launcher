@@ -27,7 +27,11 @@ class ChannelVisualizerWidget(QDialog):
 
     def show(self):
         channels = self.client.list_channels()
-        forwarding_history = self.client.forwarding_history()
+        forwarding_history = self.client.forwarding_history(
+            start_time=1,
+            end_time=int(datetime.now().timestamp()),
+            num_max_events=10000
+        )
         forwarding_events = forwarding_history.forwarding_events
         payments = self.client.list_payments().payments
         invoices = self.client.list_invoices().invoices
