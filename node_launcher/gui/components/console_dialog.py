@@ -1,7 +1,7 @@
 from typing import List
 
 from PySide2.QtCore import SIGNAL, QProcess, QByteArray, Qt
-from PySide2.QtWidgets import QTextEdit, QLineEdit, QCompleter, QDialog
+from PySide2.QtWidgets import QTextEdit, QLineEdit, QCompleter, QWidget
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.data import JsonLexer

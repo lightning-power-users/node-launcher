@@ -1,21 +1,25 @@
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QDialog, QTabWidget, QDialogButtonBox, QVBoxLayout
 
+from node_launcher.gui.components.console_dialog import ConsoleDialog
+from node_launcher.node_set.bitcoin import Bitcoin
 from .bitcoind_output_tab import BitcoindOutputTab
 from .bitcoind_console_tab import BitcoindConsoleTab
 
 
 class BitcoindManagerTabsDialog(QDialog):
-    def __init__(self):
+    def __init__(self, bitcoin: Bitcoin):
         super().__init__()
+
+        self.bitcoin = bitcoin
 
         self.tab_widget = QTabWidget()
 
         # bitcoin console
         self.bitcoin_cli_widget = ConsoleDialog(
             title='bitcoin-cli',
-            program=self.node_set.bitcoin.software.bitcoin_cli,
-            args=self.node_set.bitcoin.args,
+            program=self.bitcoin.software.bitcoin_cli,
+            args=self.bitcoin.args,
             commands=BITCOIN_CLI_COMMANDS
         )
 

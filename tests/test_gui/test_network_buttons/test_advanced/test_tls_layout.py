@@ -4,7 +4,7 @@ import pytest
 from PySide2.QtCore import Qt
 from PySide2.QtTest import QTest
 
-from node_launcher.gui.system_tray_widgets import TlsLayout
+from node_launcher.gui.menu import TlsLayout
 
 
 @pytest.fixture

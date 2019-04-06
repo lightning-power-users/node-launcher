@@ -10,7 +10,7 @@ from node_launcher.constants import (
     LND_DEFAULT_GRPC_PORT,
     LND_DEFAULT_REST_PORT
 )
-from node_launcher.gui.system_tray_widgets import PortsLayout
+from node_launcher.gui.menu import PortsLayout
 
 
 @pytest.fixture

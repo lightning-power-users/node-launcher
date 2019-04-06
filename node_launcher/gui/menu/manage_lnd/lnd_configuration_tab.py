@@ -1,8 +1,8 @@
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QDialog, QTabWidget, QDialogButtonBox, QVBoxLayout
 
-from node_launcher.gui.system_tray_widgets.manage_bitcoind.bitcoin_tab import BitcoinTab
-from .lnd_tab import LndTab
+from node_launcher.gui.menu.manage_bitcoind.bitcoin_tab import BitcoinTab
+from node_launcher.gui.menu.manage_lnd.lnd_tab import LndTab
 from node_launcher.node_set import NodeSet
 
 

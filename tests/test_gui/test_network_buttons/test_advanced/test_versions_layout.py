@@ -8,7 +8,7 @@ from node_launcher.constants import (
     TARGET_BITCOIN_RELEASE,
     TARGET_LND_RELEASE
 )
-from node_launcher.gui.system_tray_widgets import VersionsLayout
+from node_launcher.gui.menu import VersionsLayout
 
 
 @pytest.fixture

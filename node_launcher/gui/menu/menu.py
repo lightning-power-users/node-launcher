@@ -1,11 +1,10 @@
 import webbrowser
 
 from PySide2.QtCore import QCoreApplication
-from PySide2.QtGui import QKeySequence, QClipboard, QPixmap
+from PySide2.QtGui import QClipboard, QPixmap
 from PySide2.QtWidgets import QMenu, QLabel
 
-from node_launcher.constants import LNCLI_COMMANDS
-from node_launcher.gui.system_tray_widgets.manage_bitcoind.bitcoind_manager_tabs_dialog import \
+from node_launcher.gui.menu.manage_bitcoind.bitcoind_manager_tabs_dialog import \
     BitcoindManagerTabsDialog
 from node_launcher.gui.utilities import reveal
 from node_launcher.node_set import NodeSet
@@ -31,11 +30,16 @@ class Menu(QMenu):
 
         self.addSeparator()
 
+        # LND
+
         self.lnd_status_action = self.addAction('lnd off')
         self.lnd_status_action.setEnabled(False)
 
-        # LND
-
+        self.lnd_manager = LndManagerTabsDialog()
+        self.lnd_manage_action = self.addAction('Manage LND')
+        self.lnd_manage_action.triggered.connect(
+            self.lnd_manager.show
+        )
 
         self.addSeparator()
 

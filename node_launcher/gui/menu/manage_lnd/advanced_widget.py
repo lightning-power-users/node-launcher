@@ -1,11 +1,10 @@
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget
 
-from .configuration_files_layout import ConfigurationFilesLayout
-from .ports_layout import PortsLayout
-from .tls_layout import TlsLayout
-from .versions_layout import VersionsLayout
-from .zap_layout import ZapLayout
+from node_launcher.gui.menu.manage_bitcoind.configuration_files_layout import ConfigurationFilesLayout
+from node_launcher.gui.menu.manage_lnd.ports_layout import PortsLayout
+from node_launcher.gui.menu.manage_lnd.tls_layout import TlsLayout
+from node_launcher.gui.menu.manage_bitcoind.versions_layout import VersionsLayout
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.node_set import NodeSet
@@ -24,7 +23,6 @@ class AdvancedWidget(QWidget):
         self.versions_layout = VersionsLayout(node_set=node_set)
         self.ports_layout = PortsLayout(node_set=node_set)
         self.actions_layout = ConfigurationFilesLayout(node_set=node_set)
-        self.zap_layout = ZapLayout(node_set=self.node_set)
         self.tls_layout = TlsLayout(node_set=self.node_set)
 
         self.layout.addLayout(self.versions_layout, column_span=self.columns)

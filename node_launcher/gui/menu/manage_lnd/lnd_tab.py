@@ -1,7 +1,7 @@
 from PySide2.QtWidgets import QWidget
 
 from node_launcher.gui.components.grid_layout import QGridLayout
-from .alias_layout import AliasLayout
+from node_launcher.gui.menu.manage_lnd.alias_layout import AliasLayout
 from node_launcher.node_set.lnd import Lnd
 
 

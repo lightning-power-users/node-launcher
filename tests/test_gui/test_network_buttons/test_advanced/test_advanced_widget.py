@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from node_launcher.gui.system_tray_widgets import AdvancedWidget
+from node_launcher.gui.menu import AdvancedWidget
 
 
 @pytest.fixture
