@@ -11,6 +11,20 @@ class BitcoindManagerTabsDialog(QDialog):
 
         self.tab_widget = QTabWidget()
 
+        # bitcoin console
+        self.bitcoin_cli_widget = ConsoleDialog(
+            title='bitcoin-cli',
+            program=self.node_set.bitcoin.software.bitcoin_cli,
+            args=self.node_set.bitcoin.args,
+            commands=BITCOIN_CLI_COMMANDS
+        )
+
+
+        self.bitcoind_output_widget = BitcoindOutputWidget(
+            node_set=self.node_set,
+            system_tray=self.system_tray
+        )
+        
         self.bitcoind_output_tab = BitcoindOutputTab()
         self.tab_widget.addTab(self.bitcoin_output_tab, 'Logs')
 
