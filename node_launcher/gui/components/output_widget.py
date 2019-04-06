@@ -1,10 +1,10 @@
 from PySide2.QtCore import QByteArray, QProcess
-from PySide2.QtWidgets import QDialog, QGridLayout, QTextEdit
+from PySide2.QtWidgets import QGridLayout, QTextEdit, QWidget
 
 from node_launcher.node_set import NodeSet
 
 
-class OutputWidget(QDialog):
+class OutputWidget(QWidget):
     node_set: NodeSet
     process: QProcess
 

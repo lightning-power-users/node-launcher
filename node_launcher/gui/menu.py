@@ -30,7 +30,9 @@ class Menu(QMenu):
             args=self.node_set.bitcoin.args,
             commands=BITCOIN_CLI_COMMANDS
         )
+
         self.bitcoin_console_action = self.addAction('Open Bitcoin Console')
+        self.manage_bitcoin_action = self.addAction('Manage Bitcoin')
         self.bitcoin_console_action.triggered.connect(
             self.bitcoin_cli_widget.show
         )

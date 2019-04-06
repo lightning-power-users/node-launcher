@@ -7,7 +7,7 @@ from PySide2.QtCore import QThreadPool, Qt, QTimer
 
 from node_launcher.constants import keyring
 from node_launcher.gui.components.thread_worker import Worker
-from node_launcher.gui.system_tray_widgets.output_widget import OutputWidget
+from node_launcher.gui.components.output_widget import OutputWidget
 from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
 from node_launcher.node_set.lnd_client import LndClient

@@ -1,12 +1,13 @@
 from PySide2.QtCore import Qt, Signal
 from PySide2.QtWidgets import QWidget, QLabel, QCheckBox, QVBoxLayout
 
+
 from node_launcher.constants import Network
-from .data_directories.data_directory_box import DataDirectoryBox
+from node_launcher.gui.system_tray_widgets.settings.data_directories.data_directory_box import DataDirectoryBox
 from node_launcher.node_set.bitcoin import Bitcoin
 
 
-class BitcoinTab(QWidget):
+class BitcoindConfigurationTab(QWidget):
     change_network = Signal(Network)
 
     def __init__(self, bitcoin: Bitcoin):

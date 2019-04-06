@@ -16,7 +16,6 @@ from .settings import (
     LndTab,
     SettingsTabDialog
 )
-from .bitcoind_output_widget import BitcoindOutputWidget
-from .console_dialog import ConsoleDialog
-from .lnd_output_widget import LndOutputWidget
+from node_launcher.gui.system_tray_widgets.manage_bitcoind.bitcoind_output_widget import BitcoindOutputWidget
+from node_launcher.gui.system_tray_widgets.manage_lnd.lnd_output_widget import LndOutputWidget
 from.restart_layout import RestartLayout
