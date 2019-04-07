@@ -38,6 +38,9 @@ Review the contributing.md file https://github.com/PierreRochard/node-launcher/b
 
 Install Python3.7+ (macOS: `brew install python3`)
 
+For Windows see https://medium.com/@pierre_rochard/node-launcher-developer-setup-on-windows-5ba6e0fbb38a
+
+For macOS and Linux:
 0. `git clone https://github.com/PierreRochard/node-launcher`
 1. `cd node-launcher`
 2. `python3.7 -m venv venv`
