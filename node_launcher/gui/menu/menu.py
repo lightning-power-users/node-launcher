@@ -22,7 +22,10 @@ class Menu(QMenu):
         self.bitcoind_status_action = self.addAction('bitcoind off')
         self.bitcoind_status_action.setEnabled(False)
 
-        self.bitcoin_manager = BitcoindManagerTabsDialog()
+        self.bitcoin_manager = BitcoindManagerTabsDialog(
+            bitcoin=self.node_set.bitcoin,
+            system_tray=self.system_tray
+        )
         self.bitcoin_manage_action = self.addAction('Manage Bitcoind')
         self.bitcoin_manage_action.triggered.connect(
             self.bitcoin_cli_widget.show
@@ -65,22 +68,6 @@ class Menu(QMenu):
         self.zap_status_action = self.addAction('Zap Desktop UI')
         self.zap_status_action.setEnabled(False)
 
-        self.zap_open_action = self.addAction('Open Zap Desktop')
-        self.zap_open_action.triggered.connect(self.open_zap_desktop)
-
-        self.show_zap_qrcode_action = self.addAction('Pair Zap Mobile')
-        self.show_zap_qrcode_button.clicked.connect(self.show_zap_qrcode)
-
-        self.addSeparator()
-
-        # quit
-        self.quit_action = self.addAction('Quit')
-
-        self.quit_action.triggered.connect(
-            lambda _: QCoreApplication.exit(0)
-        )
-
-    def open_zap_desktop(self):
         # This should soon be replaced with using the get_lndconnect_url method
         old_lndconnect_url = get_deprecated_lndconnect_url(
             self.node_set.lnd.grpc_url.split(':')[0],
@@ -88,11 +75,13 @@ class Menu(QMenu):
             self.node_set.lnd.tls_cert_path,
             self.node_set.lnd.admin_macaroon_path
         )
-        webbrowser.open(old_lndconnect_url)
+        self.zap_open_action = self.addAction('Open Zap Desktop')
+        self.zap_open_action.triggered.connect(
+            lambda: webbrowser.open(old_lndconnect_url)
+        )
 
-    def show_zap_qrcode(self):
         qrcode_img = get_qrcode_img(
-            self.node_set.lnd.tlsextraip,
+            self.node_set.lnd.file['externalip'],
             self.node_set.lnd.grpc_url.split(':')[1],
             self.node_set.lnd.tls_cert_path,
             self.node_set.lnd.admin_macaroon_path
@@ -105,4 +94,16 @@ class Menu(QMenu):
         qrcode_label.setWindowTitle('Zap QR Code')
         qrcode_label.resize(400, 400)
         qrcode_label.setPixmap(pixmap)
-        qrcode_label.show()
+        self.show_zap_qrcode_action = self.addAction('Pair Zap Mobile')
+        self.show_zap_qrcode_button.clicked.connect(
+            qrcode_label.show
+        )
+
+        self.addSeparator()
+
+        # Quit
+        self.quit_action = self.addAction('Quit')
+
+        self.quit_action.triggered.connect(
+            lambda _: QCoreApplication.exit(0)
+        )

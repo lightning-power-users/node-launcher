@@ -10,7 +10,7 @@ from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.logging import log
 
 
-class ConsoleDialog(QWidget):
+class ConsoleWidget(QWidget):
     def __init__(self, title: str,
                  program: str,
                  args: List[str],

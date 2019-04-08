@@ -1,5 +1,6 @@
 from PySide2.QtCore import Qt, Signal
-from PySide2.QtWidgets import QWidget, QLabel, QCheckBox, QVBoxLayout
+from PySide2.QtWidgets import QWidget, QLabel, QCheckBox, QVBoxLayout, \
+    QPushButton
 
 from node_launcher.constants import Network, MAINNET, TESTNET
 from node_launcher.gui.menu.manage_bitcoind.data_directories import DataDirectoryBox
@@ -16,6 +17,13 @@ class BitcoindConfigurationTab(QWidget):
         self.bitcoin = bitcoin
 
         self.bitcoin_layout = QVBoxLayout()
+
+        self.show_bitcoin_conf = QPushButton('Show bitcoin.conf')
+        # noinspection PyUnresolvedReferences
+        self.show_bitcoin_conf.clicked.connect(
+            lambda: reveal(self.node_set.bitcoin.file.directory)
+        )
+        self.bitcoin_layout.addWidget(self.show_bitcoin_conf)
 
         self.data_directory_group_box = DataDirectoryBox(bitcoin=self.bitcoin)
         self.data_directory_group_box.file_dialog.new_data_directory.connect(

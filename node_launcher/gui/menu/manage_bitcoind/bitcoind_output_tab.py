@@ -4,18 +4,18 @@ import humanize
 from PySide2.QtCore import QProcess, QThreadPool, Qt
 
 from node_launcher.gui.components.output_widget import OutputWidget
-from node_launcher.node_set import NodeSet
+
+from node_launcher.node_set.bitcoin import Bitcoin
 
 
 class BitcoindOutputTab(OutputWidget):
-    node_set: NodeSet
+    bitcoin: Bitcoin
     process: QProcess
 
-    def __init__(self, node_set: NodeSet, system_tray):
+    def __init__(self, bitcoin: Bitcoin, system_tray):
         super().__init__()
-        self.node_set = node_set
         self.system_tray = system_tray
-        self.process = node_set.bitcoin.process
+        self.process = bitcoin.process
 
         self.process.readyReadStandardError.connect(self.handle_error)
         self.process.readyReadStandardOutput.connect(self.handle_output)
@@ -76,9 +76,3 @@ class BitcoindOutputTab(OutputWidget):
 
                         self.old_progress = new_progress
                         self.old_timestamp = new_timestamp
-
-    def show(self):
-        self.showMaximized()
-        self.raise_()
-        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
-        self.activateWindow()
