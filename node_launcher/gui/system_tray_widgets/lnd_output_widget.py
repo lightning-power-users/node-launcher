@@ -63,13 +63,14 @@ class LndOutputWidget(OutputWidget):
             )
             if self.old_height is not None:
                 change = new_height - self.old_height
-                timestamp_change = new_timestamp - self.old_timestamp
-                total_left = 600000 - new_height
-                time_left = (total_left / change)*timestamp_change
-                humanized = humanize.naturaltime(-time_left)
-                self.system_tray.menu.lnd_status_action.setText(
-                    f'ETA: {humanized}, caught up to height {new_height}'
-                )
+                if change:
+                    timestamp_change = new_timestamp - self.old_timestamp
+                    total_left = 600000 - new_height
+                    time_left = (total_left / change)*timestamp_change
+                    humanized = humanize.naturaltime(-time_left)
+                    self.system_tray.menu.lnd_status_action.setText(
+                        f'ETA: {humanized}, caught up to height {new_height}'
+                    )
 
             self.old_height = new_height
             self.old_timestamp = new_timestamp
