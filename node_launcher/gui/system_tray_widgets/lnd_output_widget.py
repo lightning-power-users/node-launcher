@@ -94,14 +94,9 @@ class LndOutputWidget(OutputWidget):
             generate_seed_response = self.node_set.lnd_client.generate_seed(
                 seed_password=new_seed_password
             )
-        except _Rendezvous as e:
-            log.error(
-                'generate_seed',
-                exc_info=True
-            )
-            # noinspection PyProtectedMember
-            self.error_message.showMessage(e._state.details)
-            return
+        except _Rendezvous:
+            log.error('generate_seed error', exc_info=True)
+            raise
 
         seed = generate_seed_response.cipher_seed_mnemonic
 
@@ -155,14 +150,9 @@ class LndOutputWidget(OutputWidget):
                     seed=seed,
                     seed_password=new_wallet_password
                 )
-            except _Rendezvous as e:
-                log.error(
-                    'initialize_wallet',
-                    exc_info=True
-                )
-                # noinspection PyProtectedMember
-                self.error_message.showMessage(e._state.details)
-                return
+            except _Rendezvous:
+                log.error('initialize_wallet error', exc_info=True)
+                raise
             keyring.set_password(
                 service=f'lnd_{self.node_set.bitcoin.network}_wallet_password',
                 username=self.node_set.bitcoin.file['rpcuser'],
