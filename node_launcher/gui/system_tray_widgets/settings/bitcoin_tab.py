@@ -33,7 +33,6 @@ class BitcoinTab(QWidget):
         self.bitcoin_layout.addWidget(self.enable_wallet_widget)
 
         self.setLayout(self.bitcoin_layout)
-        self.bitcoin.file.file_watcher.fileChanged.connect(self.bitcoin_config_changed)
 
     def change_datadir(self, new_datadir: str):
         self.bitcoin.file['datadir'] = new_datadir
