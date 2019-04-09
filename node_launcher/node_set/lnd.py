@@ -189,8 +189,10 @@ class Lnd(object):
         self.file.file_watcher.blockSignals(True)
         self.file.populate_cache()
         self.file.file_watcher.blockSignals(False)
-        self.rest_port = int(self.file['restlisten'].split(':')[-1])
-        self.grpc_port = int(self.file['rpclisten'].split(':')[-1])
+        if self.file['restlisten']:
+            self.rest_port = int(self.file['restlisten'].split(':')[-1])
+        if self.file['rpclisten']:
+            self.grpc_port = int(self.file['rpclisten'].split(':')[-1])
 
         # Some text editors do not modify the file, they delete and replace the file
         # Check if file is still in file_watcher list of files, if not add back
