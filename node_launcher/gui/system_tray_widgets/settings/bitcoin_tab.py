@@ -1,7 +1,7 @@
 from PySide2.QtCore import Qt, Signal
 from PySide2.QtWidgets import QWidget, QLabel, QCheckBox, QVBoxLayout
 
-from node_launcher.constants import Network, MAINNET, TESTNET
+from node_launcher.constants import Network
 from .data_directories.data_directory_box import DataDirectoryBox
 from node_launcher.node_set.bitcoin import Bitcoin
 
@@ -32,16 +32,6 @@ class BitcoinTab(QWidget):
         )
         self.bitcoin_layout.addWidget(self.enable_wallet_widget)
 
-        self.enable_testnet_label = QLabel('Enable testnet')
-        self.enable_testnet_widget = QCheckBox('Enable Testnet')
-        self.set_checked(
-            self.enable_testnet_widget,
-            self.bitcoin.file['testnet']
-        )
-        self.enable_testnet_widget.stateChanged.connect(
-            lambda x: self.update_config('testnet', bool(x))
-        )
-        self.bitcoin_layout.addWidget(self.enable_testnet_widget)
         self.setLayout(self.bitcoin_layout)
         self.bitcoin.file.file_watcher.fileChanged.connect(self.bitcoin_config_changed)
 
@@ -59,21 +49,3 @@ class BitcoinTab(QWidget):
             widget.setChecked(False)
             return
         widget.setChecked(state)
-
-    def update_config(self, name: str, state: bool):
-        self.bitcoin.file[name] = state
-
-        if name == 'testnet' and state:
-            self.change_network.emit(TESTNET)
-        elif name == 'testnet' and not state:
-            self.change_network.emit(MAINNET)
-
-    def bitcoin_config_changed(self):
-        if self.bitcoin.file['testnet']:
-            self.enable_testnet_widget.blockSignals(True)
-            self.set_checked(self.enable_testnet_widget, True)
-            self.enable_testnet_widget.blockSignals(False)
-        else:
-            self.enable_testnet_widget.blockSignals(True)
-            self.set_checked(self.enable_testnet_widget, False)
-            self.enable_testnet_widget.blockSignals(False)
