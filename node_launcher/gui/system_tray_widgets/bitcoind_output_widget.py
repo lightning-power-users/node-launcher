@@ -55,17 +55,18 @@ class BitcoindOutputWidget(OutputWidget):
                     if new_progress != self.old_progress:
                         if self.old_progress is not None:
                             change = new_progress - self.old_progress
-                            timestamp_change = new_timestamp - self.old_timestamp
-                            total_left = 1 - new_progress
-                            time_left = ((total_left / change)*timestamp_change).seconds
-                            self.timestamp_changes.append(time_left)
-                            if len(self.timestamp_changes) > 100:
-                                self.timestamp_changes.pop(0)
-                            average_time_left = sum(self.timestamp_changes)/len(self.timestamp_changes)
-                            humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
-                            self.system_tray.menu.bitcoind_status_action.setText(
-                                f'ETA: {humanized}, {new_progress*100:.2f}% done'
-                            )
+                            if change:
+                                timestamp_change = new_timestamp - self.old_timestamp
+                                total_left = 1 - new_progress
+                                time_left = ((total_left / change)*timestamp_change).seconds
+                                self.timestamp_changes.append(time_left)
+                                if len(self.timestamp_changes) > 100:
+                                    self.timestamp_changes.pop(0)
+                                average_time_left = sum(self.timestamp_changes)/len(self.timestamp_changes)
+                                humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
+                                self.system_tray.menu.bitcoind_status_action.setText(
+                                    f'ETA: {humanized}, {new_progress*100:.2f}% done'
+                                )
                         else:
                             if round(new_progress*100) == 100:
                                 continue
