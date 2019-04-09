@@ -33,7 +33,8 @@ class Bitcoin(object):
         self.running = False
         self.process = None
 
-        if self.file['datadir'] is None:
+        if (not os.path.exists(self.file['datadir'])
+                or self.file['datadir'] is None):
             self.autoconfigure_datadir()
 
         if 'bitcoin.conf' in os.listdir(self.file['datadir']):
