@@ -246,8 +246,10 @@ class Bitcoin(object):
         self.file.file_watcher.blockSignals(True)
         self.file.populate_cache()
         self.file.file_watcher.blockSignals(False)
-        self.zmq_block_port = int(self.file['zmqpubrawblock'].split(':')[-1])
-        self.zmq_tx_port = int(self.file['zmqpubrawtx'].split(':')[-1])
+        if self.file['zmqpubrawblock']:
+            self.zmq_block_port = int(self.file['zmqpubrawblock'].split(':')[-1])
+        if self.file['zmqpubrawtx']:
+            self.zmq_tx_port = int(self.file['zmqpubrawtx'].split(':')[-1])
         # Some text editors do not modify the file, they delete and replace the file
         # Check if file is still in file_watcher list of files, if not add back
         files_watched = self.file.file_watcher.files()
