@@ -9,6 +9,7 @@ from node_launcher.gui.menu.manage_lnd.alias_layout import AliasLayout
 from node_launcher.gui.menu.manage_lnd.lnd_ports_layout import LndPortsLayout
 from node_launcher.gui.menu.manage_lnd.lnd_restart_layout import \
     LndRestartLayout
+from node_launcher.gui.menu.manage_lnd.tls_layout import TlsLayout
 from node_launcher.node_set.lnd import Lnd
 
 
@@ -37,7 +38,6 @@ class LndConfigurationTab(QWidget):
         self.layout.addWidget(
             self.show_lnd_conf,
             same_row=True,
-            column=self.columns
         )
 
         self.ports_layout = LndPortsLayout(lnd=self.lnd)
@@ -45,6 +45,9 @@ class LndConfigurationTab(QWidget):
 
         self.restart_layout = LndRestartLayout(lnd=self.lnd)
         self.layout.addLayout(self.restart_layout)
+
+        self.tls_layout = TlsLayout(lnd=self.lnd)
+        self.layout.addLayout(self.tls_layout)
 
         self.setLayout(self.layout)
 

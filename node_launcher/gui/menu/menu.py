@@ -70,7 +70,7 @@ class Menu(QMenu):
             lambda: webbrowser.open(self.node_set.lnd.lndconnect_url)
         )
         self.show_zap_qrcode_action = self.addAction('Pair Zap Mobile')
-        self.show_zap_qrcode_button.clicked.connect(
+        self.show_zap_qrcode_action.triggered.connect(
             ZapQrcodeLabel(self.node_set.lnd.lndconnect_qrcode).show
         )
 

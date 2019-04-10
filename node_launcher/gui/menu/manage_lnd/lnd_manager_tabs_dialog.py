@@ -1,14 +1,15 @@
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QDialog, QTabWidget, QVBoxLayout
+from PySide2.QtWidgets import QVBoxLayout
 
 from node_launcher.constants import LNCLI_COMMANDS
 from node_launcher.gui.components.console_dialog import ConsoleWidget
+from node_launcher.gui.components.tabs_dialog import TabsDialog
 from node_launcher.gui.menu.manage_lnd.lnd_configuration_tab import \
     LndConfigurationTab
 from .lnd_output_tab import LndOutputTab
 
 
-class LndManagerTabsDialog(QDialog):
+class LndManagerTabsDialog(TabsDialog):
     def __init__(self, lnd, system_tray):
         super().__init__()
 

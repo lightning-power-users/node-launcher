@@ -8,7 +8,7 @@ class TabsDialog(QDialog):
         self.tab_widget = QTabWidget()
 
         self.tab_widget.currentChanged.connect(
-            self.tab_change_event
+            self.tab_changed_event
         )
 
     def tab_changed_event(self, tab_index: int):
