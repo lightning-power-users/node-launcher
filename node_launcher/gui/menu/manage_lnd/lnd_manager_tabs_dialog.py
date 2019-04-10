@@ -41,8 +41,16 @@ class LndManagerTabsDialog(TabsDialog):
 
         self.setWindowTitle('Manage LND')
 
+        self.has_run_help = False
+
     def show(self):
+        if self.lnd.file['alias'] is not None:
+            self.configuration_tab.alias_layout.set_alias(self.lnd.file['alias'])
+
         super().show()
         self.raise_()
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
         self.activateWindow()
+
+        if not self.has_run_help:
+            self.console_tab.run_command('help')

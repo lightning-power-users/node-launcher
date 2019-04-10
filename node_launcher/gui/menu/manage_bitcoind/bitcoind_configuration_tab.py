@@ -8,6 +8,11 @@ from PySide2.QtWidgets import (
 )
 
 from node_launcher.constants import Network
+from node_launcher.gui.components.horizontal_line import HorizontalLine
+from node_launcher.gui.menu.manage_bitcoind.bitcoind_ports_layout import \
+    BitcoindPortsLayout
+from node_launcher.gui.menu.manage_bitcoind.bitcoind_restart_layout import \
+    BitcoindRestartLayout
 from node_launcher.gui.utilities import reveal
 from .data_directories import DataDirectoryBox
 
@@ -38,6 +43,14 @@ class BitcoindConfigurationTab(QWidget):
             lambda x: self.update_config('disablewallet', not bool(x))
         )
         self.layout.addWidget(self.enable_wallet_widget)
+
+        self.layout.addWidget(HorizontalLine())
+
+        self.ports_layout = BitcoindPortsLayout(bitcoin=self.bitcoin)
+        self.layout.addLayout(self.ports_layout)
+
+        self.restart_layout = BitcoindRestartLayout(bitcoin=self.bitcoin)
+        self.layout.addLayout(self.restart_layout)
 
         self.show_bitcoin_conf = QPushButton('Show bitcoin.conf')
         self.show_bitcoin_conf.clicked.connect(
