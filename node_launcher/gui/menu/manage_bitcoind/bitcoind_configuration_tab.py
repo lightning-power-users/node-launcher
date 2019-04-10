@@ -1,9 +1,14 @@
 from PySide2.QtCore import Qt, Signal
-from PySide2.QtWidgets import QWidget, QLabel, QCheckBox, QVBoxLayout, \
-    QPushButton
+from PySide2.QtWidgets import (
+    QCheckBox,
+    QLabel,
+    QPushButton,
+    QVBoxLayout,
+    QWidget
+)
 
-from node_launcher.constants import Network, MAINNET, TESTNET
-from node_launcher.gui.menu.manage_bitcoind.data_directories import DataDirectoryBox
+from node_launcher.constants import Network
+from .data_directories import DataDirectoryBox
 
 from node_launcher.node_set.bitcoin import Bitcoin
 
