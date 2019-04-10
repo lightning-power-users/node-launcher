@@ -31,7 +31,7 @@ class BitcoindManagerTabsDialog(TabsDialog):
         )
         self.tab_widget.addTab(self.output_tab, 'Logs')
 
-        self.configuration_tab = BitcoindConfigurationTab(self.node_set.bitcoin)
+        self.configuration_tab = BitcoindConfigurationTab(self.bitcoin)
         self.tab_widget.addTab(self.configuration_tab, 'Configuration')
 
         self.main_layout = QVBoxLayout()
@@ -44,8 +44,8 @@ class BitcoindManagerTabsDialog(TabsDialog):
         super().show()
 
         self.bitcoin_tab.data_directory_group_box.set_datadir(
-            self.node_set.bitcoin.file['datadir'],
-            self.node_set.bitcoin.file['prune']
+            self.bitcoin.file['datadir'],
+            self.bitcoin.file['prune']
         )
 
         self.raise_()

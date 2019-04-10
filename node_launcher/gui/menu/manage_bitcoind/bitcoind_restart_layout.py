@@ -20,26 +20,18 @@ class RestartLayout(QGridLayout):
         self.section_name = SectionName('Restart Required')
         self.addWidget(self.section_name, column_span=columns)
         self.bitcoin_restart_required = WarningText('Bitcoin: ')
-        self.lnd_restart_required = WarningText('Lnd: ')
         self.addWidget(self.bitcoin_restart_required)
-        self.addWidget(self.lnd_restart_required, same_row=True, column=columns)
         self.bitcoin_restart_required.hide()
-        self.lnd_restart_required.hide()
         self.node_set.bitcoin.file.file_watcher.fileChanged.connect(self.check_restart_required)
-        self.node_set.lnd.file.file_watcher.fileChanged.connect(self.check_restart_required)
         self.timer.start(1000)
         self.timer.timeout.connect(self.check_restart_required)
 
     def check_restart_required(self):
-        restart_required = self.node_set.bitcoin.restart_required or self.node_set.lnd.restart_required
-
+        restart_required = self.node_set.bitcoin.restart_required
         self.bitcoin_restart_required.setText(f'Bitcoin: {self.node_set.bitcoin.restart_required}')
-        self.lnd_restart_required.setText(f'Lnd: {self.node_set.lnd.restart_required}')
         if restart_required:
             self.section_name.show()
             self.bitcoin_restart_required.show()
-            self.lnd_restart_required.show()
         else:
             self.section_name.hide()
             self.bitcoin_restart_required.hide()
-            self.lnd_restart_required.hide()
