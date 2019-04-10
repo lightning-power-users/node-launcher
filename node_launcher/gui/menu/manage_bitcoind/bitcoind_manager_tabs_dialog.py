@@ -40,14 +40,20 @@ class BitcoindManagerTabsDialog(TabsDialog):
 
         self.setWindowTitle('Manage Bitcoin')
 
+        self.has_run_help = False
+
     def show(self):
         super().show()
 
-        self.bitcoin_tab.data_directory_group_box.set_datadir(
+        self.configuration_tab.data_directory_group_box.set_datadir(
             self.bitcoin.file['datadir'],
             self.bitcoin.file['prune']
         )
 
+        self.console_tab.input.setFocus()
         self.raise_()
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
         self.activateWindow()
+
+        if not self.has_run_help:
+            self.console_tab.run_command('help')

@@ -8,6 +8,7 @@ from PySide2.QtWidgets import (
 )
 
 from node_launcher.constants import Network
+from node_launcher.gui.utilities import reveal
 from .data_directories import DataDirectoryBox
 
 from node_launcher.node_set.bitcoin import Bitcoin
@@ -23,18 +24,10 @@ class BitcoindConfigurationTab(QWidget):
 
         self.layout = QVBoxLayout()
 
-        self.show_bitcoin_conf = QPushButton('Show bitcoin.conf')
-        # noinspection PyUnresolvedReferences
-        self.show_bitcoin_conf.clicked.connect(
-            lambda: reveal(self.node_set.bitcoin.file.directory)
-        )
-        self.layout.addWidget(self.show_bitcoin_conf)
-
         self.data_directory_group_box = DataDirectoryBox(bitcoin=self.bitcoin)
         self.data_directory_group_box.file_dialog.new_data_directory.connect(
             self.change_datadir
         )
-
         self.layout.addWidget(self.data_directory_group_box)
         self.layout.setAlignment(self.data_directory_group_box, Qt.AlignHCenter)
 
@@ -45,6 +38,12 @@ class BitcoindConfigurationTab(QWidget):
             lambda x: self.update_config('disablewallet', not bool(x))
         )
         self.layout.addWidget(self.enable_wallet_widget)
+
+        self.show_bitcoin_conf = QPushButton('Show bitcoin.conf')
+        self.show_bitcoin_conf.clicked.connect(
+            lambda: reveal(self.bitcoin.file.directory)
+        )
+        self.layout.addWidget(self.show_bitcoin_conf)
 
         self.setLayout(self.layout)
 
