@@ -16,6 +16,7 @@ from node_launcher.constants import (
     OPERATING_SYSTEM
 )
 from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.node_set.lnd_client import LndClient
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.services.lnd_software import LndSoftware
 from node_launcher.utilities.utilities import get_port
@@ -23,6 +24,7 @@ from node_launcher.utilities.utilities import get_port
 
 class Lnd(object):
     bitcoin: Bitcoin
+    client: LndClient
     file: ConfigurationFile
     software: LndSoftware
     process: QProcess
@@ -94,6 +96,8 @@ class Lnd(object):
         self.process.setCurrentReadChannel(0)
         self.process.setArguments(self.args)
         self.process.start()
+
+        self.client = LndClient(self)
 
     @property
     def args(self):
@@ -267,3 +271,9 @@ class Lnd(object):
     def lndconnect_qrcode(self):
         img = qrcode.make(self.lndconnect_url)
         return img
+
+    def reset_tls(self):
+        os.remove(self.client.tls_cert_path)
+        os.remove(self.client.tls_key_path)
+        self.process.terminate()
+        self.client.reset()

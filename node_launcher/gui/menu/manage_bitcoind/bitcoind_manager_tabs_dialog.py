@@ -1,6 +1,7 @@
 from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QDialog, QTabWidget, QVBoxLayout
+from PySide2.QtWidgets import QVBoxLayout
 
+from node_launcher.gui.components.tabs_dialog import TabsDialog
 from .bitcoind_configuration_tab import BitcoindConfigurationTab
 from .bitcoind_output_tab import BitcoindOutputTab
 from node_launcher.constants import BITCOIN_CLI_COMMANDS
@@ -8,14 +9,12 @@ from node_launcher.gui.components.console_dialog import ConsoleWidget
 from node_launcher.node_set.bitcoin import Bitcoin
 
 
-class BitcoindManagerTabsDialog(QDialog):
+class BitcoindManagerTabsDialog(TabsDialog):
     def __init__(self, bitcoin: Bitcoin, system_tray):
         super().__init__()
 
         self.bitcoin = bitcoin
         self.system_tray = system_tray
-
-        self.tab_widget = QTabWidget()
 
         # bitcoin console
         self.console_tab = ConsoleWidget(

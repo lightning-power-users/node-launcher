@@ -25,7 +25,7 @@ class TlsLayout(QGridLayout):
 
         self.reset_tls = QPushButton('Reset TLS')
         # noinspection PyUnresolvedReferences
-        self.reset_tls.clicked.connect(self.node_set.reset_tls)
+        self.reset_tls.clicked.connect(self.node_set.lnd.reset_tls)
         self.addWidget(self.reset_tls, same_row=True, column=2)
 
     def test_tls_cert(self):

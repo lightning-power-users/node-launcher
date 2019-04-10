@@ -142,12 +142,3 @@ class ConsoleWidget(QWidget):
             command = command.strip().replace(',', '')
             commands.append(command)
         return commands
-
-    def show(self):
-        self.showMaximized()
-        self.raise_()
-        self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
-        self.activateWindow()
-
-        self.input.setFocus()
-        self.run_command('help')
