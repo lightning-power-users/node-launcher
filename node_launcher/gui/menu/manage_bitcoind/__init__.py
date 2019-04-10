@@ -1,0 +1,1 @@
+from .bitcoind_manager_tabs_dialog import BitcoindManagerTabsDialog

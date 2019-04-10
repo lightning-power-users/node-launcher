@@ -1,9 +1,11 @@
+from typing import List
+import base64
 import os
 import socket
 import ssl
-from typing import List
 
 from PySide2.QtCore import QProcess
+import qrcode
 
 from node_launcher.constants import (
     IS_WINDOWS,
@@ -84,7 +86,8 @@ class Lnd(object):
         )
         self.config_snapshot = self.file.snapshot.copy()
         self.file.file_watcher.fileChanged.connect(self.config_file_changed)
-        self.bitcoin.file.file_watcher.fileChanged.connect(self.bitcoin_config_file_changed)
+        self.bitcoin.file.file_watcher.fileChanged.connect(
+            self.bitcoin_config_file_changed)
 
         self.process = QProcess()
         self.process.setProgram(self.software.lnd)
@@ -208,7 +211,8 @@ class Lnd(object):
         self.file['bitcoind.rpchost'] = f'127.0.0.1:{self.bitcoin.rpc_port}'
         self.file['bitcoind.rpcuser'] = self.bitcoin.file['rpcuser']
         self.file['bitcoind.rpcpass'] = self.bitcoin.file['rpcpassword']
-        self.file['bitcoind.zmqpubrawblock'] = self.bitcoin.file['zmqpubrawblock']
+        self.file['bitcoind.zmqpubrawblock'] = self.bitcoin.file[
+            'zmqpubrawblock']
         self.file['bitcoind.zmqpubrawtx'] = self.bitcoin.file['zmqpubrawtx']
 
     @property
@@ -238,3 +242,28 @@ class Lnd(object):
                         return True
 
         return False
+
+    @staticmethod
+    def base64URL_from_base64(s):
+        return s.replace('+', '-').replace('/', '_').rstrip('=')
+
+    @property
+    def lndconnect_url(self):
+        host = self.grpc_url.split(':')[0]
+        port = self.grpc_url.split(':')[1]
+        with open(self.tls_cert_path, 'r') as cert_file:
+            lines = cert_file.read().split('\n')
+            lines = [line for line in lines if line != '']
+            cert = ''.join(lines[1:-1])
+            cert = self.base64URL_from_base64(cert)
+
+        with open(self.admin_macaroon_path, 'rb') as macaroon_file:
+            macaroon = base64.b64encode(macaroon_file.read()).decode('ascii')
+            macaroon = self.base64URL_from_base64(macaroon)
+
+        return f'lndconnect://{host}:{port}?cert={cert}&macaroon={macaroon}'
+
+    @property
+    def lndconnect_qrcode(self):
+        img = qrcode.make(self.lndconnect_url)
+        return img
