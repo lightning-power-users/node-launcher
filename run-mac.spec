@@ -1,4 +1,5 @@
 # -*- mode: python -*-
+from PyInstaller.utils.hooks import collect_data_files
 
 block_cipher = None
 
@@ -8,7 +9,8 @@ a = Analysis(
     binaries=[],
     datas=[
         ('node_launcher/assets/*.png', 'assets')
-    ],
+    ] + collect_data_files('shiboken2', include_py_files=True, subdir='support')
+    + collect_data_files('PySide2', include_py_files=True, subdir='support'),
     hiddenimports=['setuptools'],
     hookspath=[],
     runtime_hooks=[],
