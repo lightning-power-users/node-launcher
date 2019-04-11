@@ -61,7 +61,7 @@ class Application(QApplication):
                           and latest_bugfix > bugfix)
 
         if major_upgrade or minor_upgrade or bugfix_upgrade:
-            message_box = QMessageBox(self)
+            message_box = QMessageBox()
             message_box.setTextFormat(Qt.RichText)
             message_box.setText(UPGRADE)
             message_box.setInformativeText(
