@@ -18,7 +18,7 @@ def reveal(path: str):
         elif IS_WINDOWS:
             subprocess.call(f'explorer "{Path(path)}"', shell=True)
         elif IS_LINUX:
-            subprocess.call(["xdg-open",path])
+            subprocess.call(["xdg-open", path])
         else:
             raise NotImplementedError(f'reveal method has not been implemented for {OPERATING_SYSTEM}')
     except (FileNotFoundError, NotADirectoryError):
