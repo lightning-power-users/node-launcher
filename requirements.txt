@@ -11,12 +11,12 @@ protobuf
 psutil
 pygments
 pyinstaller
-PySide2
+PySide2<=5.12.0
 PyTest
 pytest-qt
 qrcode
 requests
-shiboken2
+shiboken2<=5.12.0
 structlog
 webassets
 wtforms
