@@ -9,6 +9,7 @@ from PySide2.QtWidgets import (
 
 from node_launcher.constants import Network
 from node_launcher.gui.components.horizontal_line import HorizontalLine
+from node_launcher.gui.components.selectable_text import SelectableText
 from node_launcher.gui.menu.manage_bitcoind.bitcoind_ports_layout import \
     BitcoindPortsLayout
 from node_launcher.gui.menu.manage_bitcoind.bitcoind_restart_layout import \
@@ -28,6 +29,12 @@ class BitcoindConfigurationTab(QWidget):
         self.bitcoin = bitcoin
 
         self.layout = QVBoxLayout()
+
+        self.bitcoin_version = SelectableText(
+            f'Bitcoin Core '
+            f'version {self.bitcoin.software.release_version}'
+        )
+        self.layout.addWidget(self.bitcoin_version)
 
         self.data_directory_group_box = DataDirectoryBox(bitcoin=self.bitcoin)
         self.data_directory_group_box.file_dialog.new_data_directory.connect(

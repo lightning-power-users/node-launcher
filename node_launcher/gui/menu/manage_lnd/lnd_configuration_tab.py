@@ -6,11 +6,13 @@ from PySide2.QtWidgets import (
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
+from node_launcher.gui.components.selectable_text import SelectableText
 from node_launcher.gui.menu.manage_lnd.alias_layout import AliasLayout
 from node_launcher.gui.menu.manage_lnd.lnd_ports_layout import LndPortsLayout
 from node_launcher.gui.menu.manage_lnd.lnd_restart_layout import \
     LndRestartLayout
 from node_launcher.gui.menu.manage_lnd.tls_layout import TlsLayout
+from node_launcher.gui.utilities import reveal
 from node_launcher.node_set.lnd import Lnd
 
 
@@ -19,6 +21,12 @@ class LndConfigurationTab(QWidget):
         super().__init__()
         self.lnd = lnd
         self.layout = QGridLayout()
+
+        self.lnd_version = SelectableText(
+            f'LND '
+            f'version {self.lnd.software.release_version}'
+        )
+        self.layout.addWidget(self.lnd_version)
 
         self.alias_layout = AliasLayout()
         color = self.lnd.file['color']
@@ -45,7 +53,6 @@ class LndConfigurationTab(QWidget):
         self.layout.addLayout(self.tls_layout)
 
         self.show_lnd_conf = QPushButton('Show lnd.conf')
-        # noinspection PyUnresolvedReferences
         self.show_lnd_conf.clicked.connect(
             lambda: reveal(self.lnd.file.directory)
         )

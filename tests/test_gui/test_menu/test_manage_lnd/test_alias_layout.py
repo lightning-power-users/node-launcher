@@ -1,6 +1,6 @@
 import pytest
 
-from node_launcher.gui.menu import AliasLayout
+from node_launcher.gui.menu.manage_lnd.alias_layout import AliasLayout
 
 
 @pytest.fixture

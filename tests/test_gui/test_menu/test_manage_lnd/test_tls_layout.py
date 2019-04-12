@@ -4,13 +4,13 @@ import pytest
 from PySide2.QtCore import Qt
 from PySide2.QtTest import QTest
 
-from node_launcher.gui.menu import TlsLayout
+from node_launcher.gui.menu.manage_lnd import TlsLayout
 
 
 @pytest.fixture
 def tls_layout():
-    node_set = MagicMock()
-    tls_layout = TlsLayout(node_set)
+    lnd = MagicMock()
+    tls_layout = TlsLayout(lnd)
     return tls_layout
 
 
@@ -19,4 +19,4 @@ class TestTlsLayout(object):
                        tls_layout: TlsLayout,
                        qtbot: QTest):
         qtbot.mouseClick(tls_layout.reset_tls, Qt.LeftButton)
-        tls_layout.node_set.reset_tls.assert_called_once()
+        tls_layout.lnd.reset_tls.assert_called_once()

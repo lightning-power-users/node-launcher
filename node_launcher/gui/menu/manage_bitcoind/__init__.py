@@ -1,1 +1,5 @@
+from .bitcoind_configuration_tab import BitcoindConfigurationTab
 from .bitcoind_manager_tabs_dialog import BitcoindManagerTabsDialog
+from .bitcoind_output_tab import BitcoindOutputTab
+from .bitcoind_ports_layout import BitcoindPortsLayout
+from .bitcoind_restart_layout import BitcoindRestartLayout
