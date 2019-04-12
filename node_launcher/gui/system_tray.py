@@ -28,3 +28,11 @@ class SystemTray(QSystemTrayIcon):
 
     def set_green(self):
         self.set_icon('green')
+
+    def show_message(self,
+                     title: str,
+                     message: str = '',
+                     icon=QSystemTrayIcon.Information,
+                     timeout: int = 10):
+        milliseconds_timeout_hint = timeout * 1000
+        self.showMessage(title, message, icon, milliseconds_timeout_hint)

@@ -26,9 +26,9 @@ class Application(QApplication):
 
         self.system_tray.show()
 
-        self.system_tray.showMessage(
-            'Nodes starting...',
-            'Bitcoin and Lightning are syncing'
+        self.system_tray.show_message(
+            title='Nodes starting...',
+            message='Bitcoin and Lightning are syncing'
         )
 
         self.node_set.bitcoin.file.file_watcher.fileChanged.connect(self.check_restart_required)
@@ -77,16 +77,16 @@ class Application(QApplication):
 
     @Slot()
     def quit_app(self):
-        self.system_tray.showMessage('Stopping LND...', '')
+        self.system_tray.show_message(title='Stopping LND...')
 
         self.node_set.lnd.process.terminate()
         self.node_set.lnd.process.waitForFinished(2000)
         self.node_set.lnd.process.kill()
 
-        self.system_tray.showMessage('Stopping bitcoind...', '')
+        self.system_tray.show_message(title='Stopping bitcoind...')
         self.node_set.bitcoin.process.terminate()
         self.node_set.bitcoin.process.waitForFinished(20000)
         self.node_set.bitcoin.process.kill()
 
-        self.system_tray.showMessage('Exiting Node Launcher', '')
+        self.system_tray.show_message(title='Exiting Node Launcher', timeout=1)
         QCoreApplication.exit(0)
