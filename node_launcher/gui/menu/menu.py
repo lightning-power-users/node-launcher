@@ -1,6 +1,6 @@
 import webbrowser
 
-from PySide2.QtCore import QCoreApplication
+from PySide2.QtCore import QCoreApplication, QTimer
 from PySide2.QtGui import QClipboard
 from PySide2.QtWidgets import QMenu
 
@@ -29,6 +29,11 @@ class Menu(QMenu):
         self.bitcoin_manage_action = self.addAction('Manage Bitcoind')
         self.bitcoin_manage_action.triggered.connect(
             self.bitcoind_manager_tabs_dialog.show
+        )
+
+        QTimer.singleShot(500, self.node_set.bitcoin.process.start)
+        self.bitcoind_manager_tabs_dialog.output_tab.bitcoind_synced.connect(
+            self.node_set.lnd.process.start
         )
 
         self.addSeparator()

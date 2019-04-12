@@ -106,7 +106,6 @@ class Bitcoin(object):
         self.process.setProgram(self.software.bitcoind)
         self.process.setCurrentReadChannel(0)
         self.process.setArguments(self.args)
-        self.process.start()
 
     @property
     def network(self):

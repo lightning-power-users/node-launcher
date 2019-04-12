@@ -29,7 +29,6 @@ class LndOutputTab(OutputWidget):
 
         self.old_height = None
         self.old_timestamp = None
-        self.process.finished.connect(self.restart_process)
 
     def process_output_line(self, line: str):
         if 'Active chain: Bitcoin' in line:
@@ -43,8 +42,10 @@ class LndOutputTab(OutputWidget):
             QTimer.singleShot(100, self.auto_unlock_wallet)
         elif 'Unable to synchronize wallet to chain' in line:
             self.process.terminate()
+            self.restart_process()
         elif 'Unable to complete chain rescan' in line:
             self.process.terminate()
+            self.restart_process()
         elif 'Starting HTLC Switch' in line:
             self.system_tray.set_green()
             self.system_tray.menu.lnd_status_action.setText(

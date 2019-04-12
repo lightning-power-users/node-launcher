@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import humanize
-from PySide2.QtCore import QProcess, QThreadPool
+from PySide2.QtCore import QProcess, QThreadPool, Signal
 
 from node_launcher.gui.components.output_widget import OutputWidget
 
@@ -11,6 +11,8 @@ from node_launcher.node_set.bitcoin import Bitcoin
 class BitcoindOutputTab(OutputWidget):
     bitcoin: Bitcoin
     process: QProcess
+
+    bitcoind_synced = Signal(bool)
 
     def __init__(self, bitcoin: Bitcoin, system_tray):
         super().__init__()
@@ -38,6 +40,7 @@ class BitcoindOutputTab(OutputWidget):
             self.system_tray.menu.bitcoind_status_action.setText(
                 'Bitcoin synced'
             )
+            self.bitcoind_synced.emit(True)
         elif 'Shutdown: done' in line:
             self.system_tray.menu.bitcoind_status_action.setText(
                 'Error, please check Bitcoin Output'

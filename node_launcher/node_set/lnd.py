@@ -95,7 +95,6 @@ class Lnd(object):
         self.process.setProgram(self.software.lnd)
         self.process.setCurrentReadChannel(0)
         self.process.setArguments(self.args)
-        self.process.start()
 
         self.client = LndClient(self)
 
