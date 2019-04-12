@@ -254,17 +254,8 @@ class Lnd(object):
     def lndconnect_url(self):
         host = self.grpc_url.split(':')[0]
         port = self.grpc_url.split(':')[1]
-        with open(self.tls_cert_path, 'r') as cert_file:
-            lines = cert_file.read().split('\n')
-            lines = [line for line in lines if line != '']
-            cert = ''.join(lines[1:-1])
-            cert = self.base64URL_from_base64(cert)
-
-        with open(self.admin_macaroon_path, 'rb') as macaroon_file:
-            macaroon = base64.b64encode(macaroon_file.read()).decode('ascii')
-            macaroon = self.base64URL_from_base64(macaroon)
-
-        return f'lndconnect://{host}:{port}?cert={cert}&macaroon={macaroon}'
+        return f'lndconnect://{host}:{port}' \
+            f'?cert={self.tls_cert_path}&macaroon={self.admin_macaroon_path}'
 
     @property
     def lndconnect_qrcode(self):
