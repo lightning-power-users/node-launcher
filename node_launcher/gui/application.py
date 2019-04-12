@@ -77,16 +77,14 @@ class Application(QApplication):
 
     @Slot()
     def quit_app(self):
-        self.system_tray.show_message(title='Stopping LND...')
+        self.system_tray.show_message(title='Stopping LND and bitcoind...')
 
         self.node_set.lnd.process.terminate()
-        self.node_set.lnd.process.waitForFinished(2000)
-        self.node_set.lnd.process.kill()
-
-        self.system_tray.show_message(title='Stopping bitcoind...')
         self.node_set.bitcoin.process.terminate()
-        self.node_set.bitcoin.process.waitForFinished(20000)
-        self.node_set.bitcoin.process.kill()
+
+        self.node_set.lnd.process.waitForFinished(-1)
+        self.node_set.bitcoin.process.waitForFinished(-1)
 
         self.system_tray.show_message(title='Exiting Node Launcher', timeout=1)
+
         QCoreApplication.exit(0)
