@@ -43,7 +43,7 @@ class BitcoindManagerTabsDialog(TabsDialog):
         self.has_run_help = False
 
     def show(self):
-        super().show()
+        super().showMaximized()
 
         self.configuration_tab.data_directory_group_box.set_datadir(
             self.bitcoin.file['datadir'],
@@ -54,6 +54,5 @@ class BitcoindManagerTabsDialog(TabsDialog):
         self.raise_()
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
         self.activateWindow()
-
         if not self.has_run_help:
             self.console_tab.run_command('help')
