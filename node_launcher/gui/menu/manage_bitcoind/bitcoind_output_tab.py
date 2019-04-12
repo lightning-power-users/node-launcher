@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 
 import humanize
 from PySide2.QtCore import QProcess, QThreadPool, Signal
+from PySide2.QtWidgets import QSystemTrayIcon
 
 from node_launcher.gui.components.output_widget import OutputWidget
 
@@ -43,8 +44,14 @@ class BitcoindOutputTab(OutputWidget):
             self.bitcoind_synced.emit(True)
         elif 'Shutdown: done' in line:
             self.system_tray.menu.bitcoind_status_action.setText(
-                'Error, please check Bitcoin Output'
+                'Error: please check Bitcoin Output'
             )
+            self.system_tray.show_message(
+                title='Bitcoin Error',
+                message='Please check Bitcoin Output',
+                icon=QSystemTrayIcon.Critical
+            )
+
         elif 'UpdateTip' in line:
             line_segments = line.split(' ')
             timestamp = line_segments[0]
@@ -79,3 +86,12 @@ class BitcoindOutputTab(OutputWidget):
 
                         self.old_progress = new_progress
                         self.old_timestamp = new_timestamp
+        elif 'Bitcoin Core is probably already running' in line:
+            self.system_tray.menu.bitcoind_status_action.setText(
+                'Error: Bitcoin Core is already running'
+            )
+            self.system_tray.show_message(
+                title='Bitcoin Error',
+                message='Bitcoin Core is already running',
+                icon=QSystemTrayIcon.Critical
+            )
