@@ -33,22 +33,24 @@ class Bitcoin(object):
         self.running = False
         self.process = None
 
-        try:
-            if not os.path.exists(self.file['datadir']) or self.file['datadir'] is None:
-                self.autoconfigure_datadir()
-        except TypeError:
+        log.debug('datadir', datadir=self.file['datadir'])
+
+        if (self.file['datadir'] is None
+                or not os.path.exists(self.file['datadir'])):
             self.autoconfigure_datadir()
 
         if 'bitcoin.conf' in os.listdir(self.file['datadir']):
             actual_conf_file = os.path.join(self.file['datadir'], 'bitcoin.conf')
-            log.info(
-                'datadir_redirect',
-                configuration_file_path=configuration_file_path,
-                actual_conf_file=actual_conf_file
-            )
-            self.file = ConfigurationFile(actual_conf_file)
-            if self.file['datadir'] is None:
-                self.autoconfigure_datadir()
+            if configuration_file_path != actual_conf_file:
+                log.info(
+                    'datadir_redirect',
+                    configuration_file_path=configuration_file_path,
+                    actual_conf_file=actual_conf_file
+                )
+                self.file = ConfigurationFile(actual_conf_file)
+                if (self.file['datadir'] is None
+                        or not os.path.exists(self.file['datadir'])):
+                    self.autoconfigure_datadir()
 
         if os.path.exists(os.path.join(self.file['datadir'], 'blocks')):
             if self.file['prune'] is None:
@@ -74,7 +76,8 @@ class Bitcoin(object):
             self.file['rpcpassword'] = get_random_password()
 
         if self.file['prune'] is None:
-            should_prune = self.hard_drives.should_prune(self.file['datadir'], has_bitcoin=True)
+            should_prune = self.hard_drives.should_prune(self.file['datadir'],
+                                                         has_bitcoin=True)
             self.set_prune(should_prune)
 
         self.zmq_block_port = get_zmq_port()
