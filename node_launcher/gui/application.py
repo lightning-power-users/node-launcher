@@ -1,8 +1,9 @@
 from PySide2 import QtCore
-from PySide2.QtCore import QCoreApplication, Slot, QTimer, Qt
+from PySide2.QtCore import QCoreApplication, Slot, QTimer, Qt, QThreadPool
 from PySide2.QtWidgets import QApplication, QWidget, QMessageBox
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
+from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.system_tray import SystemTray
 from node_launcher.node_set import NodeSet
 from node_launcher.services.launcher_software import LauncherSoftware
@@ -36,7 +37,10 @@ class Application(QApplication):
         self.timer = QTimer(self)
         self.timer.start(1000)
         self.timer.timeout.connect(self.check_restart_required)
-        self.timer.singleShot(1000, self.check_version)
+
+        self.threadpool = QThreadPool()
+        worker = Worker(fn=self.check_version)
+        self.threadpool.start(worker)
 
     def check_restart_required(self):
         if self.node_set.bitcoin.restart_required or self.node_set.lnd.restart_required:
@@ -44,7 +48,8 @@ class Application(QApplication):
         else:
             pass
 
-    def check_version(self):
+    @staticmethod
+    def check_version(progress_callback):
         latest_version = LauncherSoftware().get_latest_release_version()
         if latest_version is None:
             return
@@ -72,10 +77,16 @@ class Application(QApplication):
 
     @Slot()
     def quit_app(self):
+        self.system_tray.showMessage('Stopping LND...', '')
+
         self.node_set.lnd.process.terminate()
         self.node_set.lnd.process.waitForFinished(2000)
+        self.node_set.lnd.process.kill()
+
+        self.system_tray.showMessage('Stopping bitcoind...', '')
         self.node_set.bitcoin.process.terminate()
         self.node_set.bitcoin.process.waitForFinished(20000)
         self.node_set.bitcoin.process.kill()
 
+        self.system_tray.showMessage('Exiting Node Launcher', '')
         QCoreApplication.exit(0)

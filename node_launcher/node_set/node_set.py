@@ -8,11 +8,9 @@ from node_launcher.constants import (
     LND_DIR_PATH,
     OPERATING_SYSTEM,
 )
-from node_launcher.node_set.lnd_client import LndClient
 
 
 class NodeSet(object):
-    lnd_client: LndClient
     bitcoin: Bitcoin
     lnd: Lnd
 
@@ -40,7 +38,6 @@ class NodeSet(object):
             configuration_file_path=self.lnd_configuration_file_path,
             bitcoin=self.bitcoin
         )
-        self.lnd_client = LndClient(self.lnd)
 
     @property
     def is_testnet(self) -> bool:
@@ -49,13 +46,3 @@ class NodeSet(object):
     @property
     def is_mainnet(self) -> bool:
         return not self.bitcoin.file['testnet']
-
-    def reset_tls(self):
-        was_running = self.lnd.running
-        if was_running:
-            self.lnd.stop()
-        os.remove(self.lnd_client.tls_cert_path)
-        os.remove(self.lnd_client.tls_key_path)
-        if was_running:
-            self.lnd.launch()
-        self.lnd_client.reset()
