@@ -4,8 +4,7 @@ from PySide2 import QtWidgets
 from PySide2.QtGui import QPixmap
 from PySide2.QtWidgets import QLabel
 
-from node_launcher.services.lndconnect import get_deprecated_lndconnect_url, \
-    get_qrcode_img
+from node_launcher.services.lndconnect import get_qrcode_img, get_lndconnect_url
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
@@ -45,7 +44,7 @@ class ZapLayout(QGridLayout):
 
     def open_zap_desktop(self):
         # This should soon be replaced with using the get_lndconnect_url method
-        old_lndconnect_url = get_deprecated_lndconnect_url(
+        old_lndconnect_url = get_lndconnect_url(
             self.node_set.lnd.grpc_url.split(':')[0],
             self.node_set.lnd.grpc_url.split(':')[1],
             self.node_set.lnd.tls_cert_path,
