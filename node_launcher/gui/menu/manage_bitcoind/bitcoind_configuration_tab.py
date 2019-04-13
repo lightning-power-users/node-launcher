@@ -3,17 +3,14 @@ from PySide2.QtWidgets import (
     QCheckBox,
     QLabel,
     QPushButton,
-    QVBoxLayout,
     QWidget
 )
 
-from node_launcher.constants import Network
+from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.selectable_text import SelectableText
-from node_launcher.gui.menu.manage_bitcoind.bitcoind_ports_layout import \
-    BitcoindPortsLayout
-from node_launcher.gui.menu.manage_bitcoind.bitcoind_restart_layout import \
-    BitcoindRestartLayout
+from .bitcoind_ports_layout import BitcoindPortsLayout
+from .bitcoind_restart_layout import BitcoindRestartLayout
 from node_launcher.gui.utilities import reveal
 from .data_directories import DataDirectoryBox
 
@@ -21,14 +18,12 @@ from node_launcher.node_set.bitcoin import Bitcoin
 
 
 class BitcoindConfigurationTab(QWidget):
-    change_network = Signal(Network)
-
     def __init__(self, bitcoin: Bitcoin):
         super().__init__()
 
         self.bitcoin = bitcoin
 
-        self.layout = QVBoxLayout()
+        self.layout = QGridLayout()
 
         self.bitcoin_version = SelectableText(
             f'Bitcoin Core '
@@ -47,7 +42,7 @@ class BitcoindConfigurationTab(QWidget):
         self.enable_wallet_widget = QCheckBox('Enable Wallet')
         self.enable_wallet_widget.setChecked(not self.bitcoin.file['disablewallet'])
         self.enable_wallet_widget.stateChanged.connect(
-            lambda x: self.update_config('disablewallet', not bool(x))
+            lambda x: self.set_conf_value('disablewallet', not bool(x))
         )
         self.layout.addWidget(self.enable_wallet_widget)
 
@@ -81,3 +76,6 @@ class BitcoindConfigurationTab(QWidget):
             widget.setChecked(False)
             return
         widget.setChecked(state)
+
+    def set_conf_value(self, key: str, new_value):
+        self.bitcoin.file[key] = new_value

@@ -47,7 +47,7 @@ class LndManagerTabsDialog(TabsDialog):
         if self.lnd.file['alias'] is not None:
             self.configuration_tab.alias_layout.set_alias(self.lnd.file['alias'])
 
-        super().show()
+        super().showMaximized()
         self.raise_()
         self.setWindowState(self.windowState() & ~Qt.WindowMinimized | Qt.WindowActive)
         self.activateWindow()
