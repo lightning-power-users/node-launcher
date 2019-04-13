@@ -22,7 +22,7 @@ from subprocess import call, Popen, PIPE
 def downloadtor():
     print('Downloading Tor...')
     if IS_WINDOWS:
-        url = 'http://www.torproject.org/dist/torbrowser/8.0.6/tor-win32-0.3.5.7.zip'
+        url = 'http://www.torproject.org/dist/torbrowser/8.0.8/tor-win32-0.3.5.7.zip'
         f = urllib.request.urlopen(url)
         file = f.read()
         f.close()
@@ -30,8 +30,13 @@ def downloadtor():
         f2.write(file)
         f2.close()
     elif IS_MACOS:
-        url = 'https://www.torproject.org/dist/torbrowser/8.0.6/TorBrowser-8.0.6-osx64_en-US.dmg'
-        urllib.request.urlopen(url)
+        url = 'https://www.torproject.org/dist/torbrowser/8.0.8/TorBrowser-8.0.8-osx64_en-US.dmg'
+        f = urllib.request.urlopen(url)
+        file = f.read()
+        f.close()
+        f2 = open(expanduser('~/Downloads/TorBrowser-8.0.8-osx64_en-US.dmg'), 'wb')
+        f2.write(file)
+        f2.close()
 
 def deb_install():
 
@@ -102,7 +107,7 @@ def installtor():
         bash_torpath = expanduser('~/Library/Application\ Support/Tor/')
         if not os.path.exists(torpath):
             os.makedirs(torpath)
-        bashcommand_attach = 'hdiutil attach ~/Downloads/TorBrowser-8.0.6-osx64_en-US.dmg'
+        bashcommand_attach = 'hdiutil attach ~/Downloads/TorBrowser-8.0.8-osx64_en-US.dmg'
         bashcommand_detach = 'hdiutil detach /Volumes/Tor\ Browser'
         cp = ["cp -R /Volumes/Tor\ Browser/Tor\ Browser.app ", str(bash_torpath)]
         bashcommand_cp =  ""
@@ -139,11 +144,11 @@ def runtor():
 
 
 
-def run_tor(self):
+def run_tor():
 
     if IS_MACOS:
-        path= expanduser('~/node-launcher/node_launcher/node_set/setup_tor.py')
-        command = expanduser('~/node-launcher/venv/bin/python ')
+        path = expanduser('~/src/node-launcher/node_launcher/node_set/setup_tor.py')
+        command = expanduser('~/src/node-launcher/venv/bin/python ')
         cmd = command + path
         with NamedTemporaryFile(suffix='-tor.command', delete=False) as f:
             f.write(f'#!/bin/sh\n{cmd}\n'.encode('utf-8'))
@@ -176,7 +181,7 @@ def run_tor(self):
 
 def launch():
     if IS_MACOS or IS_WINDOWS:
-        downloadtor()
+        # downloadtor()
         installtor()
         runtor()
 
