@@ -21,7 +21,6 @@ class LndOutputTab(OutputWidget):
         self.lnd = lnd
 
         self.process = lnd.process
-        self.process.readyReadStandardError.connect(self.handle_error)
         self.process.readyReadStandardOutput.connect(self.handle_output)
         self.setWindowTitle('LND Output')
 

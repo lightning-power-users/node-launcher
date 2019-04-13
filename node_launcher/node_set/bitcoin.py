@@ -104,7 +104,7 @@ class Bitcoin(object):
 
         self.process = QProcess()
         self.process.setProgram(self.software.bitcoind)
-        self.process.setCurrentReadChannel(0)
+        self.process.setProcessChannelMode(QProcess.MergedChannels)
         self.process.setArguments(self.args)
 
     @property
