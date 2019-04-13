@@ -20,7 +20,7 @@ class ConfigurationFile(dict):
                 'Creating directory',
                 path=parent
             )
-            os.mkdir(parent)
+            os.makedirs(parent)
         if not isfile(self.path):
             log.info(
                 'Creating file',
