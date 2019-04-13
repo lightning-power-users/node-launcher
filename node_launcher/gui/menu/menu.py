@@ -4,7 +4,7 @@ from PySide2.QtCore import QCoreApplication, QTimer
 from PySide2.QtGui import QClipboard
 from PySide2.QtWidgets import QMenu
 
-from node_launcher.node_set.setup_tor import run_tor
+from node_launcher.services.setup_tor import run_tor
 from .manage_lnd.lnd_manager_tabs_dialog import LndManagerTabsDialog
 from .manage_lnd.zap_qrcode_label import ZapQrcodeLabel
 from .manage_bitcoind import BitcoindManagerTabsDialog

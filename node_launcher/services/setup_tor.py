@@ -182,7 +182,7 @@ def run_tor():
 def launch():
     if IS_MACOS or IS_WINDOWS:
         # downloadtor()
-        installtor()
+        # installtor()
         runtor()
 
     elif IS_LINUX:
