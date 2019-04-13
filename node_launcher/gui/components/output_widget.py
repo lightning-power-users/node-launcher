@@ -1,6 +1,7 @@
 from PySide2.QtCore import QByteArray, QProcess
 from PySide2.QtWidgets import QGridLayout, QTextEdit, QWidget
 
+from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
 
 
@@ -21,11 +22,10 @@ class OutputWidget(QWidget):
     def handle_output(self):
         while self.process.canReadLine():
             line_bytes: QByteArray = self.process.readLine()
-            line_str = line_bytes.data().decode('utf-8').strip()
+            try:
+                line_str = line_bytes.data().decode('utf-8').strip()
+            except UnicodeDecodeError:
+                log.error('handle_output decode error', exc_info=True)
+                continue
             self.output.append(line_str)
             self.process_output_line(line_str)
-
-    def handle_error(self):
-        output: QByteArray = self.process.readAllStandardError()
-        message = output.data().decode('utf-8').strip()
-        self.output.append(message)

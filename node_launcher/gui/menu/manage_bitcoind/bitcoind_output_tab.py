@@ -20,7 +20,6 @@ class BitcoindOutputTab(OutputWidget):
         self.system_tray = system_tray
         self.process = bitcoin.process
 
-        self.process.readyReadStandardError.connect(self.handle_error)
         self.process.readyReadStandardOutput.connect(self.handle_output)
 
         self.setWindowTitle('Bitcoind Output')
