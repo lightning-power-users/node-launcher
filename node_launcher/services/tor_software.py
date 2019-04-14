@@ -63,7 +63,7 @@ class TorSoftware(SoftwareABC):
     @property
     def download_url(self) -> str:
         return f'http://www.torproject.org/dist/torbrowser/' \
-            f'{self.release_version}/{self.download_name}'
+            f'{self.release_version}/{self.download_compressed_name}'
 
     @property
     def uncompressed_directory_name(self) -> str:
@@ -76,13 +76,13 @@ class TorSoftware(SoftwareABC):
                                 'Tor Browser.app', 'Contents',
                                 'MacOS', 'Tor')
         elif IS_WINDOWS:
-            return os.path.join(self.binary_directory_path, 'tor.exe')
+            return os.path.join(self.binary_directory_path, 'Tor')
         return
 
     def extract(self):
         if IS_WINDOWS:
             with zipfile.ZipFile(self.download_compressed_path) as zip_file:
-                zip_file.extractall(path=self.downloads_directory_path)
+                zip_file.extractall(path=self.binary_directory_path)
         elif IS_MACOS:
             # TODO see if this below is covered by `torpath` variable
             tor_path = str(TOR_PATH[OPERATING_SYSTEM])
