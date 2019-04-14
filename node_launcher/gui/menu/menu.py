@@ -30,7 +30,8 @@ class Menu(QMenu):
             self.bitcoind_manager_tabs_dialog.show
         )
 
-        QTimer.singleShot(500, self.node_set.bitcoin.process.start)
+        self.node_set.tor.process.start()
+        QTimer.singleShot(1000, self.node_set.bitcoin.process.start)
         self.bitcoind_manager_tabs_dialog.output_tab.bitcoind_synced.connect(
             self.node_set.lnd.process.start
         )

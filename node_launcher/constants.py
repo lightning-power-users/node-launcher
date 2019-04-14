@@ -5,6 +5,8 @@ from typing import Dict
 
 NODE_LAUNCHER_RELEASE = '.'.join(map(str, (6, 1, 0)))
 
+TARGET_TOR_RELEASE = '8.0.8'
+TARGET_WINDOWS_TOR_VERSION = '0.3.5.8'
 TARGET_BITCOIN_RELEASE = 'v0.17.1'
 TARGET_LND_RELEASE = 'v0.6-beta-rc4'
 
@@ -77,6 +79,22 @@ BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Bitcoin/'),
     LINUX: expanduser('~/.bitcoin'),
     WINDOWS: os.path.join(APPDATA, 'Bitcoin')
+}
+
+TOR_DIR_PATH: Dict[OperatingSystem, str] = {
+    DARWIN: '/var/tmp/dist/tor/etc/tor/',
+    LINUX: expanduser('~/tor/etc/tor/'),  # should be '/etc/tor', permissions issue
+    WINDOWS: os.path.join(APPDATA, 'tor'),
+}
+
+TOR_PATH: Dict[OperatingSystem, str] = {
+    WINDOWS: os.path.join(LOCALAPPDATA, 'tor'),
+    DARWIN: expanduser('~/Library/Application Support/Tor')
+}
+
+TOR_EXE_PATH: Dict[OperatingSystem, str] = {
+    WINDOWS: os.path.join(LOCALAPPDATA, r'tor\tor\tor.exe'),
+    DARWIN: expanduser('~/Library/Application Support/Tor/Tor Browser.app/Contents/MacOS/Tor/tor.real')
 }
 
 UPGRADE = 'Please download the latest version of the Node Launcher: ' \

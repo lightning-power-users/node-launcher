@@ -81,9 +81,11 @@ class Application(QApplication):
 
         self.node_set.lnd.process.terminate()
         self.node_set.bitcoin.process.terminate()
+        self.node_set.tor.process.terminate()
 
         self.node_set.lnd.process.waitForFinished(-1)
         self.node_set.bitcoin.process.waitForFinished(-1)
+        self.node_set.tor.process.waitForFinished(-1)
 
         self.system_tray.show_message(title='Exiting Node Launcher', timeout=1)
 
