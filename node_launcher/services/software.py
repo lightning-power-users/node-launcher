@@ -9,7 +9,7 @@ import requests
 from node_launcher.constants import NODE_LAUNCHER_DATA_PATH, OPERATING_SYSTEM, IS_WINDOWS
 
 
-class NodeSoftwareABC(ABC):
+class SoftwareABC(ABC):
     def __init__(self, override_directory: str = None):
         self.override_directory = override_directory
         self.release_version = None
@@ -130,7 +130,7 @@ class NodeSoftwareABC(ABC):
         return release['tag_name']
 
 
-class NodeSoftware(NodeSoftwareABC):
+class Software(SoftwareABC):
 
     @property
     def uncompressed_directory_name(self) -> str:

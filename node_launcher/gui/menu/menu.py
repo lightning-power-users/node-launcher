@@ -4,7 +4,6 @@ from PySide2.QtCore import QCoreApplication, QTimer
 from PySide2.QtGui import QClipboard
 from PySide2.QtWidgets import QMenu
 
-from node_launcher.services.setup_tor import run_tor
 from .manage_lnd.lnd_manager_tabs_dialog import LndManagerTabsDialog
 from .manage_lnd.zap_qrcode_label import ZapQrcodeLabel
 from .manage_bitcoind import BitcoindManagerTabsDialog
@@ -31,7 +30,7 @@ class Menu(QMenu):
             self.bitcoind_manager_tabs_dialog.show
         )
 
-        QTimer.singleShot(100, run_tor)
+        self.node_set.tor.process.start()
         QTimer.singleShot(1000, self.node_set.bitcoin.process.start)
         self.bitcoind_manager_tabs_dialog.output_tab.bitcoind_synced.connect(
             self.node_set.lnd.process.start

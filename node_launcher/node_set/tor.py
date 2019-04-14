@@ -1,4 +1,5 @@
 import psutil, os
+from PySide2.QtCore import QProcess
 
 from node_launcher.node_set.lnd import Lnd
 from node_launcher.services.configuration_file import ConfigurationFile
@@ -10,19 +11,21 @@ from node_launcher.constants import (
     TOR_DIR_PATH,
     OPERATING_SYSTEM,
 )
+from node_launcher.services.tor_software import TorSoftware
+
 
 class Tor(object):
     file: ConfigurationFile
-    #software: TorSoftware
-    #process: Optional[psutil.Process]
+    software: TorSoftware
+    process: QProcess
 
     def __init__(self, configuration_file_path: str, lnd: Lnd):
         self.lnd = lnd
         self.bitcoin = lnd.bitcoin
         self.file = ConfigurationFile(configuration_file_path, ' ')
-        #self.software = TorSoftware()
+        self.software = TorSoftware()
 
-        self.tordir = TOR_DIR_PATH[OPERATING_SYSTEM]
+        self.tordir = self.software.downloads_directory_path
 
         # torrc edits
         self.file['ControlPort'] = '9051'
@@ -43,6 +46,9 @@ class Tor(object):
         self.lnd.file['tor.v3'] = '1'
         self.lnd.file['tor.streamisolation'] = '1'
 
+        self.process = QProcess()
+        self.process.setProgram(self.software.tor)
+        self.process.setProcessChannelMode(QProcess.MergedChannels)
 
     def launch(self):
         pass

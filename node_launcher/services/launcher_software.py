@@ -1,7 +1,7 @@
-from node_launcher.services.node_software import NodeSoftware
+from node_launcher.services.software import Software
 
 
-class LauncherSoftware(NodeSoftware):
+class LauncherSoftware(Software):
     def __init__(self):
         super().__init__()
         self.github_team = 'pierrerochard'
