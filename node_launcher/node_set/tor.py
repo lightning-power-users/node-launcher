@@ -45,6 +45,8 @@ class Tor(object):
         self.lnd.file['tor.active'] = '1'
         self.lnd.file['tor.v3'] = '1'
         self.lnd.file['tor.streamisolation'] = '1'
+        with open(os.path.join(self.tordir, 'bitcoin-service', 'hostname'), 'r') as f:
+            self.lnd.file['externalip'] = f.readline().strip()
 
         self.process = QProcess()
         self.process.setProgram(self.software.tor)
