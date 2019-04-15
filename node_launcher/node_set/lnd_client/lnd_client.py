@@ -260,3 +260,8 @@ class LndClient(object):
         request = ln.ClosedChannelsRequest()
         response = self.lnd_client.ClosedChannels(request)
         return response.channels
+
+    def stop(self):
+        request = ln.StopRequest()
+        response = self.lnd_client.StopDaemon(request)
+        return response

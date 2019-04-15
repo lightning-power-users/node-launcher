@@ -59,8 +59,6 @@ class NodeSet(object):
             lnd=self.lnd
         )
 
-
-
     @property
     def is_testnet(self) -> bool:
         return self.bitcoin.file['testnet']

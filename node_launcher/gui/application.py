@@ -1,11 +1,12 @@
 from PySide2 import QtCore
-from PySide2.QtCore import QCoreApplication, Slot, QTimer, Qt, QThreadPool
+from PySide2.QtCore import QCoreApplication, Slot, QTimer, Qt, QThreadPool, QProcess
 from PySide2.QtWidgets import QApplication, QWidget, QMessageBox
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.system_tray import SystemTray
 from node_launcher.node_set import NodeSet
+from node_launcher.node_set.bitcoind_client import Proxy
 from node_launcher.services.launcher_software import LauncherSoftware
 
 
@@ -79,9 +80,13 @@ class Application(QApplication):
     def quit_app(self):
         self.system_tray.show_message(title='Stopping LND and bitcoind...')
 
-        self.node_set.lnd.process.terminate()
-        self.node_set.bitcoin.process.terminate()
-        self.node_set.tor.process.terminate()
+        if self.node_set.lnd.process.state() == QProcess.Running:
+            self.node_set.lnd.client.stop()
+        if self.node_set.bitcoin.process.state() == QProcess.Running:
+            Proxy(btc_conf_file=self.node_set.bitcoin.file.path,
+                  service_port=self.node_set.bitcoin.rpc_port).call('stop')
+
+        self.node_set.tor.process.kill()
 
         self.node_set.lnd.process.waitForFinished(-1)
         self.node_set.bitcoin.process.waitForFinished(-1)
