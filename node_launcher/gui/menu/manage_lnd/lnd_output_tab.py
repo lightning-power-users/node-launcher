@@ -16,7 +16,7 @@ from node_launcher.utilities.utilities import get_random_password
 
 class LndOutputTab(OutputWidget):
     def __init__(self, lnd: Lnd, system_tray):
-        super().__init__()
+        super().__init__('lnd')
         self.system_tray = system_tray
         self.lnd = lnd
 

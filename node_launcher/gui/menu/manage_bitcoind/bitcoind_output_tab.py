@@ -16,7 +16,7 @@ class BitcoindOutputTab(OutputWidget):
     bitcoind_synced = Signal(bool)
 
     def __init__(self, bitcoin: Bitcoin, system_tray):
-        super().__init__()
+        super().__init__('bitcoind')
         self.system_tray = system_tray
         self.process = bitcoin.process
 

@@ -3,6 +3,7 @@ from PySide2.QtWidgets import QSystemTrayIcon, QWidget
 
 from node_launcher.assets.asset_access import asset_access
 from node_launcher.gui.menu.menu import Menu
+from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
 
 
