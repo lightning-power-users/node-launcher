@@ -32,6 +32,7 @@ class Tor(object):
         self.bitcoin.file['listen'] = True
         self.bitcoin.file['bind'] = '127.0.0.1'
         self.bitcoin.file['debug'] = 'tor'
+        self.bitcoin.file['discover'] = True
 
         # lnd.conf edits
         self.lnd.file['listen'] = 'localhost'
