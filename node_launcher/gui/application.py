@@ -5,6 +5,7 @@ from PySide2.QtWidgets import QApplication, QWidget, QMessageBox
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.system_tray import SystemTray
+from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
 from node_launcher.node_set.bitcoind_client import Proxy
 from node_launcher.services.launcher_software import LauncherSoftware
@@ -15,6 +16,7 @@ class Application(QApplication):
         super().__init__()
 
         self.node_set = NodeSet()
+
         self.parent = QWidget()
         self.parent.hide()
         self.parent.setWindowFlags(self.parent.windowFlags() & ~QtCore.Qt.Tool)
@@ -78,6 +80,7 @@ class Application(QApplication):
 
     @Slot()
     def quit_app(self):
+        log.debug('quit_app')
         self.system_tray.show_message(title='Stopping LND and bitcoind...')
 
         if self.node_set.lnd.process.state() == QProcess.Running:
@@ -86,10 +89,12 @@ class Application(QApplication):
             Proxy(btc_conf_file=self.node_set.bitcoin.file.path,
                   service_port=self.node_set.bitcoin.rpc_port).call('stop')
 
-        self.node_set.tor.process.kill()
-
+        self.system_tray.show_message(title='Stopping LND...')
         self.node_set.lnd.process.waitForFinished(-1)
+        self.system_tray.show_message(title='Stopping bitcoind...')
         self.node_set.bitcoin.process.waitForFinished(-1)
+
+        self.node_set.tor.process.kill()
         self.node_set.tor.process.waitForFinished(-1)
 
         self.system_tray.show_message(title='Exiting Node Launcher', timeout=1)

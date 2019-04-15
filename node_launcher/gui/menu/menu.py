@@ -4,6 +4,7 @@ from PySide2.QtCore import QCoreApplication, QTimer
 from PySide2.QtGui import QClipboard
 from PySide2.QtWidgets import QMenu
 
+from node_launcher.gui.menu.tor_output import TorOutput
 from .manage_lnd.lnd_manager_tabs_dialog import LndManagerTabsDialog
 from .manage_lnd.zap_qrcode_label import ZapQrcodeLabel
 from .manage_bitcoind import BitcoindManagerTabsDialog
@@ -17,6 +18,12 @@ class Menu(QMenu):
         self.node_set = node_set
         self.system_tray = system_tray
 
+        self.tor_tab = TorOutput(tor=self.node_set.tor)
+        QTimer.singleShot(1000, self.node_set.tor.process.start)
+        self.tor_tab.tor_bootstrapped.connect(
+            self.node_set.bitcoin.process.start
+        )
+
         # Bitcoind
         self.bitcoind_status_action = self.addAction('bitcoind off')
         self.bitcoind_status_action.setEnabled(False)
@@ -29,13 +36,9 @@ class Menu(QMenu):
         self.bitcoin_manage_action.triggered.connect(
             self.bitcoind_manager_tabs_dialog.show
         )
-
-        self.node_set.tor.process.start()
-        QTimer.singleShot(1000, self.node_set.bitcoin.process.start)
         self.bitcoind_manager_tabs_dialog.output_tab.bitcoind_synced.connect(
             self.node_set.lnd.process.start
         )
-
         self.addSeparator()
 
         # LND
