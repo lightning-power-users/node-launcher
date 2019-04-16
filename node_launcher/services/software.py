@@ -8,6 +8,7 @@ from PySide2.QtCore import QThreadPool, Signal, QObject
 
 from node_launcher.constants import NODE_LAUNCHER_DATA_PATH, OPERATING_SYSTEM, IS_WINDOWS
 from node_launcher.gui.components.thread_worker import Worker
+from node_launcher.logging import log
 
 
 class Software(QObject):
@@ -93,7 +94,7 @@ class Software(QObject):
                     f.write(chunk)
 
     @classmethod
-    def update(cls, download_url, download_compressed_path,
+    def update(cls, progress_callback, download_url, download_compressed_path,
                downloads_directory_path, bin_path, latest_bin_path):
         cls.download(
             source_url=download_url,
@@ -158,5 +159,7 @@ class Software(QObject):
     @property
     def needs_update(self) -> bool:
         if self.uncompressed_directory_name not in os.listdir(self.downloads_directory_path):
+            log.debug(f'{self.uncompressed_directory_name} needs update')
             return True
+        log.debug(f'{self.uncompressed_directory_name} is ready')
         return False

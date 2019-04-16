@@ -28,13 +28,10 @@ class Tor(object):
         self.file = ConfigurationFile(path=configuration_file_path, assign_op=' ')
         self.software = TorSoftware()
 
-        tor_directory = self.software.downloads_directory_path
-        bitcoin_service_directory = os.path.join(tor_directory, 'bitcoin-service')
-
         # torrc edits
         self.file['ControlPort'] = 9051
         self.file['CookieAuthentication'] = True
-        self.file['HiddenServiceDir'] = bitcoin_service_directory
+        self.file['HiddenServiceDir'] = self.bitcoin_service_directory
         self.file['HiddenServicePort'] = '8333 127.0.0.1:8333'
 
         # bitcoin.conf edits
@@ -49,9 +46,18 @@ class Tor(object):
         self.lnd.file['tor.active'] = True
         self.lnd.file['tor.v3'] = True
         self.lnd.file['tor.streamisolation'] = True
-        hostname_file = os.path.join(bitcoin_service_directory, 'hostname')
-        with open(hostname_file, 'r') as f:
-            self.lnd.file['externalip'] = f.readline().strip()
 
         self.process = TorProcess(self.software.tor, [])
-        self.software.ready.connect(self.process.start)
+        self.software.ready.connect()
+
+    def start_tor(self):
+        log.debug('Starting Tor')
+        self.process.start()
+
+
+
+    @property
+    def bitcoin_service_directory(self) -> str:
+        tor_directory = self.software.downloads_directory_path
+        bitcoin_service_directory = os.path.join(tor_directory, 'bitcoin-service')
+        return bitcoin_service_directory
