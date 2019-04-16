@@ -17,6 +17,7 @@ pytest-qt
 qrcode
 requests
 shiboken2<=5.12.0
+sphinx
 structlog
 webassets
 wtforms
