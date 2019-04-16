@@ -1,56 +1,39 @@
 from datetime import datetime, timedelta
 
 import humanize
-from PySide2.QtCore import QProcess, QThreadPool, Signal
+from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QSystemTrayIcon
 
-from node_launcher.gui.components.output_widget import OutputWidget
-
-from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.node_set.managed_process import ManagedProcess
 
 
-class BitcoindOutputTab(OutputWidget):
-    bitcoin: Bitcoin
-    process: QProcess
+class BitcoinProcess(ManagedProcess):
+    synced = Signal(bool)
 
-    bitcoind_synced = Signal(bool)
-
-    def __init__(self, bitcoin: Bitcoin, system_tray):
-        super().__init__('bitcoind')
-        self.system_tray = system_tray
-        self.process = bitcoin.process
-
-        self.process.readyReadStandardOutput.connect(self.handle_output)
-
-        self.setWindowTitle('Bitcoind Output')
-
-        self.threadpool = QThreadPool()
-
+    def __init__(self, binary, args):
+        super().__init__(binary, args)
         self.old_progress = None
         self.old_timestamp = None
 
         self.timestamp_changes = []
 
+        self.expecting_shutdown = False
+
     def process_output_line(self, line: str):
         if 'Bitcoin Core version' in line:
-            self.system_tray.menu.bitcoind_status_action.setText(
-                'Bitcoin starting'
-            )
+            self.status_update.emit('Bitcoin starting')
         elif 'Leaving InitialBlockDownload' in line:
-            self.system_tray.menu.bitcoind_status_action.setText(
-                'Bitcoin synced'
-            )
-            self.bitcoind_synced.emit(True)
+            self.status_update.emit('Bitcoin synced')
+            self.synced.emit(True)
         elif 'Shutdown: done' in line:
-            self.system_tray.menu.bitcoind_status_action.setText(
-                'Error: please check Bitcoin Output'
+            if self.expecting_shutdown:
+                return
+            self.status_update.emit('Error: please check Bitcoin Output')
+            self.notification.emit(
+                'Bitcoin Error',
+                'Please check Bitcoin Output',
+                QSystemTrayIcon.Critical
             )
-            self.system_tray.show_message(
-                title='Bitcoin Error',
-                message='Please check Bitcoin Output',
-                icon=QSystemTrayIcon.Critical
-            )
-
         elif 'UpdateTip' in line:
             line_segments = line.split(' ')
             timestamp = line_segments[0]
@@ -73,24 +56,17 @@ class BitcoindOutputTab(OutputWidget):
                                     self.timestamp_changes.pop(0)
                                 average_time_left = sum(self.timestamp_changes)/len(self.timestamp_changes)
                                 humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
-                                self.system_tray.menu.bitcoind_status_action.setText(
-                                    f'ETA: {humanized}, {new_progress*100:.2f}% done'
-                                )
+                                self.status_update.emit(f'ETA: {humanized}, {new_progress*100:.2f}% done')
                         else:
                             if round(new_progress*100) == 100:
                                 continue
-                            self.system_tray.menu.bitcoind_status_action.setText(
-                                f'{new_progress*100:.2f}%'
-                            )
-
+                            self.self.status_update.emit(f'{new_progress*100:.2f}%')
                         self.old_progress = new_progress
                         self.old_timestamp = new_timestamp
         elif 'Bitcoin Core is probably already running' in line:
-            self.system_tray.menu.bitcoind_status_action.setText(
-                'Error: Bitcoin Core is already running'
-            )
-            self.system_tray.show_message(
-                title='Bitcoin Error',
-                message='Bitcoin Core is already running',
-                icon=QSystemTrayIcon.Critical
+            self.status_update.emit('Error: Bitcoin Core is already running')
+            self.notification.emit(
+                'Bitcoin Error',
+                'Bitcoin Core is already running',
+                QSystemTrayIcon.Critical
             )

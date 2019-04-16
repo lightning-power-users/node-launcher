@@ -7,10 +7,9 @@ from node_launcher.constants import (
     OPERATING_SYSTEM,
     TARGET_BITCOIN_RELEASE
 )
-from node_launcher.services.software import SoftwareABC
+from node_launcher.services.software import Software
 
-
-class BitcoinSoftware(SoftwareABC):
+class BitcoinSoftware(Software):
 
     def __init__(self, override_directory: str = None):
         super().__init__(override_directory)

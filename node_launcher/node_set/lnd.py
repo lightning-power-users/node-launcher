@@ -4,7 +4,9 @@ import os
 import socket
 import ssl
 
-from PySide2.QtCore import QProcess
+# noinspection PyProtectedMember
+from grpc._channel import _Rendezvous
+from PySide2.QtCore import QThreadPool
 import qrcode
 
 from node_launcher.constants import (
@@ -13,13 +15,16 @@ from node_launcher.constants import (
     LND_DEFAULT_PEER_PORT,
     LND_DEFAULT_REST_PORT,
     LND_DIR_PATH,
-    OPERATING_SYSTEM
-)
+    OPERATING_SYSTEM,
+    keyring)
+from node_launcher.gui.components.thread_worker import Worker
+from node_launcher.logging import log
 from node_launcher.node_set.bitcoin import Bitcoin
 from node_launcher.node_set.lnd_client import LndClient
+from node_launcher.node_set.lnd_process import LndProcess
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.services.lnd_software import LndSoftware
-from node_launcher.utilities.utilities import get_port
+from node_launcher.utilities.utilities import get_port, get_random_password
 
 
 class Lnd(object):
@@ -27,12 +32,21 @@ class Lnd(object):
     client: LndClient
     file: ConfigurationFile
     software: LndSoftware
-    process: QProcess
+    process: LndProcess
 
-    def __init__(self, configuration_file_path: str, bitcoin: Bitcoin):
+    def __init__(self, bitcoin: Bitcoin, configuration_file_path: str = None):
         self.running = False
         self.is_unlocked = False
         self.bitcoin = bitcoin
+        if configuration_file_path is None:
+            file_name = 'lnd.conf'
+            lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
+            configuration_file_path = os.path.join(lnd_dir_path, file_name)
+            log.info(
+                'lnd configuration_file_path',
+                configuration_file_path=configuration_file_path
+            )
+
         self.file = ConfigurationFile(configuration_file_path)
         self.software = LndSoftware()
 
@@ -91,12 +105,13 @@ class Lnd(object):
         self.bitcoin.file.file_watcher.fileChanged.connect(
             self.bitcoin_config_file_changed)
 
-        self.process = QProcess()
-        self.process.setProgram(self.software.lnd)
-        self.process.setCurrentReadChannel(0)
-        self.process.setArguments(self.args)
-
         self.client = LndClient(self)
+
+        self.threadpool = QThreadPool()
+
+        self.process = LndProcess(self.software.lnd, self.args)
+        self.software.ready.connect(self.process.start)
+        self.process.ready_to_unlock.connect(self.auto_unlock_wallet)
 
     @property
     def args(self):
@@ -283,3 +298,111 @@ class Lnd(object):
         os.remove(self.client.tls_key_path)
         self.process.terminate()
         self.client.reset()
+
+    def auto_unlock_wallet(self):
+        keyring_service_name = f'lnd_mainnet_wallet_password'
+        keyring_user_name = self.file['bitcoind.rpcuser']
+        log.info(
+            'auto_unlock_wallet_get_password',
+            keyring_service_name=keyring_service_name,
+            keyring_user_name=keyring_user_name
+        )
+        password = keyring.get_password(
+            service=keyring_service_name,
+            username=keyring_user_name,
+        )
+        worker = Worker(
+            fn=self.unlock_wallet,
+            lnd=self,
+            password=password
+        )
+        worker.signals.result.connect(self.handle_unlock_wallet)
+        self.threadpool.start(worker)
+
+    @staticmethod
+    def unlock_wallet(lnd, progress_callback, password: str):
+        if password is None:
+            return 'wallet not found'
+        client = LndClient(lnd)
+        try:
+            client.unlock(password)
+            return None
+        except _Rendezvous as e:
+            details = e.details()
+            return details
+
+    def generate_seed(self, new_seed_password: str):
+        try:
+            generate_seed_response = self.client.generate_seed(
+                seed_password=new_seed_password
+            )
+        except _Rendezvous:
+            log.error('generate_seed error', exc_info=True)
+            raise
+
+        seed = generate_seed_response.cipher_seed_mnemonic
+
+        keyring_service_name = f'lnd_seed'
+        keyring_user_name = ''.join(seed[0:2])
+        log.info(
+            'generate_seed',
+            keyring_service_name=keyring_service_name,
+            keyring_user_name=keyring_user_name
+        )
+
+        keyring.set_password(
+            service=keyring_service_name,
+            username=keyring_user_name,
+            password=' '.join(seed)
+        )
+
+        keyring.set_password(
+            service=f'{keyring_service_name}_seed_password',
+            username=keyring_user_name,
+            password=new_seed_password
+        )
+        return seed
+
+    def handle_unlock_wallet(self, details: str):
+        if details is None:
+            return
+        details = details.lower()
+        # The Wallet Unlocker gRPC service disappears from LND's API
+        # after the wallet is unlocked (or created/recovered)
+        if 'unknown service lnrpc.walletunlocker' in details:
+            pass
+        # User needs to create a new wallet
+        elif 'wallet not found' in details:
+            new_wallet_password = get_random_password()
+            keyring_service_name = keyring_user_name = f'lnd_wallet_password'
+            log.info(
+                'create_wallet',
+                keyring_service_name=keyring_service_name,
+                keyring_user_name=keyring_user_name
+            )
+            keyring.set_password(
+                service=keyring_service_name,
+                username=keyring_user_name,
+                password=new_wallet_password
+            )
+            seed = self.generate_seed(new_wallet_password)
+            try:
+                self.client.initialize_wallet(
+                    wallet_password=new_wallet_password,
+                    seed=seed,
+                    seed_password=new_wallet_password
+                )
+            except _Rendezvous:
+                log.error('initialize_wallet error', exc_info=True)
+                raise
+            keyring.set_password(
+                service=f'lnd_mainnet_wallet_password',
+                username=self.file['bitcoind.rpcuser'],
+                password=new_wallet_password
+            )
+        else:
+            log.warning(
+                'unlock_wallet failed',
+                details=details,
+                exc_info=True
+            )

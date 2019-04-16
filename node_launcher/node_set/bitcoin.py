@@ -2,36 +2,47 @@ import os
 from typing import List
 
 import psutil
-from PySide2.QtCore import QProcess
 
-from node_launcher.constants import (BITCOIN_DATA_PATH,
-                                     BITCOIN_MAINNET_PEER_PORT,
-                                     BITCOIN_MAINNET_RPC_PORT,
-                                     BITCOIN_TESTNET_PEER_PORT,
-                                     BITCOIN_TESTNET_RPC_PORT, MAINNET,
-                                     MAINNET_PRUNE, OPERATING_SYSTEM, TESTNET,
-                                     TESTNET_PRUNE)
+from node_launcher.constants import (
+    BITCOIN_DATA_PATH,
+    BITCOIN_MAINNET_PEER_PORT,
+    BITCOIN_MAINNET_RPC_PORT,
+    BITCOIN_TESTNET_PEER_PORT,
+    BITCOIN_TESTNET_RPC_PORT, MAINNET,
+    MAINNET_PRUNE, OPERATING_SYSTEM,
+    TESTNET, TESTNET_PRUNE
+)
 from node_launcher.logging import log
 from node_launcher.services.bitcoin_software import BitcoinSoftware
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.services.hard_drives import HardDrives
 from node_launcher.utilities.utilities import get_random_password, get_zmq_port
+from .bitcoin_process import BitcoinProcess
 
 
 class Bitcoin(object):
     file: ConfigurationFile
     hard_drives: HardDrives
-    process: QProcess
+    process: BitcoinProcess
     software: BitcoinSoftware
     zmq_block_port: int
     zmq_tx_port: int
 
-    def __init__(self, configuration_file_path: str):
+    def __init__(self, configuration_file_path: str = None):
         self.hard_drives = HardDrives()
         self.software = BitcoinSoftware()
+
+        if configuration_file_path is None:
+            file_name = 'bitcoin.conf'
+            bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
+            configuration_file_path = os.path.join(bitcoin_data_path, file_name)
+            log.info(
+                'bitcoin_configuration_file_path',
+                configuration_file_path=configuration_file_path
+            )
+
         self.file = ConfigurationFile(configuration_file_path)
         self.running = False
-        self.process = None
 
         log.debug('datadir', datadir=self.file['datadir'])
 
@@ -102,10 +113,8 @@ class Bitcoin(object):
         self.config_snapshot = self.file.snapshot.copy()
         self.file.file_watcher.fileChanged.connect(self.config_file_changed)
 
-        self.process = QProcess()
-        self.process.setProgram(self.software.bitcoind)
-        self.process.setProcessChannelMode(QProcess.MergedChannels)
-        self.process.setArguments(self.args)
+        self.process = BitcoinProcess(self.software.bitcoind, self.args)
+        self.software.ready.connect(self.process.start)
 
     @property
     def network(self):

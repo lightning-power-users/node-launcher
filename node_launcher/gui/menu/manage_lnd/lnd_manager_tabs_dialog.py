@@ -3,10 +3,10 @@ from PySide2.QtWidgets import QVBoxLayout
 
 from node_launcher.constants import LNCLI_COMMANDS
 from node_launcher.gui.components.console_dialog import ConsoleWidget
+from node_launcher.gui.components.output_widget import OutputWidget
 from node_launcher.gui.components.tabs_dialog import TabsDialog
 from node_launcher.gui.menu.manage_lnd.lnd_configuration_tab import \
     LndConfigurationTab
-from .lnd_output_tab import LndOutputTab
 
 
 class LndManagerTabsDialog(TabsDialog):
@@ -26,9 +26,9 @@ class LndManagerTabsDialog(TabsDialog):
         self.tab_widget.addTab(self.console_tab, 'lncli')
 
         # lnd output
-        self.output_tab = LndOutputTab(
-            lnd=self.lnd,
-            system_tray=self.system_tray
+        self.output_tab = OutputWidget()
+        self.lnd.process.log_line.connect(
+            self.output_tab.output_text_edit.append
         )
         self.tab_widget.addTab(self.output_tab, 'Logs')
 

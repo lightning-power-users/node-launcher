@@ -1,8 +1,8 @@
 from node_launcher.constants import TARGET_LND_RELEASE, OPERATING_SYSTEM
-from node_launcher.services.software import SoftwareABC
+from node_launcher.services.software import Software
 
 
-class LndSoftware(SoftwareABC):
+class LndSoftware(Software):
 
     def __init__(self, override_directory: str = None):
         super().__init__(override_directory)

@@ -1,35 +1,50 @@
 import os
 import tarfile
 import zipfile
-from abc import ABC, abstractmethod
 from typing import Optional
 
 import requests
+from PySide2.QtCore import QThreadPool, Signal, QObject
 
 from node_launcher.constants import NODE_LAUNCHER_DATA_PATH, OPERATING_SYSTEM, IS_WINDOWS
+from node_launcher.gui.components.thread_worker import Worker
 
 
-class SoftwareABC(ABC):
+class Software(QObject):
+    github_repo: str
+    github_team: str
+
+    updating = Signal(bool)
+    ready = Signal(bool)
+
     def __init__(self, override_directory: str = None):
+        super().__init__()
         self.override_directory = override_directory
-        self.release_version = None
-        self.github_team = None
-        self.github_repo = None
+
+    def run(self):
+        if self.needs_update:
+            self.updating.emit(True)
+            worker = Worker(self.update,
+                            download_url=self.download_url,
+                            download_compressed_path=self.download_compressed_path,
+                            downloads_directory_path=self.downloads_directory_path,
+                            bin_path=self.bin_path,
+                            latest_bin_path=self.latest_bin_path)
+            worker.signals.result.connect(lambda: self.ready.emit(True))
+            QThreadPool().start(worker)
+        self.ready.emit(True)
 
     @property
-    @abstractmethod
     def download_name(self) -> str:
-        return ''
+        raise NotImplementedError()
 
     @property
-    @abstractmethod
     def download_url(self) -> str:
-        return ''
+        raise NotImplementedError()
 
     @property
-    @abstractmethod
     def uncompressed_directory_name(self) -> str:
-        return ''
+        raise NotImplementedError()
 
     @property
     def download_compressed_name(self) -> str:
@@ -60,42 +75,53 @@ class SoftwareABC(ABC):
         return path
 
     @property
-    @abstractmethod
     def bin_path(self) -> str:
         raise NotImplementedError()
 
     def executable_path(self, name):
         if IS_WINDOWS:
             name += '.exe'
-        executable = os.path.join(self.bin_path, name)
-        if not os.path.isfile(executable):
-            self.download()
-            self.extract()
-            self.link_latest_bin()
         latest_executable = os.path.join(self.latest_bin_path, name)
-        if not os.path.isfile(latest_executable):
-            self.link_latest_bin()
         return latest_executable
 
-    def download(self):
-        response = requests.get(self.download_url, stream=True)
-        with open(self.download_compressed_path, 'wb') as f:
+    @staticmethod
+    def download(source_url, destination):
+        response = requests.get(source_url, stream=True)
+        with open(destination, 'wb') as f:
             for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
                     f.write(chunk)
 
-    def extract(self):
-        if IS_WINDOWS:
-            with zipfile.ZipFile(self.download_compressed_path) as zip_file:
-                zip_file.extractall(path=self.downloads_directory_path)
-        else:
-            with tarfile.open(self.download_compressed_path) as tar:
-                tar.extractall(path=self.downloads_directory_path)
+    @classmethod
+    def update(cls, download_url, download_compressed_path,
+               downloads_directory_path, bin_path, latest_bin_path):
+        cls.download(
+            source_url=download_url,
+            destination=download_compressed_path
+        )
+        cls.extract(
+            source=download_compressed_path,
+            destination=downloads_directory_path
+        )
+        cls.link_latest_bin(
+            source_directory=bin_path,
+            destination_directory=latest_bin_path
+        )
 
-    def link_latest_bin(self):
-        for executable in os.listdir(self.bin_path):
-            source = os.path.join(self.bin_path, executable)
-            destination = os.path.join(self.latest_bin_path, executable)
+    @staticmethod
+    def extract(source, destination):
+        if IS_WINDOWS:
+            with zipfile.ZipFile(source) as zip_file:
+                zip_file.extractall(path=destination)
+        else:
+            with tarfile.open(source) as tar:
+                tar.extractall(path=destination)
+
+    @staticmethod
+    def link_latest_bin(source_directory, destination_directory):
+        for executable in os.listdir(source_directory):
+            source = os.path.join(source_directory, executable)
+            destination = os.path.join(destination_directory, executable)
             if os.path.exists(destination):
                 os.remove(destination)
             os.link(source, destination)
@@ -129,43 +155,8 @@ class SoftwareABC(ABC):
         release = response.json()[0]
         return release['tag_name']
 
-
-class Software(SoftwareABC):
-
     @property
-    def uncompressed_directory_name(self) -> str:
-        return ''
-
-    @property
-    def bin_path(self) -> str:
-        return ''
-
-    @property
-    def download_name(self) -> str:
-        return ''
-
-    @property
-    def download_compressed_name(self) -> str:
-        return ''
-
-    @property
-    def download_compressed_path(self) -> str:
-        return ''
-
-    @property
-    def downloads_directory_path(self) -> str:
-        return ''
-
-    @property
-    def binary_directory_path(self) -> str:
-        return ''
-
-    @property
-    def download_url(self) -> str:
-        return ''
-
-    def download(self):
-        pass
-
-    def extract(self):
-        pass
+    def needs_update(self) -> bool:
+        if self.uncompressed_directory_name not in os.listdir(self.downloads_directory_path):
+            return True
+        return False

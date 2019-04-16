@@ -45,6 +45,8 @@ class Application(QApplication):
         worker = Worker(fn=self.check_version)
         self.threadpool.start(worker)
 
+        self.node_set.run()
+
     def check_restart_required(self):
         if self.node_set.bitcoin.restart_required or self.node_set.lnd.restart_required:
             pass
@@ -86,6 +88,7 @@ class Application(QApplication):
         if self.node_set.lnd.process.state() == QProcess.Running:
             self.node_set.lnd.client.stop()
         if self.node_set.bitcoin.process.state() == QProcess.Running:
+            self.node_set.bitcoin.process.expecting_shutdown = True
             Proxy(btc_conf_file=self.node_set.bitcoin.file.path,
                   service_port=self.node_set.bitcoin.rpc_port).call('stop')
 

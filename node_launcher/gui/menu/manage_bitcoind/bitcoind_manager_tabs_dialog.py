@@ -1,9 +1,9 @@
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QVBoxLayout
 
+from node_launcher.gui.components.output_widget import OutputWidget
 from node_launcher.gui.components.tabs_dialog import TabsDialog
 from .bitcoind_configuration_tab import BitcoindConfigurationTab
-from .bitcoind_output_tab import BitcoindOutputTab
 from node_launcher.constants import BITCOIN_CLI_COMMANDS
 from node_launcher.gui.components.console_dialog import ConsoleWidget
 from node_launcher.node_set.bitcoin import Bitcoin
@@ -25,9 +25,9 @@ class BitcoindManagerTabsDialog(TabsDialog):
         )
         self.tab_widget.addTab(self.console_tab, 'bitcoin-cli')
 
-        self.output_tab = BitcoindOutputTab(
-            bitcoin=self.bitcoin,
-            system_tray=self.system_tray
+        self.output_tab = OutputWidget()
+        self.bitcoin.process.log_line.connect(
+            self.output_tab.output_text_edit.append
         )
         self.tab_widget.addTab(self.output_tab, 'Logs')
 

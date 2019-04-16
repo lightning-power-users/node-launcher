@@ -13,12 +13,12 @@ from node_launcher.constants import (
     TARGET_TOR_RELEASE
 )
 from node_launcher.logging import log
-from node_launcher.services.software import SoftwareABC
+from node_launcher.services.software import Software
 
 
-class TorSoftware(SoftwareABC):
-    def __init__(self):
-        super().__init__()
+class TorSoftware(Software):
+    def __init__(self, override_directory: str = None):
+        super().__init__(override_directory)
         self.release_version = TARGET_TOR_RELEASE
         self.windows_version = TARGET_WINDOWS_TOR_VERSION
         # Only used for directory name
@@ -32,14 +32,7 @@ class TorSoftware(SoftwareABC):
             name = 'tor.exe'
         else:
             raise NotImplementedError()
-        executable = os.path.join(self.bin_path, name)
-        if not os.path.isfile(executable):
-            self.download()
-            self.extract()
-            self.link_latest_bin()
         latest_executable = os.path.join(self.latest_bin_path, name)
-        if not os.path.isfile(latest_executable):
-            self.link_latest_bin()
         return latest_executable
 
     @property
@@ -79,26 +72,25 @@ class TorSoftware(SoftwareABC):
             return os.path.join(self.binary_directory_path, 'Tor')
         return
 
-    def extract(self):
+    @staticmethod
+    def extract(source, destination):
         if IS_WINDOWS:
-            with zipfile.ZipFile(self.download_compressed_path) as zip_file:
-                zip_file.extractall(path=self.binary_directory_path)
+            with zipfile.ZipFile(source) as zip_file:
+                zip_file.extractall(path=destination)
         elif IS_MACOS:
             # TODO see if this below is covered by `torpath` variable
             tor_path = str(TOR_PATH[OPERATING_SYSTEM])
             if not os.path.exists(tor_path):
                 os.makedirs(tor_path)
 
-            bash_command_attach = f'hdiutil attach {self.download_compressed_path}'
+            bash_command_attach = f'hdiutil attach {source}'
             subprocess.run(['bash', '-c', bash_command_attach])
 
-            bash_command_cp = f'cp -R /Volumes/Tor\ Browser/Tor\ Browser.app {self.binary_directory_path}'
+            bash_command_cp = f'cp -R /Volumes/Tor Browser/Tor Browser.app {destination}'
             subprocess.run(['bash', '-c', bash_command_cp])
 
-            bash_command_detach = 'hdiutil detach /Volumes/Tor\ Browser'
+            bash_command_detach = 'hdiutil detach /Volumes/Tor Browser'
             subprocess.run(['bash', '-c', bash_command_detach])
-        elif IS_LINUX:
-            self.deb_install()
 
     @staticmethod
     def deb_install():

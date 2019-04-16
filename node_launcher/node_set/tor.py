@@ -1,7 +1,8 @@
 import os
 
-from PySide2.QtCore import QProcess
-
+from node_launcher.constants import TOR_DIR_PATH, OPERATING_SYSTEM
+from node_launcher.logging import log
+from node_launcher.node_set.tor_process import TorProcess
 from .lnd import Lnd
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.services.tor_software import TorSoftware
@@ -10,9 +11,18 @@ from node_launcher.services.tor_software import TorSoftware
 class Tor(object):
     file: ConfigurationFile
     software: TorSoftware
-    process: QProcess
+    process: TorProcess
 
-    def __init__(self, configuration_file_path: str, lnd: Lnd):
+    def __init__(self, lnd: Lnd, configuration_file_path: str = None):
+        if configuration_file_path is None:
+            file_name = 'torrc'
+            tor_dir_path = TOR_DIR_PATH[OPERATING_SYSTEM]
+            configuration_file_path = os.path.join(tor_dir_path, file_name)
+        log.info(
+            'tor configuration_file_path',
+            configuration_file_path=configuration_file_path
+        )
+
         self.lnd = lnd
         self.bitcoin = lnd.bitcoin
         self.file = ConfigurationFile(path=configuration_file_path, assign_op=' ')
@@ -43,6 +53,5 @@ class Tor(object):
         with open(hostname_file, 'r') as f:
             self.lnd.file['externalip'] = f.readline().strip()
 
-        self.process = QProcess()
-        self.process.setProgram(self.software.tor)
-        self.process.setProcessChannelMode(QProcess.MergedChannels)
+        self.process = TorProcess(self.software.tor, [])
+        self.software.ready.connect(self.process.start)
