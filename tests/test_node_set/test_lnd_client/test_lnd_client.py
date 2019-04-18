@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from node_launcher.node_set.lnd_client import LndClient
+from node_launcher.node_set.lnd.lnd_client import LndClient
 
 
 @pytest.fixture

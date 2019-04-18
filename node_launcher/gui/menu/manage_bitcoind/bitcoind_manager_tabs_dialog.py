@@ -6,7 +6,7 @@ from node_launcher.gui.components.tabs_dialog import TabsDialog
 from .bitcoind_configuration_tab import BitcoindConfigurationTab
 from node_launcher.constants import BITCOIN_CLI_COMMANDS
 from node_launcher.gui.components.console_dialog import ConsoleWidget
-from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
 
 
 class BitcoindManagerTabsDialog(TabsDialog):

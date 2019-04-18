@@ -4,7 +4,7 @@ import humanize
 from PySide2.QtCore import QTimer, Signal
 from PySide2.QtWidgets import QSystemTrayIcon
 
-from node_launcher.node_set.managed_process import ManagedProcess
+from node_launcher.node_set.lib.managed_process import ManagedProcess
 
 
 class LndProcess(ManagedProcess):

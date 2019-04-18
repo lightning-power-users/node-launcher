@@ -1,6 +1,6 @@
 from PySide2.QtCore import Signal
 
-from node_launcher.node_set.managed_process import ManagedProcess
+from node_launcher.node_set.lib.managed_process import ManagedProcess
 
 
 class TorProcess(ManagedProcess):

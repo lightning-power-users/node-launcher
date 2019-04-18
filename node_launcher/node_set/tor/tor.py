@@ -2,8 +2,8 @@ import os
 
 from node_launcher.constants import TOR_DIR_PATH, OPERATING_SYSTEM
 from node_launcher.logging import log
-from node_launcher.node_set.tor_process import TorProcess
-from .lnd import Lnd
+from node_launcher.node_set.tor.tor_process import TorProcess
+from node_launcher.node_set.lnd.lnd import Lnd
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.services.tor_software import TorSoftware
 
@@ -48,13 +48,11 @@ class Tor(object):
         self.lnd.file['tor.streamisolation'] = True
 
         self.process = TorProcess(self.software.tor, [])
-        self.software.ready.connect()
+        self.software.ready.connect(self.start_tor)
 
     def start_tor(self):
         log.debug('Starting Tor')
         self.process.start()
-
-
 
     @property
     def bitcoin_service_directory(self) -> str:

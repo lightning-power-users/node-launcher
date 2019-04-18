@@ -19,9 +19,9 @@ from node_launcher.constants import (
     keyring)
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.logging import log
-from node_launcher.node_set.bitcoin import Bitcoin
-from node_launcher.node_set.lnd_client import LndClient
-from node_launcher.node_set.lnd_process import LndProcess
+from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
+from node_launcher.node_set.lnd.lnd_client import LndClient
+from node_launcher.node_set.lnd.lnd_process import LndProcess
 from node_launcher.services.configuration_file import ConfigurationFile
 from node_launcher.services.lnd_software import LndSoftware
 from node_launcher.utilities.utilities import get_port, get_random_password

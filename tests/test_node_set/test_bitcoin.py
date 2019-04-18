@@ -5,7 +5,7 @@ from node_launcher.constants import (
     MAINNET_PRUNE,
     TESTNET_PRUNE
 )
-from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
 from node_launcher.services.configuration_file import ConfigurationFile
 
 

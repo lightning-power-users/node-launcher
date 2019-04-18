@@ -4,7 +4,7 @@ from PySide2.QtWidgets import (
     QPushButton
 )
 
-from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
 from .datadir_label import DatadirLabel
 from .prune_warning_label import PruneWarningLabel
 from .select_directory_dialog import SelectDirectoryDialog

@@ -1,9 +1,9 @@
 import os
 
 from node_launcher.logging import log
-from .bitcoin import Bitcoin
-from .lnd import Lnd
-from .tor import Tor
+from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
+from node_launcher.node_set.lnd.lnd import Lnd
+from node_launcher.node_set.tor.tor import Tor
 
 
 class NodeSet(object):

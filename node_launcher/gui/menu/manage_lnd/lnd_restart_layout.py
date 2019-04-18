@@ -3,7 +3,7 @@ from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.section_name import SectionName
 from node_launcher.node_set import NodeSet
 from node_launcher.gui.components.warning_text import WarningText
-from node_launcher.node_set.lnd import Lnd
+from node_launcher.node_set.lnd.lnd import Lnd
 
 
 class LndRestartLayout(QGridLayout):

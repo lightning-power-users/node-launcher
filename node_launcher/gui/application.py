@@ -7,7 +7,7 @@ from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.system_tray import SystemTray
 from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
-from node_launcher.node_set.bitcoind_client import Proxy
+from node_launcher.node_set.bitcoind.bitcoind_client import Proxy
 from node_launcher.services.launcher_software import LauncherSoftware
 
 

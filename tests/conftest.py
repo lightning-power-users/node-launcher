@@ -2,12 +2,12 @@ import pytest
 from tempfile import NamedTemporaryFile
 
 from node_launcher.constants import Network, TESTNET
-from node_launcher.node_set.lnd import Lnd
-from node_launcher.node_set.lnd_client import LndClient
+from node_launcher.node_set.lnd.lnd import Lnd
+from node_launcher.node_set.lnd.lnd_client import LndClient
 from node_launcher.node_set import NodeSet
-from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
 
-from node_launcher.node_set.tor import Tor
+from node_launcher.node_set.tor.tor import Tor
 
 
 @pytest.fixture

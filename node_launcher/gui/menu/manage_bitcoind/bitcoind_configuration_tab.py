@@ -1,4 +1,4 @@
-from PySide2.QtCore import Qt, Signal
+from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
     QCheckBox,
     QLabel,
@@ -14,7 +14,7 @@ from .bitcoind_restart_layout import BitcoindRestartLayout
 from node_launcher.gui.utilities import reveal
 from .data_directories import DataDirectoryBox
 
-from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
 
 
 class BitcoindConfigurationTab(QWidget):
