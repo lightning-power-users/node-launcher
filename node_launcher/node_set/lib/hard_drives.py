@@ -13,7 +13,6 @@ from node_launcher.constants import (
     OPERATING_SYSTEM
 )
 from node_launcher.logging import log
-from node_launcher.utilities.utilities import get_dir_size
 
 
 @dataclass
@@ -85,8 +84,7 @@ class HardDrives(object):
         partition = Path(partition.mountpoint).drive
         return default_partition == partition
 
-    @staticmethod
-    def should_prune(input_directory: str, has_bitcoin: bool) -> bool:
+    def should_prune(self, input_directory: str, has_bitcoin: bool) -> bool:
         directory = os.path.realpath(input_directory)
         try:
             total, used, free, percent = psutil.disk_usage(os.path.realpath(directory))
@@ -99,7 +97,7 @@ class HardDrives(object):
             )
             return False
         if has_bitcoin:
-            bitcoin_bytes = get_dir_size(directory)
+            bitcoin_bytes = self.get_dir_size(directory)
             free += bitcoin_bytes
         else:
             bitcoin_bytes = 0
@@ -121,3 +119,23 @@ class HardDrives(object):
             should_prune=should_prune
         )
         return should_prune
+
+    def get_dir_size(self, start_path: str) -> int:
+        total_size = 0
+        entries = None
+        try:
+            entries = os.scandir(start_path)
+            for entry in entries:
+                if entry.is_dir(follow_symlinks=False):
+                    total_size += self.get_dir_size(entry.path)
+                elif entry.is_file(follow_symlinks=False):
+                    total_size += entry.stat().st_size
+        except:
+            log.warning(
+                'get_dir_size',
+                start_path=start_path,
+                total_size=total_size,
+                entries=entries,
+                exc_info=True
+            )
+        return total_size

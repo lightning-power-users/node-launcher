@@ -2,7 +2,7 @@ from PySide2 import QtWidgets
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QPixmap
 
-from node_launcher.assets.asset_access import asset_access
+from node_launcher.gui.assets import asset_access
 
 
 class ImageLabel(QtWidgets.QLabel):
