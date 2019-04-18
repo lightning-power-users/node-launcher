@@ -3,7 +3,7 @@ import os
 import pytest
 
 from node_launcher.constants import NODE_LAUNCHER_DATA_PATH, OPERATING_SYSTEM
-from node_launcher.services.software import Software
+from node_launcher.node_set.lib.software import Software
 
 
 @pytest.fixture

@@ -7,7 +7,7 @@ from node_launcher.constants import (
     OPERATING_SYSTEM,
     TARGET_BITCOIN_RELEASE
 )
-from node_launcher.services.software import Software
+from node_launcher.node_set.lib.software import Software
 
 class BitcoinSoftware(Software):
 

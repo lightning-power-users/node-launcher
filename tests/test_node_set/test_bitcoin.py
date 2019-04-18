@@ -6,7 +6,7 @@ from node_launcher.constants import (
     TESTNET_PRUNE
 )
 from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
-from node_launcher.services.configuration_file import ConfigurationFile
+from node_launcher.node_set.lib.configuration_file import ConfigurationFile
 
 
 class TestBitcoinConfiguration(object):

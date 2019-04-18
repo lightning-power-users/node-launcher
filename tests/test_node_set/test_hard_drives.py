@@ -1,6 +1,6 @@
 import pytest
 
-from node_launcher.services.hard_drives import HardDrives
+from node_launcher.node_set.lib.hard_drives import HardDrives
 
 
 @pytest.fixture

@@ -13,9 +13,9 @@ from node_launcher.constants import (
     TESTNET, TESTNET_PRUNE
 )
 from node_launcher.logging import log
-from node_launcher.services.bitcoin_software import BitcoinSoftware
-from node_launcher.services.configuration_file import ConfigurationFile
-from node_launcher.services.hard_drives import HardDrives
+from node_launcher.node_set.bitcoind.bitcoin_software import BitcoinSoftware
+from node_launcher.node_set.lib.configuration_file import ConfigurationFile
+from node_launcher.node_set.lib.hard_drives import HardDrives
 from node_launcher.utilities.utilities import get_random_password, get_zmq_port
 from .bitcoin_process import BitcoinProcess
 

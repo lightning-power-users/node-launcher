@@ -1,5 +1,5 @@
 from node_launcher.constants import TARGET_LND_RELEASE, OPERATING_SYSTEM
-from node_launcher.services.software import Software
+from node_launcher.node_set.lib.software import Software
 
 
 class LndSoftware(Software):

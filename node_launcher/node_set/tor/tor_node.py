@@ -2,18 +2,20 @@ import os
 
 from node_launcher.constants import TOR_DIR_PATH, OPERATING_SYSTEM
 from node_launcher.logging import log
+from node_launcher.node_set.lib.network_node import NetworkNode
 from node_launcher.node_set.tor.tor_process import TorProcess
 from node_launcher.node_set.lnd.lnd import Lnd
-from node_launcher.services.configuration_file import ConfigurationFile
-from node_launcher.services.tor_software import TorSoftware
+from node_launcher.node_set.lib.configuration_file import ConfigurationFile
+from node_launcher.node_set.tor.tor_software import TorSoftware
 
 
-class Tor(object):
+class TorNode(NetworkNode):
     file: ConfigurationFile
     software: TorSoftware
     process: TorProcess
 
     def __init__(self, lnd: Lnd, configuration_file_path: str = None):
+        super().__init__()
         if configuration_file_path is None:
             file_name = 'torrc'
             tor_dir_path = TOR_DIR_PATH[OPERATING_SYSTEM]
