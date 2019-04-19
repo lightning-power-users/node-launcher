@@ -17,8 +17,8 @@ from node_launcher.node_set.lib.software import Software
 
 
 class TorSoftware(Software):
-    def __init__(self, override_directory: str = None):
-        super().__init__(override_directory)
+    def __init__(self):
+        super().__init__()
         self.release_version = TARGET_TOR_RELEASE
         self.windows_version = TARGET_WINDOWS_TOR_VERSION
         # Only used for directory name
@@ -26,7 +26,7 @@ class TorSoftware(Software):
 
     @property
     def tor(self) -> str:
-        if IS_MACOS:
+        if IS_MACOS or IS_LINUX:
             name = 'tor.real'
         elif IS_WINDOWS:
             name = 'tor.exe'

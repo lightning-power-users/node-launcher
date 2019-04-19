@@ -97,6 +97,8 @@ TOR_EXE_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Tor/Tor Browser.app/Contents/MacOS/Tor/tor.real')
 }
 
+TOR_SERVICE_PATH = os.path.join(NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM], 'tor-service')
+
 UPGRADE = 'Please download the latest version of the Node Launcher: ' \
                     '<a href="https://github.com/PierreRochard/node-launcher/releases/">' \
                     'https://github.com/PierreRochard/node-launcher/releases' \

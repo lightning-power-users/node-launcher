@@ -9,31 +9,27 @@ from PySide2.QtCore import QThreadPool, Signal, QObject
 from node_launcher.constants import NODE_LAUNCHER_DATA_PATH, OPERATING_SYSTEM, IS_WINDOWS
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.logging import log
+from node_launcher.node_set.lib.node_status import NodeStatus
 
 
 class Software(QObject):
     github_repo: str
     github_team: str
 
-    updating = Signal(bool)
-    ready = Signal(bool)
+    status = Signal(str)
 
-    def __init__(self, override_directory: str = None):
+    def __init__(self):
         super().__init__()
-        self.override_directory = override_directory
 
-    def run(self):
+    def update(self):
         if self.needs_update:
-            self.updating.emit(True)
-            worker = Worker(self.update,
-                            download_url=self.download_url,
-                            download_compressed_path=self.download_compressed_path,
-                            downloads_directory_path=self.downloads_directory_path,
-                            bin_path=self.bin_path,
-                            latest_bin_path=self.latest_bin_path)
-            worker.signals.result.connect(lambda: self.ready.emit(True))
+            self.status.emit(NodeStatus.DOWNLOADING_SOFTWARE)
+            worker = Worker(self.download,
+                            source_url=self.download_url,
+                            destination=self.download_compressed_path)
+            worker.signals.result.connect(self.install)
             QThreadPool().start(worker)
-        self.ready.emit(True)
+        self.status.emit(NodeStatus.SOFTWARE_READY)
 
     @property
     def download_name(self) -> str:
@@ -86,27 +82,22 @@ class Software(QObject):
         return latest_executable
 
     @staticmethod
-    def download(source_url, destination):
+    def download(progress_callback, source_url, destination):
         response = requests.get(source_url, stream=True)
         with open(destination, 'wb') as f:
             for chunk in response.iter_content(chunk_size=1024):
                 if chunk:
                     f.write(chunk)
 
-    @classmethod
-    def update(cls, progress_callback, download_url, download_compressed_path,
-               downloads_directory_path, bin_path, latest_bin_path):
-        cls.download(
-            source_url=download_url,
-            destination=download_compressed_path
+    def install(self):
+        self.status.emit(NodeStatus.INSTALLING_SOFTWARE)
+        self.extract(
+            source=self.download_compressed_path,
+            destination=self.downloads_directory_path
         )
-        cls.extract(
-            source=download_compressed_path,
-            destination=downloads_directory_path
-        )
-        cls.link_latest_bin(
-            source_directory=bin_path,
-            destination_directory=latest_bin_path
+        self.link_latest_bin(
+            source_directory=self.bin_path,
+            destination_directory=self.latest_bin_path
         )
 
     @staticmethod
@@ -129,19 +120,12 @@ class Software(QObject):
 
     @property
     def launcher_data_path(self) -> str:
-        if self.override_directory is None:
-            data = NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM]
-        else:
-            data = self.override_directory
-        if not os.path.exists(data):
-            os.mkdir(data)
+        data = NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM]
         return data
 
     @property
     def latest_bin_path(self) -> str:
         path = os.path.join(self.launcher_data_path, 'bin')
-        if not os.path.exists(path):
-            os.mkdir(path)
         return path
 
     def get_latest_release_version(self) -> Optional[str]:
@@ -158,6 +142,7 @@ class Software(QObject):
 
     @property
     def needs_update(self) -> bool:
+        self.status.emit(NodeStatus.CHECKING_SOFTWARE_VERSION)
         if self.uncompressed_directory_name not in os.listdir(self.downloads_directory_path):
             log.debug(f'{self.uncompressed_directory_name} needs update')
             return True

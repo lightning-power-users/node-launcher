@@ -93,6 +93,11 @@ class Lnd(object):
         if self.file['color'] is None:
             self.file['color'] = '#000000'
 
+        self.file['listen'] = 'localhost'
+        self.file['tor.active'] = True
+        self.file['tor.v3'] = True
+        self.file['tor.streamisolation'] = True
+
         self.macaroon_path = os.path.join(
             self.lnddir,
             'data',

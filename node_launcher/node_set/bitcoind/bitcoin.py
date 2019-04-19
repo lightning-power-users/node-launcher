@@ -97,6 +97,12 @@ class Bitcoin(object):
         self.file['zmqpubrawblock'] = f'tcp://127.0.0.1:{self.zmq_block_port}'
         self.file['zmqpubrawtx'] = f'tcp://127.0.0.1:{self.zmq_tx_port}'
 
+        self.file['proxy'] = '127.0.0.1:9050'
+        self.file['listen'] = True
+        self.file['bind'] = '127.0.0.1'
+        self.file['debug'] = 'tor'
+        self.file['discover'] = True
+
         # noinspection PyBroadException
         try:
             memory = psutil.virtual_memory()
