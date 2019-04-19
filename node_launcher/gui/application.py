@@ -1,5 +1,5 @@
 from PySide2 import QtCore
-from PySide2.QtCore import QCoreApplication, Slot, QTimer, Qt, QThreadPool, QProcess
+from PySide2.QtCore import QCoreApplication, Slot, Qt, QThreadPool, QProcess
 from PySide2.QtWidgets import QApplication, QWidget, QMessageBox
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
@@ -15,43 +15,24 @@ class Application(QApplication):
     def __init__(self):
         super().__init__()
 
-        self.node_set = NodeSet()
-
         self.parent = QWidget()
         self.parent.hide()
         self.parent.setWindowFlags(self.parent.windowFlags() & ~QtCore.Qt.Tool)
-
-        self.system_tray = SystemTray(self.parent, self.node_set)
-
         self.setQuitOnLastWindowClosed(False)
-
         self.aboutToQuit.connect(self.quit_app)
 
-        self.system_tray.show()
+        self.node_set = NodeSet()
+        self.system_tray = SystemTray(self.parent, self.node_set)
 
-        self.system_tray.show_message(
-            title='Nodes starting...',
-            message='Bitcoin and Lightning are syncing'
-        )
-
-        self.node_set.bitcoin.file.file_watcher.fileChanged.connect(self.check_restart_required)
-        self.node_set.lnd.file.file_watcher.fileChanged.connect(self.check_restart_required)
-
-        self.timer = QTimer(self)
-        self.timer.start(1000)
-        self.timer.timeout.connect(self.check_restart_required)
-
-        self.threadpool = QThreadPool()
+    def start(self):
+        threadpool = QThreadPool()
         worker = Worker(fn=self.check_version)
-        self.threadpool.start(worker)
+        threadpool.start(worker)
 
-        self.node_set.run()
-
-    def check_restart_required(self):
-        if self.node_set.bitcoin.restart_required or self.node_set.lnd.restart_required:
-            pass
-        else:
-            pass
+        self.system_tray.show()
+        self.node_set.start()
+        status = self.exec_()
+        return status
 
     @staticmethod
     def check_version(progress_callback):
