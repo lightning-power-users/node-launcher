@@ -18,22 +18,24 @@ class NodeSet(object):
         self.bitcoin = Bitcoin()
         self.lnd = Lnd(bitcoin=self.bitcoin)
 
-        self.tor_node.software.status.connect(self.download_bitcoin)
-        self.bitcoin.software.status.connect(self.download_lnd)
-
-        self.bitcoin.process.synced.connect(self.start_lnd)
+        self.tor_node.status.connect(self.handle_tor_node_status_change)
+        self.bitcoin.status.connect(self.handle_bitcoin_node_status_change)
+        self.lnd.status.connect(self.handle_lnd_node_status_change)
 
     def start(self):
         log.debug('Starting node set')
         self.tor_node.software.update()
 
-    def download_bitcoin(self, status):
-        if status == NodeStatus.INSTALLING_SOFTWARE:
+    def handle_tor_node_status_change(self, status):
+        if status == NodeStatus.SOFTWARE_DOWNLOADED:
             self.bitcoin.software.update()
 
-    def download_lnd(self, status):
-        if status == NodeStatus.INSTALLING_SOFTWARE:
+    def handle_bitcoin_node_status_change(self, status):
+        if status == NodeStatus.SOFTWARE_DOWNLOADED:
             self.lnd.software.update()
+
+    def handle_lnd_node_status_change(self, status):
+        pass
 
     def start_lnd(self):
         hostname_file = os.path.join(TOR_SERVICE_PATH, 'hostname')
