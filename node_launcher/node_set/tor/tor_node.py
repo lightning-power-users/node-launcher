@@ -7,7 +7,7 @@ from node_launcher.node_set.tor.tor_software import TorSoftware
 
 
 class TorNode(NetworkNode):
-    node_status: NodeStatus
+    current_status: NodeStatus
     software: TorSoftware
     configuration: TorConfiguration
     process: TorProcess
@@ -15,7 +15,7 @@ class TorNode(NetworkNode):
 
     def __init__(self):
         super().__init__()
-        self.node_status = None
+        self.current_status = None
 
         self.software = TorSoftware()
         self.configuration = TorConfiguration()
@@ -27,10 +27,16 @@ class TorNode(NetworkNode):
         self.software.status.connect(self.start_process)
 
     def update_status(self, new_status: NodeStatus):
-        self.node_status = new_status
+        self.current_status = new_status
         self.status.emit(new_status)
 
     def start_process(self, new_status: NodeStatus):
         if new_status == NodeStatus.SOFTWARE_READY:
+            # Todo: run in threads so they don't block the GUI
+            self.update_status(NodeStatus.LOADING_CONFIGURATION)
+            self.configuration.load()
+            self.update_status(NodeStatus.CHECKING_CONFIGURATION)
+            self.configuration.check()
+            self.update_status(NodeStatus.CONFIGURATION_READY)
             log.debug(f'Starting {self.network} node')
             self.process.start()
