@@ -37,7 +37,7 @@ class TestBitcoinSoftware(object):
         assert bitcoin_software.download_name
 
     def test_binaries_directory(self, bitcoin_software: BitcoinSoftware):
-        d = bitcoin_software.downloads_directory_path
+        d = bitcoin_software.download_destination_directory
         assert os.path.isdir(d)
 
     def test_binary_directory(self, bitcoin_software: BitcoinSoftware):
@@ -53,4 +53,4 @@ class TestBitcoinSoftware(object):
     @pytest.mark.slow
     def test_download(self, bitcoin_software: BitcoinSoftware):
         bitcoin_software.download()
-        assert os.path.isfile(bitcoin_software.download_compressed_path)
+        assert os.path.isfile(bitcoin_software.download_destination_file_path)

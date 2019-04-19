@@ -97,8 +97,8 @@ class Application(QApplication):
         self.system_tray.show_message(title='Stopping bitcoind...')
         self.node_set.bitcoin.process.waitForFinished(-1)
 
-        self.node_set.tor.process.kill()
-        self.node_set.tor.process.waitForFinished(-1)
+        self.node_set.tor_node.process.kill()
+        self.node_set.tor_node.process.waitForFinished(-1)
 
         self.system_tray.show_message(title='Exiting Node Launcher', timeout=1)
 

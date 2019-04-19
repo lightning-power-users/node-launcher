@@ -43,7 +43,7 @@ class TorSoftware(Software):
             return f'tor-win64-{self.windows_version}'
 
     @property
-    def download_compressed_name(self) -> str:
+    def download_destination_file_name(self) -> str:
         name = self.download_name
         if IS_WINDOWS:
             suffix = '.zip'
@@ -56,7 +56,7 @@ class TorSoftware(Software):
     @property
     def download_url(self) -> str:
         return f'http://www.torproject.org/dist/torbrowser/' \
-            f'{self.release_version}/{self.download_compressed_name}'
+            f'{self.release_version}/{self.download_destination_file_name}'
 
     @property
     def uncompressed_directory_name(self) -> str:

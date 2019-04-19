@@ -60,5 +60,5 @@ class BitcoinSoftware(Software):
         download_url = f'https://bitcoincore.org' \
             f'/bin' \
             f'/bitcoin-core-{self.release_version}' \
-            f'/{self.download_compressed_name}'
+            f'/{self.download_destination_file_name}'
         return download_url

@@ -1,4 +1,8 @@
+from PySide2.QtCore import Signal, QObject
 
-class NetworkNode(object):
+
+class NetworkNode(QObject):
+    status = Signal(str)
+
     def __init__(self):
-        pass
+        super().__init__()

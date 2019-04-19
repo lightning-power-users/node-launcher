@@ -42,11 +42,11 @@ class TestLndSoftware(object):
         assert len(name)
 
     def test_binary_compressed_name(self, lnd_software: LndSoftware):
-        name = lnd_software.download_compressed_name
+        name = lnd_software.download_destination_file_name
         assert len(name)
 
     def test_binaries_directory(self, lnd_software: LndSoftware):
-        d = lnd_software.downloads_directory_path
+        d = lnd_software.download_destination_directory
         assert os.path.isdir(d)
 
     def test_binary_directory(self, lnd_software: LndSoftware):
@@ -60,5 +60,5 @@ class TestLndSoftware(object):
     @pytest.mark.slow
     def test_download(self, lnd_software: LndSoftware):
         lnd_software.download()
-        assert os.path.isfile(lnd_software.download_compressed_path)
+        assert os.path.isfile(lnd_software.download_destination_file_path)
 

@@ -38,5 +38,5 @@ class LndSoftware(Software):
             f'/releases' \
             f'/download' \
             f'/{self.release_version}' \
-            f'/{self.download_compressed_name}'
+            f'/{self.download_destination_file_name}'
         return download_url
