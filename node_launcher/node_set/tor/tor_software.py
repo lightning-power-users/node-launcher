@@ -17,12 +17,14 @@ from node_launcher.node_set.lib.software import Software
 
 
 class TorSoftware(Software):
+    release_version = TARGET_TOR_RELEASE
+    windows_version = TARGET_WINDOWS_TOR_VERSION
+    software_name = 'tor'
+
     def __init__(self):
         super().__init__()
-        self.release_version = TARGET_TOR_RELEASE
-        self.windows_version = TARGET_WINDOWS_TOR_VERSION
-        # Only used for directory name
-        self.github_repo = 'tor'
+        if IS_MACOS:
+            self.compressed_suffix = '.dmg'
 
     @property
     def tor(self) -> str:
@@ -32,7 +34,7 @@ class TorSoftware(Software):
             name = 'tor.exe'
         else:
             raise NotImplementedError()
-        latest_executable = os.path.join(self.latest_bin_path, name)
+        latest_executable = os.path.join(self.static_bin_path, name)
         return latest_executable
 
     @property
@@ -41,17 +43,6 @@ class TorSoftware(Software):
             return f'TorBrowser-{self.release_version}-osx64_en-US'
         elif IS_WINDOWS:
             return f'tor-win64-{self.windows_version}'
-
-    @property
-    def download_destination_file_name(self) -> str:
-        name = self.download_name
-        if IS_WINDOWS:
-            suffix = '.zip'
-        elif IS_MACOS:
-            suffix = '.dmg'
-        else:
-            raise NotImplementedError()
-        return name + suffix
 
     @property
     def download_url(self) -> str:
