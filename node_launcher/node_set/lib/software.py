@@ -1,4 +1,5 @@
 import os
+import subprocess
 import tarfile
 import zipfile
 
@@ -50,9 +51,7 @@ class Software(QObject):
     @property
     def binary_directory_path(self) -> str:
         path = os.path.join(self.download_destination_directory,
-                            self.uncompressed_directory_name)
-        if not os.path.exists(path):
-            os.mkdir(path)
+                            self.download_name)
         return path
 
     @property
@@ -100,7 +99,7 @@ class Software(QObject):
             for chunk in response.iter_content(chunk_size=4096):
                 downloaded += len(chunk)
                 f.write(chunk)
-                progress = int((downloaded/total_length)*100)
+                progress = int((downloaded / total_length) * 100)
                 log.debug('Download progress', progress=progress)
                 progress_callback.emit(progress)
 
@@ -119,17 +118,35 @@ class Software(QObject):
         self.status.emit(NodeStatus.SOFTWARE_INSTALLED)
         self.status.emit(NodeStatus.SOFTWARE_READY)
 
-    @staticmethod
-    def extract(source, destination):
+    def extract(self, source, destination):
         log.debug('Extracting downloaded software',
                   source=source,
                   destination=destination)
-        if IS_WINDOWS:
+        if self.compressed_suffix == '.zip':
             with zipfile.ZipFile(source) as zip_file:
                 zip_file.extractall(path=destination)
-        else:
+        elif 'tar' in self.compressed_suffix:
             with tarfile.open(source) as tar:
                 tar.extractall(path=destination)
+        elif self.compressed_suffix == '.dmg':
+            log.debug('Attaching disk image', source=source)
+            subprocess.run(
+                [
+                    f'hdiutil attach {source}'
+                ])
+            app_source_path = '/Volumes/Tor Browser/Tor Browser.app'
+            log.debug('Copying app from disk image',
+                      app_source_path=app_source_path,
+                      destination=destination)
+            subprocess.run(
+                [
+                    f'cp -R {app_source_path} {destination}'
+                ], shell=True)
+            disk_image_path = '/Volumes/Tor Browser'
+            log.debug('Detaching disk image', disk_image_path=disk_image_path)
+            subprocess.run([
+                f'hdiutil detach {disk_image_path}'
+            ])
 
     @staticmethod
     def link_static_bin(source_directory, destination_directory):
