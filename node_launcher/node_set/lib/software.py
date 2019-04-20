@@ -26,6 +26,7 @@ class Software(QObject):
     github_team: str
 
     status = Signal(str)
+    download_progress = Signal(str)
 
     def __init__(self, software_name: str, release_version: str):
         super().__init__()
@@ -56,6 +57,11 @@ class Software(QObject):
             source_url=self.download_url,
             destination_directory=self.download_destination_directory,
             destination_file=self.download_destination_file_name
+        )
+        worker.signals.progress.connect(
+            lambda percent: self.download_progress.emit(
+                f'{percent}% finished downloading {self.software_name} software'
+            )
         )
         worker.signals.finished.connect(
             lambda: self.change_status(SoftwareStatus.SOFTWARE_DOWNLOADED)

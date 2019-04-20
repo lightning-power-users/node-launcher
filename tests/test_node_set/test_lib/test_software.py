@@ -17,6 +17,9 @@ def software():
     software = Software(software_name='test_software', release_version='0.1.0')
     software.download_name = f'TestSoftware_{software.release_version}'
     software.download_url = 'http://localhost'
+    software.downloaded_bin_path = os.path.join(
+        software.binary_directory_path,
+        'bin')
     return software
 
 
@@ -25,7 +28,9 @@ class DownloadFixture(object):
         self.tmpdir = tmpdir
         self.software = software
         self.binary_name = 'test_bin'
-        self.bin_path = os.path.join(self.tmpdir, 'bin')
+        self.archive_source = os.path.join(self.tmpdir,
+                                           self.software.download_name)
+        self.bin_path = os.path.join(self.archive_source, 'bin')
 
     @property
     def binary_path(self):
@@ -33,7 +38,7 @@ class DownloadFixture(object):
         return os.path.join(self.bin_path, self.binary_name)
 
     @property
-    def archive_path(self):
+    def archive_destination_file_path(self):
         return os.path.join(self.tmpdir,
                             self.software.download_destination_file_name)
 
@@ -42,11 +47,11 @@ class DownloadFixture(object):
         with open(self.binary_path, 'wb') as f:
             f.write(os.urandom(file_size))
 
-        make_archive(base_name=self.archive_path.replace('.tar.gz', ''),
+        make_archive(base_name=self.archive_destination_file_path.replace('.tar.gz', ''),
                      format='gztar',
-                     root_dir=self.bin_path)
+                     root_dir=self.tmpdir)
 
-        content = open(self.archive_path, 'rb').read()
+        content = open(self.archive_destination_file_path, 'rb').read()
         return content
 
 
@@ -73,6 +78,7 @@ class TestSoftware(object):
             correct = new_status == str(expected_status[self.call_count])
             self.call_count += 1
             return correct
+
         os.makedirs(software.download_destination_directory, exist_ok=True)
         file = open(software.download_destination_file_path, 'w').close()
         with qtbot.waitSignal(software.status, raising=True,
@@ -94,11 +100,12 @@ class TestSoftware(object):
             correct = new_status == str(expected_status[self.call_count])
             self.call_count += 1
             return correct
+
         download_fixture = DownloadFixture(software, tmpdir)
         content = download_fixture.get_content()
         requests_mock.get(software.download_url,
                           content=content,
-                          headers={'content-length': len(content)})
+                          headers={'content-length': str(len(content))})
         if os.path.isfile(software.download_destination_file_path):
             os.remove(software.download_destination_file_path)
         with qtbot.waitSignal(software.status, raising=True,
