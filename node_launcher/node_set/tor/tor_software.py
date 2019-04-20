@@ -11,12 +11,11 @@ from node_launcher.node_set.lib.software import Software
 
 
 class TorSoftware(Software):
-    release_version = TARGET_TOR_RELEASE
-    windows_version = TARGET_WINDOWS_TOR_VERSION
-    software_name = 'tor'
-
     def __init__(self):
-        super().__init__()
+        super().__init__(
+            software_name='tor',
+            release_version=TARGET_TOR_RELEASE
+        )
         if IS_MACOS:
             self.compressed_suffix = '.dmg'
             self.download_name = f'TorBrowser-{self.release_version}-osx64_en-US'
@@ -31,7 +30,8 @@ class TorSoftware(Software):
             self.compressed_suffix = '.tar.xz'
             self.download_name = f'tor-browser-linux64-{self.release_version}_en-US'
         elif IS_WINDOWS:
-            self.download_name = f'tor-win64-{self.windows_version}'
+            self.release_version = TARGET_WINDOWS_TOR_VERSION
+            self.download_name = f'tor-win64-{self.release_version}'
             self.downloaded_bin_path = os.path.join(self.binary_directory_path,
                                                     'Tor')
 

@@ -27,30 +27,41 @@ class Software(QObject):
 
     status = Signal(str)
 
-    def __init__(self):
+    def __init__(self, software_name: str, release_version: str):
         super().__init__()
+        self.software_name = software_name
+        self.release_version = release_version
         self.compressed_suffix = DEFAULT_COMPRESSED_SUFFIX
         if IS_WINDOWS:
             self.compressed_suffix = DEFAULT_WINDOWS_COMPRESSED_SUFFIX
 
     def change_status(self, new_status: SoftwareStatus):
+        log.debug('change_status',
+                  software_name=self.software_name,
+                  new_status=new_status)
         self.current_status = new_status
-        self.status.emit(new_status)
+        self.status.emit(str(new_status))
 
     def update(self):
         self.change_status(SoftwareStatus.CHECKING_DOWNLOAD)
         if os.path.isfile(self.download_destination_file_path):
             self.change_status(SoftwareStatus.SOFTWARE_READY)
         else:
-            self.change_status(SoftwareStatus.DOWNLOADING_SOFTWARE)
-            worker = Worker(self.download,
-                            source_url=self.download_url,
-                            destination=self.download_destination_file_path)
-            worker.signals.finished.connect(
-                lambda: self.change_status(SoftwareStatus.SOFTWARE_DOWNLOADED)
-            )
-            worker.signals.result.connect(self.install)
-            QThreadPool().start(worker)
+            self.start_update_worker()
+
+    def start_update_worker(self):
+        self.change_status(SoftwareStatus.DOWNLOADING_SOFTWARE)
+        worker = Worker(
+            self.download,
+            source_url=self.download_url,
+            destination_directory=self.download_destination_directory,
+            destination_file=self.download_destination_file_name
+        )
+        worker.signals.finished.connect(
+            lambda: self.change_status(SoftwareStatus.SOFTWARE_DOWNLOADED)
+        )
+        worker.signals.result.connect(self.install)
+        QThreadPool().start(worker)
 
     @staticmethod
     def download(progress_callback, source_url: str,
@@ -61,7 +72,7 @@ class Software(QObject):
             destination_directory=destination_directory,
             destination_file=destination_file
         )
-        os.makedirs(destination_directory)
+        os.makedirs(destination_directory, exist_ok=True)
         destination = os.path.join(destination_directory, destination_file)
         with open(destination, 'wb') as f:
             response = requests.get(source_url, stream=True)
@@ -127,7 +138,7 @@ class Software(QObject):
             source_directory=source_directory,
             destination_directory=destination_directory
         )
-        os.makedirs(destination_directory)
+        os.makedirs(destination_directory, exist_ok=True)
         for executable in os.listdir(source_directory):
             source = os.path.join(source_directory, executable)
             destination = os.path.join(destination_directory, executable)

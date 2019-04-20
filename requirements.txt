@@ -16,6 +16,7 @@ PyTest
 pytest-qt
 qrcode
 requests
+requests-mock
 shiboken2<=5.12.0
 structlog
 webassets
