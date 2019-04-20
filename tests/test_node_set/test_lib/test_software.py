@@ -68,6 +68,7 @@ class TestSoftware(object):
             SoftwareStatus.CHECKING_DOWNLOAD,
             SoftwareStatus.SOFTWARE_READY
         ]
+
         def signal_cb(new_status):
             correct = new_status == str(expected_status[self.call_count])
             self.call_count += 1
@@ -94,8 +95,10 @@ class TestSoftware(object):
             self.call_count += 1
             return correct
         download_fixture = DownloadFixture(software, tmpdir)
+        content = download_fixture.get_content()
         requests_mock.get(software.download_url,
-                          content=download_fixture.get_content())
+                          content=content,
+                          headers={'content-length': len(content)})
         if os.path.isfile(software.download_destination_file_path):
             os.remove(software.download_destination_file_path)
         with qtbot.waitSignal(software.status, raising=True,
