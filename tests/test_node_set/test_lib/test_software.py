@@ -1,4 +1,5 @@
 import os
+import shutil
 from shutil import make_archive
 
 import pytest
@@ -20,6 +21,7 @@ def software():
     software.downloaded_bin_path = os.path.join(
         software.binary_directory_path,
         'bin')
+    software.test_bin = os.path.join(software.downloaded_bin_path, 'test_bin')
     return software
 
 
@@ -31,6 +33,7 @@ class DownloadFixture(object):
         self.archive_source = os.path.join(self.tmpdir,
                                            self.software.download_name)
         self.bin_path = os.path.join(self.archive_source, 'bin')
+        software.bin_path = self.bin_path
 
     @property
     def binary_path(self):
@@ -47,9 +50,10 @@ class DownloadFixture(object):
         with open(self.binary_path, 'wb') as f:
             f.write(os.urandom(file_size))
 
-        make_archive(base_name=self.archive_destination_file_path.replace('.tar.gz', ''),
-                     format='gztar',
-                     root_dir=self.tmpdir)
+        make_archive(
+            base_name=self.archive_destination_file_path.replace('.tar.gz', ''),
+            format='gztar',
+            root_dir=self.tmpdir)
 
         content = open(self.archive_destination_file_path, 'rb').read()
         return content
@@ -86,6 +90,8 @@ class TestSoftware(object):
             software.update()
 
     def test_update_download(self, software, qtbot, requests_mock, tmpdir):
+        shutil.rmtree(software.download_destination_directory)
+
         self.call_count = 0
         expected_status = [
             SoftwareStatus.CHECKING_DOWNLOAD,
@@ -96,10 +102,19 @@ class TestSoftware(object):
             SoftwareStatus.SOFTWARE_READY
         ]
 
-        def signal_cb(new_status):
+        def check_status_order(new_status):
             correct = new_status == str(expected_status[self.call_count])
             self.call_count += 1
             return correct
+
+        def check_file_creation(new_status):
+            if new_status == str(SoftwareStatus.SOFTWARE_READY):
+                assert len(requests_mock.request_history) == 1
+                assert os.path.isdir(software.download_destination_directory)
+                assert os.path.isfile(software.download_destination_file_path)
+                assert os.path.isdir(software.binary_directory_path)
+                assert os.path.isdir(software.bin_path)
+                assert os.path.isfile(software.test_bin)
 
         download_fixture = DownloadFixture(software, tmpdir)
         content = download_fixture.get_content()
@@ -108,7 +123,8 @@ class TestSoftware(object):
                           headers={'content-length': str(len(content))})
         if os.path.isfile(software.download_destination_file_path):
             os.remove(software.download_destination_file_path)
+
+        software.status.connect(check_file_creation)
         with qtbot.waitSignal(software.status, raising=True,
-                              check_params_cb=signal_cb) as blocker:
+                              check_params_cb=check_status_order) as blocker:
             software.update()
-        assert len(requests_mock.request_history) == 1
