@@ -121,8 +121,6 @@ class TestSoftware(object):
         requests_mock.get(software.download_url,
                           content=content,
                           headers={'content-length': str(len(content))})
-        if os.path.isfile(software.download_destination_file_path):
-            os.remove(software.download_destination_file_path)
 
         software.status.connect(check_file_creation)
         with qtbot.waitSignal(software.status, raising=True,

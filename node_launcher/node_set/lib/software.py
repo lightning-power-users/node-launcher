@@ -58,16 +58,16 @@ class Software(QObject):
             destination_directory=self.download_destination_directory,
             destination_file=self.download_destination_file_name
         )
-        worker.signals.progress.connect(
-            lambda percent: self.download_progress.emit(
-                f'{percent}% finished downloading {self.software_name} software'
-            )
-        )
+        worker.signals.progress.connect(self.emit_download_progress)
         worker.signals.finished.connect(
             lambda: self.change_status(SoftwareStatus.SOFTWARE_DOWNLOADED)
         )
         worker.signals.result.connect(self.install)
         QThreadPool().start(worker)
+
+    def emit_download_progress(self, percent):
+        msg = f'{percent}% finished downloading {self.software_name} software'
+        self.download_progress.emit(msg)
 
     @staticmethod
     def download(progress_callback, source_url: str,
