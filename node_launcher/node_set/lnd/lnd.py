@@ -20,11 +20,12 @@ from node_launcher.constants import (
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.logging import log
 from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
-from node_launcher.node_set.lnd.lnd_client import LndClient
-from node_launcher.node_set.lnd.lnd_process import LndProcess
 from node_launcher.node_set.lib.configuration_file import ConfigurationFile
-from node_launcher.node_set.lnd.lnd_software import LndSoftware
-from node_launcher.utilities.utilities import get_port, get_random_password
+from node_launcher.node_set.lib.get_random_password import get_random_password
+from node_launcher.port_utilities import get_port
+from .lnd_client import LndClient
+from .lnd_process import LndProcess
+from .lnd_software import LndSoftware
 
 
 class Lnd(object):

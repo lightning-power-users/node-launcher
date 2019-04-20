@@ -3,7 +3,7 @@ import os
 from node_launcher.node_set.lnd.lnd import (
     Lnd
 )
-from node_launcher.utilities.utilities import is_port_in_use
+from node_launcher.port_utilities import is_port_in_use
 
 
 class TestDirectoryConfiguration(object):

@@ -13,6 +13,10 @@ from node_launcher.constants import (
 )
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.logging import log
+from .constants import (
+    DEFAULT_COMPRESSED_SUFFIX,
+    DEFAULT_WINDOWS_COMPRESSED_SUFFIX
+)
 from .node_status import SoftwareStatus
 
 
@@ -25,10 +29,9 @@ class Software(QObject):
 
     def __init__(self):
         super().__init__()
+        self.compressed_suffix = DEFAULT_COMPRESSED_SUFFIX
         if IS_WINDOWS:
-            self.compressed_suffix = '.zip'
-        else:
-            self.compressed_suffix = '.tar.gz'
+            self.compressed_suffix = DEFAULT_WINDOWS_COMPRESSED_SUFFIX
 
     def change_status(self, new_status: SoftwareStatus):
         self.current_status = new_status
@@ -36,7 +39,9 @@ class Software(QObject):
 
     def update(self):
         self.change_status(SoftwareStatus.CHECKING_DOWNLOAD)
-        if not os.path.isfile(self.download_destination_file_path):
+        if os.path.isfile(self.download_destination_file_path):
+            self.change_status(SoftwareStatus.SOFTWARE_READY)
+        else:
             self.change_status(SoftwareStatus.DOWNLOADING_SOFTWARE)
             worker = Worker(self.download,
                             source_url=self.download_url,
@@ -46,8 +51,6 @@ class Software(QObject):
             )
             worker.signals.result.connect(self.install)
             QThreadPool().start(worker)
-        else:
-            self.change_status(SoftwareStatus.SOFTWARE_READY)
 
     @staticmethod
     def download(progress_callback, source_url: str,

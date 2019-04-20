@@ -1,7 +1,7 @@
 from PySide2.QtGui import QIcon, QPixmap
 from PySide2.QtWidgets import QSystemTrayIcon, QWidget
 
-from .assets import asset_access
+from .assets.asset_access import asset_access
 from .menu.menu import Menu
 from node_launcher.node_set import NodeSet
 
