@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 import tarfile
 import zipfile
@@ -45,13 +46,18 @@ class Software(QObject):
 
     def update(self):
         self.change_status(SoftwareStatus.CHECKING_DOWNLOAD)
-        if os.path.isfile(self.download_destination_file_path):
+        is_downloaded = os.path.isfile(self.download_destination_file_path)
+        is_installed = os.path.isdir(self.binary_directory_path)
+        if is_downloaded and is_installed:
             self.change_status(SoftwareStatus.SOFTWARE_READY)
-        else:
+        elif not is_downloaded:
+            self.change_status(SoftwareStatus.DOWNLOADING_SOFTWARE)
             self.start_update_worker()
+        elif not is_installed:
+            self.change_status(SoftwareStatus.SOFTWARE_DOWNLOADED)
+            self.install()
 
     def start_update_worker(self):
-        self.change_status(SoftwareStatus.DOWNLOADING_SOFTWARE)
         worker = Worker(
             self.download,
             source_url=self.download_url,
@@ -98,7 +104,7 @@ class Software(QObject):
         self.change_status(SoftwareStatus.INSTALLING_SOFTWARE)
         self.extract(
             source=self.download_destination_file_path,
-            destination=self.download_destination_directory
+            destination=self.downloaded_bin_path
         )
         self.link_static_bin(
             source_directory=self.downloaded_bin_path,
@@ -108,6 +114,7 @@ class Software(QObject):
         self.change_status(SoftwareStatus.SOFTWARE_READY)
 
     def extract(self, source, destination):
+        os.makedirs(destination, exist_ok=True)
         log.debug('Extracting downloaded software',
                   source=source,
                   destination=destination)
@@ -119,19 +126,21 @@ class Software(QObject):
                 tar.extractall(path=destination)
         elif self.compressed_suffix == '.dmg':
             log.debug('Attaching disk image', source=source)
+            escaped_source = source.replace(' ', '\ ')
             subprocess.run(
                 [
-                    f'hdiutil attach {source}'
+                    f'hdiutil attach {escaped_source}'
                 ], shell=True)
-            app_source_path = '/Volumes/Tor Browser/Tor Browser.app'
+            # app_source_path = '/Volumes/Tor Browser/Tor Browser.app'
+            app_source_path = os.path.join(
+                '/Volumes', 'Tor Browser', 'Tor Browser.app', 'Contents',
+                'MacOS', 'Tor', 'tor.real'
+            )
             log.debug('Copying app from disk image',
                       app_source_path=app_source_path,
                       destination=destination)
-            subprocess.run(
-                [
-                    f'cp -R {app_source_path} {destination}'
-                ], shell=True)
-            disk_image_path = '/Volumes/Tor Browser'
+            shutil.copy(src=app_source_path, dst=destination)
+            disk_image_path = '/Volumes/Tor\ Browser'
             log.debug('Detaching disk image', disk_image_path=disk_image_path)
             subprocess.run([
                 f'hdiutil detach {disk_image_path}'

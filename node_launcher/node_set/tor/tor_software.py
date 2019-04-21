@@ -19,13 +19,7 @@ class TorSoftware(Software):
         if IS_MACOS:
             self.compressed_suffix = '.dmg'
             self.download_name = f'TorBrowser-{self.release_version}-osx64_en-US'
-            self.downloaded_bin_path = os.path.join(
-                self.binary_directory_path,
-                'Tor Browser.app',
-                'Contents',
-                'MacOS',
-                'Tor'
-            )
+            self.downloaded_bin_path = self.binary_directory_path
         elif IS_LINUX:
             self.compressed_suffix = '.tar.xz'
             self.download_name = f'tor-browser-linux64-{self.release_version}_en-US'

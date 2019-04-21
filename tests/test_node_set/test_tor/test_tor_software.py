@@ -40,7 +40,6 @@ class TestTorSoftware(object):
                 assert os.path.isfile(
                     tor_software.download_destination_file_path)
                 assert os.path.isdir(tor_software.binary_directory_path)
-                assert os.path.isdir(tor_software.bin_path)
                 assert os.path.isfile(tor_software.tor)
 
         tor_software.status.connect(check_file_creation)
