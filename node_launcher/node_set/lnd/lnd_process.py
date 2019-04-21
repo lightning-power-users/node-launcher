@@ -19,12 +19,12 @@ class LndProcess(ManagedProcess):
 
     def process_output_line(self, line: str):
         if 'Active chain: Bitcoin' in line:
-            self.status_update.emit('LND starting')
+            self.status.emit('LND starting')
         elif 'Waiting for wallet encryption password' in line:
-            self.status_update.emit('LND unlocking wallet')
+            self.status.emit('LND unlocking wallet')
             self.ready_to_unlock.emit(True)
         elif 'Waiting for chain backend to finish sync' in line:
-            self.status_update.emit('Chain backend syncing')
+            self.status.emit('Chain backend syncing')
         elif 'Unable to synchronize wallet to chain' in line:
             self.terminate()
             self.restart_process()
@@ -33,7 +33,7 @@ class LndProcess(ManagedProcess):
             self.restart_process()
         elif 'Starting HTLC Switch' in line:
             self.set_icon_color.emit('green')
-            self.status_update.emit('LND synced')
+            self.status.emit('LND synced')
             self.notification.emit(
                 'LND is ready',
                 'Open Joule or Zap',
@@ -53,7 +53,7 @@ class LndProcess(ManagedProcess):
                     total_left = 600000 - new_height
                     time_left = (total_left / change) * timestamp_change
                     humanized = humanize.naturaltime(-time_left)
-                    self.status_update.emit(
+                    self.status.emit(
                         f'ETA: {humanized}, caught up to height {new_height}'
                     )
 

@@ -24,7 +24,7 @@ class NodeSet(object):
 
     def start(self):
         log.debug('Starting node set')
-        self.tor_node.software.update()
+        self.tor_node.start()
 
     def handle_tor_node_status_change(self, status):
         if status == NodeStatus.SOFTWARE_DOWNLOADED:

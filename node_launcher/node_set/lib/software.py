@@ -37,24 +37,25 @@ class Software(QObject):
         if IS_WINDOWS:
             self.compressed_suffix = DEFAULT_WINDOWS_COMPRESSED_SUFFIX
 
-    def change_status(self, new_status: SoftwareStatus):
-        log.debug('change_status',
+    def update_status(self, new_status: SoftwareStatus):
+        new_status = str(new_status)
+        log.debug('software update_status',
                   software_name=self.software_name,
                   new_status=new_status)
         self.current_status = new_status
-        self.status.emit(str(new_status))
+        self.status.emit(new_status)
 
     def update(self):
-        self.change_status(SoftwareStatus.CHECKING_DOWNLOAD)
+        self.update_status(SoftwareStatus.CHECKING_DOWNLOAD)
         is_downloaded = os.path.isfile(self.download_destination_file_path)
         is_installed = os.path.isdir(self.binary_directory_path)
         if is_downloaded and is_installed:
-            self.change_status(SoftwareStatus.SOFTWARE_READY)
+            self.update_status(SoftwareStatus.SOFTWARE_READY)
         elif not is_downloaded:
-            self.change_status(SoftwareStatus.DOWNLOADING_SOFTWARE)
+            self.update_status(SoftwareStatus.DOWNLOADING_SOFTWARE)
             self.start_update_worker()
         elif not is_installed:
-            self.change_status(SoftwareStatus.SOFTWARE_DOWNLOADED)
+            self.update_status(SoftwareStatus.SOFTWARE_DOWNLOADED)
             self.install()
 
     def start_update_worker(self):
@@ -66,7 +67,7 @@ class Software(QObject):
         )
         worker.signals.progress.connect(self.emit_download_progress)
         worker.signals.finished.connect(
-            lambda: self.change_status(SoftwareStatus.SOFTWARE_DOWNLOADED)
+            lambda: self.update_status(SoftwareStatus.SOFTWARE_DOWNLOADED)
         )
         worker.signals.result.connect(self.install)
         QThreadPool().start(worker)
@@ -101,7 +102,7 @@ class Software(QObject):
     def install(self):
         # Todo: move to a thread so it doesn't block the GUI
         log.debug('Installing software')
-        self.change_status(SoftwareStatus.INSTALLING_SOFTWARE)
+        self.update_status(SoftwareStatus.INSTALLING_SOFTWARE)
         self.extract(
             source=self.download_destination_file_path,
             destination=self.downloaded_bin_path
@@ -110,8 +111,8 @@ class Software(QObject):
             source_directory=self.downloaded_bin_path,
             destination_directory=self.static_bin_path
         )
-        self.change_status(SoftwareStatus.SOFTWARE_INSTALLED)
-        self.change_status(SoftwareStatus.SOFTWARE_READY)
+        self.update_status(SoftwareStatus.SOFTWARE_INSTALLED)
+        self.update_status(SoftwareStatus.SOFTWARE_READY)
 
     def extract(self, source, destination):
         os.makedirs(destination, exist_ok=True)

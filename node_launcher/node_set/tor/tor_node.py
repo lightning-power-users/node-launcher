@@ -1,9 +1,11 @@
+from PySide2.QtCore import QProcess
+
 from node_launcher.logging import log
 from node_launcher.node_set.lib.network_node import NetworkNode
 from node_launcher.node_set.lib.node_status import NodeStatus
-from node_launcher.node_set.tor.tor_configuration import TorConfiguration
-from node_launcher.node_set.tor.tor_process import TorProcess
-from node_launcher.node_set.tor.tor_software import TorSoftware
+from .tor_configuration import TorConfiguration
+from .tor_process import TorProcess
+from .tor_software import TorSoftware
 
 
 class TorNode(NetworkNode):
@@ -22,21 +24,33 @@ class TorNode(NetworkNode):
         self.process = TorProcess(self.software.tor)
         self.connect_events()
 
+    def start(self):
+        self.update_status(NodeStatus.STARTED)
+        self.software.update()
+
+    def stop(self):
+        self.process.kill()
+        self.update_status(NodeStatus.STOPPED)
+
     def connect_events(self):
         self.software.status.connect(self.update_status)
-        self.software.status.connect(self.start_process)
+        self.process.status.connect(self.update_status)
 
     def update_status(self, new_status: NodeStatus):
+        new_status = str(new_status)
+        log.debug('node change_status',
+                  network=self.network,
+                  new_status=new_status)
         self.current_status = new_status
         self.status.emit(new_status)
 
-    def start_process(self, new_status: NodeStatus):
-        if new_status == NodeStatus.SOFTWARE_READY:
+        if new_status == str(NodeStatus.SOFTWARE_READY):
             # Todo: run in threads so they don't block the GUI
             self.update_status(NodeStatus.LOADING_CONFIGURATION)
             self.configuration.load()
             self.update_status(NodeStatus.CHECKING_CONFIGURATION)
             self.configuration.check()
             self.update_status(NodeStatus.CONFIGURATION_READY)
-            log.debug(f'Starting {self.network} node')
+            self.update_status(NodeStatus.STARTING_PROCESS)
             self.process.start()
+            self.update_status(NodeStatus.PROCESS_STARTED)

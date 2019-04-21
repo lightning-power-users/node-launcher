@@ -20,7 +20,7 @@ class Menu(QMenu):
         # Bitcoind
         self.bitcoind_status_action = self.addAction('bitcoind off')
         self.bitcoind_status_action.setEnabled(False)
-        self.node_set.bitcoin.process.status_update.connect(
+        self.node_set.bitcoin.process.status.connect(
             lambda line: self.bitcoind_status_action.setText(line)
         )
 
@@ -37,7 +37,7 @@ class Menu(QMenu):
         # LND
         self.lnd_status_action = self.addAction('lnd off')
         self.lnd_status_action.setEnabled(False)
-        self.node_set.lnd.process.status_update.connect(
+        self.node_set.lnd.process.status.connect(
             lambda line: self.lnd_status_action.setText(line)
         )
 
