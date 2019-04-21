@@ -48,7 +48,7 @@ class Software(QObject):
     def update(self):
         self.update_status(SoftwareStatus.CHECKING_DOWNLOAD)
         is_downloaded = os.path.isfile(self.download_destination_file_path)
-        is_installed = os.path.isdir(self.binary_directory_path)
+        is_installed = os.path.isdir(self.version_path)
         if is_downloaded and is_installed:
             self.update_status(SoftwareStatus.SOFTWARE_READY)
         elif not is_downloaded:
@@ -62,7 +62,7 @@ class Software(QObject):
         worker = Worker(
             self.download,
             source_url=self.download_url,
-            destination_directory=self.download_destination_directory,
+            destination_directory=self.software_directory,
             destination_file=self.download_destination_file_name
         )
         worker.signals.progress.connect(self.emit_download_progress)
@@ -168,7 +168,7 @@ class Software(QObject):
         return data
 
     @property
-    def download_destination_directory(self) -> str:
+    def software_directory(self) -> str:
         path = os.path.join(self.launcher_data_path, self.software_name)
         return path
 
@@ -178,12 +178,12 @@ class Software(QObject):
 
     @property
     def download_destination_file_path(self) -> str:
-        return os.path.join(self.download_destination_directory,
+        return os.path.join(self.software_directory,
                             self.download_destination_file_name)
 
     @property
-    def binary_directory_path(self) -> str:
-        path = os.path.join(self.download_destination_directory,
+    def version_path(self) -> str:
+        path = os.path.join(self.software_directory,
                             self.download_name)
         return path
 

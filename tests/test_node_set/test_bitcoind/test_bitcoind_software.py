@@ -4,19 +4,19 @@ import shutil
 import pytest
 
 from node_launcher.node_set.lib.node_status import SoftwareStatus
-from node_launcher.node_set.tor.tor_software import TorSoftware
+from node_launcher.node_set.bitcoind.bitcoind_software import BitcoindSoftware
 
 
 @pytest.fixture
-def tor_software():
-    tor_software = TorSoftware()
-    return tor_software
+def bitcoind_software():
+    bitcoind_software = BitcoindSoftware()
+    return bitcoind_software
 
 
-class TestTorSoftware(object):
+class TestbitcoindSoftware(object):
     @pytest.mark.slow
-    def test_update(self, tor_software, qtbot, tmpdir):
-        shutil.rmtree(tor_software.software_directory,
+    def test_update(self, bitcoind_software, qtbot, tmpdir):
+        shutil.rmtree(bitcoind_software.software_directory,
                       ignore_errors=True)
         self.call_count = 0
         expected_status = [
@@ -35,14 +35,13 @@ class TestTorSoftware(object):
 
         def check_file_creation(new_status):
             if new_status == str(SoftwareStatus.SOFTWARE_READY):
-                assert os.path.isdir(
-                    tor_software.software_directory)
+                assert os.path.isdir(bitcoind_software.software_directory)
                 assert os.path.isfile(
-                    tor_software.download_destination_file_path)
-                assert os.path.isdir(tor_software.version_path)
-                assert os.path.isfile(tor_software.tor)
+                    bitcoind_software.download_destination_file_path)
+                assert os.path.isdir(bitcoind_software.version_path)
+                assert os.path.isfile(bitcoind_software.bitcoind)
 
-        tor_software.status.connect(check_file_creation)
-        with qtbot.waitSignal(tor_software.status, raising=True,
+        bitcoind_software.status.connect(check_file_creation)
+        with qtbot.waitSignal(bitcoind_software.status, raising=True,
                               check_params_cb=check_status_order) as blocker:
-            tor_software.update()
+            bitcoind_software.update()

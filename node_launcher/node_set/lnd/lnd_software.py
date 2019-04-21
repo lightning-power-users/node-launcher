@@ -28,7 +28,7 @@ class LndSoftware(Software):
 
     @property
     def bin_path(self):
-        return self.binary_directory_path
+        return self.version_path
 
     @property
     def download_url(self) -> str:

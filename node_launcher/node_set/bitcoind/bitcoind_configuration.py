@@ -1,50 +1,37 @@
 import os
-from typing import List
 
 import psutil
 
-from node_launcher.constants import (
-    BITCOIN_DATA_PATH,
-    BITCOIN_MAINNET_PEER_PORT,
-    BITCOIN_MAINNET_RPC_PORT,
-    BITCOIN_TESTNET_PEER_PORT,
-    BITCOIN_TESTNET_RPC_PORT, MAINNET,
-    MAINNET_PRUNE, OPERATING_SYSTEM,
-    TESTNET, TESTNET_PRUNE
-)
+from node_launcher.constants import OPERATING_SYSTEM, BITCOIN_DATA_PATH, BITCOIN_MAINNET_PEER_PORT, \
+    BITCOIN_MAINNET_RPC_PORT, MAINNET_PRUNE
 from node_launcher.logging import log
 from node_launcher.node_set.lib.configuration_file import ConfigurationFile
 from node_launcher.node_set.lib.get_random_password import get_random_password
 from node_launcher.node_set.lib.hard_drives import HardDrives
 from node_launcher.port_utilities import get_zmq_port
-from .bitcoin_process import BitcoinProcess
-from .bitcoin_software import BitcoinSoftware
 
 
-class Bitcoin(object):
+class BitcoindConfiguration(object):
     file: ConfigurationFile
     hard_drives: HardDrives
-    process: BitcoinProcess
-    software: BitcoinSoftware
     zmq_block_port: int
     zmq_tx_port: int
 
-    def __init__(self, configuration_file_path: str = None):
+    def __init__(self):
         self.hard_drives = HardDrives()
-        self.software = BitcoinSoftware()
+        self.file = None
+        file_name = 'bitcoin.conf'
+        bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
+        self.file_path = os.path.join(bitcoin_data_path, file_name)
 
-        if configuration_file_path is None:
-            file_name = 'bitcoin.conf'
-            bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
-            configuration_file_path = os.path.join(bitcoin_data_path, file_name)
-            log.info(
-                'bitcoin_configuration_file_path',
-                configuration_file_path=configuration_file_path
-            )
+    def load(self):
+        log.info(
+            'bitcoin_configuration_file_path',
+            configuration_file_path=self.file_path
+        )
+        self.file = ConfigurationFile(self.file_path)
 
-        self.file = ConfigurationFile(configuration_file_path)
-        self.running = False
-
+    def check(self):
         log.debug('datadir', datadir=self.file['datadir'])
 
         if (self.file['datadir'] is None
@@ -53,10 +40,10 @@ class Bitcoin(object):
 
         if 'bitcoin.conf' in os.listdir(self.file['datadir']):
             actual_conf_file = os.path.join(self.file['datadir'], 'bitcoin.conf')
-            if configuration_file_path != actual_conf_file:
+            if self.file_path != actual_conf_file:
                 log.info(
                     'datadir_redirect',
-                    configuration_file_path=configuration_file_path,
+                    configuration_file_path=self.file_path,
                     actual_conf_file=actual_conf_file
                 )
                 self.file = ConfigurationFile(actual_conf_file)
@@ -120,97 +107,6 @@ class Bitcoin(object):
         self.config_snapshot = self.file.snapshot.copy()
         self.file.file_watcher.fileChanged.connect(self.config_file_changed)
 
-        self.process = BitcoinProcess(self.software.bitcoind, self.args)
-        self.software.ready.connect(self.process.start)
-
-    @property
-    def network(self):
-        if self.file['testnet']:
-            return TESTNET
-        return MAINNET
-
-    def get_wallet_paths(self):
-        exclude_files = {
-            'addr.dat',
-            'banlist.dat',
-            'fee_estimates.dat',
-            'mempool.dat',
-            'peers.dat'
-        }
-        candidate_paths = []
-        if self.file['testnet']:
-            datadir = os.path.join(self.file['datadir'], 'testnet3')
-            wallet_dir = self.file['test.walletdir']
-            wallets = self.file['test.wallet']
-        else:
-            datadir = self.file['datadir']
-            wallet_dir = self.file['main.walletdir']
-            wallets = self.file['main.wallet']
-        for file in os.listdir(datadir):
-            if file not in exclude_files:
-                path = os.path.join(datadir, file)
-                candidate_paths.append(path)
-        default_walletdir = os.path.join(datadir, 'wallets')
-        if os.path.exists(default_walletdir):
-            for file in os.listdir(default_walletdir):
-                if file not in exclude_files:
-                    candidate_paths.append(
-                        os.path.join(default_walletdir, file))
-        if wallet_dir is not None:
-            for file in os.listdir(wallet_dir):
-                if file not in exclude_files:
-                    candidate_paths += os.path.join(
-                        os.path.join(wallet_dir, file))
-        dat_files = [f for f in candidate_paths if f.endswith('.dat')
-                     and not f.startswith('blk')]
-        dat_files = set(dat_files)
-        wallet_paths = set(dat_files - exclude_files)
-        if wallets is not None:
-            if isinstance(wallets, list):
-                for wallet in wallets:
-                    wallet_paths.add(wallet)
-            else:
-                wallet_paths.add(wallets)
-        return wallet_paths
-
-    @property
-    def node_port(self):
-        if self.file['testnet']:
-            custom_port = self.file['test.port']
-        else:
-            custom_port = self.file['main.port']
-        if custom_port is not None:
-            return custom_port
-        if self.file['testnet']:
-            return BITCOIN_TESTNET_PEER_PORT
-        return BITCOIN_MAINNET_PEER_PORT
-
-    @property
-    def rpc_port(self):
-        if self.file['testnet']:
-            custom_port = self.file['test.rpcport']
-        else:
-            custom_port = self.file['main.rpcport']
-        if custom_port is not None:
-            return custom_port
-        if self.file['testnet']:
-            return BITCOIN_TESTNET_RPC_PORT
-        return BITCOIN_MAINNET_RPC_PORT
-
-    def set_prune(self, should_prune: bool = None):
-
-        if should_prune is None:
-            should_prune = self.hard_drives.should_prune(self.file['datadir'],
-                                                         has_bitcoin=True)
-        if should_prune:
-            if self.file['testnet']:
-                prune = TESTNET_PRUNE
-            else:
-                prune = MAINNET_PRUNE
-            self.file['prune'] = prune
-        else:
-            self.file['prune'] = 0
-        self.file['txindex'] = not should_prune
 
     def autoconfigure_datadir(self):
         default_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
@@ -249,17 +145,70 @@ class Bitcoin(object):
                 datadir=default_datadir
             )
 
-    @property
-    def args(self) -> List[str]:
-        return [f'-conf={self.file.path}']
+    def get_wallet_paths(self):
+        exclude_files = {
+            'addr.dat',
+            'banlist.dat',
+            'fee_estimates.dat',
+            'mempool.dat',
+            'peers.dat'
+        }
+        candidate_paths = []
+        datadir = self.file['datadir']
+        wallet_dir = self.file['main.walletdir']
+        wallets = self.file['main.wallet']
+        for file in os.listdir(datadir):
+            if file not in exclude_files:
+                path = os.path.join(datadir, file)
+                candidate_paths.append(path)
+        default_walletdir = os.path.join(datadir, 'wallets')
+        if os.path.exists(default_walletdir):
+            for file in os.listdir(default_walletdir):
+                if file not in exclude_files:
+                    candidate_paths.append(
+                        os.path.join(default_walletdir, file))
+        if wallet_dir is not None:
+            for file in os.listdir(wallet_dir):
+                if file not in exclude_files:
+                    candidate_paths += os.path.join(
+                        os.path.join(wallet_dir, file))
+        dat_files = [f for f in candidate_paths if f.endswith('.dat')
+                     and not f.startswith('blk')]
+        dat_files = set(dat_files)
+        wallet_paths = set(dat_files - exclude_files)
+        if wallets is not None:
+            if isinstance(wallets, list):
+                for wallet in wallets:
+                    wallet_paths.add(wallet)
+            else:
+                wallet_paths.add(wallets)
+        return wallet_paths
 
     @property
-    def bitcoin_cli(self) -> str:
-        command = [
-            f'"{self.software.bitcoin_cli}"',
-            f'-conf="{self.file.path}"',
-        ]
-        return ' '.join(command)
+    def node_port(self):
+        custom_port = self.file['main.port']
+        if custom_port is not None:
+            return custom_port
+        return BITCOIN_MAINNET_PEER_PORT
+
+    @property
+    def rpc_port(self):
+        custom_port = self.file['main.rpcport']
+        if custom_port is not None:
+            return custom_port
+        return BITCOIN_MAINNET_RPC_PORT
+
+    def set_prune(self, should_prune: bool = None):
+
+        if should_prune is None:
+            should_prune = self.hard_drives.should_prune(self.file['datadir'],
+                                                         has_bitcoin=True)
+        if should_prune:
+            prune = MAINNET_PRUNE
+            self.file['prune'] = prune
+        else:
+            self.file['prune'] = 0
+        self.file['txindex'] = not should_prune
 
     def config_file_changed(self):
         # Refresh config file
@@ -303,24 +252,6 @@ class Bitcoin(object):
                 if found_in_old_config:
                     if old_config[field] != new_config[field]:
                         return True
-
-            if self.file['testnet']:
-                # Only check testnet fields if currently running testnet
-                testnet_fields = [
-                    'test.rpcport', 'test.port', 'test.wallet', 'test.walletdir'
-                ]
-                for field in testnet_fields:
-                    # First check if field is found in both configs
-                    found_in_old_config = field in old_config.keys()
-                    found_in_new_config = field in new_config.keys()
-
-                    if found_in_old_config != found_in_new_config:
-                        return True
-
-                    # Now check that values are the same
-                    if found_in_old_config:
-                        if old_config[field] != new_config[field]:
-                            return True
 
             else:
                 # Only check mainnet fields if currently running mainnet

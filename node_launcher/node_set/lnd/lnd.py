@@ -19,7 +19,7 @@ from node_launcher.constants import (
     keyring)
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.logging import log
-from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoind_node import BitcoindNode
 from node_launcher.node_set.lib.configuration_file import ConfigurationFile
 from node_launcher.node_set.lib.get_random_password import get_random_password
 from node_launcher.port_utilities import get_port
@@ -29,16 +29,16 @@ from .lnd_software import LndSoftware
 
 
 class Lnd(object):
-    bitcoin: Bitcoin
+    bitcoind_node: BitcoindNode
     client: LndClient
     file: ConfigurationFile
     software: LndSoftware
     process: LndProcess
 
-    def __init__(self, bitcoin: Bitcoin, configuration_file_path: str = None):
+    def __init__(self, bitcoind_node: BitcoindNode, configuration_file_path: str = None):
         self.running = False
         self.is_unlocked = False
-        self.bitcoin = bitcoin
+        self.bitcoind_node = bitcoind_node
         if configuration_file_path is None:
             file_name = 'lnd.conf'
             lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
@@ -63,15 +63,15 @@ class Lnd(object):
 
         self.file['bitcoin.active'] = True
         self.file['bitcoin.node'] = 'bitcoind'
-        self.file['bitcoind.rpchost'] = f'127.0.0.1:{self.bitcoin.rpc_port}'
-        self.file['bitcoind.rpcuser'] = self.bitcoin.file['rpcuser']
-        self.file['bitcoind.rpcpass'] = self.bitcoin.file['rpcpassword']
-        self.file['bitcoind.zmqpubrawblock'] = self.bitcoin.file[
+        self.file['bitcoind.rpchost'] = f'127.0.0.1:{self.bitcoind_node.rpc_port}'
+        self.file['bitcoind.rpcuser'] = self.bitcoind_node.file['rpcuser']
+        self.file['bitcoind.rpcpass'] = self.bitcoind_node.file['rpcpassword']
+        self.file['bitcoind.zmqpubrawblock'] = self.bitcoind_node.file[
             'zmqpubrawblock']
-        self.file['bitcoind.zmqpubrawtx'] = self.bitcoin.file['zmqpubrawtx']
+        self.file['bitcoind.zmqpubrawtx'] = self.bitcoind_node.file['zmqpubrawtx']
 
         if self.file['restlisten'] is None:
-            if self.bitcoin.file['testnet']:
+            if self.bitcoind_node.file['testnet']:
                 self.rest_port = get_port(LND_DEFAULT_REST_PORT + 1)
             else:
                 self.rest_port = get_port(LND_DEFAULT_REST_PORT)
@@ -80,7 +80,7 @@ class Lnd(object):
             self.rest_port = self.file['restlisten'].split(':')[-1]
 
         if not self.file['rpclisten']:
-            if self.bitcoin.file['testnet']:
+            if self.bitcoind_node.file['testnet']:
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT + 1)
             else:
                 self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT)
@@ -104,11 +104,11 @@ class Lnd(object):
             'data',
             'chain',
             'bitcoin',
-            str(self.bitcoin.network)
+            str(self.bitcoind_node.network)
         )
         self.config_snapshot = self.file.snapshot.copy()
         self.file.file_watcher.fileChanged.connect(self.config_file_changed)
-        self.bitcoin.file.file_watcher.fileChanged.connect(
+        self.bitcoind_node.file.file_watcher.fileChanged.connect(
             self.bitcoin_config_file_changed)
 
         self.client = LndClient(self)
@@ -130,7 +130,7 @@ class Lnd(object):
                 f'--configfile="{self.file.path}"',
             ]
 
-        if self.bitcoin.file['testnet']:
+        if self.bitcoind_node.file['testnet']:
             arg_list += [
                 '--bitcoin.testnet'
             ]
@@ -143,7 +143,7 @@ class Lnd(object):
     @property
     def node_port(self) -> str:
         if self.file['listen'] is None:
-            if self.bitcoin.file['testnet']:
+            if self.bitcoind_node.file['testnet']:
                 port = get_port(LND_DEFAULT_PEER_PORT + 1)
             else:
                 port = get_port(LND_DEFAULT_PEER_PORT)
@@ -187,8 +187,8 @@ class Lnd(object):
         args = []
         if self.grpc_port != LND_DEFAULT_GRPC_PORT:
             args.append(f'--rpcserver=127.0.0.1:{self.grpc_port}')
-        if self.bitcoin.file['testnet']:
-            args.append(f'--network={self.bitcoin.network}')
+        if self.bitcoind_node.file['testnet']:
+            args.append(f'--network={self.bitcoind_node.network}')
         if self.lnddir != LND_DIR_PATH[OPERATING_SYSTEM]:
             args.append(f'''--lnddir="{self.lnddir}"''')
             args.append(f'--macaroonpath="{self.macaroon_path}"')
@@ -232,18 +232,18 @@ class Lnd(object):
         self.file.file_watcher.blockSignals(True)
         self.file.populate_cache()
         self.file.file_watcher.blockSignals(False)
-        self.file['bitcoind.rpchost'] = f'127.0.0.1:{self.bitcoin.rpc_port}'
-        self.file['bitcoind.rpcuser'] = self.bitcoin.file['rpcuser']
-        self.file['bitcoind.rpcpass'] = self.bitcoin.file['rpcpassword']
-        self.file['bitcoind.zmqpubrawblock'] = self.bitcoin.file[
+        self.file['bitcoind.rpchost'] = f'127.0.0.1:{self.bitcoind_node.rpc_port}'
+        self.file['bitcoind.rpcuser'] = self.bitcoind_node.file['rpcuser']
+        self.file['bitcoind.rpcpass'] = self.bitcoind_node.file['rpcpassword']
+        self.file['bitcoind.zmqpubrawblock'] = self.bitcoind_node.file[
             'zmqpubrawblock']
-        self.file['bitcoind.zmqpubrawtx'] = self.bitcoin.file['zmqpubrawtx']
+        self.file['bitcoind.zmqpubrawtx'] = self.bitcoind_node.file['zmqpubrawtx']
 
     @property
     def restart_required(self):
         if self.running:
             # Did bitcoin details change
-            if self.bitcoin.restart_required:
+            if self.bitcoind_node.restart_required:
                 return True and self.running
 
             old_config = self.config_snapshot.copy()

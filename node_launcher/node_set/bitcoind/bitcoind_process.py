@@ -7,7 +7,7 @@ from PySide2.QtWidgets import QSystemTrayIcon
 from node_launcher.node_set.lib.managed_process import ManagedProcess
 
 
-class BitcoinProcess(ManagedProcess):
+class BitcoindProcess(ManagedProcess):
     synced = Signal(bool)
 
     def __init__(self, binary, args):

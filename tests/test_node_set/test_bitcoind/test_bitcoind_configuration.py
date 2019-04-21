@@ -5,7 +5,7 @@ from node_launcher.constants import (
     MAINNET_PRUNE,
     TESTNET_PRUNE
 )
-from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoind_node import BitcoindNode
 from node_launcher.node_set.lib.configuration_file import ConfigurationFile
 
 
@@ -15,21 +15,21 @@ class TestBitcoinConfiguration(object):
         with TemporaryDirectory() as tmpdirname:
             os.rmdir(tmpdirname)
             configuration_path = os.path.join(tmpdirname, 'bitcoin.conf')
-            bitcoin = Bitcoin(configuration_file_path=configuration_path)
+            bitcoin = BitcoindNode(configuration_file_path=configuration_path)
             assert os.path.isfile(bitcoin.file.path)
 
     @staticmethod
-    def test_configuration_path(bitcoin: Bitcoin):
+    def test_configuration_path(bitcoin: BitcoindNode):
         assert bitcoin.file.path.endswith('bitcoin.conf')
         assert os.path.isfile(bitcoin.file.path)
 
     @staticmethod
-    def test_datadir(bitcoin: Bitcoin):
+    def test_datadir(bitcoin: BitcoindNode):
         assert os.path.exists(bitcoin.file['datadir'])
         assert 'bitcoin.conf' in os.listdir(bitcoin.file['datadir'])
 
     @staticmethod
-    def test_prune(bitcoin: Bitcoin):
+    def test_prune(bitcoin: BitcoindNode):
         assert (
                 bitcoin.file['prune'] == TESTNET_PRUNE
                 or bitcoin.file['prune'] == 0
@@ -37,7 +37,7 @@ class TestBitcoinConfiguration(object):
         )
 
     @staticmethod
-    def test_set_prune(bitcoin: Bitcoin):
+    def test_set_prune(bitcoin: BitcoindNode):
         bitcoin.set_prune(True)
         pruned = ConfigurationFile(bitcoin.file.path)
         assert pruned['prune']
@@ -48,11 +48,11 @@ class TestBitcoinConfiguration(object):
         assert unpruned['txindex']
 
     @staticmethod
-    def test_rpcuser(bitcoin: Bitcoin):
+    def test_rpcuser(bitcoin: BitcoindNode):
         assert bitcoin.file['rpcuser']
 
     @staticmethod
-    def test_set_rpcuser(bitcoin: Bitcoin):
+    def test_set_rpcuser(bitcoin: BitcoindNode):
         bitcoin.file['rpcuser'] = 'test_user'
         changed = ConfigurationFile(bitcoin.file.path)
         assert changed['rpcuser'] == 'test_user'
@@ -61,14 +61,14 @@ class TestBitcoinConfiguration(object):
         assert changed_again['rpcuser'] == 'test_user_2'
 
     @staticmethod
-    def test_autoconfigure_datadir(bitcoin: Bitcoin):
+    def test_autoconfigure_datadir(bitcoin: BitcoindNode):
         datadir = bitcoin.file['datadir']
         prune = bitcoin.file['prune']
         txindex = bitcoin.file['txindex']
         assert datadir
         assert prune != txindex
 
-    def test_file_changed(self, bitcoin: Bitcoin):
+    def test_file_changed(self, bitcoin: BitcoindNode):
         bitcoin.file['rpcport'] = 8338
         bitcoin.config_file_changed()
         new_config = bitcoin.file.snapshot

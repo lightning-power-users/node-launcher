@@ -19,7 +19,7 @@ def software():
     software.download_name = f'TestSoftware_{software.release_version}'
     software.download_url = 'http://localhost'
     software.downloaded_bin_path = os.path.join(
-        software.binary_directory_path,
+        software.version_path,
         'bin')
     software.test_bin = os.path.join(software.downloaded_bin_path, 'test_bin')
     return software
@@ -83,14 +83,14 @@ class TestSoftware(object):
             self.call_count += 1
             return correct
 
-        os.makedirs(software.download_destination_directory, exist_ok=True)
+        os.makedirs(software.software_directory, exist_ok=True)
         file = open(software.download_destination_file_path, 'w').close()
         with qtbot.waitSignal(software.status, raising=True,
                               check_params_cb=signal_cb) as blocker:
             software.update()
 
     def test_update_download(self, software, qtbot, requests_mock, tmpdir):
-        shutil.rmtree(software.download_destination_directory)
+        shutil.rmtree(software.software_directory)
 
         self.call_count = 0
         expected_status = [
@@ -110,9 +110,9 @@ class TestSoftware(object):
         def check_file_creation(new_status):
             if new_status == str(SoftwareStatus.SOFTWARE_READY):
                 assert len(requests_mock.request_history) == 1
-                assert os.path.isdir(software.download_destination_directory)
+                assert os.path.isdir(software.software_directory)
                 assert os.path.isfile(software.download_destination_file_path)
-                assert os.path.isdir(software.binary_directory_path)
+                assert os.path.isdir(software.version_path)
                 assert os.path.isdir(software.bin_path)
                 assert os.path.isfile(software.test_bin)
 

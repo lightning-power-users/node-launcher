@@ -46,11 +46,11 @@ class TestLndSoftware(object):
         assert len(name)
 
     def test_binaries_directory(self, lnd_software: LndSoftware):
-        d = lnd_software.download_destination_directory
+        d = lnd_software.software_directory
         assert os.path.isdir(d)
 
     def test_binary_directory(self, lnd_software: LndSoftware):
-        d = lnd_software.binary_directory_path
+        d = lnd_software.version_path
         assert os.path.isdir(d)
 
     def test_download_url(self, lnd_software: LndSoftware):

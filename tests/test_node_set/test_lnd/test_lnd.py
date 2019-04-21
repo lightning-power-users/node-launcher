@@ -34,25 +34,25 @@ class TestDirectoryConfiguration(object):
         assert not is_port_in_use(lnd.grpc_port)
 
     def test_bitcoin_file_changed(self, lnd: Lnd):
-        lnd.bitcoin.file['rpcport'] = 8338
-        lnd.bitcoin.running = False
-        lnd.bitcoin.config_file_changed()
+        lnd.bitcoind_node.file['rpcport'] = 8338
+        lnd.bitcoind_node.running = False
+        lnd.bitcoind_node.config_file_changed()
         lnd.bitcoin_config_file_changed()
         new_config = lnd.file.snapshot
         lnd.running = False
         assert lnd.file['bitcoind.rpchost'] == new_config['bitcoind.rpchost'] == '127.0.0.1:8338'
         assert lnd.restart_required == False
-        lnd.bitcoin.running = True
-        lnd.bitcoin.config_snapshot = lnd.bitcoin.file.snapshot
-        assert lnd.bitcoin.config_snapshot['rpcport'] == 8338
-        lnd.bitcoin.file['rpcport'] = 8340
-        lnd.bitcoin.config_file_changed()
+        lnd.bitcoind_node.running = True
+        lnd.bitcoind_node.config_snapshot = lnd.bitcoind_node.file.snapshot
+        assert lnd.bitcoind_node.config_snapshot['rpcport'] == 8338
+        lnd.bitcoind_node.file['rpcport'] = 8340
+        lnd.bitcoind_node.config_file_changed()
         lnd.bitcoin_config_file_changed()
         new_config = lnd.file.snapshot
         assert lnd.file['bitcoind.rpchost'] == new_config['bitcoind.rpchost'] == '127.0.0.1:8340'
         assert lnd.restart_required == False
         lnd.running = True
-        assert lnd.bitcoin.restart_required == True
+        assert lnd.bitcoind_node.restart_required == True
         assert lnd.restart_required == True
 
     def test_file_changed(self, lnd: Lnd):
