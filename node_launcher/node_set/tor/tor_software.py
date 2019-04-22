@@ -30,6 +30,10 @@ class TorSoftware(Software):
             f'{self.release_version}/{self.download_destination_file_name}'
 
     @property
+    def daemon(self):
+        return self.tor
+
+    @property
     def tor(self) -> str:
         name = 'tor.real'
         if IS_WINDOWS:

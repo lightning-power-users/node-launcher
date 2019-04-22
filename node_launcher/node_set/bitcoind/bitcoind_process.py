@@ -1,15 +1,13 @@
 from datetime import datetime, timedelta
 
 import humanize
-from PySide2.QtCore import Signal
 from PySide2.QtWidgets import QSystemTrayIcon
 
 from node_launcher.node_set.lib.managed_process import ManagedProcess
+from node_launcher.node_set.lib.node_status import NodeStatus
 
 
 class BitcoindProcess(ManagedProcess):
-    synced = Signal(bool)
-
     def __init__(self, binary, args):
         super().__init__(binary, args)
         self.old_progress = None
@@ -20,11 +18,10 @@ class BitcoindProcess(ManagedProcess):
         self.expecting_shutdown = False
 
     def process_output_line(self, line: str):
-        if 'Bitcoin Core version' in line:
-            self.status.emit('Bitcoin starting')
+        if 'init message: Done loading' in line:
+            self.update_status(NodeStatus.SYNCING)
         elif 'Leaving InitialBlockDownload' in line:
-            self.status.emit('Bitcoin synced')
-            self.synced.emit(True)
+            self.update_status(NodeStatus.SYNCED)
         elif 'Shutdown: done' in line:
             if self.expecting_shutdown:
                 return

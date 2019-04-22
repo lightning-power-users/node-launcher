@@ -16,7 +16,7 @@ class NodeSet(object):
     def __init__(self):
         self.tor_node = TorNode()
         self.bitcoind_node = BitcoindNode()
-        self.lnd = Lnd(bitcoin=self.bitcoind_node)
+        self.lnd = Lnd(bitcoind_node=self.bitcoind_node)
 
         self.tor_node.status.connect(self.handle_tor_node_status_change)
         self.bitcoind_node.status.connect(self.handle_bitcoin_node_status_change)
@@ -28,11 +28,15 @@ class NodeSet(object):
 
     def handle_tor_node_status_change(self, status):
         if status == NodeStatus.SOFTWARE_DOWNLOADED:
-            self.bitcoin.software.update()
+            self.bitcoind_node.software.update()
+        elif status == NodeStatus.SYNCED:
+            self.bitcoind_node.start()
 
     def handle_bitcoin_node_status_change(self, status):
         if status == NodeStatus.SOFTWARE_DOWNLOADED:
             self.lnd.software.update()
+        elif status == NodeStatus.SYNCED:
+            self.lnd.start()
 
     def handle_lnd_node_status_change(self, status):
         pass

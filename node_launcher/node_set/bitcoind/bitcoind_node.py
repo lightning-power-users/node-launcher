@@ -1,5 +1,8 @@
 from typing import List
 
+from PySide2.QtCore import QProcess
+
+from node_launcher.node_set.bitcoind.bitcoind_rpc_client import Proxy
 from node_launcher.node_set.lib.network_node import NetworkNode
 from .bitcoind_process import BitcoindProcess
 from .bitcoind_software import BitcoindSoftware
@@ -19,6 +22,7 @@ class BitcoindNode(NetworkNode):
             Process=BitcoindProcess
         )
 
+
     @property
     def bitcoin_cli(self) -> str:
         command = [
@@ -27,7 +31,8 @@ class BitcoindNode(NetworkNode):
         ]
         return ' '.join(command)
 
-    @property
-    def args(self) -> List[str]:
-        return [f'-conf={self.configuration.file_path}']
-
+    def stop(self):
+        if self.process.state() == QProcess.Running:
+            self.process.expecting_shutdown = True
+            Proxy(btc_conf_file=self.configuration.file_path,
+                  service_port=self.configuration.rpc_port).call('stop')

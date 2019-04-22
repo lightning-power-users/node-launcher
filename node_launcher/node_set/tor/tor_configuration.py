@@ -9,6 +9,10 @@ class TorConfiguration(object):
     def __init__(self):
         self.file = None
 
+    @property
+    def args(self):
+        return []
+
     def load(self):
         file_name = 'torrc'
         tor_dir_path = TOR_DIR_PATH[OPERATING_SYSTEM]

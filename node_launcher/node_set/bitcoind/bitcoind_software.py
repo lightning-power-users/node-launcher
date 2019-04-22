@@ -30,6 +30,10 @@ class BitcoindSoftware(Software):
             f'/{self.download_destination_file_name}'
 
     @property
+    def daemon(self):
+        return self.bitcoind
+
+    @property
     def bitcoin_qt(self) -> str:
         return self.executable_path('bitcoin-qt')
 

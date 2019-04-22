@@ -68,15 +68,12 @@ class Application(QApplication):
 
         if self.node_set.lnd.process.state() == QProcess.Running:
             self.node_set.lnd.client.stop()
-        if self.node_set.bitcoin.process.state() == QProcess.Running:
-            self.node_set.bitcoin.process.expecting_shutdown = True
-            Proxy(btc_conf_file=self.node_set.bitcoin.file.path,
-                  service_port=self.node_set.bitcoin.rpc_port).call('stop')
+        self.node_set.bitcoind_node.stop()
 
         self.system_tray.show_message(title='Stopping LND...')
         self.node_set.lnd.process.waitForFinished(-1)
         self.system_tray.show_message(title='Stopping bitcoind...')
-        self.node_set.bitcoin.process.waitForFinished(-1)
+        self.node_set.bitcoind_node.process.waitForFinished(-1)
 
         self.node_set.tor_node.process.kill()
         self.node_set.tor_node.process.waitForFinished(-1)

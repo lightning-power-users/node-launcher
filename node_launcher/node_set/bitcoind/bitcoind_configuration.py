@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 import psutil
 
@@ -23,6 +24,10 @@ class BitcoindConfiguration(object):
         file_name = 'bitcoin.conf'
         bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
         self.file_path = os.path.join(bitcoin_data_path, file_name)
+
+    @property
+    def args(self) -> List[str]:
+        return [f'-conf={self.file_path}']
 
     def load(self):
         log.info(

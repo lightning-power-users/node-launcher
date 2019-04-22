@@ -17,7 +17,7 @@ class NetworkNode(QObject):
 
         self.software = Software()
         self.configuration = Configuration()
-        self.process = Process(self.software.tor)
+        self.process = Process(self.software.daemon, self.configuration.args)
         self.connect_events()
 
     def start(self):
