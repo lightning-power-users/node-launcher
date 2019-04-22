@@ -3,11 +3,11 @@ from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.section_name import SectionName
 from node_launcher.gui.components.selectable_text import SelectableText
 from node_launcher.gui.components.warning_text import WarningText
-from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoind_node import BitcoindNode
 
 
 class BitcoindPortsLayout(QGridLayout):
-    def __init__(self, bitcoin: Bitcoin):
+    def __init__(self, bitcoin: BitcoindNode):
         super(BitcoindPortsLayout, self).__init__()
         self.bitcoin = bitcoin
 

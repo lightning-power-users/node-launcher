@@ -18,9 +18,6 @@ def software():
     software = Software(software_name='test_software', release_version='0.1.0')
     software.download_name = f'TestSoftware_{software.release_version}'
     software.download_url = 'http://localhost'
-    software.downloaded_bin_path = os.path.join(
-        software.version_path,
-        'bin')
     software.test_bin = os.path.join(software.downloaded_bin_path, 'test_bin')
     return software
 
@@ -59,6 +56,7 @@ class DownloadFixture(object):
         return content
 
 
+@pytest.mark.software
 class TestSoftware(object):
     def test__init__(self, software):
         if IS_WINDOWS:
@@ -66,10 +64,10 @@ class TestSoftware(object):
         else:
             assert software.compressed_suffix == DEFAULT_COMPRESSED_SUFFIX
 
-    def test_change_status(self, software, qtbot):
+    def test_update_status(self, software, qtbot):
         with qtbot.waitSignal(software.status, raising=True):
-            software.change_status(SoftwareStatus.INSTALLING_SOFTWARE)
-        assert software.current_status == SoftwareStatus.INSTALLING_SOFTWARE
+            software.update_status(SoftwareStatus.INSTALLING_SOFTWARE)
+        assert software.current_status == str(SoftwareStatus.INSTALLING_SOFTWARE)
 
     def test_update_ready(self, software, qtbot):
         self.call_count = 0

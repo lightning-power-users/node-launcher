@@ -1,5 +1,3 @@
-import os
-
 from node_launcher.constants import (
     IS_LINUX,
     IS_MACOS,
@@ -26,7 +24,6 @@ class BitcoindSoftware(Software):
         else:
             raise Exception(f'{OPERATING_SYSTEM} is not supported')
         self.download_name = f'bitcoin-{self.release_version}-{os_name}'
-        self.downloaded_bin_path = os.path.join(self.version_path, 'bin')
         self.download_url = f'https://bitcoincore.org' \
             f'/bin' \
             f'/bitcoin-core-{self.release_version}' \

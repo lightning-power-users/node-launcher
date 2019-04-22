@@ -105,7 +105,7 @@ class Software(QObject):
         self.update_status(SoftwareStatus.INSTALLING_SOFTWARE)
         self.extract(
             source=self.download_destination_file_path,
-            destination=self.downloaded_bin_path
+            destination=self.software_directory
         )
         self.link_static_bin(
             source_directory=self.downloaded_bin_path,
@@ -128,10 +128,17 @@ class Software(QObject):
         elif self.compressed_suffix == '.dmg':
             log.debug('Attaching disk image', source=source)
             escaped_source = source.replace(' ', '\ ')
-            subprocess.run(
+            result = subprocess.run(
                 [
                     f'hdiutil attach {escaped_source}'
-                ], shell=True)
+                ], shell=True, capture_output=True)
+            log.debug('hdiutil attach output',
+                      stdout=result.stdout,
+                      stderr=result.stderr)
+            if result.stderr == b'hdiutil: attach failed - no mountable file systems\n':
+                os.remove(source)
+                self.update()
+                return
             # app_source_path = '/Volumes/Tor Browser/Tor Browser.app'
             app_source_path = os.path.join(
                 '/Volumes', 'Tor Browser', 'Tor Browser.app', 'Contents',
@@ -139,8 +146,9 @@ class Software(QObject):
             )
             log.debug('Copying app from disk image',
                       app_source_path=app_source_path,
-                      destination=destination)
-            shutil.copy(src=app_source_path, dst=destination)
+                      destination=self.downloaded_bin_path)
+            os.makedirs(self.downloaded_bin_path)
+            shutil.copy(src=app_source_path, dst=self.downloaded_bin_path)
             disk_image_path = '/Volumes/Tor\ Browser'
             log.debug('Detaching disk image', disk_image_path=disk_image_path)
             subprocess.run([
@@ -184,8 +192,12 @@ class Software(QObject):
     @property
     def version_path(self) -> str:
         path = os.path.join(self.software_directory,
-                            self.download_name)
+                            self.uncompressed_directory_name)
         return path
+
+    @property
+    def downloaded_bin_path(self) -> str:
+        return os.path.join(self.version_path, 'bin')
 
     @property
     def static_bin_path(self) -> str:
@@ -197,3 +209,7 @@ class Software(QObject):
             name += '.exe'
         latest_executable = os.path.join(self.static_bin_path, name)
         return latest_executable
+
+    @property
+    def uncompressed_directory_name(self) -> str:
+        return self.download_name

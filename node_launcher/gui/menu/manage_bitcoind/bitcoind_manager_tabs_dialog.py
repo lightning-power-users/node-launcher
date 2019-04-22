@@ -6,11 +6,11 @@ from node_launcher.gui.components.tabs_dialog import TabsDialog
 from .bitcoind_configuration_tab import BitcoindConfigurationTab
 from node_launcher.constants import BITCOIN_CLI_COMMANDS
 from node_launcher.gui.components.console_dialog import ConsoleWidget
-from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoind_node import BitcoindNode
 
 
 class BitcoindManagerTabsDialog(TabsDialog):
-    def __init__(self, bitcoin: Bitcoin, system_tray):
+    def __init__(self, bitcoin: BitcoindNode, system_tray):
         super().__init__()
 
         self.bitcoin = bitcoin

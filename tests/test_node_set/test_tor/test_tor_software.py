@@ -13,10 +13,11 @@ def tor_software():
     return tor_software
 
 
+@pytest.mark.software
 class TestTorSoftware(object):
     @pytest.mark.slow
-    def test_update(self, tor_software, qtbot, tmpdir):
-        shutil.rmtree(tor_software.software_directory,
+    def test_update(self, tor_software, qtbot):
+        shutil.rmtree(tor_software.version_path,
                       ignore_errors=True)
         self.call_count = 0
         expected_status = [

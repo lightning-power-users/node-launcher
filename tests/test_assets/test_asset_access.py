@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from node_launcher.gui.assets import AssetAccess
+from node_launcher.gui.assets.asset_access import AssetAccess
 
 
 @pytest.fixture

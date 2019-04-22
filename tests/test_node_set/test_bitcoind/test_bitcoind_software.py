@@ -13,10 +13,11 @@ def bitcoind_software():
     return bitcoind_software
 
 
-class TestbitcoindSoftware(object):
+@pytest.mark.software
+class TestBitcoindSoftware(object):
     @pytest.mark.slow
-    def test_update(self, bitcoind_software, qtbot, tmpdir):
-        shutil.rmtree(bitcoind_software.software_directory,
+    def test_update(self, bitcoind_software, qtbot):
+        shutil.rmtree(bitcoind_software.version_path,
                       ignore_errors=True)
         self.call_count = 0
         expected_status = [

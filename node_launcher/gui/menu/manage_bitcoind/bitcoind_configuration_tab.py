@@ -14,11 +14,11 @@ from .bitcoind_restart_layout import BitcoindRestartLayout
 from node_launcher.gui.utilities import reveal
 from .data_directories import DataDirectoryBox
 
-from node_launcher.node_set.bitcoind.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoind_node import BitcoindNode
 
 
 class BitcoindConfigurationTab(QWidget):
-    def __init__(self, bitcoin: Bitcoin):
+    def __init__(self, bitcoin: BitcoindNode):
         super().__init__()
 
         self.bitcoin = bitcoin
