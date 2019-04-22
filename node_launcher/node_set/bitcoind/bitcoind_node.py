@@ -22,7 +22,6 @@ class BitcoindNode(NetworkNode):
             Process=BitcoindProcess
         )
 
-
     @property
     def bitcoin_cli(self) -> str:
         command = [

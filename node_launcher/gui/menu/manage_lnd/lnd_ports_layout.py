@@ -3,11 +3,11 @@ from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.section_name import SectionName
 from node_launcher.gui.components.selectable_text import SelectableText
 from node_launcher.gui.components.warning_text import WarningText
-from node_launcher.node_set.lnd.lnd import Lnd
+from node_launcher.node_set.lnd.lnd import LndNode
 
 
 class LndPortsLayout(QGridLayout):
-    def __init__(self, lnd: Lnd):
+    def __init__(self, lnd: LndNode):
         super(LndPortsLayout, self).__init__()
         self.lnd = lnd
 

@@ -3,14 +3,14 @@ from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.section_name import SectionName
 from node_launcher.node_set import NodeSet
 from node_launcher.gui.components.warning_text import WarningText
-from node_launcher.node_set.lnd.lnd import Lnd
+from node_launcher.node_set.lnd.lnd import LndNode
 
 
 class LndRestartLayout(QGridLayout):
     node_set: NodeSet
     timer = QTimer
 
-    def __init__(self, lnd: Lnd):
+    def __init__(self, lnd: LndNode):
         super(LndRestartLayout, self).__init__()
 
         self.timer = QTimer(self.parentWidget())

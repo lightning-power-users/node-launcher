@@ -2,7 +2,7 @@ import os
 
 from .bitcoind.bitcoind_node import BitcoindNode
 from .lib.node_status import NodeStatus
-from .lnd.lnd import Lnd
+from .lnd.lnd import LndNode
 from .tor.tor_node import TorNode
 from node_launcher.constants import TOR_SERVICE_PATH
 from node_launcher.logging import log
@@ -10,13 +10,13 @@ from node_launcher.logging import log
 
 class NodeSet(object):
     bitcoind_node: BitcoindNode
-    lnd: Lnd
+    lnd: LndNode
     tor_node: TorNode
 
     def __init__(self):
         self.tor_node = TorNode()
         self.bitcoind_node = BitcoindNode()
-        self.lnd = Lnd(bitcoind_node=self.bitcoind_node)
+        self.lnd = LndNode(bitcoind_node=self.bitcoind_node)
 
         self.tor_node.status.connect(self.handle_tor_node_status_change)
         self.bitcoind_node.status.connect(self.handle_bitcoin_node_status_change)

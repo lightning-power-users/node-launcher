@@ -22,13 +22,14 @@ from node_launcher.logging import log
 from node_launcher.node_set.bitcoind.bitcoind_node import BitcoindNode
 from node_launcher.node_set.lib.configuration_file import ConfigurationFile
 from node_launcher.node_set.lib.get_random_password import get_random_password
+from node_launcher.node_set.lib.network_node import NetworkNode
 from node_launcher.port_utilities import get_port
 from .lnd_client import LndClient
 from .lnd_process import LndProcess
 from .lnd_software import LndSoftware
 
 
-class Lnd(object):
+class LndNode(NetworkNode):
     bitcoind_node: BitcoindNode
     client: LndClient
     file: ConfigurationFile
@@ -71,19 +72,13 @@ class Lnd(object):
         self.file['bitcoind.zmqpubrawtx'] = self.bitcoind_node.file['zmqpubrawtx']
 
         if self.file['restlisten'] is None:
-            if self.bitcoind_node.file['testnet']:
-                self.rest_port = get_port(LND_DEFAULT_REST_PORT + 1)
-            else:
-                self.rest_port = get_port(LND_DEFAULT_REST_PORT)
+            self.rest_port = get_port(LND_DEFAULT_REST_PORT)
             self.file['restlisten'] = f'127.0.0.1:{self.rest_port}'
         else:
             self.rest_port = self.file['restlisten'].split(':')[-1]
 
         if not self.file['rpclisten']:
-            if self.bitcoind_node.file['testnet']:
-                self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT + 1)
-            else:
-                self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT)
+            self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT)
             self.file['rpclisten'] = f'127.0.0.1:{self.grpc_port}'
         else:
             self.grpc_port = int(self.file['rpclisten'].split(':')[-1])
@@ -130,23 +125,15 @@ class Lnd(object):
                 f'--configfile="{self.file.path}"',
             ]
 
-        if self.bitcoind_node.file['testnet']:
-            arg_list += [
-                '--bitcoin.testnet'
-            ]
-        else:
-            arg_list += [
-                '--bitcoin.mainnet'
-            ]
+        arg_list += [
+            '--bitcoin.mainnet'
+        ]
         return arg_list
 
     @property
     def node_port(self) -> str:
         if self.file['listen'] is None:
-            if self.bitcoind_node.file['testnet']:
-                port = get_port(LND_DEFAULT_PEER_PORT + 1)
-            else:
-                port = get_port(LND_DEFAULT_PEER_PORT)
+            port = get_port(LND_DEFAULT_PEER_PORT)
             self.file['listen'] = f'127.0.0.1:{port}'
         else:
             if not isinstance(self.file['listen'], list):
@@ -187,8 +174,6 @@ class Lnd(object):
         args = []
         if self.grpc_port != LND_DEFAULT_GRPC_PORT:
             args.append(f'--rpcserver=127.0.0.1:{self.grpc_port}')
-        if self.bitcoind_node.file['testnet']:
-            args.append(f'--network={self.bitcoind_node.network}')
         if self.lnddir != LND_DIR_PATH[OPERATING_SYSTEM]:
             args.append(f'''--lnddir="{self.lnddir}"''')
             args.append(f'--macaroonpath="{self.macaroon_path}"')

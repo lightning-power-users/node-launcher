@@ -13,11 +13,11 @@ from node_launcher.gui.menu.manage_lnd.lnd_restart_layout import \
     LndRestartLayout
 from node_launcher.gui.menu.manage_lnd.tls_layout import TlsLayout
 from node_launcher.gui.utilities import reveal
-from node_launcher.node_set.lnd.lnd import Lnd
+from node_launcher.node_set.lnd.lnd import LndNode
 
 
 class LndConfigurationTab(QWidget):
-    def __init__(self, lnd: Lnd):
+    def __init__(self, lnd: LndNode):
         super().__init__()
         self.lnd = lnd
         self.layout = QGridLayout()
