@@ -1,6 +1,6 @@
 import os
 
-from node_launcher.node_set.lnd.lnd import (
+from node_launcher.node_set.lnd.lnd_node import (
     LndNode
 )
 from node_launcher.port_utilities import is_port_in_use

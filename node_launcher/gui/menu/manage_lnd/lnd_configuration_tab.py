@@ -13,7 +13,7 @@ from node_launcher.gui.menu.manage_lnd.lnd_restart_layout import \
     LndRestartLayout
 from node_launcher.gui.menu.manage_lnd.tls_layout import TlsLayout
 from node_launcher.gui.utilities import reveal
-from node_launcher.node_set.lnd.lnd import LndNode
+from node_launcher.node_set.lnd.lnd_node import LndNode
 
 
 class LndConfigurationTab(QWidget):
