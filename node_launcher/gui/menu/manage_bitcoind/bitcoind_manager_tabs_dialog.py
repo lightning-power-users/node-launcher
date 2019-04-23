@@ -10,28 +10,28 @@ from node_launcher.node_set.bitcoind.bitcoind_node import BitcoindNode
 
 
 class BitcoindManagerTabsDialog(TabsDialog):
-    def __init__(self, bitcoin: BitcoindNode, system_tray):
+    def __init__(self, bitcoind_node: BitcoindNode, system_tray):
         super().__init__()
 
-        self.bitcoin = bitcoin
+        self.bitcoind_node = bitcoind_node
         self.system_tray = system_tray
 
         # bitcoin console
         self.console_tab = ConsoleWidget(
             title='bitcoin-cli',
-            program=self.bitcoin.software.bitcoin_cli,
-            args=self.bitcoin.args,
+            program=self.bitcoind_node.software.bitcoin_cli,
+            args=self.bitcoind_node.configuration.args,
             commands=BITCOIN_CLI_COMMANDS
         )
         self.tab_widget.addTab(self.console_tab, 'bitcoin-cli')
 
         self.output_tab = OutputWidget()
-        self.bitcoin.process.log_line.connect(
+        self.bitcoind_node.process.log_line.connect(
             self.output_tab.output_text_edit.append
         )
         self.tab_widget.addTab(self.output_tab, 'Logs')
 
-        self.configuration_tab = BitcoindConfigurationTab(self.bitcoin)
+        self.configuration_tab = BitcoindConfigurationTab(self.bitcoind_node)
         self.tab_widget.addTab(self.configuration_tab, 'Configuration')
 
         self.main_layout = QVBoxLayout()
@@ -46,8 +46,8 @@ class BitcoindManagerTabsDialog(TabsDialog):
         super().showMaximized()
 
         self.configuration_tab.data_directory_group_box.set_datadir(
-            self.bitcoin.file['datadir'],
-            self.bitcoin.file['prune']
+            self.bitcoind_node.file['datadir'],
+            self.bitcoind_node.file['prune']
         )
 
         self.console_tab.input.setFocus()

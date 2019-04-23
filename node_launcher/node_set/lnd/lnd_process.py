@@ -9,7 +9,6 @@ from node_launcher.node_set.lib.node_status import NodeStatus
 
 
 class LndProcess(ManagedProcess):
-    ready_to_unlock = Signal(bool)
     set_icon_color = Signal(str)
 
     def __init__(self, binary: str, args):
@@ -21,7 +20,6 @@ class LndProcess(ManagedProcess):
     def process_output_line(self, line: str):
         if 'Waiting for wallet encryption password' in line:
             self.update_status(NodeStatus.UNLOCK_READY)
-            self.ready_to_unlock.emit(True)
         elif 'Waiting for chain backend to finish sync' in line:
             self.update_status(NodeStatus.SYNCING)
         elif 'Unable to synchronize wallet to chain' in line:

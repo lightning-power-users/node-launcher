@@ -7,32 +7,33 @@ from node_launcher.gui.components.output_widget import OutputWidget
 from node_launcher.gui.components.tabs_dialog import TabsDialog
 from node_launcher.gui.menu.manage_lnd.lnd_configuration_tab import \
     LndConfigurationTab
+from node_launcher.node_set.lnd.lnd_node import LndNode
 
 
 class LndManagerTabsDialog(TabsDialog):
-    def __init__(self, lnd, system_tray):
+    def __init__(self, lnd_node: LndNode, system_tray):
         super().__init__()
 
-        self.lnd = lnd
+        self.lnd_node = lnd_node
         self.system_tray = system_tray
 
         # lnd console
         self.console_tab = ConsoleWidget(
             title='lncli',
-            program=self.lnd.software.lncli,
-            args=self.lnd.lncli_arguments(),
+            program=self.lnd_node.software.lncli,
+            args=self.lnd_node.configuration.lncli_arguments,
             commands=LNCLI_COMMANDS
         )
         self.tab_widget.addTab(self.console_tab, 'lncli')
 
         # lnd output
         self.output_tab = OutputWidget()
-        self.lnd.process.log_line.connect(
+        self.lnd_node.process.log_line.connect(
             self.output_tab.output_text_edit.append
         )
         self.tab_widget.addTab(self.output_tab, 'Logs')
 
-        self.configuration_tab = LndConfigurationTab(self.lnd)
+        self.configuration_tab = LndConfigurationTab(self.lnd_node)
         self.tab_widget.addTab(self.configuration_tab, 'Configuration')
 
         self.main_layout = QVBoxLayout()
@@ -44,8 +45,8 @@ class LndManagerTabsDialog(TabsDialog):
         self.has_run_help = False
 
     def show(self):
-        if self.lnd.file['alias'] is not None:
-            self.configuration_tab.alias_layout.set_alias(self.lnd.file['alias'])
+        if self.lnd_node.file['alias'] is not None:
+            self.configuration_tab.alias_layout.set_alias(self.lnd_node.file['alias'])
 
         super().showMaximized()
         self.raise_()

@@ -22,9 +22,9 @@ class BitcoindRestartLayout(QGridLayout):
         self.bitcoin_restart_required = WarningText('Bitcoin: ')
         self.addWidget(self.bitcoin_restart_required)
         self.bitcoin_restart_required.hide()
-        self.bitcoin.file.file_watcher.fileChanged.connect(self.check_restart_required)
+        # self.bitcoin.file.file_watcher.fileChanged.connect(self.check_restart_required)
         self.timer.start(1000)
-        self.timer.timeout.connect(self.check_restart_required)
+        # self.timer.timeout.connect(self.check_restart_required)
 
     def check_restart_required(self):
         restart_required = self.bitcoin.restart_required

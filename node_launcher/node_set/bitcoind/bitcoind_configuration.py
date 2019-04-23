@@ -112,7 +112,6 @@ class BitcoindConfiguration(object):
         self.config_snapshot = self.file.snapshot.copy()
         # self.file.file_watcher.fileChanged.connect(self.config_file_changed)
 
-
     def autoconfigure_datadir(self):
         default_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
         big_drive = self.hard_drives.get_big_drive()

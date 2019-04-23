@@ -23,9 +23,9 @@ class LndRestartLayout(QGridLayout):
         self.lnd_restart_required = WarningText('Lnd: ')
         self.addWidget(self.lnd_restart_required, same_row=True, column=columns)
         self.lnd_restart_required.hide()
-        self.lnd.file.file_watcher.fileChanged.connect(self.check_restart_required)
+        # self.lnd.file.file_watcher.fileChanged.connect(self.check_restart_required)
         self.timer.start(1000)
-        self.timer.timeout.connect(self.check_restart_required)
+        # self.timer.timeout.connect(self.check_restart_required)
 
     def check_restart_required(self):
         restart_required = self.lnd.restart_required
