@@ -1,4 +1,4 @@
-from PySide2.QtCore import QThreadPool
+from PySide2.QtCore import QThreadPool, QObject
 from grpc._channel import _Rendezvous
 
 from node_launcher.constants import keyring
@@ -8,14 +8,15 @@ from node_launcher.node_set.lib.get_random_password import get_random_password
 from node_launcher.node_set.lnd.lnd_client import LndClient
 
 
-class LndUnlocker(object):
-    def __init__(self, file, client):
-        self.file = file
+class LndUnlocker(QObject):
+    def __init__(self, configuration, client):
+        super().__init__()
+        self.configuration = configuration
         self.client = client
 
     def auto_unlock_wallet(self):
         keyring_service_name = f'lnd_mainnet_wallet_password'
-        keyring_user_name = self.file['bitcoind.rpcuser']
+        keyring_user_name = self.configuration.file['bitcoind.rpcuser']
         log.info(
             'auto_unlock_wallet_get_password',
             keyring_service_name=keyring_service_name,
@@ -27,17 +28,17 @@ class LndUnlocker(object):
         )
         worker = Worker(
             fn=self.unlock_wallet,
-            lnd=self,
+            configuration=self.configuration,
             password=password
         )
         worker.signals.result.connect(self.handle_unlock_wallet)
         QThreadPool().start(worker)
 
     @staticmethod
-    def unlock_wallet(lnd, progress_callback, password: str):
+    def unlock_wallet(configuration, progress_callback, password: str):
         if password is None:
             return 'wallet not found'
-        client = LndClient(lnd)
+        client = LndClient(configuration)
         try:
             client.unlock(password)
             return None
@@ -111,7 +112,7 @@ class LndUnlocker(object):
                 raise
             keyring.set_password(
                 service=f'lnd_mainnet_wallet_password',
-                username=self.file['bitcoind.rpcuser'],
+                username=self.configuration.file['bitcoind.rpcuser'],
                 password=new_wallet_password
             )
         else:

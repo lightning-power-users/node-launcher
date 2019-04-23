@@ -22,12 +22,15 @@ class LndNode(NetworkNode):
             Configuration=LndConfiguration,
             Process=LndProcess
         )
-        self.client = LndClient(self)
-        self.unlocker = LndUnlocker(file=self.configuration.file_path,
-                                    client=self.client)
+        self.client = None
+        self.unlocker = None
 
     def handle_status_change(self, new_status):
-        if new_status == NodeStatus.SYNCED:
+        if new_status == NodeStatus.CONFIGURATION_READY:
+            self.client = LndClient(self.configuration)
+            self.unlocker = LndUnlocker(configuration=self.configuration,
+                                        client=self.client)
+        if new_status == NodeStatus.UNLOCK_READY:
             self.unlocker.auto_unlock_wallet()
 
     def stop(self):

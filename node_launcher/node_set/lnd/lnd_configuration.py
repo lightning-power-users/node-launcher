@@ -116,7 +116,7 @@ class LndConfiguration(object):
             'data',
             'chain',
             'bitcoin',
-            str(bitcoind_conf.network)
+            'mainnet'
         )
         self.config_snapshot = self.file.snapshot.copy()
         self.file.file_watcher.fileChanged.connect(self.config_file_changed)

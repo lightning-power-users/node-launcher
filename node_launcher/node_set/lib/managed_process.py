@@ -24,7 +24,7 @@ class ManagedProcess(QProcess):
         self.current_status = None
 
     def update_status(self, new_status: NodeStatus):
-        log.debug('process change_status',
+        log.debug('update_status',
                   binary=self.binary,
                   new_status=new_status,
                   current_status=self.current_status)

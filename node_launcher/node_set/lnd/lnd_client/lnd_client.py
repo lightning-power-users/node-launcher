@@ -14,7 +14,6 @@ from node_launcher.logging import log
 from . import rpc_pb2 as ln
 from . import rpc_pb2_grpc as lnrpc
 
-
 os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
 
 
@@ -34,10 +33,10 @@ class PendingChannels(DefaultModel):
 
 
 class LndClient(object):
-    def __init__(self, lnd = None, lnddir: str = None,
+    def __init__(self, lnd_configuration=None, lnddir: str = None,
                  grpc_port: int = None, grpc_host: str = None,
                  macaroon_path: str = None):
-        self.lnd = lnd
+        self.lnd_configuration = lnd_configuration
         self._lnddir = lnddir
         self._grpc_port = grpc_port
         self._grpc_host = grpc_host
@@ -87,29 +86,29 @@ class LndClient(object):
 
     @property
     def lnddir(self) -> str:
-        if self.lnd is not None:
-            return self.lnd.lnddir
+        if self.lnd_configuration is not None:
+            return self.lnd_configuration.lnddir
         else:
             return self._lnddir
 
     @property
     def grpc_port(self) -> int:
-        if self.lnd is not None:
-            return self.lnd.grpc_port
+        if self.lnd_configuration is not None:
+            return self.lnd_configuration.grpc_port
         else:
             return self._grpc_port
 
     @property
     def grpc_host(self) -> str:
-        if self.lnd is not None:
+        if self.lnd_configuration is not None:
             return 'localhost'
         else:
             return self._grpc_host
 
     @property
     def macaroon_path(self) -> str:
-        if self.lnd is not None:
-            return self.lnd.macaroon_path
+        if self.lnd_configuration is not None:
+            return self.lnd_configuration.macaroon_path
         else:
             return self._macaroon_path
 

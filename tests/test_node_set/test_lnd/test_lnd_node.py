@@ -32,7 +32,7 @@ class TestLndNode(object):
         tor_node.status.connect(handle_tor_status)
 
         def handle_bitcoind_status(status):
-            if status == NodeStatus.SYNCED:
+            if status == NodeStatus.SYNCING:
                 lnd_node.start()
             elif status == NodeStatus.STOPPED:
                 tor_node.stop()
