@@ -37,12 +37,12 @@ class Menu(QMenu):
         # LND
         self.lnd_status_action = self.addAction('lnd off')
         self.lnd_status_action.setEnabled(False)
-        self.node_set.lnd.process.status.connect(
+        self.node_set.lnd_node.process.status.connect(
             lambda line: self.lnd_status_action.setText(line)
         )
 
         self.lnd_manager_tabs_dialog = LndManagerTabsDialog(
-            lnd=self.node_set.lnd,
+            lnd=self.node_set.lnd_node,
             system_tray=self.system_tray
         )
         self.lnd_manage_action = self.addAction('Manage LND')
@@ -58,10 +58,10 @@ class Menu(QMenu):
         self.joule_url_action = self.addAction('Copy Node URL (REST)')
         self.joule_macaroons_action = self.addAction('Show Macaroons')
         self.joule_url_action.triggered.connect(
-            lambda: QClipboard().setText(self.node_set.lnd.rest_url)
+            lambda: QClipboard().setText(self.node_set.lnd_node.rest_url)
         )
         self.joule_macaroons_action.triggered.connect(
-            lambda: reveal(self.node_set.lnd.macaroon_path)
+            lambda: reveal(self.node_set.lnd_node.macaroon_path)
         )
 
         self.addSeparator()
@@ -71,9 +71,9 @@ class Menu(QMenu):
         self.zap_status_action.setEnabled(False)
         self.zap_open_action = self.addAction('Open Zap Desktop')
         self.zap_open_action.triggered.connect(
-            lambda: webbrowser.open(self.node_set.lnd.lndconnect_url)
+            lambda: webbrowser.open(self.node_set.lnd_node.lndconnect_url)
         )
-        self.zap_qr_code_label = ZapQrcodeLabel(self.node_set.lnd.lndconnect_qrcode)
+        self.zap_qr_code_label = ZapQrcodeLabel(self.node_set.lnd_node.lndconnect_qrcode)
         self.show_zap_qrcode_action = self.addAction('Pair Zap Mobile')
         self.show_zap_qrcode_action.triggered.connect(
             self.zap_qr_code_label.show

@@ -18,11 +18,11 @@ class SystemTray(QSystemTrayIcon):
             self.show_message
         )
 
-        self.node_set.lnd.process.notification.connect(
+        self.node_set.lnd_node.process.notification.connect(
             self.show_message
         )
 
-        self.node_set.lnd.process.set_icon_color.connect(
+        self.node_set.lnd_node.process.set_icon_color.connect(
             self.set_icon
         )
 

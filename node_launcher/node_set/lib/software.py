@@ -38,12 +38,10 @@ class Software(QObject):
             self.compressed_suffix = DEFAULT_WINDOWS_COMPRESSED_SUFFIX
 
     def update_status(self, new_status: SoftwareStatus):
-        new_status = str(new_status)
-        log.debug('software update_status',
-                  software_name=self.software_name,
+        log.debug(f'update_status {self.software_name} software',
                   new_status=new_status)
         self.current_status = new_status
-        self.status.emit(new_status)
+        self.status.emit(str(new_status))
 
     def update(self):
         self.update_status(SoftwareStatus.CHECKING_DOWNLOAD)

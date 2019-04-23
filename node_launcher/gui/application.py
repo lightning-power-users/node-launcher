@@ -66,12 +66,10 @@ class Application(QApplication):
         log.debug('quit_app')
         self.system_tray.show_message(title='Stopping LND and bitcoind...')
 
-        if self.node_set.lnd.process.state() == QProcess.Running:
-            self.node_set.lnd.client.stop()
         self.node_set.bitcoind_node.stop()
 
         self.system_tray.show_message(title='Stopping LND...')
-        self.node_set.lnd.process.waitForFinished(-1)
+        self.node_set.lnd_node.process.waitForFinished(-1)
         self.system_tray.show_message(title='Stopping bitcoind...')
         self.node_set.bitcoind_node.process.waitForFinished(-1)
 

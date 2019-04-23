@@ -3,12 +3,24 @@ from node_launcher.node_set.lib.software import Software
 
 
 class LndSoftware(Software):
-
-    def __init__(self, override_directory: str = None):
-        super().__init__(override_directory)
+    def __init__(self):
+        super().__init__(
+            software_name='lnd',
+            release_version=TARGET_LND_RELEASE
+        )
         self.github_team = 'lightningnetwork'
-        self.github_repo = 'lnd'
-        self.release_version = TARGET_LND_RELEASE
+        self.download_name = f'lnd-{OPERATING_SYSTEM}-amd64-{self.release_version}'
+        self.download_url = f'https://github.com' \
+            f'/{self.github_team}' \
+            f'/{self.software_name}' \
+            f'/releases' \
+            f'/download' \
+            f'/{self.release_version}' \
+            f'/{self.download_destination_file_name}'
+
+    @property
+    def daemon(self):
+        return self.lnd
 
     @property
     def lnd(self) -> str:
@@ -19,24 +31,5 @@ class LndSoftware(Software):
         return self.executable_path('lncli')
 
     @property
-    def download_name(self) -> str:
-        return f'lnd-{OPERATING_SYSTEM}-amd64-{self.release_version}'
-
-    @property
-    def uncompressed_directory_name(self) -> str:
-        return self.download_name
-
-    @property
-    def bin_path(self):
+    def downloaded_bin_path(self):
         return self.version_path
-
-    @property
-    def download_url(self) -> str:
-        download_url = f'https://github.com' \
-            f'/{self.github_team}' \
-            f'/{self.github_repo}' \
-            f'/releases' \
-            f'/download' \
-            f'/{self.release_version}' \
-            f'/{self.download_destination_file_name}'
-        return download_url

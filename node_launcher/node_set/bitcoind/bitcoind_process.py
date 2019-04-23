@@ -15,8 +15,6 @@ class BitcoindProcess(ManagedProcess):
 
         self.timestamp_changes = []
 
-        self.expecting_shutdown = False
-
     def process_output_line(self, line: str):
         if 'init message: Done loading' in line:
             self.update_status(NodeStatus.SYNCING)
@@ -25,7 +23,7 @@ class BitcoindProcess(ManagedProcess):
         elif 'Shutdown: done' in line:
             if self.expecting_shutdown:
                 return
-            self.status.emit('Error: please check Bitcoin Output')
+            self.update_status(NodeStatus.RUNTIME_ERROR)
             self.notification.emit(
                 'Bitcoin Error',
                 'Please check Bitcoin Output',
@@ -53,7 +51,7 @@ class BitcoindProcess(ManagedProcess):
                                     self.timestamp_changes.pop(0)
                                 average_time_left = sum(self.timestamp_changes)/len(self.timestamp_changes)
                                 humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
-                                self.status.emit(f'ETA: {humanized}, {new_progress * 100:.2f}% done')
+                                self.sync_progress.emit(f'ETA: {humanized}, {new_progress * 100:.2f}% done')
                         else:
                             if round(new_progress*100) == 100:
                                 continue
@@ -61,7 +59,7 @@ class BitcoindProcess(ManagedProcess):
                         self.old_progress = new_progress
                         self.old_timestamp = new_timestamp
         elif 'Bitcoin Core is probably already running' in line:
-            self.status.emit('Error: Bitcoin Core is already running')
+            self.update_status(NodeStatus.RUNTIME_ERROR)
             self.notification.emit(
                 'Bitcoin Error',
                 'Bitcoin Core is already running',

@@ -7,6 +7,7 @@ from node_launcher.node_set.lib.node_status import NodeStatus
 
 class ManagedProcess(QProcess):
     status = Signal(str)
+    sync_progress = Signal(str)
     notification = Signal(str, str, QSystemTrayIcon.MessageIcon)
     log_line = Signal(str)
 
@@ -19,14 +20,16 @@ class ManagedProcess(QProcess):
         self.readyReadStandardOutput.connect(self.handle_output)
         self.errorOccurred.connect(self.handle_process_error)
         self.finished.connect(self.handle_process_finish)
+        self.expecting_shutdown = False
+        self.current_status = None
 
     def update_status(self, new_status: NodeStatus):
-        new_status = str(new_status)
         log.debug('process change_status',
                   binary=self.binary,
-                  new_status=new_status)
+                  new_status=new_status,
+                  current_status=self.current_status)
         self.current_status = new_status
-        self.status.emit(new_status)
+        self.status.emit(str(new_status))
 
     def handle_output(self):
         while self.canReadLine():

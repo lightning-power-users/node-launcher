@@ -28,18 +28,21 @@ class NetworkNode(QObject):
         self.process.kill()
         self.update_status(NodeStatus.STOPPED)
 
+    def handle_status_change(self, new_status):
+        pass
+
     def connect_events(self):
+        self.status.connect(self.handle_status_change)
         self.software.status.connect(self.update_status)
         self.process.status.connect(self.update_status)
 
     def update_status(self, new_status: NodeStatus):
-        new_status = str(new_status)
-        log.debug(f'{self.network} node change_status',
+        log.debug(f'update_status {self.network} node',
                   network=self.network,
                   old_status=self.current_status,
                   new_status=new_status)
         self.current_status = new_status
-        self.status.emit(new_status)
+        self.status.emit(str(new_status))
 
         if new_status == str(NodeStatus.SOFTWARE_READY):
             # Todo: run in threads so they don't block the GUI

@@ -22,7 +22,7 @@ class StringConstant(object):
         return hash(self.name)
 
     def __eq__(self, other):
-        return other.name == self.name
+        return str(other) == self.name
 
     def __ne__(self, other):
         return str(other).lower() != self.name

@@ -1,5 +1,3 @@
-from typing import List
-
 from PySide2.QtCore import QProcess
 
 from node_launcher.node_set.bitcoind.bitcoind_rpc_client import Proxy
@@ -33,5 +31,6 @@ class BitcoindNode(NetworkNode):
     def stop(self):
         if self.process.state() == QProcess.Running:
             self.process.expecting_shutdown = True
-            Proxy(btc_conf_file=self.configuration.file_path,
-                  service_port=self.configuration.rpc_port).call('stop')
+            client = Proxy(btc_conf_file=self.configuration.file_path,
+                           service_port=self.configuration.rpc_port)
+            client.call('stop')

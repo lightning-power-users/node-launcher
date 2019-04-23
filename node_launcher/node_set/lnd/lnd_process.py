@@ -5,6 +5,7 @@ from PySide2.QtCore import QTimer, Signal
 from PySide2.QtWidgets import QSystemTrayIcon
 
 from node_launcher.node_set.lib.managed_process import ManagedProcess
+from node_launcher.node_set.lib.node_status import NodeStatus
 
 
 class LndProcess(ManagedProcess):
@@ -18,13 +19,11 @@ class LndProcess(ManagedProcess):
         self.old_timestamp = None
 
     def process_output_line(self, line: str):
-        if 'Active chain: Bitcoin' in line:
-            self.status.emit('LND starting')
-        elif 'Waiting for wallet encryption password' in line:
-            self.status.emit('LND unlocking wallet')
+        if 'Waiting for wallet encryption password' in line:
+            self.update_status(NodeStatus.UNLOCK_READY)
             self.ready_to_unlock.emit(True)
         elif 'Waiting for chain backend to finish sync' in line:
-            self.status.emit('Chain backend syncing')
+            self.update_status(NodeStatus.SYNCING)
         elif 'Unable to synchronize wallet to chain' in line:
             self.terminate()
             self.restart_process()
@@ -33,7 +32,7 @@ class LndProcess(ManagedProcess):
             self.restart_process()
         elif 'Starting HTLC Switch' in line:
             self.set_icon_color.emit('green')
-            self.status.emit('LND synced')
+            self.update_status(NodeStatus.SYNCED)
             self.notification.emit(
                 'LND is ready',
                 'Open Joule or Zap',
@@ -53,7 +52,7 @@ class LndProcess(ManagedProcess):
                     total_left = 600000 - new_height
                     time_left = (total_left / change) * timestamp_change
                     humanized = humanize.naturaltime(-time_left)
-                    self.status.emit(
+                    self.sync_progress.emit(
                         f'ETA: {humanized}, caught up to height {new_height}'
                     )
 
