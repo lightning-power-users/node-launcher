@@ -1,10 +1,7 @@
-import os
-
 from .bitcoind.bitcoind_node import BitcoindNode
 from .lib.node_status import NodeStatus
 from .lnd.lnd_node import LndNode
 from .tor.tor_node import TorNode
-from node_launcher.constants import TOR_SERVICE_PATH
 from node_launcher.logging import log
 
 
@@ -24,26 +21,25 @@ class NodeSet(object):
 
     def start(self):
         log.debug('Starting node set')
-        self.tor_node.start()
+        self.tor_node.software.update()
 
     def handle_tor_node_status_change(self, status):
-        if status == NodeStatus.SOFTWARE_DOWNLOADED:
+        if status in [NodeStatus.SOFTWARE_DOWNLOADED,
+                      NodeStatus.SOFTWARE_READY]:
             self.bitcoind_node.software.update()
         elif status == NodeStatus.SYNCED:
-            self.bitcoind_node.start()
+            self.bitcoind_node.tor_synced = True
+            self.bitcoind_node.start_process()
 
     def handle_bitcoin_node_status_change(self, status):
-        if status == NodeStatus.SOFTWARE_DOWNLOADED:
+        if status in [NodeStatus.SOFTWARE_DOWNLOADED,
+                      NodeStatus.SOFTWARE_READY]:
             self.lnd_node.software.update()
-        elif status == NodeStatus.SYNCED:
-            self.lnd_node.start()
+        elif status == NodeStatus.SYNCING:
+            self.lnd_node.bitcoind_syncing = True
+            self.lnd_node.start_process()
 
     def handle_lnd_node_status_change(self, status):
         pass
 
-    def start_lnd(self):
-        hostname_file = os.path.join(TOR_SERVICE_PATH, 'hostname')
-        with open(hostname_file, 'r') as f:
-            self.lnd_node.file['externalip'] = f.readline().strip()
-        self.lnd_node.software.run()
 

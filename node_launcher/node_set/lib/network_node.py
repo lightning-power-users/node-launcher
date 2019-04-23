@@ -20,10 +20,6 @@ class NetworkNode(QObject):
         self.process = Process(self.software.daemon, self.configuration.args)
         self.connect_events()
 
-    def start(self):
-        self.update_status(NodeStatus.STARTED)
-        self.software.update()
-
     def stop(self):
         self.process.kill()
         self.update_status(NodeStatus.STOPPED)
@@ -43,8 +39,15 @@ class NetworkNode(QObject):
                   new_status=new_status)
         self.current_status = new_status
         self.status.emit(str(new_status))
+        self.start_process()
 
-        if new_status == str(NodeStatus.SOFTWARE_READY):
+    @property
+    def prerequisites_synced(self):
+        return True
+
+    def start_process(self):
+        software_ready = self.current_status == NodeStatus.SOFTWARE_READY
+        if software_ready and self.prerequisites_synced:
             # Todo: run in threads so they don't block the GUI
             self.update_status(NodeStatus.LOADING_CONFIGURATION)
             self.configuration.load()

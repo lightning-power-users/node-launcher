@@ -110,7 +110,7 @@ class BitcoindConfiguration(object):
             self.file['dbcache'] = 1000
 
         self.config_snapshot = self.file.snapshot.copy()
-        self.file.file_watcher.fileChanged.connect(self.config_file_changed)
+        # self.file.file_watcher.fileChanged.connect(self.config_file_changed)
 
 
     def autoconfigure_datadir(self):

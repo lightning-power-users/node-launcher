@@ -6,7 +6,6 @@ class Status(StringConstant):
 
 
 class NodeStatus(object):
-    STARTED = StringConstant('STARTED')
     CHECKING_DOWNLOAD = StringConstant('CHECKING_DOWNLOAD')
     DOWNLOADING_SOFTWARE = StringConstant('DOWNLOADING_SOFTWARE')
     SOFTWARE_DOWNLOADED = StringConstant('SOFTWARE_DOWNLOADED')

@@ -24,6 +24,7 @@ class LndNode(NetworkNode):
         )
         self.client = None
         self.unlocker = None
+        self.bitcoind_syncing = False
 
     def handle_status_change(self, new_status):
         if new_status == NodeStatus.CONFIGURATION_READY:
@@ -32,6 +33,10 @@ class LndNode(NetworkNode):
                                         client=self.client)
         if new_status == NodeStatus.UNLOCK_READY:
             self.unlocker.auto_unlock_wallet()
+
+    @property
+    def prerequisites_synced(self):
+        return self.bitcoind_syncing
 
     def stop(self):
         if self.process.state() == QProcess.Running:

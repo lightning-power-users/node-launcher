@@ -12,8 +12,8 @@ from node_launcher.constants import (
     LND_DEFAULT_PEER_PORT,
     LND_DEFAULT_REST_PORT,
     LND_DIR_PATH,
-    OPERATING_SYSTEM
-)
+    OPERATING_SYSTEM,
+    TOR_SERVICE_PATH)
 from node_launcher.logging import log
 from node_launcher.node_set.bitcoind.bitcoind_configuration import (
     BitcoindConfiguration
@@ -119,9 +119,13 @@ class LndConfiguration(object):
             'mainnet'
         )
         self.config_snapshot = self.file.snapshot.copy()
-        self.file.file_watcher.fileChanged.connect(self.config_file_changed)
-        self.file.file_watcher.fileChanged.connect(
-            self.bitcoin_config_file_changed)
+        # self.file.file_watcher.fileChanged.connect(self.config_file_changed)
+        # self.file.file_watcher.fileChanged.connect(
+        #     self.bitcoin_config_file_changed)
+
+        hostname_file = os.path.join(TOR_SERVICE_PATH, 'hostname')
+        with open(hostname_file, 'r') as f:
+            self.file['externalip'] = f.readline().strip()
 
     def config_file_changed(self):
         # Refresh config file

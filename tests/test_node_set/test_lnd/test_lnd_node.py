@@ -27,13 +27,21 @@ class TestLndNode(object):
                    lnd_node: LndNode, qtbot):
 
         def handle_tor_status(status):
-            if status == NodeStatus.SYNCED:
-                bitcoind_node.start()
+            if status in [NodeStatus.SOFTWARE_DOWNLOADED,
+                          NodeStatus.SOFTWARE_READY]:
+                bitcoind_node.software.update()
+            elif status == NodeStatus.SYNCED:
+                bitcoind_node.tor_synced = True
+                bitcoind_node.start_process()
         tor_node.status.connect(handle_tor_status)
 
         def handle_bitcoind_status(status):
-            if status == NodeStatus.SYNCING:
-                lnd_node.start()
+            if status in [NodeStatus.SOFTWARE_DOWNLOADED,
+                          NodeStatus.SOFTWARE_READY]:
+                lnd_node.software.update()
+            elif status == NodeStatus.SYNCING:
+                lnd_node.bitcoind_syncing = True
+                lnd_node.start_process()
             elif status == NodeStatus.STOPPED:
                 tor_node.stop()
         bitcoind_node.status.connect(handle_bitcoind_status)
@@ -45,7 +53,7 @@ class TestLndNode(object):
                 bitcoind_node.stop()
         lnd_node.status.connect(handle_lnd_status)
 
-        tor_node.start()
+        tor_node.software.update()
 
         def check_synced():
             return lnd_node.current_status == NodeStatus.SYNCING

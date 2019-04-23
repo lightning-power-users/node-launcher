@@ -19,6 +19,7 @@ class BitcoindNode(NetworkNode):
             Configuration=BitcoindConfiguration,
             Process=BitcoindProcess
         )
+        self.tor_synced = False
 
     @property
     def bitcoin_cli(self) -> str:
@@ -27,6 +28,10 @@ class BitcoindNode(NetworkNode):
             f'-conf="{self.configuration.file_path}"',
         ]
         return ' '.join(command)
+
+    @property
+    def prerequisites_synced(self):
+        return self.tor_synced
 
     def stop(self):
         if self.process.state() == QProcess.Running:
