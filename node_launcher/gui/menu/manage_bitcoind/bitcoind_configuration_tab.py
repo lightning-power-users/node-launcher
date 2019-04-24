@@ -30,7 +30,8 @@ class BitcoindConfigurationTab(QWidget):
         )
         self.layout.addWidget(self.bitcoin_version)
 
-        self.data_directory_group_box = DataDirectoryBox(bitcoin=self.bitcoind_node)
+        self.data_directory_group_box = DataDirectoryBox(
+            bitcoin_node=self.bitcoind_node)
         self.data_directory_group_box.file_dialog.new_data_directory.connect(
             self.change_datadir
         )

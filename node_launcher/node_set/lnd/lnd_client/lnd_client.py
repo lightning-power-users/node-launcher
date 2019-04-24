@@ -10,6 +10,7 @@ from google.protobuf.json_format import MessageToDict
 from grpc._plugin_wrapping import (_AuthMetadataContext,
                                    _AuthMetadataPluginCallback)
 
+from node_launcher.constants import LND_DIR_PATH, OPERATING_SYSTEM
 from node_launcher.logging import log
 from . import rpc_pb2 as ln
 from . import rpc_pb2_grpc as lnrpc
@@ -33,7 +34,8 @@ class PendingChannels(DefaultModel):
 
 
 class LndClient(object):
-    def __init__(self, lnd_configuration=None, lnddir: str = None,
+    def __init__(self, lnd_configuration=None,
+                 lnddir: str = LND_DIR_PATH[OPERATING_SYSTEM],
                  grpc_port: int = None, grpc_host: str = None,
                  macaroon_path: str = None):
         self.lnd_configuration = lnd_configuration

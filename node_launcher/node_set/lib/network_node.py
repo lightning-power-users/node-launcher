@@ -1,4 +1,4 @@
-from PySide2.QtCore import Signal, QObject
+from PySide2.QtCore import Signal, QObject, QProcess
 
 from node_launcher.logging import log
 from node_launcher.node_set.lib.node_status import NodeStatus
@@ -21,8 +21,12 @@ class NetworkNode(QObject):
         self.connect_events()
 
     def stop(self):
-        self.process.kill()
-        self.update_status(NodeStatus.STOPPED)
+        if self.process.state() == QProcess.Running:
+            self.process.kill()
+            self.update_status(NodeStatus.STOPPED)
+
+    def handle_log_line(self, log_line: str):
+        pass
 
     def handle_status_change(self, new_status):
         pass
@@ -31,6 +35,7 @@ class NetworkNode(QObject):
         self.status.connect(self.handle_status_change)
         self.software.status.connect(self.update_status)
         self.process.status.connect(self.update_status)
+        self.process.log_line.connect(self.handle_log_line)
 
     def update_status(self, new_status: NodeStatus):
         log.debug(f'update_status {self.network} node',

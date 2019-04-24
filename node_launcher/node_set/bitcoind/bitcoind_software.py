@@ -34,6 +34,10 @@ class BitcoindSoftware(Software):
         return self.bitcoind
 
     @property
+    def cli(self):
+        return self.bitcoin_cli
+
+    @property
     def bitcoin_qt(self) -> str:
         return self.executable_path('bitcoin-qt')
 

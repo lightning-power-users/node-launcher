@@ -4,20 +4,16 @@ import pytest
 from PySide2.QtCore import Qt
 from PySide2.QtTest import QTest
 
-from node_launcher.constants import (
-    BITCOIN_MAINNET_PEER_PORT,
-    BITCOIN_MAINNET_RPC_PORT,
-    TARGET_BITCOIN_RELEASE
-)
+from node_launcher.constants import TARGET_BITCOIN_RELEASE
 from node_launcher.gui.menu.manage_bitcoind import BitcoindConfigurationTab
 
 
 @pytest.fixture
 def bitcoind_configuration_tab() -> BitcoindConfigurationTab:
-    bitcoin = MagicMock()
-    bitcoin.file.directory = '/test/bitcoin'
-    bitcoin.software.release_version = TARGET_BITCOIN_RELEASE
-    tab = BitcoindConfigurationTab(bitcoin)
+    bitcoin_node = MagicMock()
+    bitcoin_node.configuration.file_path = '/test/bitcoin'
+    bitcoin_node.software.release_version = TARGET_BITCOIN_RELEASE
+    tab = BitcoindConfigurationTab(bitcoin_node)
     return tab
 
 

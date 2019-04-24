@@ -36,10 +36,10 @@ class ManagedProcess(QProcess):
             line_bytes: QByteArray = self.readLine()
             try:
                 line_str = line_bytes.data().decode('utf-8').strip()
-                log.debug(f'Process output', line=line_str, binary=self.binary)
             except UnicodeDecodeError:
                 log.error('handle_output decode error', exc_info=True)
                 continue
+            log.debug(f'Process output', line=line_str, binary=self.binary)
             self.process_output_line(line_str)
             self.log_line.emit(line_str)
 
@@ -50,5 +50,4 @@ class ManagedProcess(QProcess):
                               exit_status: QProcess.ExitStatus):
         log.debug('process finish', binary=self.binary, exit_code=exit_code,
                   exit_status=exit_status)
-
         self.update_status(NodeStatus.STOPPED)

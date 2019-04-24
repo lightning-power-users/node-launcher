@@ -57,12 +57,8 @@ class Menu(QMenu):
         self.joule_status_action.setEnabled(False)
         self.joule_url_action = self.addAction('Copy Node URL (REST)')
         self.joule_macaroons_action = self.addAction('Show Macaroons')
-        self.joule_url_action.triggered.connect(
-            lambda: QClipboard().setText(self.node_set.lnd_node.rest_url)
-        )
-        self.joule_macaroons_action.triggered.connect(
-            lambda: reveal(self.node_set.lnd_node.macaroon_path)
-        )
+        self.joule_url_action.triggered.connect(self.copy_rest_url)
+        self.joule_macaroons_action.triggered.connect(self.reveal_macaroon_path)
 
         self.addSeparator()
 
@@ -88,3 +84,9 @@ class Menu(QMenu):
         self.quit_action.triggered.connect(
             lambda _: QCoreApplication.exit(0)
         )
+
+    def copy_rest_url(self):
+        QClipboard().setText(self.node_set.lnd_node.configuration.rest_url)
+
+    def reveal_macaroon_path(self):
+        reveal(self.node_set.lnd_node.configuration.macaroon_path)

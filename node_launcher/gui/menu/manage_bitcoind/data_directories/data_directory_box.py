@@ -13,10 +13,10 @@ from node_launcher.gui.utilities import reveal
 
 class DataDirectoryBox(QGroupBox):
 
-    def __init__(self, bitcoin: BitcoindNode):
+    def __init__(self, bitcoin_node: BitcoindNode):
         super().__init__('Bitcoin Data Directory')
         self.file_dialog = SelectDirectoryDialog(self)
-        self.bitcoin = bitcoin
+        self.bitcoin_node = bitcoin_node
 
         self.datadir = None
 

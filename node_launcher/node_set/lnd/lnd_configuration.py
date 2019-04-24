@@ -46,7 +46,7 @@ class LndConfiguration(object):
         ]
         return arg_list
 
-    def lncli_arguments(self) -> List[str]:
+    def cli_args(self) -> List[str]:
         args = []
         if self.grpc_port != LND_DEFAULT_GRPC_PORT:
             args.append(f'--rpcserver=127.0.0.1:{self.grpc_port}')
@@ -61,7 +61,6 @@ class LndConfiguration(object):
             'lnd configuration_file_path',
             configuration_file_path=self.file_path
         )
-
         self.file = ConfigurationFile(self.file_path)
 
     def check(self):
@@ -106,7 +105,6 @@ class LndConfiguration(object):
         if self.file['color'] is None:
             self.file['color'] = '#000000'
 
-        self.file['listen'] = 'localhost'
         self.file['tor.active'] = True
         self.file['tor.v3'] = True
         self.file['tor.streamisolation'] = True
@@ -160,15 +158,15 @@ class LndConfiguration(object):
             'zmqpubrawtx']
 
     @property
-    def node_port(self) -> str:
+    def node_port(self) -> int:
         if self.file['listen'] is None:
             port = get_port(LND_DEFAULT_PEER_PORT)
             self.file['listen'] = f'127.0.0.1:{port}'
         else:
             if not isinstance(self.file['listen'], list):
-                port = self.file['listen'].split(':')[-1]
+                port = int(self.file['listen'].split(':')[-1])
             else:
-                port = self.file['listen'][0].split(':')[-1]
+                port = int(self.file['listen'][0].split(':')[-1])
         return port
 
     @property

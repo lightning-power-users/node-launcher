@@ -20,8 +20,8 @@ class LndManagerTabsDialog(TabsDialog):
         # lnd console
         self.console_tab = ConsoleWidget(
             title='lncli',
-            program=self.lnd_node.software.lncli,
-            args=self.lnd_node.configuration.lncli_arguments,
+            software=self.lnd_node.software,
+            configuration=self.lnd_node.configuration,
             commands=LNCLI_COMMANDS
         )
         self.tab_widget.addTab(self.console_tab, 'lncli')
@@ -45,7 +45,7 @@ class LndManagerTabsDialog(TabsDialog):
         self.has_run_help = False
 
     def show(self):
-        if self.lnd_node.file['alias'] is not None:
+        if self.lnd_node.configuration.file['alias'] is not None:
             self.configuration_tab.alias_layout.set_alias(self.lnd_node.file['alias'])
 
         super().showMaximized()

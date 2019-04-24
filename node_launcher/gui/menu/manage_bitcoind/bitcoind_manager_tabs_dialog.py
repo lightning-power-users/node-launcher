@@ -19,8 +19,8 @@ class BitcoindManagerTabsDialog(TabsDialog):
         # bitcoin console
         self.console_tab = ConsoleWidget(
             title='bitcoin-cli',
-            program=self.bitcoind_node.software.bitcoin_cli,
-            args=self.bitcoind_node.configuration.args,
+            software=self.bitcoind_node.software,
+            configuration=self.bitcoind_node.configuration,
             commands=BITCOIN_CLI_COMMANDS
         )
         self.tab_widget.addTab(self.console_tab, 'bitcoin-cli')

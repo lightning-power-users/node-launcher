@@ -16,7 +16,8 @@ class NodeSet(object):
         self.lnd_node = LndNode()
 
         self.tor_node.status.connect(self.handle_tor_node_status_change)
-        self.bitcoind_node.status.connect(self.handle_bitcoin_node_status_change)
+        self.bitcoind_node.status.connect(
+            self.handle_bitcoin_node_status_change)
         self.lnd_node.status.connect(self.handle_lnd_node_status_change)
 
     def start(self):
@@ -30,6 +31,9 @@ class NodeSet(object):
         elif status == NodeStatus.SYNCED:
             self.bitcoind_node.tor_synced = True
             self.bitcoind_node.start_process()
+        elif status == NodeStatus.STOPPED:
+            self.lnd_node.stop()
+            self.bitcoind_node.stop()
 
     def handle_bitcoin_node_status_change(self, status):
         if status in [NodeStatus.SOFTWARE_DOWNLOADED,
@@ -38,8 +42,17 @@ class NodeSet(object):
         elif status == NodeStatus.SYNCING:
             self.lnd_node.bitcoind_syncing = True
             self.lnd_node.start_process()
+        elif status == NodeStatus.STOPPED:
+            self.lnd_node.stop()
+            self.tor_node.stop()
+            self.bitcoind_node.tor_synced = False
+            self.lnd_node.bitcoind_syncing = False
+            if self.bitcoind_node.restart:
+                self.tor_node.software.update()
 
     def handle_lnd_node_status_change(self, status):
-        pass
-
-
+        if status == NodeStatus.STOPPED:
+            self.lnd_node.software.update()
+        elif status in [NodeStatus.SOFTWARE_DOWNLOADED,
+                        NodeStatus.SOFTWARE_READY]:
+            self.lnd_node.start_process()

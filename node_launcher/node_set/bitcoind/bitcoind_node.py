@@ -20,6 +20,14 @@ class BitcoindNode(NetworkNode):
             Process=BitcoindProcess
         )
         self.tor_synced = False
+        self.restart = False
+
+    def handle_log_line(self, log_line: str):
+        if 'Block files have previously been pruned' in log_line:
+            if not self.configuration.file['prune']:
+                self.restart = True
+                self.configuration.set_prune(True)
+                self.stop()
 
     @property
     def bitcoin_cli(self) -> str:

@@ -41,4 +41,7 @@ class LndNode(NetworkNode):
     def stop(self):
         if self.process.state() == QProcess.Running:
             self.process.expecting_shutdown = True
-            self.client.stop()
+            try:
+                self.client.stop()
+            except:
+                self.process.kill()

@@ -7,16 +7,10 @@ from node_launcher.constants import TARGET_LND_RELEASE
 from node_launcher.node_set.lnd.lnd_software import LndSoftware
 
 
-def mock_get_latest_release_version(*args):
-    return TARGET_LND_RELEASE
-
-
 @pytest.fixture
 def lnd_software():
-    with TemporaryDirectory() as tmpdirname:
-        lnd_software = LndSoftware(tmpdirname)
-        lnd_software.get_latest_release_version = mock_get_latest_release_version
-        return lnd_software
+    lnd_software = LndSoftware()
+    return lnd_software
 
 
 class TestLndSoftware(object):
@@ -61,4 +55,3 @@ class TestLndSoftware(object):
     def test_download(self, lnd_software: LndSoftware):
         lnd_software.download()
         assert os.path.isfile(lnd_software.download_destination_file_path)
-

@@ -3,8 +3,13 @@ from typing import List
 
 import psutil
 
-from node_launcher.constants import OPERATING_SYSTEM, BITCOIN_DATA_PATH, BITCOIN_MAINNET_PEER_PORT, \
-    BITCOIN_MAINNET_RPC_PORT, MAINNET_PRUNE
+from node_launcher.constants import (
+    OPERATING_SYSTEM,
+    BITCOIN_DATA_PATH,
+    BITCOIN_MAINNET_PEER_PORT,
+    BITCOIN_MAINNET_RPC_PORT,
+    MAINNET_PRUNE
+)
 from node_launcher.logging import log
 from node_launcher.node_set.lib.configuration_file import ConfigurationFile
 from node_launcher.node_set.lib.get_random_password import get_random_password
@@ -28,6 +33,10 @@ class BitcoindConfiguration(object):
     @property
     def args(self) -> List[str]:
         return [f'-conf={self.file_path}']
+
+    @property
+    def cli_args(self) -> List[str]:
+        return self.args
 
     def load(self):
         log.info(

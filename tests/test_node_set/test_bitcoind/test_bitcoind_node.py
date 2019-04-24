@@ -20,17 +20,21 @@ class TestBitcoindNode(object):
     def test_start(self, bitcoind_node: BitcoindNode, tor_node: TorNode, qtbot):
 
         def handle_tor_node_status_change(status):
-            if status == str(NodeStatus.SYNCED):
-                bitcoind_node.start()
+            if status in [NodeStatus.SOFTWARE_DOWNLOADED,
+                          NodeStatus.SOFTWARE_READY]:
+                bitcoind_node.software.update()
+            elif status == NodeStatus.SYNCED:
+                bitcoind_node.tor_synced = True
+                bitcoind_node.start_process()
 
         tor_node.status.connect(handle_tor_node_status_change)
-        tor_node.start()
+        tor_node.software.update()
 
         def check_synced():
-            return bitcoind_node.current_status == str(NodeStatus.SYNCING)
+            return bitcoind_node.current_status == NodeStatus.SYNCING
         qtbot.waitUntil(check_synced, timeout=50000)
         bitcoind_node.stop()
 
         def check_stopped():
-            return bitcoind_node.current_status == str(NodeStatus.STOPPED)
+            return bitcoind_node.current_status == NodeStatus.STOPPED
         qtbot.waitUntil(check_stopped, timeout=50000)
