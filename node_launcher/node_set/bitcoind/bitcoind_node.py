@@ -23,7 +23,7 @@ class BitcoindNode(NetworkNode):
         self.restart = False
 
     def handle_log_line(self, log_line: str):
-        if 'Block files have previously been pruned' in log_line:
+        if 'You need to rebuild the database using -reindex to go back to unpruned mode.' in log_line:
             if not self.configuration.file['prune']:
                 self.restart = True
                 self.configuration.set_prune(True)
