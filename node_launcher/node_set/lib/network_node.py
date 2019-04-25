@@ -19,6 +19,7 @@ class NetworkNode(QObject):
         self.configuration = Configuration()
         self.process = Process(self.software.daemon, self.configuration.args)
         self.connect_events()
+        self.restart = False
 
     def stop(self):
         if self.process.state() == QProcess.Running:
@@ -45,6 +46,8 @@ class NetworkNode(QObject):
         self.current_status = new_status
         self.status.emit(str(new_status))
         self.start_process()
+        if new_status == NodeStatus.STOPPED and self.restart:
+            self.update_status(NodeStatus.RESTART)
 
     @property
     def prerequisites_synced(self):

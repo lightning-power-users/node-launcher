@@ -16,7 +16,7 @@ class LndUnlocker(QObject):
 
     def auto_unlock_wallet(self):
         keyring_service_name = f'lnd_mainnet_wallet_password'
-        keyring_user_name = self.configuration.file['bitcoind.rpcuser']
+        keyring_user_name = self.configuration['bitcoind.rpcuser']
         log.info(
             'auto_unlock_wallet_get_password',
             keyring_service_name=keyring_service_name,
@@ -112,7 +112,7 @@ class LndUnlocker(QObject):
                 raise
             keyring.set_password(
                 service=f'lnd_mainnet_wallet_password',
-                username=self.configuration.file['bitcoind.rpcuser'],
+                username=self.configuration['bitcoind.rpcuser'],
                 password=new_wallet_password
             )
         else:

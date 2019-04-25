@@ -14,6 +14,7 @@ class ManagedProcess(QProcess):
     def __init__(self, binary: str, args):
         super().__init__()
         self.binary = binary
+        self.args = args
         self.setProgram(binary)
         self.setArguments(args)
         self.setProcessChannelMode(QProcess.MergedChannels)
