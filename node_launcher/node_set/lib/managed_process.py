@@ -31,6 +31,9 @@ class ManagedProcess(QProcess):
         self.current_status = new_status
         self.status.emit(str(new_status))
 
+    def process_output_line(self, line):
+        pass
+
     def handle_output(self):
         while self.canReadLine():
             line_bytes: QByteArray = self.readLine()
