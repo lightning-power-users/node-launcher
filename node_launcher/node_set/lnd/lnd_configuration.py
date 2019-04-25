@@ -22,23 +22,24 @@ from node_launcher.node_set.lib.configuration_file import ConfigurationFile
 from node_launcher.port_utilities import get_port
 
 
-class LndConfiguration(object):
+class LndConfiguration(ConfigurationFile):
     file: ConfigurationFile
 
     def __init__(self):
         file_name = 'lnd.conf'
         lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
-        self.file_path = os.path.join(lnd_dir_path, file_name)
+        self.configuration_file_path = os.path.join(lnd_dir_path, file_name)
+        super().__init__(path=self.configuration_file_path)
 
     @property
     def args(self):
         if IS_WINDOWS:
             arg_list = [
-                f'--configfile={self.file_path}',
+                f'--configfile={self.configuration_file_path}',
             ]
         else:
             arg_list = [
-                f'--configfile="{self.file_path}"',
+                f'--configfile="{self.configuration_file_path}"',
             ]
 
         arg_list += [
@@ -56,58 +57,51 @@ class LndConfiguration(object):
             args.append(f'--tlscertpath="{self.tls_cert_path}"')
         return args
 
-    def load(self):
-        log.info(
-            'lnd configuration_file_path',
-            configuration_file_path=self.file_path
-        )
-        self.file = ConfigurationFile(self.file_path)
-
     def check(self):
         self.lnddir = LND_DIR_PATH[OPERATING_SYSTEM]
 
         # Previous versions of the launcher set lnddir in the config file,
         # but it is not a valid key so this helps old users upgrading
-        if self.file['lnddir'] is not None:
-            self.file['lnddir'] = None
+        if self['lnddir'] is not None:
+            self['lnddir'] = None
 
-        if self.file['debuglevel'] is None:
-            self.file['debuglevel'] = 'info'
+        if self['debuglevel'] is None:
+            self['debuglevel'] = 'info'
 
-        self.file['bitcoin.active'] = True
-        self.file['bitcoin.node'] = 'bitcoind'
+        self['bitcoin.active'] = True
+        self['bitcoin.node'] = 'bitcoind'
         bitcoind_conf = BitcoindConfiguration()
         bitcoind_conf.load()
-        self.file[
+        self[
             'bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
-        self.file['bitcoind.rpcuser'] = bitcoind_conf.file['rpcuser']
-        self.file['bitcoind.rpcpass'] = bitcoind_conf.file['rpcpassword']
-        self.file['bitcoind.zmqpubrawblock'] = bitcoind_conf.file[
+        self['bitcoind.rpcuser'] = bitcoind_conf['rpcuser']
+        self['bitcoind.rpcpass'] = bitcoind_conf['rpcpassword']
+        self['bitcoind.zmqpubrawblock'] = bitcoind_conf[
             'zmqpubrawblock']
-        self.file['bitcoind.zmqpubrawtx'] = bitcoind_conf.file[
+        self['bitcoind.zmqpubrawtx'] = bitcoind_conf[
             'zmqpubrawtx']
 
-        if self.file['restlisten'] is None:
+        if self['restlisten'] is None:
             self.rest_port = get_port(LND_DEFAULT_REST_PORT)
-            self.file['restlisten'] = f'127.0.0.1:{self.rest_port}'
+            self['restlisten'] = f'127.0.0.1:{self.rest_port}'
         else:
-            self.rest_port = self.file['restlisten'].split(':')[-1]
+            self.rest_port = self['restlisten'].split(':')[-1]
 
-        if not self.file['rpclisten']:
+        if not self['rpclisten']:
             self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT)
-            self.file['rpclisten'] = f'127.0.0.1:{self.grpc_port}'
+            self['rpclisten'] = f'127.0.0.1:{self.grpc_port}'
         else:
-            self.grpc_port = int(self.file['rpclisten'].split(':')[-1])
+            self.grpc_port = int(self['rpclisten'].split(':')[-1])
 
-        if not self.file['tlsextraip']:
-            self.file['tlsextraip'] = '127.0.0.1'
+        if not self['tlsextraip']:
+            self['tlsextraip'] = '127.0.0.1'
 
-        if self.file['color'] is None:
-            self.file['color'] = '#000000'
+        if self['color'] is None:
+            self['color'] = '#000000'
 
-        self.file['tor.active'] = True
-        self.file['tor.v3'] = True
-        self.file['tor.streamisolation'] = True
+        self['tor.active'] = True
+        self['tor.v3'] = True
+        self['tor.streamisolation'] = True
 
         self.macaroon_path = os.path.join(
             self.lnddir,
@@ -116,57 +110,57 @@ class LndConfiguration(object):
             'bitcoin',
             'mainnet'
         )
-        self.config_snapshot = self.file.snapshot.copy()
-        # self.file.file_watcher.fileChanged.connect(self.config_file_changed)
-        # self.file.file_watcher.fileChanged.connect(
+        self.config_snapshot = self.snapshot.copy()
+        # self.file_watcher.fileChanged.connect(self.config_file_changed)
+        # self.file_watcher.fileChanged.connect(
         #     self.bitcoin_config_file_changed)
 
         hostname_file = os.path.join(TOR_SERVICE_PATH, 'hostname')
         with open(hostname_file, 'r') as f:
-            self.file['externalip'] = f.readline().strip()
+            self['externalip'] = f.readline().strip()
 
     def config_file_changed(self):
         # Refresh config file
-        self.file.file_watcher.blockSignals(True)
-        self.file.populate_cache()
-        self.file.file_watcher.blockSignals(False)
-        if self.file['restlisten']:
-            self.rest_port = int(self.file['restlisten'].split(':')[-1])
-        if self.file['rpclisten']:
-            self.grpc_port = int(self.file['rpclisten'].split(':')[-1])
+        self.file_watcher.blockSignals(True)
+        self.populate_cache()
+        self.file_watcher.blockSignals(False)
+        if self['restlisten']:
+            self.rest_port = int(self['restlisten'].split(':')[-1])
+        if self['rpclisten']:
+            self.grpc_port = int(self['rpclisten'].split(':')[-1])
 
         # Some text editors do not modify the file, they delete and replace the file
         # Check if file is still in file_watcher list of files, if not add back
-        files_watched = self.file.file_watcher.files()
+        files_watched = self.file_watcher.files()
         if len(files_watched) == 0:
-            self.file.file_watcher.addPath(self.file_path)
+            self.file_watcher.addPath(self.file_path)
 
     def bitcoin_config_file_changed(self):
         # Refresh config file
-        self.file.file_watcher.blockSignals(True)
-        self.file.populate_cache()
-        self.file.file_watcher.blockSignals(False)
+        self.file_watcher.blockSignals(True)
+        self.populate_cache()
+        self.file_watcher.blockSignals(False)
         bitcoind_conf = BitcoindConfiguration()
         bitcoind_conf.load()
-        self.file[
+        self[
             'bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
-        self.file['bitcoind.rpcuser'] = bitcoind_conf.file['rpcuser']
-        self.file['bitcoind.rpcpass'] = bitcoind_conf.file['rpcpassword']
-        self.file['bitcoind.zmqpubrawblock'] = bitcoind_conf.file[
+        self['bitcoind.rpcuser'] = bitcoind_conf['rpcuser']
+        self['bitcoind.rpcpass'] = bitcoind_conf['rpcpassword']
+        self['bitcoind.zmqpubrawblock'] = bitcoind_conf[
             'zmqpubrawblock']
-        self.file['bitcoind.zmqpubrawtx'] = bitcoind_conf.file[
+        self['bitcoind.zmqpubrawtx'] = bitcoind_conf[
             'zmqpubrawtx']
 
     @property
     def node_port(self) -> int:
-        if self.file['listen'] is None:
+        if self['listen'] is None:
             port = get_port(LND_DEFAULT_PEER_PORT)
-            self.file['listen'] = f'127.0.0.1:{port}'
+            self['listen'] = f'127.0.0.1:{port}'
         else:
-            if not isinstance(self.file['listen'], list):
-                port = int(self.file['listen'].split(':')[-1])
+            if not isinstance(self['listen'], list):
+                port = int(self['listen'].split(':')[-1])
             else:
-                port = int(self.file['listen'][0].split(':')[-1])
+                port = int(self['listen'][0].split(':')[-1])
         return port
 
     @property
@@ -204,7 +198,7 @@ class LndConfiguration(object):
                 return True and self.running
 
             old_config = self.config_snapshot.copy()
-            new_config = self.file.snapshot
+            new_config = self.snapshot
 
             fields = [
                 'restlisten', 'listen', 'rpclisten'

@@ -20,20 +20,23 @@ class BitcoindNode(NetworkNode):
             Process=BitcoindProcess
         )
         self.tor_synced = False
-        self.restart = False
 
     def handle_log_line(self, log_line: str):
         if 'You need to rebuild the database using -reindex to go back to unpruned mode.' in log_line:
-            if not self.configuration.file['prune']:
+            if not self.configuration['prune']:
                 self.restart = True
                 self.configuration.set_prune(True)
                 self.stop()
+        elif 'Error: Prune: last wallet synchronisation goes beyond pruned data.' in log_line:
+            self.restart = True
+            self.configuration['disablewallet'] = True
+            self.stop()
 
     @property
     def bitcoin_cli(self) -> str:
         command = [
             f'"{self.software.bitcoin_cli}"',
-            f'-conf="{self.configuration.file_path}"',
+            f'-conf="{self.configuration.path}"',
         ]
         return ' '.join(command)
 
@@ -44,7 +47,7 @@ class BitcoindNode(NetworkNode):
     def stop(self):
         if self.process.state() == QProcess.Running:
             self.process.expecting_shutdown = True
-            client = Proxy(btc_conf_file=self.configuration.file_path,
+            client = Proxy(btc_conf_file=self.configuration.path,
                            service_port=self.configuration.rpc_port)
             try:
                 client.call('stop')

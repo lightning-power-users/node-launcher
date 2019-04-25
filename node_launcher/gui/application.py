@@ -34,7 +34,7 @@ class Application(QApplication):
         return status
 
     @staticmethod
-    def check_version(progress_callback):
+    def check_version():
         latest_version = LauncherSoftware().get_latest_release_version()
         if latest_version is None:
             return
