@@ -46,4 +46,7 @@ class BitcoindNode(NetworkNode):
             self.process.expecting_shutdown = True
             client = Proxy(btc_conf_file=self.configuration.file_path,
                            service_port=self.configuration.rpc_port)
-            client.call('stop')
+            try:
+                client.call('stop')
+            except:
+                self.process.terminate()
