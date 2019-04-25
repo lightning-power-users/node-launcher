@@ -266,3 +266,12 @@ class LndClient(object):
         request = ln.StopRequest()
         response = self.lnd_client.StopDaemon(request)
         return response
+
+    def debug_level(self, show: bool = None, level_spec: str = None):
+        request = ln.DebugLevelRequest()
+        if show is not None:
+            request.show = show
+        if level_spec is not None:
+            request.level_spec = level_spec
+        response = self.lnd_client.DebugLevel(request)
+        return response

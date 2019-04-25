@@ -2,6 +2,7 @@ from PySide2.QtCore import QProcess
 
 from node_launcher.node_set.lib.network_node import NetworkNode
 from node_launcher.node_set.lib.node_status import NodeStatus
+from node_launcher.node_set.lnd.lnd_threaded_client import LndThreadedClient
 from .lnd_configuration import LndConfiguration
 from .lnd_unlocker import LndUnlocker
 from .lnd_client import LndClient
@@ -10,7 +11,7 @@ from .lnd_software import LndSoftware
 
 
 class LndNode(NetworkNode):
-    client: LndClient
+    client: LndThreadedClient
     configuration: LndConfiguration
     process: LndProcess
     software: LndSoftware
@@ -28,11 +29,12 @@ class LndNode(NetworkNode):
 
     def handle_status_change(self, new_status):
         if new_status == NodeStatus.CONFIGURATION_READY:
-            self.client = LndClient(self.configuration)
-            self.unlocker = LndUnlocker(configuration=self.configuration,
-                                        client=self.client)
-        if new_status == NodeStatus.UNLOCK_READY:
+            self.client = LndThreadedClient(self.configuration)
+            self.unlocker = LndUnlocker(configuration=self.configuration)
+        elif new_status == NodeStatus.UNLOCK_READY:
             self.unlocker.auto_unlock_wallet()
+        elif new_status == NodeStatus.SYNCING:
+            self.client.debug_level()
 
     @property
     def prerequisites_synced(self):

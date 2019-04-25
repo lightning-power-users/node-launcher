@@ -9,10 +9,10 @@ from node_launcher.node_set.lnd.lnd_client import LndClient
 
 
 class LndUnlocker(QObject):
-    def __init__(self, configuration, client):
+    def __init__(self, configuration):
         super().__init__()
         self.configuration = configuration
-        self.client = client
+        self.client = LndClient(self.configuration)
 
     def auto_unlock_wallet(self):
         keyring_service_name = f'lnd_mainnet_wallet_password'
@@ -35,7 +35,7 @@ class LndUnlocker(QObject):
         QThreadPool().start(worker)
 
     @staticmethod
-    def unlock_wallet(configuration, progress_callback, password: str):
+    def unlock_wallet(configuration, password: str):
         if password is None:
             return 'wallet not found'
         client = LndClient(configuration)

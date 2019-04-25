@@ -57,7 +57,8 @@ class Worker(QRunnable):
         self.signals = WorkerSignals()
 
         # Add the callback to our kwargs
-        self.kwargs['progress_callback'] = self.signals.progress
+        if self.kwargs.get('progress_callback', None):
+            self.kwargs['progress_callback'] = self.signals.progress
 
     @Slot()
     def run(self):

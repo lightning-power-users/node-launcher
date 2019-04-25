@@ -18,7 +18,6 @@ class NodeSet(object):
         self.tor_node.status.connect(self.handle_tor_node_status_change)
         self.bitcoind_node.status.connect(
             self.handle_bitcoin_node_status_change)
-        self.lnd_node.status.connect(self.handle_lnd_node_status_change)
 
     def start(self):
         log.debug('Starting node set')
@@ -49,10 +48,3 @@ class NodeSet(object):
             self.lnd_node.bitcoind_syncing = False
             if self.bitcoind_node.restart:
                 self.tor_node.software.update()
-
-    def handle_lnd_node_status_change(self, status):
-        if status == NodeStatus.STOPPED:
-            self.lnd_node.software.update()
-        elif status in [NodeStatus.SOFTWARE_DOWNLOADED,
-                        NodeStatus.SOFTWARE_READY]:
-            self.lnd_node.start_process()

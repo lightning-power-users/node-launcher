@@ -21,6 +21,7 @@ class LndProcess(ManagedProcess):
         if 'Waiting for wallet encryption password' in line:
             self.update_status(NodeStatus.UNLOCK_READY)
         elif 'Waiting for chain backend to finish sync' in line:
+            self.set_icon_color.emit('blue')
             self.update_status(NodeStatus.SYNCING)
         elif 'Unable to synchronize wallet to chain' in line:
             self.terminate()
