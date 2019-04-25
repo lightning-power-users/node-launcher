@@ -4,7 +4,7 @@ from PySide2.QtWidgets import (
     QPushButton
 )
 
-from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoind_node import BitcoindNode
 from .datadir_label import DatadirLabel
 from .prune_warning_label import PruneWarningLabel
 from .select_directory_dialog import SelectDirectoryDialog
@@ -13,10 +13,10 @@ from node_launcher.gui.utilities import reveal
 
 class DataDirectoryBox(QGroupBox):
 
-    def __init__(self, bitcoin: Bitcoin):
+    def __init__(self, bitcoin_node: BitcoindNode):
         super().__init__('Bitcoin Data Directory')
         self.file_dialog = SelectDirectoryDialog(self)
-        self.bitcoin = bitcoin
+        self.bitcoin_node = bitcoin_node
 
         self.datadir = None
 

@@ -2,24 +2,26 @@ from typing import List
 
 from PySide2.QtCore import SIGNAL, QProcess, QByteArray, Qt
 from PySide2.QtWidgets import QTextEdit, QLineEdit, QCompleter, QWidget
+from pip._internal.configuration import Configuration
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.data import JsonLexer
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.logging import log
+from node_launcher.node_set.lib.software import Software
 
 
 class ConsoleWidget(QWidget):
     def __init__(self, title: str,
-                 program: str,
-                 args: List[str],
+                 software: Software,
+                 configuration,
                  commands: List[str]):
         super().__init__()
 
         self.setWindowTitle(title)
-        self.program = program
-        self.args = args
+        self.software = software
+        self.configuration = configuration
 
         self.layout = QGridLayout()
 
@@ -49,15 +51,15 @@ class ConsoleWidget(QWidget):
     def run_command(self, cmd: str):
         log.info(
             'run_command',
-            program=self.program,
-            args=self.args,
+            program=self.software.cli,
+            args=self.configuration.cli_args,
             cmd=cmd
         )
         self.output.append(f'> {cmd}\n')
         self.input.clear()
 
         process = QProcess()
-        process.setProgram(self.program)
+        process.setProgram(self.software.cli)
         process.setCurrentReadChannel(0)
 
         # noinspection PyUnresolvedReferences
@@ -69,10 +71,10 @@ class ConsoleWidget(QWidget):
             lambda: self.handle_output(process)
         )
 
-        connect_args = list(self.args)
+        connect_args = list(self.configuration.cli_args)
 
         args = cmd.split(' ')
-        if args[0] == self.program.split('/')[-1]:
+        if args[0] == self.software.cli.split('/')[-1]:
             args.pop(0)
         process.setArguments(connect_args + args)
         process.start()

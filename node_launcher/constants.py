@@ -22,7 +22,7 @@ class StringConstant(object):
         return hash(self.name)
 
     def __eq__(self, other):
-        return other.name == self.name
+        return str(other) == self.name
 
     def __ne__(self, other):
         return str(other).lower() != self.name
@@ -96,6 +96,8 @@ TOR_EXE_PATH: Dict[OperatingSystem, str] = {
     WINDOWS: os.path.join(LOCALAPPDATA, r'tor\tor\tor.exe'),
     DARWIN: expanduser('~/Library/Application Support/Tor/Tor Browser.app/Contents/MacOS/Tor/tor.real')
 }
+
+TOR_SERVICE_PATH = os.path.join(NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM], 'tor-service')
 
 UPGRADE = 'Please download the latest version of the Node Launcher: ' \
                     '<a href="https://github.com/PierreRochard/node-launcher/releases/">' \

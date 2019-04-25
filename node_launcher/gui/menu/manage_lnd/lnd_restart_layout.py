@@ -3,14 +3,14 @@ from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.section_name import SectionName
 from node_launcher.node_set import NodeSet
 from node_launcher.gui.components.warning_text import WarningText
-from node_launcher.node_set.lnd import Lnd
+from node_launcher.node_set.lnd.lnd_node import LndNode
 
 
 class LndRestartLayout(QGridLayout):
     node_set: NodeSet
     timer = QTimer
 
-    def __init__(self, lnd: Lnd):
+    def __init__(self, lnd: LndNode):
         super(LndRestartLayout, self).__init__()
 
         self.timer = QTimer(self.parentWidget())
@@ -23,9 +23,9 @@ class LndRestartLayout(QGridLayout):
         self.lnd_restart_required = WarningText('Lnd: ')
         self.addWidget(self.lnd_restart_required, same_row=True, column=columns)
         self.lnd_restart_required.hide()
-        self.lnd.file.file_watcher.fileChanged.connect(self.check_restart_required)
+        # self.lnd.file.file_watcher.fileChanged.connect(self.check_restart_required)
         self.timer.start(1000)
-        self.timer.timeout.connect(self.check_restart_required)
+        # self.timer.timeout.connect(self.check_restart_required)
 
     def check_restart_required(self):
         restart_required = self.lnd.restart_required

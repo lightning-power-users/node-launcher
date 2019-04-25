@@ -1,9 +1,8 @@
 from PySide2.QtGui import QIcon, QPixmap
 from PySide2.QtWidgets import QSystemTrayIcon, QWidget
 
-from node_launcher.assets.asset_access import asset_access
-from node_launcher.gui.menu.menu import Menu
-from node_launcher.logging import log
+from .assets.asset_access import asset_access
+from .menu.menu import Menu
 from node_launcher.node_set import NodeSet
 
 
@@ -14,6 +13,18 @@ class SystemTray(QSystemTrayIcon):
         self.set_red()
         self.menu = Menu(node_set=node_set, system_tray=self)
         self.setContextMenu(self.menu)
+
+        self.node_set.bitcoind_node.process.notification.connect(
+            self.show_message
+        )
+
+        self.node_set.lnd_node.process.notification.connect(
+            self.show_message
+        )
+
+        self.node_set.lnd_node.process.set_icon_color.connect(
+            self.set_icon
+        )
 
     def set_icon(self, color: str):
         path = asset_access.get_asset_full_path(f'bitcoin_logo_{color}.png')

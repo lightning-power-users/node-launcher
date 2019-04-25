@@ -1,4 +1,4 @@
-from PySide2.QtCore import Qt, Signal
+from PySide2.QtCore import Qt
 from PySide2.QtWidgets import (
     QCheckBox,
     QLabel,
@@ -9,29 +9,29 @@ from PySide2.QtWidgets import (
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.horizontal_line import HorizontalLine
 from node_launcher.gui.components.selectable_text import SelectableText
-from .bitcoind_ports_layout import BitcoindPortsLayout
 from .bitcoind_restart_layout import BitcoindRestartLayout
 from node_launcher.gui.utilities import reveal
 from .data_directories import DataDirectoryBox
 
-from node_launcher.node_set.bitcoin import Bitcoin
+from node_launcher.node_set.bitcoind.bitcoind_node import BitcoindNode
 
 
 class BitcoindConfigurationTab(QWidget):
-    def __init__(self, bitcoin: Bitcoin):
+    def __init__(self, bitcoind_node: BitcoindNode):
         super().__init__()
 
-        self.bitcoin = bitcoin
+        self.bitcoind_node = bitcoind_node
 
         self.layout = QGridLayout()
 
         self.bitcoin_version = SelectableText(
             f'Bitcoin Core '
-            f'version {self.bitcoin.software.release_version}'
+            f'version {self.bitcoind_node.software.release_version}'
         )
         self.layout.addWidget(self.bitcoin_version)
 
-        self.data_directory_group_box = DataDirectoryBox(bitcoin=self.bitcoin)
+        self.data_directory_group_box = DataDirectoryBox(
+            bitcoin_node=self.bitcoind_node)
         self.data_directory_group_box.file_dialog.new_data_directory.connect(
             self.change_datadir
         )
@@ -40,7 +40,6 @@ class BitcoindConfigurationTab(QWidget):
 
         self.enable_wallet_label = QLabel('Enable wallet')
         self.enable_wallet_widget = QCheckBox('Enable Wallet')
-        self.enable_wallet_widget.setChecked(not self.bitcoin.file['disablewallet'])
         self.enable_wallet_widget.stateChanged.connect(
             lambda x: self.set_conf_value('disablewallet', not bool(x))
         )
@@ -48,26 +47,23 @@ class BitcoindConfigurationTab(QWidget):
 
         self.layout.addWidget(HorizontalLine())
 
-        self.ports_layout = BitcoindPortsLayout(bitcoin=self.bitcoin)
-        self.layout.addLayout(self.ports_layout)
-
-        self.restart_layout = BitcoindRestartLayout(bitcoin=self.bitcoin)
+        self.restart_layout = BitcoindRestartLayout(bitcoin=self.bitcoind_node)
         self.layout.addLayout(self.restart_layout)
 
         self.show_bitcoin_conf = QPushButton('Show bitcoin.conf')
         self.show_bitcoin_conf.clicked.connect(
-            lambda: reveal(self.bitcoin.file.directory)
+            lambda: reveal(self.bitcoind_node.configuration.file_path)
         )
         self.layout.addWidget(self.show_bitcoin_conf)
 
         self.setLayout(self.layout)
 
     def change_datadir(self, new_datadir: str):
-        self.bitcoin.file['datadir'] = new_datadir
-        self.bitcoin.set_prune()
+        self.bitcoind_node.file['datadir'] = new_datadir
+        self.bitcoind_node.set_prune()
         self.data_directory_group_box.set_datadir(
-            self.bitcoin.file['datadir'],
-            self.bitcoin.file['prune']
+            self.bitcoind_node.file['datadir'],
+            self.bitcoind_node.file['prune']
         )
 
     @staticmethod
@@ -78,4 +74,4 @@ class BitcoindConfigurationTab(QWidget):
         widget.setChecked(state)
 
     def set_conf_value(self, key: str, new_value):
-        self.bitcoin.file[key] = new_value
+        self.bitcoind_node.file[key] = new_value

@@ -1,68 +1,50 @@
-import os
-
+from .bitcoind.bitcoind_node import BitcoindNode
+from .lib.node_status import NodeStatus
+from .lnd.lnd_node import LndNode
+from .tor.tor_node import TorNode
 from node_launcher.logging import log
-from node_launcher.node_set.bitcoin import Bitcoin
-from node_launcher.node_set.lnd import Lnd
-from node_launcher.node_set.tor import Tor
-from node_launcher.constants import (
-    BITCOIN_DATA_PATH,
-    LND_DIR_PATH,
-    TOR_DIR_PATH,
-    OPERATING_SYSTEM,
-)
-
-
-from node_launcher.node_set.lnd_client import LndClient
 
 
 class NodeSet(object):
-    bitcoin: Bitcoin
-    lnd: Lnd
-    tor: Tor
+    bitcoind_node: BitcoindNode
+    lnd_node: LndNode
+    tor_node: TorNode
 
     def __init__(self):
-        file_name = 'bitcoin.conf'
-        bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
-        self.bitcoin_configuration_file_path = os.path.join(bitcoin_data_path,
-                                                            file_name)
-        log.info(
-            'bitcoin_configuration_file_path',
-            bitcoin_configuration_file_path=self.bitcoin_configuration_file_path
-        )
-        self.bitcoin = Bitcoin(
-            configuration_file_path=self.bitcoin_configuration_file_path
-        )
+        self.tor_node = TorNode()
+        self.bitcoind_node = BitcoindNode()
+        self.lnd_node = LndNode()
 
-        file_name = 'lnd.conf'
-        lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
-        self.lnd_configuration_file_path = os.path.join(lnd_dir_path, file_name)
-        log.info(
-            'lnd_configuration_file_path',
-            lnd_configuration_file_path=self.lnd_configuration_file_path
-        )
-        self.lnd = Lnd(
-            configuration_file_path=self.lnd_configuration_file_path,
-            bitcoin=self.bitcoin
-        )
+        self.tor_node.status.connect(self.handle_tor_node_status_change)
+        self.bitcoind_node.status.connect(
+            self.handle_bitcoin_node_status_change)
 
-        self.lnd_client = LndClient(self.lnd)
+    def start(self):
+        log.debug('Starting node set')
+        self.tor_node.software.update()
 
-        file_name = 'torrc'
-        tor_dir_path = TOR_DIR_PATH[OPERATING_SYSTEM]
-        self.tor_configuration_file_path = os.path.join(tor_dir_path, file_name)
-        log.info(
-            'tor_configuration_file_path',
-            tor_configuration_file_path=self.tor_configuration_file_path
-        )
-        self.tor = Tor(
-            configuration_file_path=self.tor_configuration_file_path,
-            lnd=self.lnd
-        )
+    def handle_tor_node_status_change(self, status):
+        if status in [NodeStatus.SOFTWARE_DOWNLOADED,
+                      NodeStatus.SOFTWARE_READY]:
+            self.bitcoind_node.software.update()
+        elif status == NodeStatus.SYNCED:
+            self.bitcoind_node.tor_synced = True
+            self.bitcoind_node.start_process()
+        elif status == NodeStatus.STOPPED:
+            self.lnd_node.stop()
+            self.bitcoind_node.stop()
 
-    @property
-    def is_testnet(self) -> bool:
-        return self.bitcoin.file['testnet']
-
-    @property
-    def is_mainnet(self) -> bool:
-        return not self.bitcoin.file['testnet']
+    def handle_bitcoin_node_status_change(self, status):
+        if status in [NodeStatus.SOFTWARE_DOWNLOADED,
+                      NodeStatus.SOFTWARE_READY]:
+            self.lnd_node.software.update()
+        elif status == NodeStatus.SYNCING:
+            self.lnd_node.bitcoind_syncing = True
+            self.lnd_node.start_process()
+        elif status == NodeStatus.STOPPED:
+            self.lnd_node.stop()
+            self.tor_node.stop()
+            self.bitcoind_node.tor_synced = False
+            self.lnd_node.bitcoind_syncing = False
+            if self.bitcoind_node.restart:
+                self.tor_node.software.update()

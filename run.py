@@ -6,10 +6,9 @@ from node_launcher.constants import (
 )
 from node_launcher.gui.application import Application
 from node_launcher.logging import log
-from node_launcher.utilities.except_hook import except_hook
 
 if __name__ == '__main__':
-    sys.excepthook = except_hook
+    # sys.excepthook = except_hook
 
     log.info(
         'constants',
@@ -20,4 +19,4 @@ if __name__ == '__main__':
     )
 
     app = Application()
-    sys.exit(app.exec_())
+    sys.exit(app.start())

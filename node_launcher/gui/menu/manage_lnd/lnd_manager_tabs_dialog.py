@@ -3,36 +3,37 @@ from PySide2.QtWidgets import QVBoxLayout
 
 from node_launcher.constants import LNCLI_COMMANDS
 from node_launcher.gui.components.console_dialog import ConsoleWidget
+from node_launcher.gui.components.output_widget import OutputWidget
 from node_launcher.gui.components.tabs_dialog import TabsDialog
 from node_launcher.gui.menu.manage_lnd.lnd_configuration_tab import \
     LndConfigurationTab
-from .lnd_output_tab import LndOutputTab
+from node_launcher.node_set.lnd.lnd_node import LndNode
 
 
 class LndManagerTabsDialog(TabsDialog):
-    def __init__(self, lnd, system_tray):
+    def __init__(self, lnd_node: LndNode, system_tray):
         super().__init__()
 
-        self.lnd = lnd
+        self.lnd_node = lnd_node
         self.system_tray = system_tray
 
         # lnd console
         self.console_tab = ConsoleWidget(
             title='lncli',
-            program=self.lnd.software.lncli,
-            args=self.lnd.lncli_arguments(),
+            software=self.lnd_node.software,
+            configuration=self.lnd_node.configuration,
             commands=LNCLI_COMMANDS
         )
         self.tab_widget.addTab(self.console_tab, 'lncli')
 
         # lnd output
-        self.output_tab = LndOutputTab(
-            lnd=self.lnd,
-            system_tray=self.system_tray
+        self.output_tab = OutputWidget()
+        self.lnd_node.process.log_line.connect(
+            self.output_tab.output_text_edit.append
         )
         self.tab_widget.addTab(self.output_tab, 'Logs')
 
-        self.configuration_tab = LndConfigurationTab(self.lnd)
+        self.configuration_tab = LndConfigurationTab(self.lnd_node)
         self.tab_widget.addTab(self.configuration_tab, 'Configuration')
 
         self.main_layout = QVBoxLayout()
@@ -44,8 +45,8 @@ class LndManagerTabsDialog(TabsDialog):
         self.has_run_help = False
 
     def show(self):
-        if self.lnd.file['alias'] is not None:
-            self.configuration_tab.alias_layout.set_alias(self.lnd.file['alias'])
+        if self.lnd_node.configuration.file['alias'] is not None:
+            self.configuration_tab.alias_layout.set_alias(self.lnd_node.file['alias'])
 
         super().showMaximized()
         self.raise_()
