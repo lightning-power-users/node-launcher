@@ -69,24 +69,6 @@ class TestSoftware(object):
             software.update_status(SoftwareStatus.INSTALLING_SOFTWARE)
         assert software.current_status == str(SoftwareStatus.INSTALLING_SOFTWARE)
 
-    def test_update_ready(self, software, qtbot):
-        self.call_count = 0
-        expected_status = [
-            SoftwareStatus.CHECKING_DOWNLOAD,
-            SoftwareStatus.SOFTWARE_READY
-        ]
-
-        def signal_cb(new_status):
-            correct = new_status == str(expected_status[self.call_count])
-            self.call_count += 1
-            return correct
-
-        os.makedirs(software.software_directory, exist_ok=True)
-        file = open(software.download_destination_file_path, 'w').close()
-        with qtbot.waitSignal(software.status, raising=True,
-                              check_params_cb=signal_cb) as blocker:
-            software.update()
-
     def test_update_download(self, software, qtbot, requests_mock, tmpdir):
         shutil.rmtree(software.software_directory)
 
