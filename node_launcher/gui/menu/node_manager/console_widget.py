@@ -2,34 +2,26 @@ from typing import List
 
 from PySide2.QtCore import SIGNAL, QProcess, QByteArray, Qt
 from PySide2.QtWidgets import QTextEdit, QLineEdit, QCompleter, QWidget
-from pip._internal.configuration import Configuration
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.data import JsonLexer
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.logging import log
-from node_launcher.node_set.lib.software import Software
+from node_launcher.node_set import NodeSet
 
 
 class ConsoleWidget(QWidget):
-    def __init__(self, title: str,
-                 software: Software,
-                 configuration,
-                 commands: List[str]):
+    def __init__(self, node_set: NodeSet):
         super().__init__()
-
-        self.setWindowTitle(title)
-        self.software = software
-        self.configuration = configuration
-
+        self.node_set = node_set
         self.layout = QGridLayout()
 
         self.output = QTextEdit()
         self.output.acceptRichText = True
 
         self.input = QLineEdit()
-        self.completer = QCompleter(commands, self)
+        self.completer = QCompleter()
         self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.input.setCompleter(self.completer)
         self.input.setFocus()
@@ -44,6 +36,18 @@ class ConsoleWidget(QWidget):
         self.connect(self.completer, SIGNAL("activated(const QString&)"),
                      self.input.clear, Qt.QueuedConnection)
 
+        self.current_cli = 'bitcoin-cli'
+
+    @property
+    def cli(self):
+        if self.current_cli == 'bitcoin-cli':
+            return self.node_set.bitcoind_node.software.cli
+
+    @property
+    def cli_args(self):
+        if self.current_cli == 'bitcoin-cli':
+            return self.node_set.bitcoind_node.configuration.cli_args
+
     def execute_user_command(self):
         cmd = str(self.input.text())
         self.run_command(cmd)
@@ -51,15 +55,15 @@ class ConsoleWidget(QWidget):
     def run_command(self, cmd: str):
         log.info(
             'run_command',
-            program=self.software.cli,
-            args=self.configuration.cli_args,
+            program=self.cli,
+            args=self.cli_args,
             cmd=cmd
         )
         self.output.append(f'> {cmd}\n')
         self.input.clear()
 
         process = QProcess()
-        process.setProgram(self.software.cli)
+        process.setProgram(self.cli)
         process.setCurrentReadChannel(0)
 
         # noinspection PyUnresolvedReferences
@@ -71,10 +75,10 @@ class ConsoleWidget(QWidget):
             lambda: self.handle_output(process)
         )
 
-        connect_args = list(self.configuration.cli_args)
+        connect_args = list(self.cli_args)
 
         args = cmd.split(' ')
-        if args[0] == self.software.cli.split('/')[-1]:
+        if args[0] == self.cli.split('/')[-1]:
             args.pop(0)
         process.setArguments(connect_args + args)
         process.start()

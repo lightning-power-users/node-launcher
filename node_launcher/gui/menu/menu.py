@@ -4,7 +4,7 @@ from PySide2.QtCore import QCoreApplication
 from PySide2.QtGui import QClipboard
 from PySide2.QtWidgets import QMenu
 
-from .manage_bitcoind import BitcoindManagerTabsDialog
+from .node_manager.node_manager_tabs_dialog import NodeManagerTabsDialog
 from node_launcher.gui.utilities import reveal
 from node_launcher.node_set import NodeSet
 
@@ -36,8 +36,8 @@ class Menu(QMenu):
             lambda line: self.lnd_status_action.setText('LND: ' + line.replace('_', ' '))
         )
 
-        self.bitcoind_manager_tabs_dialog = BitcoindManagerTabsDialog(
-            bitcoind_node=self.node_set.bitcoind_node,
+        self.bitcoind_manager_tabs_dialog = NodeManagerTabsDialog(
+            node_set=self.node_set,
             system_tray=self.system_tray
         )
         self.bitcoin_manage_action = self.addAction('Manage Nodes')
