@@ -16,9 +16,11 @@ class BitcoindProcess(ManagedProcess):
         self.timestamp_changes = []
 
     def process_output_line(self, line: str):
-        if 'init message: Done loading' in line:
+        if 'mapBlockIndex.size() = ' in line:
             self.update_status(NodeStatus.SYNCING)
         elif 'Leaving InitialBlockDownload' in line:
+            self.update_status(NodeStatus.SYNCED)
+        elif 'progress=1.000000' in line:
             self.update_status(NodeStatus.SYNCED)
         elif 'Shutdown: done' in line:
             if self.expecting_shutdown:

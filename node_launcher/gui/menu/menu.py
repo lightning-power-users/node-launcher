@@ -1,11 +1,9 @@
 import webbrowser
 
-from PySide2.QtCore import QCoreApplication, QTimer
+from PySide2.QtCore import QCoreApplication
 from PySide2.QtGui import QClipboard
-from PySide2.QtWidgets import QMenu, QSystemTrayIcon
+from PySide2.QtWidgets import QMenu
 
-from .manage_lnd.lnd_manager_tabs_dialog import LndManagerTabsDialog
-from .manage_lnd.zap_qrcode_label import ZapQrcodeLabel
 from .manage_bitcoind import BitcoindManagerTabsDialog
 from node_launcher.gui.utilities import reveal
 from node_launcher.node_set import NodeSet
@@ -17,39 +15,35 @@ class Menu(QMenu):
         self.node_set = node_set
         self.system_tray = system_tray
 
+        # Tor
+        self.tor_status_action = self.addAction('Tor: off')
+        self.tor_status_action.setEnabled(False)
+        self.node_set.tor_node.status.connect(
+            lambda line: self.tor_status_action.setText('Tor: ' + line.replace('_', ' '))
+        )
+
         # Bitcoind
-        self.bitcoind_status_action = self.addAction('bitcoind off')
+        self.bitcoind_status_action = self.addAction('Bitcoind: off')
         self.bitcoind_status_action.setEnabled(False)
-        self.node_set.bitcoind_node.process.status.connect(
-            lambda line: self.bitcoind_status_action.setText(line)
+        self.node_set.bitcoind_node.status.connect(
+            lambda line: self.bitcoind_status_action.setText('Bitcoind: ' + line.replace('_', ' '))
+        )
+
+        # LND
+        self.lnd_status_action = self.addAction('LND: off')
+        self.lnd_status_action.setEnabled(False)
+        self.node_set.lnd_node.status.connect(
+            lambda line: self.lnd_status_action.setText('LND: ' + line.replace('_', ' '))
         )
 
         self.bitcoind_manager_tabs_dialog = BitcoindManagerTabsDialog(
             bitcoind_node=self.node_set.bitcoind_node,
             system_tray=self.system_tray
         )
-        self.bitcoin_manage_action = self.addAction('Manage Bitcoind')
+        self.bitcoin_manage_action = self.addAction('Manage Nodes')
         self.bitcoin_manage_action.triggered.connect(
             self.bitcoind_manager_tabs_dialog.show
         )
-        self.addSeparator()
-
-        # LND
-        self.lnd_status_action = self.addAction('lnd off')
-        self.lnd_status_action.setEnabled(False)
-        self.node_set.lnd_node.process.status.connect(
-            lambda line: self.lnd_status_action.setText(line)
-        )
-
-        self.lnd_manager_tabs_dialog = LndManagerTabsDialog(
-            lnd_node=self.node_set.lnd_node,
-            system_tray=self.system_tray
-        )
-        self.lnd_manage_action = self.addAction('Manage LND')
-        self.lnd_manage_action.triggered.connect(
-            self.lnd_manager_tabs_dialog.show
-        )
-
         self.addSeparator()
 
         # Joule
@@ -69,13 +63,14 @@ class Menu(QMenu):
         self.zap_open_action.triggered.connect(
             lambda: webbrowser.open(self.node_set.lnd_node.configuration.lndconnect_url)
         )
-        self.zap_qr_code_label = ZapQrcodeLabel(
-            configuration=self.node_set.lnd_node.configuration
-        )
-        self.show_zap_qrcode_action = self.addAction('Pair Zap Mobile')
-        self.show_zap_qrcode_action.triggered.connect(
-            self.zap_qr_code_label.show
-        )
+        # Todo: reenable when Zap mobile supports Tor
+        # self.zap_qr_code_label = ZapQrcodeLabel(
+        #     configuration=self.node_set.lnd_node.configuration
+        # )
+        # self.show_zap_qrcode_action = self.addAction('Pair Zap Mobile')
+        # self.show_zap_qrcode_action.triggered.connect(
+        #     self.zap_qr_code_label.show
+        # )
 
         self.addSeparator()
 
