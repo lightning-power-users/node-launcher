@@ -2,6 +2,8 @@ from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QVBoxLayout, QTabWidget, QDialog
 
 from node_launcher.gui.components.output_widget import OutputWidget
+from node_launcher.gui.menu.node_manager.configuration_widget import \
+    ConfigurationWidget
 from node_launcher.gui.menu.node_manager.console_widget import ConsoleWidget
 from node_launcher.node_set import NodeSet
 
@@ -33,6 +35,9 @@ class NodeManagerTabsDialog(QDialog):
             lambda line: self.output_tab.append('lnd', line)
         )
         self.tab_widget.addTab(self.output_tab, 'Logs')
+
+        self.configuration_tab = ConfigurationWidget(node_set=node_set)
+        self.tab_widget.addTab(self.configuration_tab, 'Configuration')
 
         self.main_layout = QVBoxLayout()
         self.main_layout.addWidget(self.tab_widget)
