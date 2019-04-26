@@ -67,7 +67,7 @@ class Menu(QMenu):
         self.zap_status_action.setEnabled(False)
         self.zap_open_action = self.addAction('Open Zap Desktop')
         self.zap_open_action.triggered.connect(
-            lambda: webbrowser.open(self.node_set.lnd_node.lndconnect_url)
+            lambda: webbrowser.open(self.node_set.lnd_node.configuration.lndconnect_url)
         )
         self.zap_qr_code_label = ZapQrcodeLabel(
             configuration=self.node_set.lnd_node.configuration
