@@ -2,15 +2,15 @@ import os
 from os.path import isfile, isdir, pardir
 from typing import List, Any
 
-from PySide2.QtGui import QStandardItemModel, QStandardItem
-
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
 from node_launcher.logging import log
-from PySide2.QtCore import QFileSystemWatcher
+from PySide2.QtCore import QFileSystemWatcher, Signal, QObject
 
 
-class ConfigurationFile(dict):
+class ConfigurationFile(QObject):
     file_watcher: QFileSystemWatcher
+
+    line_change = Signal(int, str, str, str)
 
     def __init__(self, path: str, assign_op: str = '=', **kwargs):
         super().__init__(**kwargs)
@@ -18,7 +18,7 @@ class ConfigurationFile(dict):
         self.name = os.path.basename(self.path)
         self.assign_op = assign_op
         self.cache = {}
-        self.model_repository = QStandardItemModel(0, 3)
+        self.lines = None
 
     def load(self):
         parent = os.path.abspath(os.path.join(self.path, pardir))
@@ -33,24 +33,30 @@ class ConfigurationFile(dict):
                 'Creating file',
                 path=self.path
             )
+            self.lines = [
+                '# Auto-Generated Configuration File' + os.linesep + os.linesep,
+                f'# Node Launcher version {NODE_LAUNCHER_RELEASE}' + os.linesep + os.linesep
+            ]
             with open(self.path, 'w') as f:
-                f.write(
-                    '# Auto-Generated Configuration File' + os.linesep + os.linesep)
-                f.write(
-                    f'# Node Launcher version {NODE_LAUNCHER_RELEASE}' + os.linesep + os.linesep)
+                f.writelines(self.lines)
                 f.flush()
-        self.initialize_cache_and_model_repository()
-        self.file_watcher = QFileSystemWatcher()
-        self.file_watcher.addPath(self.path)
+        self.initialize_cache()
 
-    def initialize_cache_and_model_repository(self):
+    def initialize_model_repository(self):
+        for line_index, line in enumerate(self.lines):
+            key, value = self.parse_line(line)
+            if key is not None and value is not None:
+                self.line_change.emit(line_index, self.name, key, str(value))
+
+    def initialize_cache(self):
         self.cache = {}
         with open(self.path, 'r') as f:
-            lines = f.readlines()
-        self.populate_cache(lines)
-        self.populate_model_repository(lines)
+            self.lines = f.readlines()
+        self.populate_cache(self.lines)
 
     def parse_line(self, line: str):
+        if line.startswith('#'):
+            return None, None
         key_value = line.split(self.assign_op)
         key = key_value[0]
         if not key.strip():
@@ -65,7 +71,7 @@ class ConfigurationFile(dict):
         return key, value
 
     def populate_cache(self, lines):
-        for line in lines:
+        for line_index, line in enumerate(lines):
             key, value = self.parse_line(line)
             existing_value = self.cache.get(key, 'no_key')
             if existing_value == 'no_key':
@@ -74,18 +80,6 @@ class ConfigurationFile(dict):
                 self.cache[key].append(value)
             else:
                 self.cache[key] = [existing_value, value]
-
-    def populate_model_repository(self, lines):
-        self.model_repository.clear()
-        self.model_repository.setRowCount(len(lines))
-        for index, property_line in enumerate(lines):
-            key, value = self.parse_line(property_line)
-            self.populate_row(index, key, value)
-
-    def populate_row(self, row_index, key, value):
-        self.model_repository.setItem(row_index, 0, QStandardItem(self.name))
-        self.model_repository.setItem(row_index, 1, QStandardItem(key))
-        self.model_repository.setItem(row_index, 2, QStandardItem(value))
 
     def __repr__(self):
         return f'ConfigurationFile: {self.path}'
@@ -121,27 +115,27 @@ class ConfigurationFile(dict):
 
         self.write_property(name, value)
 
-    def write_property(self, name: str, value_list: List[str]):
+    def write_property(self, property_key: str, property_value_list: List[str]):
+        property_key = property_key.strip()
         with open(self.path, 'r') as f:
             lines = f.readlines()
             lines = [l.strip() for l in lines if l.strip()]
         existing_property_lines = [line_number for line_number, l in
                                    enumerate(lines)
-                                   if l.startswith(name)]
+                                   if l.startswith(property_key)]
         for property_line_index in existing_property_lines:
             lines.pop(property_line_index)
-        if value_list is not None:
-            for value_index, value in enumerate(value_list):
-                property_string = f'{name.strip()}{self.assign_op}{value}'
+        if property_value_list is not None:
+            for value_index, value in enumerate(property_value_list):
+                property_string = f'{property_key}{self.assign_op}{value}'
                 if len(existing_property_lines) >= len(existing_property_lines):
                     lines.insert(existing_property_lines[value_index],
                                  property_string)
                 else:
                     lines.append(property_string)
         with open(self.path, 'w') as f:
-            lines = [l + os.linesep for l in lines]
-            f.writelines(lines)
-            self.populate_model_repository(lines)
+            self.lines = [l + os.linesep for l in lines]
+            f.writelines(self.lines)
 
     @property
     def directory(self):
