@@ -36,7 +36,11 @@ https://github.com/PierreRochard/node-launcher/releases
 
 Review the contributing.md file https://github.com/PierreRochard/node-launcher/blob/master/contributing.md
 
-Install Python3.7+ (macOS: `brew install python3`)
+Install Python3.7+
+
+macOS: `brew install python3`
+
+Linux: `sudo apt install python3.7-venv`
 
 For Windows see https://medium.com/@pierre_rochard/node-launcher-developer-setup-on-windows-5ba6e0fbb38a
 
