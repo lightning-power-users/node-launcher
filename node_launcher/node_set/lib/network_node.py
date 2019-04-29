@@ -61,7 +61,6 @@ class NetworkNode(QObject):
             self.configuration.load()
             self.update_status(NodeStatus.CHECKING_CONFIGURATION)
             self.configuration.check()
-            self.configuration.initialize_model_repository()
             self.update_status(NodeStatus.CONFIGURATION_READY)
             self.update_status(NodeStatus.STARTING_PROCESS)
             self.process.start()

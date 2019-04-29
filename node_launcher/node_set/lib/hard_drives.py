@@ -84,10 +84,11 @@ class HardDrives(object):
         partition = Path(partition.mountpoint).drive
         return default_partition == partition
 
-    def should_prune(self, input_directory: str, has_bitcoin: bool) -> bool:
+    @staticmethod
+    def should_prune(input_directory: str) -> bool:
         directory = os.path.realpath(input_directory)
         try:
-            total, used, free, percent = psutil.disk_usage(os.path.realpath(directory))
+            total, used, free, percent = psutil.disk_usage(directory)
         except:
             log.warning(
                 'should_prune_disk_usage',
@@ -96,26 +97,16 @@ class HardDrives(object):
                 exc_info=True
             )
             return False
-        if has_bitcoin:
-            bitcoin_bytes = self.get_dir_size(directory)
-            free += bitcoin_bytes
-        else:
-            bitcoin_bytes = 0
         free_gb = math.floor(free / GIGABYTE)
-        bitcoin_gb = math.ceil(bitcoin_bytes / GIGABYTE)
-        free_gb += bitcoin_gb
         should_prune = free_gb < AUTOPRUNE_GB
         log.info(
             'should_prune',
             input_directory=input_directory,
-            has_bitcoin=has_bitcoin,
             total=total,
             used=used,
             free=free,
-            bitcoin_bytes=bitcoin_bytes,
             percent=percent,
             free_gb=free_gb,
-            bitcoin_gb=bitcoin_gb,
             should_prune=should_prune
         )
         return should_prune

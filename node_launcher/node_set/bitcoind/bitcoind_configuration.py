@@ -47,6 +47,10 @@ class BitcoindConfiguration(Configuration):
         if os.path.exists(os.path.join(self['datadir'], 'blocks')):
             if self['prune'] is None:
                 self.set_prune(False)
+        else:
+            if self['prune'] is None:
+                should_prune = self.hard_drives.should_prune(self['datadir'])
+                self.set_prune(should_prune)
 
         self.wallet_paths = self.get_wallet_paths()
 
@@ -66,11 +70,6 @@ class BitcoindConfiguration(Configuration):
 
         if self['rpcpassword'] is None:
             self['rpcpassword'] = get_random_password()
-
-        if self['prune'] is None:
-            should_prune = self.hard_drives.should_prune(self['datadir'],
-                                                         has_bitcoin=True)
-            self.set_prune(should_prune)
 
         self.zmq_block_port = get_zmq_port()
         self.zmq_tx_port = get_zmq_port()
@@ -190,13 +189,9 @@ class BitcoindConfiguration(Configuration):
             return custom_port
         return BITCOIN_MAINNET_RPC_PORT
 
-    def set_prune(self, should_prune: bool = None):
-        if should_prune is None:
-            should_prune = self.hard_drives.should_prune(self['datadir'],
-                                                         has_bitcoin=True)
+    def set_prune(self, should_prune: bool):
         if should_prune:
-            prune = MAINNET_PRUNE
-            self['prune'] = prune
+            self['prune'] = MAINNET_PRUNE
         else:
             self['prune'] = 0
         self['txindex'] = not should_prune

@@ -14,8 +14,9 @@ def bitcoind_configuration() -> BitcoindConfiguration:
     os.rmdir(tmpdirname)
     configuration_path = os.path.join(tmpdirname, 'bitcoin.conf')
     conf = BitcoindConfiguration()
-    conf.file_path = configuration_path
+    conf.file.path = configuration_path
     conf.load()
+    conf['datadir'] = tmpdirname
     conf.check()
     return conf
 

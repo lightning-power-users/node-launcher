@@ -23,9 +23,10 @@ class Configuration(QObject):
 
     def __setitem__(self, key: str, new_value: Any) -> None:
         old_value = self.cache[key]
-        self.cache[key] = new_value
-        self.file.update(key, new_value)
-        self.line_change.emit(self.name, key, str(new_value), str(old_value))
+        if new_value != old_value:
+            self.cache[key] = new_value
+            self.file.update(key, new_value)
+            self.line_change.emit(self.name, key, str(new_value), str(old_value))
 
     def load(self):
         self.cache = ConfigurationCache()

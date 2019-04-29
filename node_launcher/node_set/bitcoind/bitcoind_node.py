@@ -47,7 +47,7 @@ class BitcoindNode(NetworkNode):
     def stop(self):
         if self.process.state() == QProcess.Running:
             self.process.expecting_shutdown = True
-            client = Proxy(btc_conf_file=self.configuration.path,
+            client = Proxy(btc_conf_file=self.configuration.file.path,
                            service_port=self.configuration.rpc_port)
             try:
                 client.call('stop')
