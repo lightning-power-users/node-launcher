@@ -70,7 +70,10 @@ class TestSoftware(object):
         assert software.current_status == str(SoftwareStatus.INSTALLING_SOFTWARE)
 
     def test_update_download(self, software, qtbot, requests_mock, tmpdir):
-        shutil.rmtree(software.software_directory)
+        try:
+            shutil.rmtree(software.software_directory)
+        except FileNotFoundError:
+            pass
 
         self.call_count = 0
         expected_status = [

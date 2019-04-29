@@ -1,6 +1,7 @@
 import os
 from os.path import isfile, isdir, pardir
-from typing import List, Any
+from pathlib import Path
+from typing import List
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
 from node_launcher.logging import log
@@ -10,17 +11,16 @@ from PySide2.QtCore import QFileSystemWatcher, Signal, QObject
 class ConfigurationFile(QObject):
     file_watcher: QFileSystemWatcher
 
-    line_change = Signal(int, str, str, str)
-
-    def __init__(self, path: str, assign_op: str = '=', **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, path: str, assign_op: str = '='):
+        super().__init__()
         self.path = path
-        self.name = os.path.basename(self.path)
+        self.directory = Path(path).parent
         self.assign_op = assign_op
-        self.cache = {}
-        self.lines = None
 
-    def load(self):
+    def __repr__(self):
+        return f'ConfigurationFile: {self.path}'
+
+    def read(self):
         parent = os.path.abspath(os.path.join(self.path, pardir))
         if not isdir(parent):
             log.info(
@@ -33,26 +33,17 @@ class ConfigurationFile(QObject):
                 'Creating file',
                 path=self.path
             )
-            self.lines = [
+            lines = [
                 '# Auto-Generated Configuration File' + os.linesep + os.linesep,
                 f'# Node Launcher version {NODE_LAUNCHER_RELEASE}' + os.linesep + os.linesep
             ]
             with open(self.path, 'w') as f:
-                f.writelines(self.lines)
-                f.flush()
-        self.initialize_cache()
-
-    def initialize_model_repository(self):
-        for line_index, line in enumerate(self.lines):
-            key, value = self.parse_line(line)
-            if key is not None and value is not None:
-                self.line_change.emit(line_index, self.name, key, str(value))
-
-    def initialize_cache(self):
-        self.cache = {}
+                f.writelines(lines)
         with open(self.path, 'r') as f:
-            self.lines = f.readlines()
-        self.populate_cache(self.lines)
+            lines = f.readlines()
+        parsed_lines = [self.parse_line(l) for l in lines]
+        return [l for l in parsed_lines
+                if l[0] is not None and l[1] is not None]
 
     def parse_line(self, line: str):
         if line.startswith('#'):
@@ -70,50 +61,22 @@ class ConfigurationFile(QObject):
             value = int(value)
         return key, value
 
-    def populate_cache(self, lines):
-        for line_index, line in enumerate(lines):
-            key, value = self.parse_line(line)
-            existing_value = self.cache.get(key, 'no_key')
-            if existing_value == 'no_key':
-                self.cache[key] = value
-            elif isinstance(existing_value, list):
-                self.cache[key].append(value)
-            else:
-                self.cache[key] = [existing_value, value]
-
-    def __repr__(self):
-        return f'ConfigurationFile: {self.path}'
-
-    def __delitem__(self, v) -> None:
-        raise NotImplementedError()
-
-    def __len__(self) -> int:
-        raise NotImplementedError()
-
-    def __iter__(self):
-        raise NotImplementedError()
-
-    def __getitem__(self, name):
-        return self.cache.get(name, None)
-
-    def __setitem__(self, name: str, value: Any) -> None:
-        self.cache[name] = value
-        if isinstance(value, str):
-            value = [value]
-        elif isinstance(value, bool):
-            value = [str(int(value))]
-        elif isinstance(value, int):
-            value = [str(value)]
-        elif isinstance(value, List):
-            for item in value:
+    def update(self, key, new_value):
+        if isinstance(new_value, str):
+            new_value = [new_value]
+        elif isinstance(new_value, bool):
+            new_value = [str(int(new_value))]
+        elif isinstance(new_value, int):
+            new_value = [str(new_value)]
+        elif isinstance(new_value, List):
+            for item in new_value:
                 assert isinstance(item, str)
             pass
-        elif value is None:
+        elif new_value is None:
             pass
         else:
-            raise NotImplementedError(f'setattr for {type(value)}')
-
-        self.write_property(name, value)
+            raise NotImplementedError(f'setattr for {type(new_value)}')
+        self.write_property(key, new_value)
 
     def write_property(self, property_key: str, property_value_list: List[str]):
         property_key = property_key.strip()
@@ -128,7 +91,7 @@ class ConfigurationFile(QObject):
         if property_value_list is not None:
             for value_index, value in enumerate(property_value_list):
                 property_string = f'{property_key}{self.assign_op}{value}'
-                if len(existing_property_lines) >= len(existing_property_lines):
+                if existing_property_lines:
                     lines.insert(existing_property_lines[value_index],
                                  property_string)
                 else:
@@ -136,14 +99,3 @@ class ConfigurationFile(QObject):
         with open(self.path, 'w') as f:
             self.lines = [l + os.linesep for l in lines]
             f.writelines(self.lines)
-
-    @property
-    def directory(self):
-        directory_path = os.path.abspath(
-            os.path.join(self.path, os.pardir)
-        )
-        return directory_path
-
-    @property
-    def snapshot(self):
-        return self.cache.copy()

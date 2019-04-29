@@ -46,7 +46,7 @@ class LndConfigurationTab(QWidget):
 
         self.show_lnd_conf = QPushButton('Show lnd.conf')
         self.show_lnd_conf.clicked.connect(
-            lambda: reveal(self.lnd_node.file.directory)
+            lambda: reveal(self.lnd_node.configuration.file.directory)
         )
         self.layout.addWidget(self.show_lnd_conf)
 
