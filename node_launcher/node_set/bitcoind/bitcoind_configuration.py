@@ -103,8 +103,7 @@ class BitcoindConfiguration(Configuration):
         default_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
         big_drive = self.hard_drives.get_big_drive()
         default_is_big_enough = not self.hard_drives.should_prune(
-            input_directory=default_datadir,
-            has_bitcoin=True
+            input_directory=default_datadir
         )
         default_is_biggest = self.hard_drives.is_default_partition(big_drive)
         log.info(

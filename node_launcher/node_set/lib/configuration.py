@@ -32,4 +32,5 @@ class Configuration(QObject):
         self.cache = ConfigurationCache()
         self.lines = self.file.read()
         for key, value in self.lines:
-            self[key] = value
+            self.cache[key] = value
+            self.line_change.emit(self.name, key, str(value), '')

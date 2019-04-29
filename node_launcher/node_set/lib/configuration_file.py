@@ -85,7 +85,7 @@ class ConfigurationFile(QObject):
             lines = [l.strip() for l in lines if l.strip()]
         existing_property_lines = [line_number for line_number, l in
                                    enumerate(lines)
-                                   if l.startswith(property_key)]
+                                   if l.split(self.assign_op)[0] == property_key]
         for property_line_index in existing_property_lines:
             lines.pop(property_line_index)
         if property_value_list is not None:
