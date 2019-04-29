@@ -18,28 +18,26 @@ from node_launcher.logging import log
 from node_launcher.node_set.bitcoind.bitcoind_configuration import (
     BitcoindConfiguration
 )
-from node_launcher.node_set.lib.configuration_file import ConfigurationFile
+from node_launcher.node_set.lib.configuration import Configuration
 from node_launcher.port_utilities import get_port
 
 
-class LndConfiguration(ConfigurationFile):
-    file: ConfigurationFile
-
+class LndConfiguration(Configuration):
     def __init__(self):
         file_name = 'lnd.conf'
         lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
-        self.configuration_file_path = os.path.join(lnd_dir_path, file_name)
-        super().__init__(path=self.configuration_file_path)
+        configuration_file_path = os.path.join(lnd_dir_path, file_name)
+        super().__init__(path=configuration_file_path)
 
     @property
     def args(self):
         if IS_WINDOWS:
             arg_list = [
-                f'--configfile={self.configuration_file_path}',
+                f'--configfile={self.file.path}',
             ]
         else:
             arg_list = [
-                f'--configfile="{self.configuration_file_path}"',
+                f'--configfile="{self.file.path}"',
             ]
 
         arg_list += [
@@ -110,7 +108,7 @@ class LndConfiguration(ConfigurationFile):
             'bitcoin',
             'mainnet'
         )
-        self.config_snapshot = self.snapshot.copy()
+        # self.config_snapshot = self.snapshot.copy()
         # self.file_watcher.fileChanged.connect(self.config_file_changed)
         # self.file_watcher.fileChanged.connect(
         #     self.bitcoin_config_file_changed)
@@ -133,7 +131,7 @@ class LndConfiguration(ConfigurationFile):
         # Check if file is still in file_watcher list of files, if not add back
         files_watched = self.file_watcher.files()
         if len(files_watched) == 0:
-            self.file_watcher.addPath(self.file_path)
+            self.file_watcher.addPath(self.file.path)
 
     def bitcoin_config_file_changed(self):
         # Refresh config file

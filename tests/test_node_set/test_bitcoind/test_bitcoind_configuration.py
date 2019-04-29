@@ -5,7 +5,7 @@ import pytest
 
 from node_launcher.node_set.bitcoind.bitcoind_configuration import \
     BitcoindConfiguration
-from node_launcher.node_set.lib.configuration_file import ConfigurationFile
+from node_launcher.node_set.lib.configuration import Configuration
 
 
 @pytest.fixture
@@ -14,8 +14,9 @@ def bitcoind_configuration() -> BitcoindConfiguration:
     os.rmdir(tmpdirname)
     configuration_path = os.path.join(tmpdirname, 'bitcoin.conf')
     conf = BitcoindConfiguration()
-    conf.file_path = configuration_path
+    conf.file.path = configuration_path
     conf.load()
+    conf['datadir'] = tmpdirname
     conf.check()
     return conf
 
@@ -25,38 +26,42 @@ class TestBitcoinConfiguration(object):
     @staticmethod
     def test_set_prune(bitcoind_configuration: BitcoindConfiguration):
         bitcoind_configuration.set_prune(True)
-        pruned = ConfigurationFile(bitcoind_configuration.file.path)
+        pruned = Configuration(bitcoind_configuration.file.path)
+        pruned.load()
         assert pruned['prune']
         assert not pruned['txindex']
         bitcoind_configuration.set_prune(False)
-        unpruned = ConfigurationFile(bitcoind_configuration.file.path)
+        unpruned = Configuration(bitcoind_configuration.file.path)
+        unpruned.load()
         assert not unpruned['prune']
         assert unpruned['txindex']
 
     @staticmethod
     def test_rpcuser(bitcoind_configuration: BitcoindConfiguration):
-        assert bitcoind_configuration.file['rpcuser']
+        assert bitcoind_configuration['rpcuser']
 
     @staticmethod
     def test_set_rpcuser(bitcoind_configuration: BitcoindConfiguration):
-        bitcoind_configuration.file['rpcuser'] = 'test_user'
-        changed = ConfigurationFile(bitcoind_configuration.file.path)
+        bitcoind_configuration['rpcuser'] = 'test_user'
+        changed = Configuration(bitcoind_configuration.file.path)
+        changed.load()
         assert changed['rpcuser'] == 'test_user'
-        bitcoind_configuration.file['rpcuser'] = 'test_user_2'
-        changed_again = ConfigurationFile(bitcoind_configuration.file.path)
+        bitcoind_configuration['rpcuser'] = 'test_user_2'
+        changed_again = Configuration(bitcoind_configuration.file.path)
+        changed_again.load()
         assert changed_again['rpcuser'] == 'test_user_2'
 
     @staticmethod
     def test_autoconfigure_datadir(bitcoind_configuration: BitcoindConfiguration):
-        datadir = bitcoind_configuration.file['datadir']
-        prune = bitcoind_configuration.file['prune']
-        txindex = bitcoind_configuration.file['txindex']
+        datadir = bitcoind_configuration['datadir']
+        prune = bitcoind_configuration['prune']
+        txindex = bitcoind_configuration['txindex']
         assert datadir
         assert prune != txindex
 
     @pytest.mark.skip
     def test_file_changed(self, bitcoind_configuration: BitcoindConfiguration):
-        bitcoind_configuration.file['rpcport'] = 8338
+        bitcoind_configuration['rpcport'] = 8338
         bitcoind_configuration.config_file_changed()
         new_config = bitcoind_configuration.file.snapshot
         bitcoind_configuration.running = False
@@ -64,7 +69,7 @@ class TestBitcoinConfiguration(object):
         assert bitcoind_configuration.restart_required == False
         bitcoind_configuration.running = True
         assert bitcoind_configuration.restart_required == True
-        bitcoind_configuration.file['port'] = 8336
+        bitcoind_configuration['port'] = 8336
         bitcoind_configuration.config_file_changed()
         new_config = bitcoind_configuration.file.snapshot
         bitcoind_configuration.running = False

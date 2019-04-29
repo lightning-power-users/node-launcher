@@ -1,15 +1,15 @@
 import os
 
 from node_launcher.constants import TOR_DIR_PATH, OPERATING_SYSTEM, TOR_SERVICE_PATH
-from node_launcher.node_set.lib.configuration_file import ConfigurationFile
+from node_launcher.node_set.lib.configuration import Configuration
 
 
-class TorConfiguration(ConfigurationFile):
+class TorConfiguration(Configuration):
     def __init__(self):
         file_name = 'torrc'
         tor_dir_path = TOR_DIR_PATH[OPERATING_SYSTEM]
-        self.configuration_file_path = os.path.join(tor_dir_path, file_name)
-        super().__init__(path=self.configuration_file_path, assign_op=' ')
+        configuration_file_path = os.path.join(tor_dir_path, file_name)
+        super().__init__(path=configuration_file_path, assign_op=' ')
 
     @property
     def args(self):

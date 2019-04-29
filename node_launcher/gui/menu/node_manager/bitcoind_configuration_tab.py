@@ -52,7 +52,7 @@ class BitcoindConfigurationTab(QWidget):
 
         self.show_bitcoin_conf = QPushButton('Show bitcoin.conf')
         self.show_bitcoin_conf.clicked.connect(
-            lambda: reveal(self.bitcoind_node.configuration.file_path)
+            lambda: reveal(self.bitcoind_node.configuration.file.path)
         )
         self.layout.addWidget(self.show_bitcoin_conf)
 

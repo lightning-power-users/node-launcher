@@ -15,9 +15,12 @@ class NodeSet(object):
         self.bitcoind_node = BitcoindNode()
         self.lnd_node = LndNode()
 
-        self.tor_node.status.connect(self.handle_tor_node_status_change)
+        self.tor_node.status.connect(
+            self.handle_tor_node_status_change
+        )
         self.bitcoind_node.status.connect(
-            self.handle_bitcoin_node_status_change)
+            self.handle_bitcoin_node_status_change
+        )
 
     def start(self):
         log.debug('Starting node set')

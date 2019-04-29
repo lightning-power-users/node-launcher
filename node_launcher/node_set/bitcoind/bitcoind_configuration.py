@@ -11,29 +11,27 @@ from node_launcher.constants import (
     MAINNET_PRUNE
 )
 from node_launcher.logging import log
-from node_launcher.node_set.lib.configuration_file import ConfigurationFile
+from node_launcher.node_set.lib.configuration import Configuration
 from node_launcher.node_set.lib.get_random_password import get_random_password
 from node_launcher.node_set.lib.hard_drives import HardDrives
 from node_launcher.port_utilities import get_zmq_port
 
 
-class BitcoindConfiguration(ConfigurationFile):
-    file: ConfigurationFile
+class BitcoindConfiguration(Configuration):
     hard_drives: HardDrives
     zmq_block_port: int
     zmq_tx_port: int
 
     def __init__(self):
         self.hard_drives = HardDrives()
-        self.file = None
         file_name = 'bitcoin.conf'
         bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
-        self.configuration_file_path = os.path.join(bitcoin_data_path, file_name)
-        super().__init__(path=self.configuration_file_path)
+        configuration_file_path = os.path.join(bitcoin_data_path, file_name)
+        super().__init__(path=configuration_file_path)
 
     @property
     def args(self) -> List[str]:
-        return [f'-conf={self.configuration_file_path}']
+        return [f'-conf={self.file.path}']
 
     @property
     def cli_args(self) -> List[str]:
@@ -49,6 +47,10 @@ class BitcoindConfiguration(ConfigurationFile):
         if os.path.exists(os.path.join(self['datadir'], 'blocks')):
             if self['prune'] is None:
                 self.set_prune(False)
+        else:
+            if self['prune'] is None:
+                should_prune = self.hard_drives.should_prune(self['datadir'])
+                self.set_prune(should_prune)
 
         self.wallet_paths = self.get_wallet_paths()
 
@@ -68,11 +70,6 @@ class BitcoindConfiguration(ConfigurationFile):
 
         if self['rpcpassword'] is None:
             self['rpcpassword'] = get_random_password()
-
-        if self['prune'] is None:
-            should_prune = self.hard_drives.should_prune(self['datadir'],
-                                                         has_bitcoin=True)
-            self.set_prune(should_prune)
 
         self.zmq_block_port = get_zmq_port()
         self.zmq_tx_port = get_zmq_port()
@@ -99,7 +96,7 @@ class BitcoindConfiguration(ConfigurationFile):
             )
             self['dbcache'] = 1000
 
-        self.config_snapshot = self.snapshot.copy()
+        # self.config_snapshot = self.snapshot.copy()
         # self.file_watcher.fileChanged.connect(self.config_file_changed)
 
     def autoconfigure_datadir(self):
@@ -192,13 +189,9 @@ class BitcoindConfiguration(ConfigurationFile):
             return custom_port
         return BITCOIN_MAINNET_RPC_PORT
 
-    def set_prune(self, should_prune: bool = None):
-        if should_prune is None:
-            should_prune = self.hard_drives.should_prune(self['datadir'],
-                                                         has_bitcoin=True)
+    def set_prune(self, should_prune: bool):
         if should_prune:
-            prune = MAINNET_PRUNE
-            self['prune'] = prune
+            self['prune'] = MAINNET_PRUNE
         else:
             self['prune'] = 0
         self['txindex'] = not should_prune

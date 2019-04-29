@@ -1,5 +1,5 @@
 import os
-from tempfile import TemporaryDirectory, mkdtemp
+from tempfile import mkdtemp
 
 import pytest
 
@@ -13,7 +13,7 @@ def lnd_configuration() -> LndConfiguration:
     os.rmdir(tmpdirname)
     configuration_path = os.path.join(tmpdirname, 'lnd.conf')
     conf = LndConfiguration()
-    conf.file_path = configuration_path
+    conf.file.path = configuration_path
     conf.load()
     conf.check()
     return conf
@@ -24,14 +24,14 @@ class TestDirectoryConfiguration(object):
         assert os.path.isdir(lnd_configuration.lnddir)
 
     def test_multi_property(self, lnd_configuration: LndConfiguration):
-        lnd_configuration.file['multi_property'] = [
+        lnd_configuration['multi_property'] = [
             'test1',
             'test2'
         ]
-        assert len(lnd_configuration.file['multi_property']) == 2
+        assert len(lnd_configuration['multi_property']) == 2
 
     def test_multi_listen(self, lnd_configuration: LndConfiguration):
-        lnd_configuration.file['listen'] = [
+        lnd_configuration['listen'] = [
             '127.0.0.1:9835',
             '192.168.1.1:9736',
         ]

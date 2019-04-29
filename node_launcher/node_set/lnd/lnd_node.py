@@ -5,7 +5,6 @@ from node_launcher.node_set.lib.node_status import NodeStatus
 from node_launcher.node_set.lnd.lnd_threaded_client import LndThreadedClient
 from .lnd_configuration import LndConfiguration
 from .lnd_unlocker import LndUnlocker
-from .lnd_client import LndClient
 from .lnd_process import LndProcess
 from .lnd_software import LndSoftware
 

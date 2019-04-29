@@ -8,7 +8,7 @@ claimed_ports = []
 def is_port_in_use(port):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
-            s.bind(('127.0.0.1', port))
+            s.bind(('127.0.0.1', int(port)))
         except socket.error as e:
             if e.errno == errno.EADDRINUSE or e.errno == 10013:
                 return True

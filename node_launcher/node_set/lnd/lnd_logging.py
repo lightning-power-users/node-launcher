@@ -29,6 +29,7 @@ class Subsystem(object):
     WTWR = StringConstant('WTWR')
     NTFR = StringConstant('NTFR')
     IRPC = StringConstant('IRPC')
+    CHBU = StringConstant('CHBU')
 
 
 class LoggingLevel(object):
@@ -46,5 +47,6 @@ DEFAULT_LOGGING_LEVELS = [
     (Subsystem.LNWL, LoggingLevel.INFO),
     (Subsystem.PEER, LoggingLevel.WARN),
     (Subsystem.SRVR, LoggingLevel.WARN),
-    (Subsystem.DISC, LoggingLevel.WARN)
+    (Subsystem.DISC, LoggingLevel.WARN),
+    (Subsystem.CHBU, LoggingLevel.DEBUG)
 ]
