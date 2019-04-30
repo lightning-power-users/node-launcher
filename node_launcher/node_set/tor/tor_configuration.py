@@ -9,7 +9,7 @@ class TorConfiguration(Configuration):
         file_name = 'torrc'
         tor_dir_path = TOR_DIR_PATH[OPERATING_SYSTEM]
         configuration_file_path = os.path.join(tor_dir_path, file_name)
-        super().__init__(path=configuration_file_path, assign_op=' ')
+        super().__init__(name='tor', path=configuration_file_path, assign_op=' ')
 
     @property
     def args(self):

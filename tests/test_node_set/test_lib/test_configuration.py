@@ -9,7 +9,7 @@ from node_launcher.node_set.lib.configuration import Configuration
 def configuration():
     with NamedTemporaryFile(suffix='.conf', delete=True) as f:
         name = f.name
-    configuration = Configuration(name)
+    configuration = Configuration('test_node', name)
     configuration.load()
     return configuration
 
@@ -26,7 +26,7 @@ class TestConfiguration(object):
 
     def test_getattr(self, configuration: Configuration):
         configuration['test_attribute'] = test_value
-        new_object = Configuration(configuration.file.path)
+        new_object = Configuration('test_node', configuration.file.path)
         new_object.load()
         assert new_object['test_attribute'] == test_value
 
@@ -41,7 +41,7 @@ class TestConfiguration(object):
     def test_getattr_bool(self, configuration: Configuration):
         configuration['test_bool_true'] = True
         configuration['test_bool_false'] = False
-        new_object = Configuration(configuration.file.path)
+        new_object = Configuration('test_node', configuration.file.path)
         new_object.load()
         assert new_object['test_bool_true']
         assert not new_object['test_bool_false']

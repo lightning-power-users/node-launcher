@@ -26,12 +26,12 @@ class TestBitcoinConfiguration(object):
     @staticmethod
     def test_set_prune(bitcoind_configuration: BitcoindConfiguration):
         bitcoind_configuration.set_prune(True)
-        pruned = Configuration(bitcoind_configuration.file.path)
+        pruned = Configuration('bitcoind', bitcoind_configuration.file.path)
         pruned.load()
         assert pruned['prune']
         assert not pruned['txindex']
         bitcoind_configuration.set_prune(False)
-        unpruned = Configuration(bitcoind_configuration.file.path)
+        unpruned = Configuration('bitcoind', bitcoind_configuration.file.path)
         unpruned.load()
         assert not unpruned['prune']
         assert unpruned['txindex']
@@ -43,11 +43,11 @@ class TestBitcoinConfiguration(object):
     @staticmethod
     def test_set_rpcuser(bitcoind_configuration: BitcoindConfiguration):
         bitcoind_configuration['rpcuser'] = 'test_user'
-        changed = Configuration(bitcoind_configuration.file.path)
+        changed = Configuration('bitcoind', bitcoind_configuration.file.path)
         changed.load()
         assert changed['rpcuser'] == 'test_user'
         bitcoind_configuration['rpcuser'] = 'test_user_2'
-        changed_again = Configuration(bitcoind_configuration.file.path)
+        changed_again = Configuration('bitcoind', bitcoind_configuration.file.path)
         changed_again.load()
         assert changed_again['rpcuser'] == 'test_user_2'
 

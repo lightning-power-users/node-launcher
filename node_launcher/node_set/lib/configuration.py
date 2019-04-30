@@ -9,11 +9,11 @@ from node_launcher.node_set.lib.configuration_file import ConfigurationFile
 
 class Configuration(QObject):
 
-    line_change = Signal(str, str, str, str)
+    line_change = Signal(str, str, str)
 
-    def __init__(self, path: str, assign_op: str = '='):
+    def __init__(self, name: str, path: str, assign_op: str = '='):
         super().__init__()
-        self.name = os.path.basename(path)
+        self.name = name
         self.file = ConfigurationFile(path=path, assign_op=assign_op)
         self.cache = None
         self.lines = None
@@ -23,14 +23,14 @@ class Configuration(QObject):
 
     def __setitem__(self, key: str, new_value: Any) -> None:
         old_value = self.cache[key]
-        if new_value != old_value:
+        if str(new_value) != str(old_value):
             self.cache[key] = new_value
-            self.file.update(key, new_value)
-            self.line_change.emit(self.name, key, str(new_value), str(old_value))
+            self.lines = self.file.update(key, new_value)
+            self.line_change.emit(self.name, key, new_value)
 
     def load(self):
         self.cache = ConfigurationCache()
         self.lines = self.file.read()
         for key, value in self.lines:
             self.cache[key] = value
-            self.line_change.emit(self.name, key, str(value), '')
+            self.line_change.emit(self.name, key, value)

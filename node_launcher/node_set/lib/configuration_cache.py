@@ -22,6 +22,12 @@ class ConfigurationCache(dict):
         existing_value = self.get(key, 'no_key')
         if existing_value == new_value:
             return
+
+        if len(new_value) == 1 and new_value.isdigit():
+            new_value = bool(int(new_value))
+        elif new_value.isdigit():
+            new_value = int(new_value)
+
         if existing_value == 'no_key':
             super(ConfigurationCache, self).__setitem__(key, new_value)
         elif isinstance(existing_value, list):

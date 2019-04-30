@@ -55,10 +55,6 @@ class ConfigurationFile(QObject):
         value = key_value[1:]
         value = self.assign_op.join(value).strip()
         value = value.replace('"', '')
-        if len(value) == 1 and value.isdigit():
-            value = bool(int(value))
-        elif value.isdigit():
-            value = int(value)
         return key, value
 
     def update(self, key, new_value):
@@ -76,7 +72,7 @@ class ConfigurationFile(QObject):
             pass
         else:
             raise NotImplementedError(f'setattr for {type(new_value)}')
-        self.write_property(key, new_value)
+        return self.write_property(key, new_value)
 
     def write_property(self, property_key: str, property_value_list: List[str]):
         property_key = property_key.strip()
@@ -97,5 +93,6 @@ class ConfigurationFile(QObject):
                 else:
                     lines.append(property_string)
         with open(self.path, 'w') as f:
-            self.lines = [l + os.linesep for l in lines]
-            f.writelines(self.lines)
+            lines = [l + os.linesep for l in lines]
+            f.writelines(lines)
+        return lines

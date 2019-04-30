@@ -27,7 +27,7 @@ class LndConfiguration(Configuration):
         file_name = 'lnd.conf'
         lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
         configuration_file_path = os.path.join(lnd_dir_path, file_name)
-        super().__init__(path=configuration_file_path)
+        super().__init__(name='lnd', path=configuration_file_path)
 
     @property
     def args(self):
