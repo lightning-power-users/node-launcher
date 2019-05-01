@@ -44,13 +44,14 @@ class ConfigurationWidget(QWidget):
             return
 
         key_item = self.table.item(row, 1)
-        if key_item is not None:
-            key = key_item.text()
-        else:
+        if key_item is None:
             return
+        key = key_item.text()
         value_key_items = self.table.findItems(key, Qt.MatchExactly)
         value_items = [self.table.item(i.row(), 2) for i in value_key_items]
         new_values = [i.text() for i in value_items]
+        if len(new_values) == 1:
+            new_values = new_values[0]
 
         node_name = self.table.item(row, 0).text()
         if node_name == 'bitcoind':
@@ -63,4 +64,5 @@ class ConfigurationWidget(QWidget):
             raise NotImplementedError(f'{node_name} does not exist')
 
         old_values = [l[1] for l in config.lines if l[0] == key]
-        print('here')
+
+        config[key] = new_values
