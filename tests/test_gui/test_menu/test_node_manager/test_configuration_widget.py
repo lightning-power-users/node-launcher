@@ -10,9 +10,9 @@ from node_launcher.node_set.lib.configuration import Configuration
 
 @pytest.fixture
 def configuration_widget():
-    with NamedTemporaryFile(suffix='.conf', delete=True) as f:
-        name = f.name
-    configuration = Configuration('bitcoind', name)
+    with NamedTemporaryFile(suffix='.conf', delete=False) as f:
+        path = f.name
+    configuration = Configuration(name='bitcoind', path=path)
     configuration.load()
     node_set = MagicMock()
     node_set.bitcoind_node.configuration = configuration
@@ -22,19 +22,36 @@ def configuration_widget():
 
 class TestConfigurationWidget(object):
     def test_init(self, qtbot, configuration_widget: ConfigurationWidget):
-        assert configuration_widget.table
+        assert configuration_widget
 
-    def test_handle_configuration_file_line_change(
+    def test_get_nothing(self, qtbot, configuration_widget: ConfigurationWidget):
+        existing_value_items = configuration_widget.get('bitcoind', 'server')
+        assert not existing_value_items
+
+    def test_append_key_value(
             self, qtbot, configuration_widget: ConfigurationWidget):
-        configuration_widget.handle_configuration_file_line_change(
+        configuration_widget.append_key_value(
             'bitcoind',
             'test_key',
             'test_new_value'
         )
-        assert configuration_widget.table.rowCount() == 1
-        assert configuration_widget.table.item(0, 0).text() == 'bitcoind'
-        assert configuration_widget.table.item(0, 1).text() == 'test_key'
-        assert configuration_widget.table.item(0, 2).text() == 'test_new_value'
+        assert configuration_widget.rowCount() == 1
+        assert configuration_widget.item(0, 0).text() == 'bitcoind'
+        assert configuration_widget.item(0, 1).text() == 'test_key'
+        assert configuration_widget.item(0, 2).text() == 'test_new_value'
+
+    def test_update_key(self, qtbot, configuration_widget: ConfigurationWidget):
+        configuration_widget.node_set.bitcoind_node.configuration.parameter_change.emit(
+            'bitcoind', 'testing_key', ['test_value_1', 'test_value_2']
+        )
+        assert configuration_widget.rowCount() == 2
+        assert configuration_widget.item(0, 0).text() == 'bitcoind'
+        assert configuration_widget.item(0, 1).text() == 'testing_key'
+        assert configuration_widget.item(0, 2).text() == 'test_value_1'
+
+        assert configuration_widget.item(1, 0).text() == 'bitcoind'
+        assert configuration_widget.item(1, 1).text() == 'testing_key'
+        assert configuration_widget.item(1, 2).text() == 'test_value_2'
 
     def test_handle_cell_change(self, qtbot,
                                 configuration_widget: ConfigurationWidget):
