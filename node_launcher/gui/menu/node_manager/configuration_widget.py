@@ -38,7 +38,9 @@ class ConfigurationWidget(QTableWidget):
             item.setText(cell_text)
             if column_index != 2:
                 item.setFlags(Qt.ItemIsEnabled)
+            self.cellChanged.disconnect()
             self.setItem(row_number, column_index, item)
+            self.cellChanged.connect(self.handle_cell_change)
         self.resizeColumnsToContents()
 
     def update_key(self, node_name: str, key: str, new_values: List[str]):
@@ -71,6 +73,6 @@ class ConfigurationWidget(QTableWidget):
             raise NotImplementedError(f'{node_name} does not exist')
 
         old_values = [l[1] for l in config.lines if l[0] == key]
-        if new_values == old_values:
+        if sorted(new_values) == sorted(old_values):
             return
         config[key] = new_values

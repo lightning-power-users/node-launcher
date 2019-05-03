@@ -69,7 +69,7 @@ class ConfigurationFile(QObject):
         existing_lines = [l for l in enumerate(lines)
                           if l[1].split(self.assign_op)[0] == key]
         existing_line_numbers = [l[0] for l in existing_lines]
-        for line_index in existing_line_numbers:
+        for line_index in sorted(existing_line_numbers, reverse=True):
             lines.pop(line_index)
         if values is not None:
             for value_index, value in enumerate(values):

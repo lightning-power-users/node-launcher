@@ -55,9 +55,10 @@ class TestConfigurationWidget(object):
 
     def test_handle_cell_change(self, qtbot,
                                 configuration_widget: ConfigurationWidget):
-        # configuration_widget.handle_configuration_file_line_change(
-        #     'bitcoind',
-        #     'test_key',
-        #     'test_new_value'
-        # )
-        assert configuration_widget.node_set.bitcoind_node.configuration['test_key'] == ['test_new_value']
+        configuration_widget.append_key_value(
+            'bitcoind',
+            'test_key',
+            'test_new_value'
+        )
+        configuration_widget.item(0, 2).setText('test_edit_value')
+        assert configuration_widget.node_set.bitcoind_node.configuration['test_key'] == ['test_edit_value']
