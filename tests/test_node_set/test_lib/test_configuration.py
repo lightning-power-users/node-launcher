@@ -45,3 +45,10 @@ class TestConfiguration(object):
         new_object.load()
         assert new_object['test_bool_true']
         assert not new_object['test_bool_false']
+
+    def test_value_to_string(self, configuration: Configuration):
+        assert configuration.value_to_string('test') == 'test'
+        assert configuration.value_to_string(True) == '1'
+        assert configuration.value_to_string(False) == '0'
+        assert configuration.value_to_string(5000) == '5000'
+

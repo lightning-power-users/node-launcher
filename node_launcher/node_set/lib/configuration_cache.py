@@ -22,10 +22,11 @@ class ConfigurationCache(dict):
         existing_values = self.get(key, 'no_key')
         parsed_values = []
         for new_value in new_values:
-            if len(new_value) == 1 and new_value.isdigit():
-                new_value = bool(int(new_value))
-            elif new_value.isdigit():
-                new_value = int(new_value)
+            if isinstance(new_value, str):
+                if len(new_value) == 1 and new_value.isdigit():
+                    new_value = bool(int(new_value))
+                elif new_value.isdigit():
+                    new_value = int(new_value)
             parsed_values.append(new_value)
 
         if existing_values == parsed_values:
