@@ -28,8 +28,6 @@ class TorSoftware(Software):
         self.download_url = f'http://www.torproject.org/dist/torbrowser/' \
             f'{self.release_version}/{self.download_destination_file_name}'
 
-        self.downloaded_bin_path =
-
     @property
     def daemon(self):
         return self.tor

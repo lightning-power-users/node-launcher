@@ -132,7 +132,13 @@ class Software(QObject):
         if self.compressed_suffix == '.zip':
             try:
                 with ZipFile(source) as zip_file:
-                    zip_file.extractall(path=destination)
+                    if self.software_name != 'tor':
+                        zip_file.extractall(path=destination)
+                    else:
+                        os.makedirs(self.downloaded_bin_path, exist_ok=True)
+                        destination_exe = os.path.join(self.downloaded_bin_path, 'tor.exe')
+                        with zip_file.open('Tor/tor.exe') as zf, open(destination_exe, 'wb') as f:
+                            shutil.copyfileobj(zf, f)
             except BadZipFile:
                 log.debug('BadZipFile', destination=destination, exc_info=True)
                 os.remove(source)
@@ -163,7 +169,7 @@ class Software(QObject):
             log.debug('Copying app from disk image',
                       app_source_path=app_source_path,
                       destination=self.downloaded_bin_path)
-            os.makedirs(self.downloaded_bin_path)
+            os.makedirs(self.downloaded_bin_path, exist_ok=True)
             shutil.copy(src=app_source_path, dst=self.downloaded_bin_path)
             disk_image_path = '/Volumes/Tor\ Browser'
             log.debug('Detaching disk image', disk_image_path=disk_image_path)
