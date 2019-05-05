@@ -65,7 +65,7 @@ class Software(QObject):
             destination_file=self.download_destination_file_name
         )
         worker.signals.progress.connect(self.emit_download_progress)
-        worker.signals.finished.connect(
+        worker.signals.result.connect(
             lambda: self.update_status(SoftwareStatus.SOFTWARE_DOWNLOADED)
         )
         worker.signals.result.connect(self.install)
@@ -86,21 +86,32 @@ class Software(QObject):
         )
         os.makedirs(destination_directory, exist_ok=True)
         destination = os.path.join(destination_directory, destination_file)
+
+        response = requests.get(source_url, stream=True)
+        log.debug('Download response', headers=dict(response.headers))
+        if response.status_code != 200:
+            log.debug(
+                'Download error',
+                status_code=response.status_code,
+                reason=response.reason
+            )
+            response.raise_for_status()
+
         with open(destination, 'wb') as f:
-            response = requests.get(source_url, stream=True)
-            log.debug('Download response', headers=dict(response.headers))
             total_length = float(response.headers['content-length'])
             downloaded = 0.0
+            old_progress = 0
             for chunk in response.iter_content(chunk_size=4096):
                 downloaded += len(chunk)
                 f.write(chunk)
-                progress = int((downloaded / total_length) * 100)
-                log.debug('Download progress', progress=progress)
-                progress_callback.emit(progress)
+                new_progress = int((downloaded / total_length) * 100)
+                if new_progress > old_progress:
+                    log.debug('Download progress', progress=new_progress)
+                    progress_callback.emit(new_progress)
+                    old_progress = new_progress
 
     def install(self):
         # Todo: move to a thread so it doesn't block the GUI
-        log.debug('Installing software')
         self.update_status(SoftwareStatus.INSTALLING_SOFTWARE)
         self.extract(
             source=self.download_destination_file_path,
@@ -113,7 +124,7 @@ class Software(QObject):
         self.update_status(SoftwareStatus.SOFTWARE_INSTALLED)
         self.update_status(SoftwareStatus.SOFTWARE_READY)
 
-    def extract(self, source, destination):
+    def extract(self, source: str, destination: str):
         os.makedirs(destination, exist_ok=True)
         log.debug('Extracting downloaded software',
                   source=source,
@@ -123,6 +134,7 @@ class Software(QObject):
                 with ZipFile(source) as zip_file:
                     zip_file.extractall(path=destination)
             except BadZipFile:
+                log.debug('BadZipFile', destination=destination, exc_info=True)
                 os.remove(source)
                 self.update()
 

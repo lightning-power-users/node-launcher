@@ -23,11 +23,12 @@ class TorSoftware(Software):
             self.compressed_suffix = '.tar.xz'
             self.download_name = f'tor-browser-linux64-{self.release_version}_en-US'
         elif IS_WINDOWS:
-            self.release_version = TARGET_WINDOWS_TOR_VERSION
-            self.download_name = f'tor-win64-{self.release_version}'
+            self.download_name = f'tor-win64-{TARGET_WINDOWS_TOR_VERSION}'
 
         self.download_url = f'http://www.torproject.org/dist/torbrowser/' \
             f'{self.release_version}/{self.download_destination_file_name}'
+
+        self.downloaded_bin_path =
 
     @property
     def daemon(self):

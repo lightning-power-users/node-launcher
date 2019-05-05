@@ -40,7 +40,8 @@ class NodeSet(object):
     def handle_bitcoin_node_status_change(self, status):
         if status in [NodeStatus.SOFTWARE_DOWNLOADED,
                       NodeStatus.SOFTWARE_READY]:
-            self.lnd_node.software.update()
+            if self.lnd_node.current_status is None:
+                self.lnd_node.software.update()
         elif status == NodeStatus.SYNCING:
             self.lnd_node.bitcoind_syncing = True
             self.lnd_node.start_process()
