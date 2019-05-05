@@ -136,9 +136,11 @@ class Software(QObject):
                         zip_file.extractall(path=destination)
                     else:
                         os.makedirs(self.downloaded_bin_path, exist_ok=True)
-                        destination_exe = os.path.join(self.downloaded_bin_path, 'tor.exe')
-                        with zip_file.open('Tor/tor.exe') as zf, open(destination_exe, 'wb') as f:
-                            shutil.copyfileobj(zf, f)
+                        for file in zip_file.filelist:
+                            if file.filename.endswith('dll') or file.filename.endswith('exe'):
+                                destination_exe = os.path.join(self.downloaded_bin_path, file.filename.split('/')[-1])
+                                with zip_file.open(file.filename) as zf, open(destination_exe, 'wb') as f:
+                                    shutil.copyfileobj(zf, f)
             except BadZipFile:
                 log.debug('BadZipFile', destination=destination, exc_info=True)
                 os.remove(source)
