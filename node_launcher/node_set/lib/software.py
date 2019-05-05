@@ -2,7 +2,7 @@ import os
 import shutil
 import subprocess
 import tarfile
-import zipfile
+from zipfile import ZipFile, BadZipFile
 
 import requests
 from PySide2.QtCore import QThreadPool, QObject, Signal
@@ -59,6 +59,7 @@ class Software(QObject):
     def start_update_worker(self):
         worker = Worker(
             self.download,
+            progress_callback=None,
             source_url=self.download_url,
             destination_directory=self.software_directory,
             destination_file=self.download_destination_file_name
@@ -118,8 +119,13 @@ class Software(QObject):
                   source=source,
                   destination=destination)
         if self.compressed_suffix == '.zip':
-            with zipfile.ZipFile(source) as zip_file:
-                zip_file.extractall(path=destination)
+            try:
+                with ZipFile(source) as zip_file:
+                    zip_file.extractall(path=destination)
+            except BadZipFile:
+                os.remove(source)
+                self.update()
+
         elif 'tar' in self.compressed_suffix:
             with tarfile.open(source) as tar:
                 tar.extractall(path=destination)
