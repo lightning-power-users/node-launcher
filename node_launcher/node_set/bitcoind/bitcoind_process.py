@@ -57,7 +57,7 @@ class BitcoindProcess(ManagedProcess):
                         else:
                             if round(new_progress*100) == 100:
                                 continue
-                            self.self.status_update.emit(f'{new_progress*100:.2f}%')
+                            self.status_update.emit(f'{new_progress*100:.2f}%')
                         self.old_progress = new_progress
                         self.old_timestamp = new_timestamp
         elif 'Bitcoin Core is probably already running' in line:
