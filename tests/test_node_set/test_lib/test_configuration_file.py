@@ -1,3 +1,4 @@
+import os
 from os.path import isfile
 from tempfile import NamedTemporaryFile
 
@@ -30,11 +31,12 @@ class TestConfigurationFile(object):
 
     def test_assign_op(self, configuration_file: ConfigurationFile):
         configuration_file.update('key', 'value')
-        new_object = ConfigurationFile(configuration_file.path, ' ')
-        new_object.read()
-        with open(new_object.path, 'r') as f:
+        with open(configuration_file.path, 'r') as f:
             text = f.read()
             assert 'key=value' in text
+        os.remove(configuration_file.path)
+        new_object = ConfigurationFile(configuration_file.path, ' ')
+        new_object.read()
         new_object.update('key', 'value')
         with open(new_object.path, 'r') as f:
             text = f.read()
