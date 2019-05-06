@@ -12,7 +12,7 @@ def tor_node():
 class TestTorNode(object):
     @pytest.mark.slow
     def test_start(self, tor_node: TorNode, qtbot):
-        tor_node.start()
+        tor_node.software.update()
 
         def check_status():
             return tor_node.current_status == str(NodeStatus.SYNCED)
