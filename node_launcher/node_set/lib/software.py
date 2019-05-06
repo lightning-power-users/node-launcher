@@ -2,7 +2,7 @@ import os
 import shutil
 import subprocess
 import tarfile
-import zipfile
+from zipfile import ZipFile, BadZipFile
 
 import requests
 from PySide2.QtCore import QThreadPool, QObject, Signal
@@ -59,12 +59,13 @@ class Software(QObject):
     def start_update_worker(self):
         worker = Worker(
             self.download,
+            progress_callback=None,
             source_url=self.download_url,
             destination_directory=self.software_directory,
             destination_file=self.download_destination_file_name
         )
         worker.signals.progress.connect(self.emit_download_progress)
-        worker.signals.finished.connect(
+        worker.signals.result.connect(
             lambda: self.update_status(SoftwareStatus.SOFTWARE_DOWNLOADED)
         )
         worker.signals.result.connect(self.install)
@@ -85,21 +86,32 @@ class Software(QObject):
         )
         os.makedirs(destination_directory, exist_ok=True)
         destination = os.path.join(destination_directory, destination_file)
+
+        response = requests.get(source_url, stream=True)
+        log.debug('Download response', headers=dict(response.headers))
+        if response.status_code != 200:
+            log.debug(
+                'Download error',
+                status_code=response.status_code,
+                reason=response.reason
+            )
+            response.raise_for_status()
+
         with open(destination, 'wb') as f:
-            response = requests.get(source_url, stream=True)
-            log.debug('Download response', headers=dict(response.headers))
             total_length = float(response.headers['content-length'])
             downloaded = 0.0
+            old_progress = 0
             for chunk in response.iter_content(chunk_size=4096):
                 downloaded += len(chunk)
                 f.write(chunk)
-                progress = int((downloaded / total_length) * 100)
-                log.debug('Download progress', progress=progress)
-                progress_callback.emit(progress)
+                new_progress = int((downloaded / total_length) * 100)
+                if new_progress > old_progress:
+                    log.debug('Download progress', progress=new_progress)
+                    progress_callback.emit(new_progress)
+                    old_progress = new_progress
 
     def install(self):
         # Todo: move to a thread so it doesn't block the GUI
-        log.debug('Installing software')
         self.update_status(SoftwareStatus.INSTALLING_SOFTWARE)
         self.extract(
             source=self.download_destination_file_path,
@@ -112,14 +124,28 @@ class Software(QObject):
         self.update_status(SoftwareStatus.SOFTWARE_INSTALLED)
         self.update_status(SoftwareStatus.SOFTWARE_READY)
 
-    def extract(self, source, destination):
+    def extract(self, source: str, destination: str):
         os.makedirs(destination, exist_ok=True)
         log.debug('Extracting downloaded software',
                   source=source,
                   destination=destination)
         if self.compressed_suffix == '.zip':
-            with zipfile.ZipFile(source) as zip_file:
-                zip_file.extractall(path=destination)
+            try:
+                with ZipFile(source) as zip_file:
+                    if self.software_name != 'tor':
+                        zip_file.extractall(path=destination)
+                    else:
+                        os.makedirs(self.downloaded_bin_path, exist_ok=True)
+                        for file in zip_file.filelist:
+                            if file.filename.endswith('dll') or file.filename.endswith('exe'):
+                                destination_exe = os.path.join(self.downloaded_bin_path, file.filename.split('/')[-1])
+                                with zip_file.open(file.filename) as zf, open(destination_exe, 'wb') as f:
+                                    shutil.copyfileobj(zf, f)
+            except BadZipFile:
+                log.debug('BadZipFile', destination=destination, exc_info=True)
+                os.remove(source)
+                self.update()
+
         elif 'tar' in self.compressed_suffix:
             with tarfile.open(source) as tar:
                 tar.extractall(path=destination)
@@ -145,7 +171,7 @@ class Software(QObject):
             log.debug('Copying app from disk image',
                       app_source_path=app_source_path,
                       destination=self.downloaded_bin_path)
-            os.makedirs(self.downloaded_bin_path)
+            os.makedirs(self.downloaded_bin_path, exist_ok=True)
             shutil.copy(src=app_source_path, dst=self.downloaded_bin_path)
             disk_image_path = '/Volumes/Tor\ Browser'
             log.debug('Detaching disk image', disk_image_path=disk_image_path)

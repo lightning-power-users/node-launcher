@@ -27,7 +27,7 @@ class DownloadFixture(object):
         self.tmpdir = tmpdir
         self.software = software
         self.binary_name = 'test_bin'
-        self.archive_source = os.path.join(self.tmpdir,
+        self.archive_source = os.path.join(self.tmpdir, 'archive',
                                            self.software.download_name)
         self.bin_path = os.path.join(self.archive_source, 'bin')
         software.bin_path = self.bin_path
@@ -47,10 +47,16 @@ class DownloadFixture(object):
         with open(self.binary_path, 'wb') as f:
             f.write(os.urandom(file_size))
 
+        extension = '.tar.gz'
+        format = 'gztar'
+        if IS_WINDOWS:
+            extension = '.zip'
+            format = 'zip'
         make_archive(
-            base_name=self.archive_destination_file_path.replace('.tar.gz', ''),
-            format='gztar',
-            root_dir=self.tmpdir)
+            base_name=self.archive_destination_file_path.replace(extension, ''),
+            format=format,
+            root_dir=os.path.join(self.tmpdir, 'archive')
+        )
 
         content = open(self.archive_destination_file_path, 'rb').read()
         return content

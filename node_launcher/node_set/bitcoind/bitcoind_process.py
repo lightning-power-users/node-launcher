@@ -53,11 +53,11 @@ class BitcoindProcess(ManagedProcess):
                                     self.timestamp_changes.pop(0)
                                 average_time_left = sum(self.timestamp_changes)/len(self.timestamp_changes)
                                 humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
-                                self.sync_progress.emit(f'ETA: {humanized}, {new_progress * 100:.2f}% done')
+                                self.status.emit(f'{new_progress * 100:.2f}% synced, ETA: {humanized}')
                         else:
                             if round(new_progress*100) == 100:
                                 continue
-                            self.self.status_update.emit(f'{new_progress*100:.2f}%')
+                            self.status.emit(f'{new_progress*100:.2f}% synced')
                         self.old_progress = new_progress
                         self.old_timestamp = new_timestamp
         elif 'Bitcoin Core is probably already running' in line:

@@ -25,12 +25,6 @@ class TestLndSoftware(object):
     def test_release_version(self, lnd_software: LndSoftware):
         assert lnd_software.release_version == TARGET_LND_RELEASE
 
-    @pytest.mark.slow
-    def test_get_latest_release_version(self):
-        latest = LndSoftware().get_latest_release_version()
-        if latest is not None:
-            assert latest == TARGET_LND_RELEASE
-
     def test_binary_name(self, lnd_software: LndSoftware):
         name = lnd_software.download_name
         assert len(name)
@@ -50,8 +44,3 @@ class TestLndSoftware(object):
     def test_download_url(self, lnd_software: LndSoftware):
         url = lnd_software.download_url
         assert len(url)
-
-    @pytest.mark.slow
-    def test_download(self, lnd_software: LndSoftware):
-        lnd_software.download()
-        assert os.path.isfile(lnd_software.download_destination_file_path)
