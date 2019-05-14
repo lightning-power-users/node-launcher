@@ -23,6 +23,8 @@ class ConfigurationWidget(QTableWidget):
 
         self.cellChanged.connect(self.handle_cell_change)
 
+        self.setHorizontalHeaderLabels(['Node', 'Property', 'Value'])
+
     def get(self, node_name: str, key: str) -> List[Tuple[int, str]]:
         value_key_items = list(self.findItems(key, Qt.MatchExactly))
         value_items = [(i.row(), self.item(i.row(), 2).text())
