@@ -50,8 +50,6 @@ class NodeManagerTabsDialog(QDialog):
     def tab_changed_event(self, tab_index: int):
         if tab_index == 0:
             self.console_tab.input.setFocus()
-        elif tab_index == 2:
-            self.configuration_tab.refresh()
 
     def show(self):
         super().showMaximized()

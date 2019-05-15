@@ -27,7 +27,7 @@ class BitcoindConfiguration(Configuration):
         file_name = 'bitcoin.conf'
         bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
         configuration_file_path = os.path.join(bitcoin_data_path, file_name)
-        super().__init__(path=configuration_file_path)
+        super().__init__(name='bitcoind', path=configuration_file_path)
 
     @property
     def args(self) -> List[str]:
