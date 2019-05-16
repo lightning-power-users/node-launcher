@@ -5,7 +5,8 @@ from node_launcher.constants import (
     IS_MACOS,
     IS_LINUX,
     TARGET_WINDOWS_TOR_VERSION,
-    TARGET_TOR_RELEASE
+    TARGET_TOR_RELEASE,
+    TOR_WEBSITE
 )
 from node_launcher.node_set.lib.software import Software
 
@@ -25,8 +26,7 @@ class TorSoftware(Software):
         elif IS_WINDOWS:
             self.download_name = f'tor-win64-{TARGET_WINDOWS_TOR_VERSION}'
 
-        self.download_url = f'http://www.torproject.org/dist/torbrowser/' \
-            f'{self.release_version}/{self.download_destination_file_name}'
+        self.download_url = f'{TOR_WEBSITE}{self.release_version}/{self.download_destination_file_name}'
 
     @property
     def daemon(self):
