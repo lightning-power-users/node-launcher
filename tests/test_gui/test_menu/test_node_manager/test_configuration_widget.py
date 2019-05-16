@@ -61,4 +61,15 @@ class TestConfigurationWidget(object):
             'test_new_value'
         )
         configuration_widget.item(0, 2).setText('test_edit_value')
-        assert configuration_widget.node_set.bitcoind_node.configuration['test_key'] == ['test_edit_value']
+        assert configuration_widget.node_set.bitcoind_node.configuration['test_key'] == 'test_edit_value'
+
+        configuration_widget.append_key_value(
+            'bitcoind',
+            'test_key',
+            'test_new_value2'
+        )
+        configuration_widget.item(1, 2).setText('test_edit_multi_value')
+        assert configuration_widget.node_set.bitcoind_node.configuration['test_key'] == [
+            'test_edit_value',
+            'test_edit_multi_value'
+        ]
