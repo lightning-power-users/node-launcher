@@ -32,9 +32,9 @@ class TestBitcoindNode(object):
 
         def check_synced():
             return bitcoind_node.current_status == NodeStatus.SYNCING
-        qtbot.waitUntil(check_synced, timeout=50000)
+        qtbot.waitUntil(check_synced, timeout=500000)
         bitcoind_node.stop()
 
         def check_stopped():
             return bitcoind_node.current_status == NodeStatus.STOPPED
-        qtbot.waitUntil(check_stopped, timeout=50000)
+        qtbot.waitUntil(check_stopped, timeout=500000)

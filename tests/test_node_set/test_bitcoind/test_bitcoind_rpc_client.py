@@ -39,7 +39,7 @@ def live_bitcoind_node(bitcoind_node: BitcoindNode, tor_node: TorNode, qtbot_ses
 
 class TestBitcoindRpcClient(object):
     @pytest.mark.slow
-    def test_get_raw_mempool(self, live_bitcoind_node: BitcoindNode):
+    def test_get_raw_mempool(self, live_bitcoind_node: BitcoindNode, qtbot):
         client = Proxy(btc_conf_file=live_bitcoind_node.configuration.file.path,
                        service_port=live_bitcoind_node.configuration.rpc_port)
         while True:
@@ -53,3 +53,8 @@ class TestBitcoindRpcClient(object):
             except JSONRPCError as e:
                 time.sleep(2)
                 print(e)
+        live_bitcoind_node.stop()
+
+        def check_stopped():
+            return live_bitcoind_node.current_status == NodeStatus.STOPPED
+        qtbot.waitUntil(check_stopped, timeout=500000)

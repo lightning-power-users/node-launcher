@@ -24,20 +24,20 @@ class TestConfigurationFile(object):
         assert isfile(configuration_file.path)
 
     def test_update(self, configuration_file: ConfigurationFile):
-        configuration_file.update('test_attribute', test_value)
+        configuration_file.update('test_attribute', [test_value])
         with open(configuration_file.path, 'r') as f:
             text = f.read()
             assert test_value in text
 
     def test_assign_op(self, configuration_file: ConfigurationFile):
-        configuration_file.update('key', 'value')
+        configuration_file.update('key', ['value'])
         with open(configuration_file.path, 'r') as f:
             text = f.read()
             assert 'key=value' in text
         os.remove(configuration_file.path)
         new_object = ConfigurationFile(configuration_file.path, ' ')
         new_object.read()
-        new_object.update('key', 'value')
+        new_object.update('key', ['value'])
         with open(new_object.path, 'r') as f:
             text = f.read()
             assert 'key=value' not in text
