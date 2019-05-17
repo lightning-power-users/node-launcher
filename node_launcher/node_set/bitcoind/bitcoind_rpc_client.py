@@ -267,3 +267,15 @@ class Proxy(BaseProxy):
     def call(self, service_name, *args):
         """Call an RPC method by name and raw (JSON encodable) arguments"""
         return self._call(service_name, *args)
+
+    def get_raw_mempool(self):
+        results = self.call('getrawmempool', True)
+        new_results = []
+        for result_key in results:
+            del results[result_key]['fees']
+            del results[result_key]['depends']
+            del results[result_key]['spentby']
+            results[result_key]['txid'] = result_key
+            new_results.append(results[result_key])
+
+        return new_results
