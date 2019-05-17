@@ -8,7 +8,7 @@ a = Analysis(['run.py'],
              pathex=['C:\\Users\\pierre\\PycharmProjects\\node-launcher'],
              binaries=[],
              datas=[
-                 ('node_launcher/assets/*.png', 'assets')
+                 ('node_launcher/gui/assets/*.png', 'assets')
              ] + collect_data_files('shiboken2', include_py_files=True, subdir='support')
              + collect_data_files('PySide2', include_py_files=True, subdir='support'),
              hiddenimports=['setuptools', 'pypiwin32', 'win32timezone'],
