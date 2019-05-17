@@ -121,7 +121,7 @@ class BitcoindConfiguration(Configuration):
             )
             return
 
-        if not self.hard_drives.should_prune(big_drive.mountpoint, False):
+        if not self.hard_drives.should_prune(big_drive.mountpoint):
             datadir = os.path.join(big_drive.mountpoint, 'Bitcoin')
             self['datadir'] = datadir
             log.info(
