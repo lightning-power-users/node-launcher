@@ -9,7 +9,7 @@ TARGET_TOR_RELEASE = '8.0.9'
 TARGET_WINDOWS_TOR_VERSION = '0.3.5.8'
 TOR_WEBSITE = 'http://www.torproject.org/dist/torbrowser/'
 
-TARGET_BITCOIN_RELEASE = 'v0.18.0'
+TARGET_BITCOIN_RELEASE = 'v0.17.1'
 TARGET_LND_RELEASE = 'v0.6.1-beta'
 
 
