@@ -148,7 +148,23 @@ class Software(QObject):
 
         elif 'tar' in self.compressed_suffix:
             with tarfile.open(source) as tar:
-                tar.extractall(path=destination)
+                if self.software_name != 'tor':
+                    tar.extractall(path=destination)
+                else:
+                    os.makedirs(self.downloaded_bin_path, exist_ok=True)
+                    tor_files = [
+                        'libcrypto.so.1.0.0',
+                        'libevent-2.1.so.6',
+                        'libssl.so.1.0.0',
+                        'tor'
+                    ]
+                    for tor_file in tor_files:
+                        file_name = 'tor-browser_en-US/Browser/TorBrowser/Tor/' + tor_file
+                        destination_file = os.path.join(self.downloaded_bin_path, tor_file)
+                        extracted_file = tar.extractfile(file_name)
+                        with open(destination_file, 'wb') as f:
+                            shutil.copyfileobj(extracted_file, f)
+
         elif self.compressed_suffix == '.dmg':
             log.debug('Attaching disk image', source=source)
             escaped_source = source.replace(' ', '\ ')
