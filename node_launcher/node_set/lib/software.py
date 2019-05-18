@@ -1,5 +1,6 @@
 import os
 import shutil
+import stat
 import subprocess
 import tarfile
 from zipfile import ZipFile, BadZipFile
@@ -164,6 +165,9 @@ class Software(QObject):
                         extracted_file = tar.extractfile(file_name)
                         with open(destination_file, 'wb') as f:
                             shutil.copyfileobj(extracted_file, f)
+                            if tor_file == 'tor':
+                                st = os.stat(destination_file)
+                                os.chmod(destination_file, st.st_mode | stat.S_IEXEC)
 
         elif self.compressed_suffix == '.dmg':
             log.debug('Attaching disk image', source=source)

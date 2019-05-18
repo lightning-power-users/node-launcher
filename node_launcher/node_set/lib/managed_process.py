@@ -1,3 +1,5 @@
+import os
+
 from PySide2.QtCore import QProcess, QByteArray, Signal, QProcessEnvironment
 from PySide2.QtWidgets import QSystemTrayIcon
 from node_launcher.constants import IS_LINUX
@@ -27,7 +29,7 @@ class ManagedProcess(QProcess):
 
         if IS_LINUX:
             env = QProcessEnvironment.systemEnvironment()
-            env.insert('LD_LIBRARY_PATH', '.')
+            env.insert('LD_LIBRARY_PATH', os.path.abspath(os.path.join(binary, os.pardir)))
             self.setProcessEnvironment(env)
 
     def update_status(self, new_status: NodeStatus):
