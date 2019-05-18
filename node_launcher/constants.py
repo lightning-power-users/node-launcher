@@ -85,18 +85,8 @@ BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
 
 TOR_DIR_PATH: Dict[OperatingSystem, str] = {
     DARWIN: '/var/tmp/dist/tor/etc/tor/',
-    LINUX: expanduser('~/tor/etc/tor/'),  # should be '/etc/tor', permissions issue
+    LINUX: '/var/tmp/dist/tor/etc/tor/',
     WINDOWS: os.path.join(APPDATA, 'tor'),
-}
-
-TOR_PATH: Dict[OperatingSystem, str] = {
-    WINDOWS: os.path.join(LOCALAPPDATA, 'tor'),
-    DARWIN: expanduser('~/Library/Application Support/Tor')
-}
-
-TOR_EXE_PATH: Dict[OperatingSystem, str] = {
-    WINDOWS: os.path.join(LOCALAPPDATA, r'tor\tor\tor.exe'),
-    DARWIN: expanduser('~/Library/Application Support/Tor/Tor Browser.app/Contents/MacOS/Tor/tor.real')
 }
 
 TOR_SERVICE_PATH = os.path.join(NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM], 'tor-service')
