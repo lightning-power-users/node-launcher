@@ -23,3 +23,6 @@ class SystemKeyring(KeyringBackend):
 
     def get_password(self, service, username):
         return self.backend.get_password(service, username)
+
+    def delete_password(self, service, username):
+        return self.backend.delete_password(service, username)
