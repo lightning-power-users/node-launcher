@@ -98,18 +98,6 @@ UPGRADE = 'Please download the latest version of the Node Launcher: ' \
 
 GIGABYTE = 1000000000
 
-if IS_WINDOWS:
-    from keyring.backends.Windows import WinVaultKeyring
-    keyring = WinVaultKeyring()
-
-if IS_MACOS:
-    from keyring.backends.OS_X import Keyring
-    keyring = Keyring()
-
-if IS_LINUX:
-    from keyring.backends.SecretService import Keyring
-    keyring = Keyring()
-
 AUTOPRUNE_GB = 150
 # How many megabytes to keep
 # Total Bitcoin (mainnet) data directory size minus blocks is ~3 GB
