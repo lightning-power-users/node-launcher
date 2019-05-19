@@ -3,6 +3,7 @@ import shutil
 
 import pytest
 
+from node_launcher.constants import TOR_WEBSITE
 from node_launcher.node_set.lib.node_status import SoftwareStatus
 from node_launcher.node_set.tor.tor_software import TorSoftware
 
@@ -15,6 +16,19 @@ def tor_software():
 
 @pytest.mark.software
 class TestTorSoftware(object):
+    @pytest.mark.slow
+    def test_linux_update(self, tor_software, qtbot):
+        tor_software.compressed_suffix = '.tar.xz'
+        tor_software.download_name = f'tor-browser-linux64-{tor_software.release_version}_en-US'
+        tor_software.download_url = f'{TOR_WEBSITE}{tor_software.release_version}/' \
+            f'{tor_software.download_destination_file_name}'
+        shutil.rmtree(tor_software.version_path,
+                      ignore_errors=True)
+        tor_software.update()
+        assert os.path.isfile(tor_software.tor)
+        shutil.rmtree(tor_software.version_path,
+                      ignore_errors=True)
+
     @pytest.mark.slow
     def test_update(self, tor_software, qtbot):
         shutil.rmtree(tor_software.version_path,

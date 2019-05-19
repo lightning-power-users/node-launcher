@@ -1,11 +1,11 @@
 from PySide2.QtCore import QThreadPool, QObject
 from grpc._channel import _Rendezvous
 
-from node_launcher.constants import keyring
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.logging import log
 from node_launcher.node_set.lib.get_random_password import get_random_password
 from node_launcher.node_set.lnd.lnd_client import LndClient
+from node_launcher.system_keyring import SystemKeyring
 
 
 class LndUnlocker(QObject):
@@ -13,6 +13,7 @@ class LndUnlocker(QObject):
         super().__init__()
         self.configuration = configuration
         self.client = LndClient(self.configuration)
+        self.keyring = SystemKeyring()
 
     def auto_unlock_wallet(self):
         keyring_service_name = f'lnd_mainnet_wallet_password'
@@ -22,7 +23,7 @@ class LndUnlocker(QObject):
             keyring_service_name=keyring_service_name,
             keyring_user_name=keyring_user_name
         )
-        password = keyring.get_password(
+        password = self.keyring.get_password(
             service=keyring_service_name,
             username=keyring_user_name,
         )
@@ -65,13 +66,13 @@ class LndUnlocker(QObject):
             keyring_user_name=keyring_user_name
         )
 
-        keyring.set_password(
+        self.keyring.set_password(
             service=keyring_service_name,
             username=keyring_user_name,
             password=' '.join(seed)
         )
 
-        keyring.set_password(
+        self.keyring.set_password(
             service=f'{keyring_service_name}_seed_password',
             username=keyring_user_name,
             password=new_seed_password
@@ -95,7 +96,7 @@ class LndUnlocker(QObject):
                 keyring_service_name=keyring_service_name,
                 keyring_user_name=keyring_user_name
             )
-            keyring.set_password(
+            self.keyring.set_password(
                 service=keyring_service_name,
                 username=keyring_user_name,
                 password=new_wallet_password
@@ -110,7 +111,7 @@ class LndUnlocker(QObject):
             except _Rendezvous:
                 log.error('initialize_wallet error', exc_info=True)
                 raise
-            keyring.set_password(
+            self.keyring.set_password(
                 service=f'lnd_mainnet_wallet_password',
                 username=self.configuration['bitcoind.rpcuser'],
                 password=new_wallet_password

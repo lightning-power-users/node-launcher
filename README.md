@@ -38,9 +38,9 @@ Review the contributing.md file https://github.com/PierreRochard/node-launcher/b
 
 Install Python3.7+
 
-macOS: `brew install python3`
+macOS: `brew install python3 dbus dbus-glib`
 
-Linux: `sudo apt install python3.7-venv`
+Linux: `sudo apt install python3.7-venv libdbus-glib-1-dev`
 
 For Windows see https://medium.com/@pierre_rochard/node-launcher-developer-setup-on-windows-5ba6e0fbb38a
 

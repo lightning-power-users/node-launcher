@@ -37,5 +37,7 @@ class TorSoftware(Software):
         name = 'tor.real'
         if IS_WINDOWS:
             name = 'tor.exe'
+        elif IS_LINUX:
+            name = 'tor'
         latest_executable = os.path.join(self.static_bin_path, name)
         return latest_executable

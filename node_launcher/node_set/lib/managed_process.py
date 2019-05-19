@@ -1,5 +1,8 @@
-from PySide2.QtCore import QProcess, QByteArray, Signal
+import os
+
+from PySide2.QtCore import QProcess, QByteArray, Signal, QProcessEnvironment
 from PySide2.QtWidgets import QSystemTrayIcon
+from node_launcher.constants import IS_LINUX
 
 from node_launcher.logging import log
 from node_launcher.node_set.lib.node_status import NodeStatus
@@ -23,6 +26,11 @@ class ManagedProcess(QProcess):
         self.finished.connect(self.handle_process_finish)
         self.expecting_shutdown = False
         self.current_status = None
+
+        if IS_LINUX:
+            env = QProcessEnvironment.systemEnvironment()
+            env.insert('LD_LIBRARY_PATH', os.path.abspath(os.path.join(binary, os.pardir)))
+            self.setProcessEnvironment(env)
 
     def update_status(self, new_status: NodeStatus):
         log.debug('update_status',

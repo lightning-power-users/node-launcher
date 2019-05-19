@@ -85,18 +85,8 @@ BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
 
 TOR_DIR_PATH: Dict[OperatingSystem, str] = {
     DARWIN: '/var/tmp/dist/tor/etc/tor/',
-    LINUX: expanduser('~/tor/etc/tor/'),  # should be '/etc/tor', permissions issue
+    LINUX: '/var/tmp/dist/tor/etc/tor/',
     WINDOWS: os.path.join(APPDATA, 'tor'),
-}
-
-TOR_PATH: Dict[OperatingSystem, str] = {
-    WINDOWS: os.path.join(LOCALAPPDATA, 'tor'),
-    DARWIN: expanduser('~/Library/Application Support/Tor')
-}
-
-TOR_EXE_PATH: Dict[OperatingSystem, str] = {
-    WINDOWS: os.path.join(LOCALAPPDATA, r'tor\tor\tor.exe'),
-    DARWIN: expanduser('~/Library/Application Support/Tor/Tor Browser.app/Contents/MacOS/Tor/tor.real')
 }
 
 TOR_SERVICE_PATH = os.path.join(NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM], 'tor-service')
@@ -107,18 +97,6 @@ UPGRADE = 'Please download the latest version of the Node Launcher: ' \
                     '</a>'
 
 GIGABYTE = 1000000000
-
-if IS_WINDOWS:
-    from keyring.backends.Windows import WinVaultKeyring
-    keyring = WinVaultKeyring()
-
-if IS_MACOS:
-    from keyring.backends.OS_X import Keyring
-    keyring = Keyring()
-
-if IS_LINUX:
-    from keyring.backends.SecretService import Keyring
-    keyring = Keyring()
 
 AUTOPRUNE_GB = 150
 # How many megabytes to keep
