@@ -20,9 +20,13 @@ from node_launcher.node_set.bitcoind.bitcoind_configuration import (
 )
 from node_launcher.node_set.lib.configuration import Configuration
 from node_launcher.port_utilities import get_port
+from node_launcher.node_set.lnd.lnd_configuration_keys import keys_info
 
 
 class LndConfiguration(Configuration):
+
+    keys_info = keys_info
+    
     def __init__(self):
         file_name = 'lnd.conf'
         lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
@@ -45,6 +49,7 @@ class LndConfiguration(Configuration):
         ]
         return arg_list
 
+    @property
     def cli_args(self) -> List[str]:
         args = []
         if self.grpc_port != LND_DEFAULT_GRPC_PORT:

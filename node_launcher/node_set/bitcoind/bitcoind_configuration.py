@@ -15,12 +15,15 @@ from node_launcher.node_set.lib.configuration import Configuration
 from node_launcher.node_set.lib.get_random_password import get_random_password
 from node_launcher.node_set.lib.hard_drives import HardDrives
 from node_launcher.port_utilities import get_zmq_port
+from node_launcher.node_set.bitcoind.bitcoind_configuration_keys import keys_info
 
 
 class BitcoindConfiguration(Configuration):
     hard_drives: HardDrives
     zmq_block_port: int
     zmq_tx_port: int
+
+    keys_info = keys_info
 
     def __init__(self):
         self.hard_drives = HardDrives()

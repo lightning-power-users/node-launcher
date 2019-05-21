@@ -9,6 +9,7 @@ from node_launcher.node_set.lib.configuration_file import ConfigurationFile
 class Configuration(QObject):
 
     parameter_change = Signal(str, str, list)
+    validators = {}
 
     def __init__(self, name: str, path: str, assign_op: str = '='):
         super().__init__()
@@ -27,7 +28,8 @@ class Configuration(QObject):
             new_value = [new_value]
         self.cache[key] = new_value
 
-        string_values = self.stringify_values(new_value)
+        all_values = self.cache[key]
+        string_values = self.stringify_values(all_values)
         self.lines = self.file.update(key, string_values)
         self.parameter_change.emit(self.name, key, string_values)
 
@@ -52,3 +54,13 @@ class Configuration(QObject):
         self.lines = self.file.read()
         for key, value in self.lines:
             self[key] = value
+
+    def is_valid_configuration(self, key, value):
+        key_info = self.keys_info.get(key)
+        if key_info is None:
+            return True
+        else:
+            validators = key_info.get('validators')
+            if not validators:
+                return True
+            return all([validator(value) for validator in validators])

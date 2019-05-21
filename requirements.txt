@@ -1,6 +1,6 @@
 colorama
 dataclasses
-dbus-python
+pydbus
 googleapis-common-protos
 grpcio
 grpcio-tools
