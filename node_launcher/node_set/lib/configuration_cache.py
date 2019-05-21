@@ -7,7 +7,7 @@ class ConfigurationCache(dict):
         super().__init__()
 
     def __delitem__(self, v) -> None:
-        raise NotImplementedError()
+        super().__delitem__(v)
 
     def __len__(self) -> int:
         raise NotImplementedError()
@@ -23,9 +23,10 @@ class ConfigurationCache(dict):
         parsed_values = []
         for new_value in new_values:
             if isinstance(new_value, str):
-                if len(new_value) == 1 and new_value.isdigit():
-                    new_value = bool(int(new_value))
-                elif new_value.isdigit():
+                #if len(new_value) == 1 and new_value.isdigit() and (int(new_value) == 1 or int(new_value) == 0):
+                #    new_value = bool(int(new_value))
+                #el
+                if new_value.isdigit():
                     new_value = int(new_value)
             parsed_values.append(new_value)
 

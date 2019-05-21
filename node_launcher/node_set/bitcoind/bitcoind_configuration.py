@@ -91,6 +91,8 @@ class BitcoindConfiguration(Configuration):
             memory = psutil.virtual_memory()
             free_mb = round(memory.available / 1000000)
             free_mb -= int(free_mb * .3)
+            if 'dbcache' in self:
+                del self['dbcache']
             self['dbcache'] = min(free_mb, 10000)
             self['maxmempool'] = 500
             self['mempoolexpiry'] = 2000

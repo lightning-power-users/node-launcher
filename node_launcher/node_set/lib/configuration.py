@@ -33,6 +33,12 @@ class Configuration(QObject):
         self.lines = self.file.update(key, string_values)
         self.parameter_change.emit(self.name, key, string_values)
 
+    def __contains__(self, item):
+        return item in self.cache
+
+    def __delitem__(self, key):
+        del self.cache[key]
+
     @staticmethod
     def value_to_string(input_value: Any) -> str:
         if isinstance(input_value, str):
