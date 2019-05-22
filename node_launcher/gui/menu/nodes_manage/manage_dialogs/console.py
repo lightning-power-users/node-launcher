@@ -40,11 +40,17 @@ class ConsoleDialog(QDialog):
 
     @property
     def cli(self):
-        return self.node.software.cli
+        try:
+            return self.node.software.cli
+        except AttributeError:
+            return None
 
     @property
     def cli_args(self):
-        return self.node.configuration.cli_args
+        try:
+            return self.node.configuration.cli_args
+        except AttributeError:
+            return None
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -61,6 +67,10 @@ class ConsoleDialog(QDialog):
 
     def run_command(self, command):
         try:
+            if self.cli is None or self.cli_args is None:
+                self.output_area.append('Node starting up, please try again later...')
+                return False
+
             self.output_area.append(f'> {command}\n')
 
             process = QProcess()
@@ -92,7 +102,6 @@ class ConsoleDialog(QDialog):
 
             return True
         except Exception:
-            log.info(self.node.process.current_status)
             self.output_area.append('Node starting up, please try again later...')
             return False
 

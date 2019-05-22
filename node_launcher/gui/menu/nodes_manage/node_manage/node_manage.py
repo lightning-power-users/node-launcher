@@ -1,9 +1,7 @@
 
 from PySide2.QtWidgets import QTabWidget, QDialog, QGridLayout
 
-from node_launcher.gui.menu.nodes_manage.manage_dialogs.configuration import ConfigurationDialog
-from node_launcher.gui.menu.nodes_manage.manage_dialogs.console import ConsoleDialog
-from node_launcher.gui.menu.nodes_manage.manage_dialogs.logs import LogsDialog
+from node_launcher.gui.menu.nodes_manage.node_manage.node_manage_configuration import node_tabs
 
 from node_launcher.node_set.lib.network_node import NetworkNode
 
@@ -22,15 +20,8 @@ class NodeManageDialog(QDialog):
         self.tabs = QTabWidget()
         self.layout.addWidget(self.tabs)
 
-        # Initializing logs tab
-        self.logs_tab = LogsDialog(self.node)
-        self.tabs.addTab(self.logs_tab, 'Logs')
+        self.tab_dialogs = []
 
-        # Initializing configuration tab
-        self.configuration_tab = ConfigurationDialog(self.node)
-        self.tabs.addTab(self.configuration_tab, 'Configuration')
-
-        # Initializing console tab
-        if self.network != 'tor':
-            self.console_tab = ConsoleDialog(self.node)
-            self.tabs.addTab(self.console_tab, 'Console')
+        for node_tab in node_tabs[self.network]:
+            tab_dialog = node_tab['class'](self.node)
+            self.tabs.addTab(tab_dialog, node_tab['title'])
