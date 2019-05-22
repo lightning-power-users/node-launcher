@@ -11,6 +11,8 @@ class Configuration(QObject):
     parameter_change = Signal(str, str, list)
     validators = {}
 
+    keys_info = {}
+
     def __init__(self, name: str, path: str, assign_op: str = '='):
         super().__init__()
         self.name = name
