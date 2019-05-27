@@ -1,4 +1,3 @@
-from node_launcher.gui.menu.nodes_manage.manage_dialogs.bitcoind.bitcoinstatus import BitcoinStatusDialog
 from node_launcher.gui.menu.nodes_manage.manage_dialogs.configuration import ConfigurationDialog
 from node_launcher.gui.menu.nodes_manage.manage_dialogs.console import ConsoleDialog
 from node_launcher.gui.menu.nodes_manage.manage_dialogs.logs import LogsDialog
