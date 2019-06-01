@@ -17,7 +17,11 @@ class LndSoftware(Software):
             f'/download' \
             f'/{self.release_version}' \
             f'/{self.download_destination_file_name}'
-
+    
+    @property
+    def cli(self):
+        return self.lncli
+    
     @property
     def daemon(self):
         return self.lnd
