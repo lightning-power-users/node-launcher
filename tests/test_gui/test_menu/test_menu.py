@@ -11,6 +11,9 @@ from node_launcher.gui.menu.menu import Menu
 def menu() -> Menu:
     system_tray = MagicMock()
     node_set = MagicMock()
+    node_set.tor_node.network = 'tor'
+    node_set.bitcoind_node.network = 'bitcoin'
+    node_set.lnd_node.network = 'lnd'
     node_set.lnd_node.configuration.rest_url = 'test rest'
     node_set.lnd_node.configuration.macaroon_path = 'test macaroon'
     menu = Menu(node_set=node_set, system_tray=system_tray)
