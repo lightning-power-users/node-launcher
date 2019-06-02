@@ -30,10 +30,4 @@ class ConfigurationCache(dict):
         if existing_values == parsed_values:
             return
 
-        if existing_values == 'no_key':
-            super(ConfigurationCache, self).__setitem__(key, parsed_values)
-        elif isinstance(existing_values, list):
-            for parsed_value in parsed_values:
-                if parsed_value in existing_values:
-                    continue
-                self[key].append(parsed_value)
+        super(ConfigurationCache, self).__setitem__(key, parsed_values)
