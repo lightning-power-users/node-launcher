@@ -48,11 +48,12 @@ For macOS and Linux:
 
 0. `git clone https://github.com/PierreRochard/node-launcher`
 1. `cd node-launcher`
-2. `python3.7 -m venv venv`
-3. `. venv/bin/activate`
-4. `pip3.7 install -r requirements.txt`
-5. `python setup.py develop`
-6. `python run.py`
+2. `git submodule update --init`
+3. `python3.7 -m venv venv`
+4. `. venv/bin/activate`
+5. `pip3.7 install -r requirements.txt`
+6. `python setup.py develop`
+7. `python run.py`
 
 # Testing
 

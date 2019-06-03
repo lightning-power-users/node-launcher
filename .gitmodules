@@ -1,0 +1,3 @@
+[submodule "node_launcher/gui/assets/rtl"]
+	path = node_launcher/gui/assets/rtl
+	url = git@github.com:ShahanaFarooqui/RTL.git

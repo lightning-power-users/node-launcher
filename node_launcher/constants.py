@@ -12,6 +12,9 @@ TOR_WEBSITE = 'http://www.torproject.org/dist/torbrowser/'
 TARGET_BITCOIN_RELEASE = 'v0.17.1'
 TARGET_LND_RELEASE = 'v0.6.1-beta'
 
+TARGET_NODEJS_RELEASE = 'v12.3.1'
+NODEJS_WEBSITE = 'https://nodejs.org/dist/'
+
 
 class StringConstant(object):
     def __init__(self, name: str):
