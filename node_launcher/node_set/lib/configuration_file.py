@@ -73,31 +73,3 @@ class ConfigurationFile(QObject):
         with open(self.path, 'w') as f:
             lines = [f'{c.name}{self.assign_op}{c.value}{os.linesep}' for c in configurations]
             f.writelines(lines)
-
-    def update(self, key: str, new_value: List[Any]) -> List[Tuple[str, str]]:
-        lines = self.write_property(key, new_value)
-        parsed_lines = [self.parse_line(l) for l in lines if l[0]]
-        return parsed_lines
-
-    def write_property(self, key: str, values: List[str]):
-        key = key.strip()
-        with open(self.path, 'r') as f:
-            lines = f.readlines()
-            lines = [l.strip() for l in lines if l.strip()]
-        existing_lines = [l for l in enumerate(lines)
-                          if l[1].split(self.assign_op)[0] == key]
-        existing_line_numbers = [l[0] for l in existing_lines]
-        for line_index in sorted(existing_line_numbers, reverse=True):
-            lines.pop(line_index)
-        if values is not None:
-            for value_index, value in enumerate(values):
-                property_string = f'{key}{self.assign_op}{value}'
-                if existing_lines and value_index < len(existing_line_numbers):
-                    lines.insert(existing_line_numbers[value_index],
-                                 property_string)
-                else:
-                    lines.append(property_string)
-        with open(self.path, 'w') as f:
-            lines = [l + os.linesep for l in lines]
-            f.writelines(lines)
-        return lines
