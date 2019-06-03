@@ -7,6 +7,8 @@ from node_launcher.constants import NODE_LAUNCHER_RELEASE
 from node_launcher.logging import log
 from PySide2.QtCore import QFileSystemWatcher, Signal, QObject
 
+from node_launcher.node_set.lib.configuration_property import ConfigurationProperty
+
 
 class ConfigurationFile(QObject):
     file_watcher: QFileSystemWatcher
@@ -32,14 +34,16 @@ class ConfigurationFile(QObject):
         value = value.replace('"', '')
         return key, value
 
-    def read(self) -> List[Tuple[str, str]]:
+    def read(self) -> List[Tuple[str, str, str]]:
         parent = os.path.abspath(os.path.join(self.path, pardir))
+
         if not isdir(parent):
             log.info(
                 'Creating directory',
                 path=parent
             )
             os.makedirs(parent)
+
         if not isfile(self.path):
             log.info(
                 'Creating file',
@@ -51,10 +55,24 @@ class ConfigurationFile(QObject):
             ]
             with open(self.path, 'w') as f:
                 f.writelines(lines)
+
         with open(self.path, 'r') as f:
             lines = f.readlines()
-        parsed_lines = [self.parse_line(l) for l in lines]
-        return [l for l in parsed_lines if l[0]]
+
+        parsed_lines = []
+        index = 0
+        for line in lines:
+            key, value = self.parse_line(line)
+            if key:
+                parsed_lines.append((str(index), key, value))
+                index += 1
+
+        return parsed_lines
+
+    def save(self, configurations: List[ConfigurationProperty]):
+        with open(self.path, 'w') as f:
+            lines = [f'{c.name}{self.assign_op}{c.value}{os.linesep}' for c in configurations]
+            f.writelines(lines)
 
     def update(self, key: str, new_value: List[Any]) -> List[Tuple[str, str]]:
         lines = self.write_property(key, new_value)

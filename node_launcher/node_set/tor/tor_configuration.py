@@ -2,18 +2,16 @@ import os
 
 from node_launcher.constants import TOR_DIR_PATH, OPERATING_SYSTEM, TOR_SERVICE_PATH
 from node_launcher.node_set.lib.configuration import Configuration
-from node_launcher.node_set.tor.tor_configuration_keys import keys_info
+from node_launcher.node_set.tor.tor_configuration_keys import keys_info as tor_keys_info
 
 
 class TorConfiguration(Configuration):
-
-    keys_info = keys_info
 
     def __init__(self):
         file_name = 'torrc'
         tor_dir_path = TOR_DIR_PATH[OPERATING_SYSTEM]
         configuration_file_path = os.path.join(tor_dir_path, file_name)
-        super().__init__(name='tor', path=configuration_file_path, assign_op=' ')
+        super().__init__(name='tor', path=configuration_file_path, assign_op=' ', keys_info=tor_keys_info)
 
     @property
     def args(self):
