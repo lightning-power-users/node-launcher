@@ -22,8 +22,7 @@ class ConfigurationDialog(QDialog):
         self.table = QTableWidget(0, 3)
         self.table.setHorizontalHeaderLabels(['Id', 'Key', 'Value'])
 
-        # TODO: Change to True
-        self.table.setColumnHidden(0, False)
+        self.table.setColumnHidden(0, True)
 
         self.node.configuration.configuration_changed.connect(
             self.handle_configuration_change
@@ -138,8 +137,10 @@ class ConfigurationDialog(QDialog):
             else:
                 self.add_row(new_value.name, new_value.value, new_value.identifier)
         else:
-            # TODO: Handle configuration remove (very uncommon, so unimplemented for now)
-            pass
+            for row_index in range(self.table.rowCount()):
+                row_identifier = self.table.item(row_index, 0).text()
+                if row_identifier == old_value.identifier:
+                    self.table.removeRow(row_index)
 
     def handle_cell_change(self, row_index: int, column_index: int):
         """
