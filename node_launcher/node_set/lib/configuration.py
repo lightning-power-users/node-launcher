@@ -164,6 +164,10 @@ class Configuration(QObject):
     def edit_configuration(self, identifier: str, value, signal: bool = True) -> Optional[ConfigurationProperty]:
         for configuration in self._configurations:
             if configuration.identifier == identifier:
+
+                if not self._is_valid_configuration(configuration.name, value):
+                    return None
+
                 old_configuration = configuration.copy()
                 configuration.value = value
 
