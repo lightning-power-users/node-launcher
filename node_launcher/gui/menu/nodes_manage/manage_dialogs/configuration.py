@@ -4,6 +4,8 @@ from PySide2.QtWidgets import QDialog, QGridLayout, QTableWidget, QTableWidgetIt
 
 from node_launcher.node_set.lib.configuration import ConfigurationProperty
 
+from node_launcher.node_set.lib.network_node import NetworkNode
+
 # noinspection PyUnresolvedReferences
 editDisabledFlags = Qt.ItemFlags() ^ Qt.ItemIsEnabled
 
@@ -13,7 +15,7 @@ class ConfigurationDialog(QDialog):
     def __init__(self, node):
         super().__init__()
 
-        self.node = node
+        self.node: NetworkNode = node
 
         self.delete_popup = None
 

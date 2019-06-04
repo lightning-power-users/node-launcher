@@ -191,7 +191,7 @@ class Configuration(QObject):
                     if i == 0:
                         self.configuration_changed.emit(removed_configurations[0], added_configuration)
                     else:
-                        self.configuration_changed.emit(removed_configurations[i])
+                        self.configuration_changed.emit(removed_configurations[i], None)
         else:
             for configuration in removed_configurations:
                 self.append_configuration(configuration.name, configuration.value, configuration.identifier, False)

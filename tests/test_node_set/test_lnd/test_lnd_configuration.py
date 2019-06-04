@@ -28,7 +28,7 @@ class TestDirectoryConfiguration(object):
             'test1',
             'test2'
         ]
-        assert len(lnd_configuration['multi_property']) == 2
+        assert len(lnd_configuration.get_configurations_by_name('multi_property')) == 2
 
     def test_multi_listen(self, lnd_configuration: LndConfiguration):
         lnd_configuration['listen'] = [

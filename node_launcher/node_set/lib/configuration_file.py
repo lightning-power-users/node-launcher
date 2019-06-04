@@ -1,7 +1,7 @@
 import os
 from os.path import isfile, isdir, pardir
 from pathlib import Path
-from typing import List, Any, Tuple
+from typing import List, Tuple
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
 from node_launcher.logging import log
@@ -25,13 +25,20 @@ class ConfigurationFile(QObject):
     def parse_line(self, line: str) -> Tuple[str, str]:
         if line.startswith('#'):
             return '', ''
+
         key_value = line.split(self.assign_op)
-        key = key_value[0]
-        if not key.strip():
+        key = key_value[0].strip()
+
+        if not key:
             return '', ''
+
         value = key_value[1:]
         value = self.assign_op.join(value).strip()
         value = value.replace('"', '')
+
+        if not value:
+            return '', ''
+
         return key, value
 
     def read(self) -> List[Tuple[str, str, str]]:
