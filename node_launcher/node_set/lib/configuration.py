@@ -177,7 +177,8 @@ class Configuration(QObject):
         return None
 
     def replace_configuration(self, name: str, value, signal: bool = True) -> Optional[ConfigurationProperty]:
-        removed_configurations = self.remove_configuration_by_name(name)
+
+        removed_configurations = self.remove_configuration_by_name(name, signal=False)
 
         identifier = None
         if len(removed_configurations) > 0:
