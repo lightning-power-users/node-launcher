@@ -1,11 +1,13 @@
 import os
 from os.path import isfile, isdir, pardir
 from pathlib import Path
-from typing import List, Any, Tuple
+from typing import List, Tuple
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
 from node_launcher.logging import log
 from PySide2.QtCore import QFileSystemWatcher, Signal, QObject
+
+from node_launcher.node_set.lib.configuration_property import ConfigurationProperty
 
 
 class ConfigurationFile(QObject):
@@ -23,23 +25,32 @@ class ConfigurationFile(QObject):
     def parse_line(self, line: str) -> Tuple[str, str]:
         if line.startswith('#'):
             return '', ''
+
         key_value = line.split(self.assign_op)
-        key = key_value[0]
-        if not key.strip():
+        key = key_value[0].strip()
+
+        if not key:
             return '', ''
+
         value = key_value[1:]
         value = self.assign_op.join(value).strip()
         value = value.replace('"', '')
+
+        if not value:
+            return '', ''
+
         return key, value
 
-    def read(self) -> List[Tuple[str, str]]:
+    def read(self) -> List[Tuple[str, str, str]]:
         parent = os.path.abspath(os.path.join(self.path, pardir))
+
         if not isdir(parent):
             log.info(
                 'Creating directory',
                 path=parent
             )
             os.makedirs(parent)
+
         if not isfile(self.path):
             log.info(
                 'Creating file',
@@ -51,35 +62,21 @@ class ConfigurationFile(QObject):
             ]
             with open(self.path, 'w') as f:
                 f.writelines(lines)
+
         with open(self.path, 'r') as f:
             lines = f.readlines()
-        parsed_lines = [self.parse_line(l) for l in lines]
-        return [l for l in parsed_lines if l[0]]
 
-    def update(self, key: str, new_value: List[Any]) -> List[Tuple[str, str]]:
-        lines = self.write_property(key, new_value)
-        parsed_lines = [self.parse_line(l) for l in lines if l[0]]
+        parsed_lines = []
+        index = 0
+        for line in lines:
+            key, value = self.parse_line(line)
+            if key:
+                parsed_lines.append((str(index), key, value))
+                index += 1
+
         return parsed_lines
 
-    def write_property(self, key: str, values: List[str]):
-        key = key.strip()
-        with open(self.path, 'r') as f:
-            lines = f.readlines()
-            lines = [l.strip() for l in lines if l.strip()]
-        existing_lines = [l for l in enumerate(lines)
-                          if l[1].split(self.assign_op)[0] == key]
-        existing_line_numbers = [l[0] for l in existing_lines]
-        for line_index in sorted(existing_line_numbers, reverse=True):
-            lines.pop(line_index)
-        if values is not None:
-            for value_index, value in enumerate(values):
-                property_string = f'{key}{self.assign_op}{value}'
-                if existing_lines and value_index < len(existing_line_numbers):
-                    lines.insert(existing_line_numbers[value_index],
-                                 property_string)
-                else:
-                    lines.append(property_string)
+    def save(self, configurations: List[ConfigurationProperty]):
         with open(self.path, 'w') as f:
-            lines = [l + os.linesep for l in lines]
+            lines = [f'{c.name}{self.assign_op}{c.value}{os.linesep}' for c in configurations]
             f.writelines(lines)
-        return lines

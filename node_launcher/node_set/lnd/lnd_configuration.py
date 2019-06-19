@@ -20,18 +20,16 @@ from node_launcher.node_set.bitcoind.bitcoind_configuration import (
 )
 from node_launcher.node_set.lib.configuration import Configuration
 from node_launcher.port_utilities import get_port
-from node_launcher.node_set.lnd.lnd_configuration_keys import keys_info
+from node_launcher.node_set.lnd.lnd_configuration_keys import keys_info as lnd_keys_info
 
 
 class LndConfiguration(Configuration):
-
-    keys_info = keys_info
     
     def __init__(self):
         file_name = 'lnd.conf'
         lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
         configuration_file_path = os.path.join(lnd_dir_path, file_name)
-        super().__init__(name='lnd', path=configuration_file_path)
+        super().__init__(name='lnd', path=configuration_file_path, keys_info=lnd_keys_info)
 
     @property
     def args(self):
@@ -65,42 +63,29 @@ class LndConfiguration(Configuration):
 
         # Previous versions of the launcher set lnddir in the config file,
         # but it is not a valid key so this helps old users upgrading
-        if self['lnddir'] is not None:
-            self['lnddir'] = None
+        self.remove_configuration_by_name('lnddir')
 
-        if self['debuglevel'] is None:
-            self['debuglevel'] = 'info'
+        self.set_default_configuration('debuglevel', 'info')
 
         self['bitcoin.active'] = True
         self['bitcoin.node'] = 'bitcoind'
         bitcoind_conf = BitcoindConfiguration()
         bitcoind_conf.load()
-        self[
-            'bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
+        self['bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
         self['bitcoind.rpcuser'] = bitcoind_conf['rpcuser']
         self['bitcoind.rpcpass'] = bitcoind_conf['rpcpassword']
-        self['bitcoind.zmqpubrawblock'] = bitcoind_conf[
-            'zmqpubrawblock']
-        self['bitcoind.zmqpubrawtx'] = bitcoind_conf[
-            'zmqpubrawtx']
+        self['bitcoind.zmqpubrawblock'] = bitcoind_conf['zmqpubrawblock']
+        self['bitcoind.zmqpubrawtx'] = bitcoind_conf['zmqpubrawtx']
 
-        if self['restlisten'] is None:
-            self.rest_port = get_port(LND_DEFAULT_REST_PORT)
-            self['restlisten'] = f'127.0.0.1:{self.rest_port}'
-        else:
-            self.rest_port = self['restlisten'].split(':')[-1]
+        self.set_default_configuration('restlisten', f'127.0.0.1:{get_port(LND_DEFAULT_REST_PORT)}')
+        self.rest_port = self['restlisten'].split(':')[-1]
 
-        if not self['rpclisten']:
-            self.grpc_port = get_port(LND_DEFAULT_GRPC_PORT)
-            self['rpclisten'] = f'127.0.0.1:{self.grpc_port}'
-        else:
-            self.grpc_port = int(self['rpclisten'].split(':')[-1])
+        self.set_default_configuration('rpclisten', f'127.0.0.1:{get_port(LND_DEFAULT_GRPC_PORT)}')
+        self.grpc_port = int(self['rpclisten'].split(':')[-1])
 
-        if not self['tlsextraip']:
-            self['tlsextraip'] = '127.0.0.1'
+        self.set_default_configuration('tlsextraip', '127.0.0.1')
 
-        if self['color'] is None:
-            self['color'] = '#000000'
+        self.set_default_configuration('color', '#000000')
 
         self['tor.active'] = True
         self['tor.v3'] = True
@@ -127,9 +112,9 @@ class LndConfiguration(Configuration):
         self.file_watcher.blockSignals(True)
         self.populate_cache()
         self.file_watcher.blockSignals(False)
-        if self['restlisten']:
+        if self['restlisten'] is not None:
             self.rest_port = int(self['restlisten'].split(':')[-1])
-        if self['rpclisten']:
+        if self['rpclisten'] is not None:
             self.grpc_port = int(self['rpclisten'].split(':')[-1])
 
         # Some text editors do not modify the file, they delete and replace the file
@@ -145,26 +130,16 @@ class LndConfiguration(Configuration):
         self.file_watcher.blockSignals(False)
         bitcoind_conf = BitcoindConfiguration()
         bitcoind_conf.load()
-        self[
-            'bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
+        self['bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
         self['bitcoind.rpcuser'] = bitcoind_conf['rpcuser']
         self['bitcoind.rpcpass'] = bitcoind_conf['rpcpassword']
-        self['bitcoind.zmqpubrawblock'] = bitcoind_conf[
-            'zmqpubrawblock']
-        self['bitcoind.zmqpubrawtx'] = bitcoind_conf[
-            'zmqpubrawtx']
+        self['bitcoind.zmqpubrawblock'] = bitcoind_conf['zmqpubrawblock']
+        self['bitcoind.zmqpubrawtx'] = bitcoind_conf['zmqpubrawtx']
 
     @property
     def node_port(self) -> int:
-        if self['listen'] is None:
-            port = get_port(LND_DEFAULT_PEER_PORT)
-            self['listen'] = f'127.0.0.1:{port}'
-        else:
-            if not isinstance(self['listen'], list):
-                port = int(self['listen'].split(':')[-1])
-            else:
-                port = int(self['listen'][0].split(':')[-1])
-        return port
+        self.set_default_configuration('listen', f'127.0.0.1:{get_port(LND_DEFAULT_PEER_PORT)}')
+        return int(self['listen'].split(':')[-1])
 
     @property
     def admin_macaroon_path(self) -> str:
