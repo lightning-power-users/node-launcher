@@ -21,5 +21,5 @@ class TorNode(NetworkNode):
     def handle_log_line(self, log_line: str):
         if 'Bootstrapped 0%: Starting' in log_line:
             self.update_status(NodeStatus.SYNCING)
-        elif 'Bootstrapped 100%: Done' in log_line:
+        elif 'Bootstrapped 100% (done): Done' in log_line:
             self.update_status(NodeStatus.SYNCED)
