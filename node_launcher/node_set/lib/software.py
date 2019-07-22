@@ -49,6 +49,10 @@ class Software(QObject):
         is_downloaded = os.path.isfile(self.download_destination_file_path)
         is_installed = os.path.isdir(self.version_path)
         if is_downloaded and is_installed:
+            self.link_static_bin(
+                source_directory=self.downloaded_bin_path,
+                destination_directory=self.static_bin_path
+            )
             self.update_status(SoftwareStatus.SOFTWARE_READY)
         elif not is_downloaded:
             self.update_status(SoftwareStatus.DOWNLOADING_SOFTWARE)
