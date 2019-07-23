@@ -7,6 +7,7 @@ import grpc
 # noinspection PyProtectedMember,PyPackageRequirements
 from google.protobuf.json_format import MessageToDict
 # noinspection PyProtectedMember
+from grpc._channel import _Rendezvous
 from grpc._plugin_wrapping import (_AuthMetadataContext,
                                    _AuthMetadataPluginCallback)
 
@@ -264,7 +265,11 @@ class LndClient(object):
 
     def stop(self):
         request = ln.StopRequest()
-        response = self.lnd_client.StopDaemon(request)
+        try:
+            response = self.lnd_client.StopDaemon(request)
+        except _Rendezvous:
+            log.error('stop lnd error', exc_info=True)
+            response = self.stop()
         return response
 
     def debug_level(self, show: bool = None, level_spec: str = None):
