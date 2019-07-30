@@ -39,19 +39,8 @@ class BitcoindConfiguration(Configuration):
         return self.args
 
     def check(self):
-        log.debug('datadir', datadir=self['datadir'])
-
-        if ('datadir' not in self
-                or not os.path.exists(self['datadir'])):
-            self.autoconfigure_datadir()
-
-        if os.path.exists(os.path.join(self['datadir'], 'blocks')):
-            if 'prune' not in self:
-                self.set_prune(False)
-        else:
-            if 'prune' not in self:
-                should_prune = self.hard_drives.should_prune(self['datadir'])
-                self.set_prune(should_prune)
+        self.check_datadir()
+        self.check_prune()
 
         wallet_paths = self.get_wallet_paths()
 
@@ -93,6 +82,46 @@ class BitcoindConfiguration(Configuration):
 
         # self.config_snapshot = self.snapshot.copy()
         # self.file_watcher.fileChanged.connect(self.config_file_changed)
+
+    def check_datadir(self):
+        log.debug('datadir', datadir=self['datadir'])
+        if 'datadir' not in self:
+            log.debug('No datadir, configuring one')
+            self.autoconfigure_datadir()
+        elif not os.path.exists(self['datadir']):
+            log.debug('Existing datadir path not found, configuring a new one')
+            self.autoconfigure_datadir()
+        else:
+            external_drive = self.hard_drives.get_external_drive()
+            if external_drive:
+                external_datadir = os.path.join(
+                    external_drive.mountpoint,
+                    'Bitcoin'
+                )
+                if os.path.exists(external_datadir):
+                    self['datadir'] = external_datadir
+
+    def check_prune(self):
+        log.debug('check_prune')
+        blocks_directory = os.path.join(self['datadir'], 'blocks')
+        if os.path.exists(blocks_directory):
+            log.debug('blocks_directory exists')
+            if 'prune' not in self:
+                self.set_prune(False)
+        else:
+            log.debug('blocks_directory does not exist')
+            if 'prune' not in self:
+                should_prune = self.hard_drives.should_prune(self['datadir'])
+                self.set_prune(should_prune)
+        self.prevent_accidental_prune(blocks_directory)
+
+    def prevent_accidental_prune(self, blocks_directory):
+        block_files = [f for f in os.listdir(blocks_directory)
+                       if f.startswith('blk')]
+        is_not_pruned = 'blk00000.dat' in block_files
+        is_starting_ibd = len(block_files) < 100
+        if is_not_pruned and not is_starting_ibd:
+            self.set_prune(False)
 
     def autoconfigure_datadir(self):
         default_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
@@ -183,6 +212,7 @@ class BitcoindConfiguration(Configuration):
         return BITCOIN_MAINNET_RPC_PORT
 
     def set_prune(self, should_prune: bool):
+        log.debug(f'set_prune to {should_prune}')
         if should_prune:
             self['prune'] = MAINNET_PRUNE
         else:
