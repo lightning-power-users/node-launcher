@@ -74,7 +74,7 @@ class TestBitcoindSoftware(object):
     def test_download_url(self, bitcoind_software: BitcoindSoftware):
         url = bitcoind_software.download_url
         if IS_WINDOWS:
-            assert url == 'https://bitcoincore.org/bin/bitcoin-core-0.17.1/bitcoin-0.17.1-win64.zip'
+            assert url == 'https://bitcoincore.org/bin/bitcoin-core-0.18.1/bitcoin-0.18.1-win64.zip'
         elif IS_MACOS:
-            assert url == 'https://bitcoincore.org/bin/bitcoin-core-0.17.1/bitcoin-0.17.1-osx64.tar.gz'
+            assert url == 'https://bitcoincore.org/bin/bitcoin-core-0.18.1/bitcoin-0.18.1-osx64.tar.gz'
         assert url
