@@ -22,7 +22,6 @@ TARGET_WINDOWS_TOR_VERSION = '0.4.5.10'
 TOR_WEBSITE = 'http://www.torproject.org/dist/torbrowser/'
 
 
-
 class StringConstant(object):
     def __init__(self, name: str):
         self.name = name.lower()
@@ -41,6 +40,16 @@ class StringConstant(object):
 
     def __repr__(self):
         return self.name
+
+
+class NodeSoftwareName(StringConstant):
+    pass
+
+
+TOR: NodeSoftwareName = NodeSoftwareName('tor')
+BITCOIND: NodeSoftwareName = NodeSoftwareName('bitcoind')
+LND: NodeSoftwareName = NodeSoftwareName('lnd')
+NODE_LAUNCHER: NodeSoftwareName = NodeSoftwareName('node-launcher')
 
 
 class Network(StringConstant):

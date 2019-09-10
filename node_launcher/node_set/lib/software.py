@@ -8,51 +8,55 @@ from zipfile import ZipFile, BadZipFile
 import requests
 from node_launcher.gui.qt import QThreadPool, QObject, Signal
 
-from node_launcher.constants import (
-    NODE_LAUNCHER_DATA_PATH,
-    OPERATING_SYSTEM,
-    IS_WINDOWS
-)
+from node_launcher.constants import NodeSoftwareName
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.logging import log
-from .constants import (
-    DEFAULT_COMPRESSED_SUFFIX,
-    DEFAULT_WINDOWS_COMPRESSED_SUFFIX
-)
+from node_launcher.node_set.lib.software_metadata import SoftwareMetadata
 from .node_status import SoftwareStatus
 
 
 class Software(QObject):
+    node_software_name: NodeSoftwareName
+    metadata: SoftwareMetadata
     current_status: SoftwareStatus
-    software_name: str
-    github_team: str
 
     status = Signal(str)
     download_progress = Signal(str)
 
-    def __init__(self, software_name: str, release_version: str):
+    def __init__(self, node_software_name: NodeSoftwareName):
         super().__init__()
-        self.software_name = software_name
-        self.release_version = release_version
-        self.compressed_suffix = DEFAULT_COMPRESSED_SUFFIX
-        if IS_WINDOWS:
-            self.compressed_suffix = DEFAULT_WINDOWS_COMPRESSED_SUFFIX
+        self.node_software_name = node_software_name
+        self.metadata = SoftwareMetadata(node_software_name)
         self.threadpool = QThreadPool()
 
     def update_status(self, new_status: SoftwareStatus):
-        log.debug(f'update_status {self.software_name} software',
+        log.debug(f'update_status {self.node_software_name} software',
                   new_status=new_status)
         self.current_status = new_status
         self.status.emit(str(new_status))
 
+    @property
+    def daemon(self):
+        latest_executable = self.metadata.executable_path(
+            self.metadata.os_metadata.daemon_name
+        )
+        return latest_executable
+
+    @property
+    def cli(self):
+        latest_executable = self.metadata.executable_path(
+            self.metadata.cli_name
+        )
+        return latest_executable
+
     def update(self):
         self.update_status(SoftwareStatus.CHECKING_DOWNLOAD)
-        is_downloaded = os.path.isfile(self.download_destination_file_path)
-        is_installed = os.path.isdir(self.version_path)
+        is_downloaded = os.path.isfile(self.metadata.download_destination_file_path)
+        is_installed = os.path.isdir(self.metadata.version_path)
         if is_downloaded and is_installed:
             self.link_static_bin(
-                source_directory=self.downloaded_bin_path,
-                destination_directory=self.static_bin_path
+                source_directory=self.metadata.downloaded_bin_path,
+                destination_directory=self.metadata.static_bin_path
             )
             self.update_status(SoftwareStatus.SOFTWARE_READY)
         elif not is_downloaded:
@@ -66,9 +70,9 @@ class Software(QObject):
         worker = Worker(
             self.download,
             progress_callback=None,
-            source_url=self.download_url,
-            destination_directory=self.software_directory,
-            destination_file=self.download_destination_file_name
+            source_url=self.metadata.download_url,
+            destination_directory=self.metadata.software_directory,
+            destination_file=self.metadata.download_destination_file_name
         )
         worker.signals.progress.connect(self.emit_download_progress)
         worker.signals.result.connect(
@@ -78,7 +82,7 @@ class Software(QObject):
         self.threadpool.start(worker)
 
     def emit_download_progress(self, percent):
-        msg = f'{percent}% finished downloading {self.software_name} software'
+        msg = f'{percent}% finished downloading {self.node_software_name} software'
         self.download_progress.emit(msg)
 
     @staticmethod
@@ -120,12 +124,12 @@ class Software(QObject):
         # Todo: move to a thread so it doesn't block the GUI
         self.update_status(SoftwareStatus.INSTALLING_SOFTWARE)
         self.extract(
-            source=self.download_destination_file_path,
-            destination=self.software_directory
+            source=self.metadata.download_destination_file_path,
+            destination=self.metadata.software_directory
         )
         self.link_static_bin(
-            source_directory=self.downloaded_bin_path,
-            destination_directory=self.static_bin_path
+            source_directory=self.metadata.downloaded_bin_path,
+            destination_directory=self.metadata.static_bin_path
         )
         self.update_status(SoftwareStatus.SOFTWARE_INSTALLED)
         self.update_status(SoftwareStatus.SOFTWARE_READY)
@@ -135,16 +139,16 @@ class Software(QObject):
         log.debug('Extracting downloaded software',
                   source=source,
                   destination=destination)
-        if self.compressed_suffix == '.zip':
+        if self.metadata.os_metadata.compressed_suffix == '.zip':
             try:
                 with ZipFile(source) as zip_file:
-                    if self.software_name != 'tor':
+                    if self.node_software_name != 'tor':
                         zip_file.extractall(path=destination)
                     else:
-                        os.makedirs(self.downloaded_bin_path, exist_ok=True)
+                        os.makedirs(self.metadata.downloaded_bin_path, exist_ok=True)
                         for file in zip_file.filelist:
                             if file.filename.endswith('dll') or file.filename.endswith('exe'):
-                                destination_exe = os.path.join(self.downloaded_bin_path, file.filename.split('/')[-1])
+                                destination_exe = os.path.join(self.metadata.downloaded_bin_path, file.filename.split('/')[-1])
                                 with zip_file.open(file.filename) as zf, open(destination_exe, 'wb') as f:
                                     shutil.copyfileobj(zf, f)
             except BadZipFile:
@@ -152,12 +156,12 @@ class Software(QObject):
                 os.remove(source)
                 self.update()
 
-        elif 'tar' in self.compressed_suffix:
+        elif 'tar' in self.metadata.os_metadata.compressed_suffix:
             with tarfile.open(source) as tar:
-                if self.software_name != 'tor':
+                if self.node_software_name != 'tor':
                     tar.extractall(path=destination)
                 else:
-                    os.makedirs(self.downloaded_bin_path, exist_ok=True)
+                    os.makedirs(self.metadata.downloaded_bin_path, exist_ok=True)
                     tor_files = [
                         'libcrypto.so.1.0.0',
                         'libevent-2.1.so.6',
@@ -166,7 +170,7 @@ class Software(QObject):
                     ]
                     for tor_file in tor_files:
                         file_name = 'tor-browser_en-US/Browser/TorBrowser/Tor/' + tor_file
-                        destination_file = os.path.join(self.downloaded_bin_path, tor_file)
+                        destination_file = os.path.join(self.metadata.downloaded_bin_path, tor_file)
                         extracted_file = tar.extractfile(file_name)
                         with open(destination_file, 'wb') as f:
                             shutil.copyfileobj(extracted_file, f)
@@ -174,7 +178,7 @@ class Software(QObject):
                                 st = os.stat(destination_file)
                                 os.chmod(destination_file, st.st_mode | stat.S_IEXEC)
 
-        elif self.compressed_suffix == '.dmg':
+        elif self.metadata.os_metadata.compressed_suffix == '.dmg':
             log.debug('Attaching disk image', source=source)
             escaped_source = source.replace(' ', '\ ')
             result = subprocess.run(
@@ -189,16 +193,23 @@ class Software(QObject):
                 self.update()
                 return
             # app_source_path = '/Volumes/Tor Browser/Tor Browser.app'
-            for source_file in ['tor.real', 'libevent-2.1.7.dylib']:
-                app_source_path = os.path.join(
-                    '/Volumes', 'Tor Browser', 'Tor Browser.app', 'Contents',
-                    'MacOS', 'Tor', source_file
-                )
+
+            app_source_path = os.path.join(
+                '/Volumes', 'Tor Browser', 'Tor Browser.app', 'Contents',
+                'MacOS', 'Tor'
+            )
+            file_names = [
+                'tor.real',
+                'libevent-2.1.6.dylib'
+            ]
+            os.makedirs(self.metadata.downloaded_bin_path, exist_ok=True)
+            for file_name in file_names:
                 log.debug('Copying app from disk image',
                           app_source_path=app_source_path,
-                          destination=self.downloaded_bin_path)
-                os.makedirs(self.downloaded_bin_path, exist_ok=True)
-                shutil.copy(src=app_source_path, dst=self.downloaded_bin_path)
+                          destination=self.metadata.downloaded_bin_path)
+                source_path = os.path.join(app_source_path, file_name)
+                shutil.copy(src=source_path, dst=self.metadata.downloaded_bin_path)
+
             disk_image_path = '/Volumes/Tor\ Browser'
             log.debug('Detaching disk image', disk_image_path=disk_image_path)
             subprocess.run([
@@ -219,47 +230,3 @@ class Software(QObject):
             if os.path.exists(destination):
                 os.remove(destination)
             os.link(source, destination)
-
-    @property
-    def launcher_data_path(self) -> str:
-        data = NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM]
-        return data
-
-    @property
-    def software_directory(self) -> str:
-        path = os.path.join(self.launcher_data_path, self.software_name)
-        return path
-
-    @property
-    def download_destination_file_name(self) -> str:
-        return self.download_name + self.compressed_suffix
-
-    @property
-    def download_destination_file_path(self) -> str:
-        return os.path.join(self.software_directory,
-                            self.download_destination_file_name)
-
-    @property
-    def version_path(self) -> str:
-        path = os.path.join(self.software_directory,
-                            self.uncompressed_directory_name)
-        return path
-
-    @property
-    def downloaded_bin_path(self) -> str:
-        return os.path.join(self.version_path, 'bin')
-
-    @property
-    def static_bin_path(self) -> str:
-        path = os.path.join(self.launcher_data_path, 'bin')
-        return path
-
-    def executable_path(self, name):
-        if IS_WINDOWS:
-            name += '.exe'
-        latest_executable = os.path.join(self.static_bin_path, name)
-        return latest_executable
-
-    @property
-    def uncompressed_directory_name(self) -> str:
-        return self.download_name

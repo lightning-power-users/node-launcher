@@ -176,3 +176,5 @@ venv.bak/
 # VSCode
 .vscode
 !/node_launcher/node_set/lib
+
+*.DS_Store
