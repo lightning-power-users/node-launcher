@@ -23,3 +23,5 @@ class TorNode(NetworkNode):
             self.update_status(NodeStatus.SYNCING)
         elif 'Bootstrapped 100% (done): Done' in log_line:
             self.update_status(NodeStatus.SYNCED)
+        elif log_line.startswith('dyld: Library not loaded'):
+            self.update_status(NodeStatus.LIBRARY_ERROR)

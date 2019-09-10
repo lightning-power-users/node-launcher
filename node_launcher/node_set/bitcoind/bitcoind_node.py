@@ -2,6 +2,7 @@ from PySide2.QtCore import QProcess
 
 from node_launcher.node_set.bitcoind.bitcoind_rpc_client import Proxy
 from node_launcher.node_set.lib.network_node import NetworkNode
+from node_launcher.node_set.lib.software import Software
 from .bitcoind_process import BitcoindProcess
 from .bitcoind_software import BitcoindSoftware
 from .bitcoind_configuration import BitcoindConfiguration
@@ -10,7 +11,7 @@ from .bitcoind_configuration import BitcoindConfiguration
 class BitcoindNode(NetworkNode):
     configuration: BitcoindConfiguration
     process: BitcoindProcess
-    software: BitcoindSoftware
+    software: Software
 
     def __init__(self):
         super().__init__(

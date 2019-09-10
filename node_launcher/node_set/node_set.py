@@ -30,6 +30,9 @@ class NodeSet(object):
         if status in [NodeStatus.SOFTWARE_DOWNLOADED,
                       NodeStatus.SOFTWARE_READY]:
             self.bitcoind_node.software.update()
+        elif status == NodeStatus.LIBRARY_ERROR:
+            # raise Exception
+            self.tor_node.software.start_update_worker()
         elif status == NodeStatus.SYNCED:
             self.bitcoind_node.tor_synced = True
             self.bitcoind_node.start_process()

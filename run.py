@@ -1,11 +1,14 @@
 import sys
 
 from node_launcher.constants import (
-    OPERATING_SYSTEM, NODE_LAUNCHER_RELEASE,
-    TARGET_BITCOIN_RELEASE, TARGET_LND_RELEASE
+    OPERATING_SYSTEM, NODE_LAUNCHER_RELEASE
 )
 from node_launcher.gui.application import Application
 from node_launcher.logging import log
+from node_launcher.node_set.lib.constants import (
+    TARGET_BITCOIN_RELEASE,
+    TARGET_LND_RELEASE
+)
 
 if __name__ == '__main__':
     # sys.excepthook = except_hook

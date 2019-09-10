@@ -26,6 +26,7 @@ class NodeStatus(object):
 
     STOPPED = StringConstant('STOPPED')
     RUNTIME_ERROR = StringConstant('RUNTIME_ERROR')
+    LIBRARY_ERROR = StringConstant('LIBRARY_ERROR')
     RESTART = StringConstant('RESTART')
 
 
