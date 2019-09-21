@@ -9,14 +9,14 @@ a = Analysis(['run.py'],
              binaries=[],
              datas=[
                  ('node_launcher/assets/*.png', 'assets')
-             ] + collect_data_files('shiboken2', include_py_files=True, subdir='support')
-             + collect_data_files('PySide2', include_py_files=True, subdir='support'),
+             ] + collect_data_files('shiboken2', include_py_files=True)
+             + collect_data_files('PySide2', include_py_files=True),
              hiddenimports=['setuptools', 'pypiwin32', 'win32timezone'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
+             win_no_prefer_redirects=True,
+             win_private_assemblies=True,
              cipher=block_cipher,
              noarchive=False)
 pyz = PYZ(a.pure, a.zipped_data,
