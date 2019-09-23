@@ -95,8 +95,9 @@ class LndOutputWidget(OutputWidget):
             generate_seed_response = self.node_set.lnd_client.generate_seed(
                 seed_password=new_seed_password
             )
-        except _Rendezvous:
-            log.error('generate_seed error', exc_info=True)
+        except _Rendezvous as e:
+            details = e.details()
+            log.error('generate_seed error', details=details, exc_info=True)
             raise
 
         seed = generate_seed_response.cipher_seed_mnemonic
