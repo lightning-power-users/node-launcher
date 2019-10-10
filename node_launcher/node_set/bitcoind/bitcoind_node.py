@@ -1,7 +1,12 @@
-from PySide2.QtCore import QProcess
+from _signal import SIGTERM
 
+from PySide2.QtCore import QProcess
+from psutil import process_iter
+
+from node_launcher.logging import log
 from node_launcher.node_set.bitcoind.bitcoind_rpc_client import Proxy
 from node_launcher.node_set.lib.network_node import NetworkNode
+from node_launcher.node_set.lib.node_status import NodeStatus
 from node_launcher.node_set.lib.software import Software
 from .bitcoind_process import BitcoindProcess
 from .bitcoind_software import BitcoindSoftware
@@ -32,6 +37,16 @@ class BitcoindNode(NetworkNode):
             self.restart = True
             self.configuration['disablewallet'] = True
             self.stop()
+        elif 'Bitcoin Core is probably already running.' in log_line:
+            for proc in process_iter():
+                try:
+                    name = proc.name()
+                    if name == 'bitcoind':
+                        proc.send_signal(SIGTERM)
+                except Exception as e:
+                    log.debug('proc exception', {'exception': e})
+                    pass
+            self.update_status(NodeStatus.RESTART)
 
     @property
     def bitcoin_cli(self) -> str:

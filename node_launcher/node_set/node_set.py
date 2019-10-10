@@ -27,8 +27,10 @@ class NodeSet(object):
         self.tor_node.software.update()
 
     def handle_tor_node_status_change(self, status):
-        if status in [NodeStatus.SOFTWARE_DOWNLOADED,
-                      NodeStatus.SOFTWARE_READY]:
+        if status == NodeStatus.RESTART:
+            self.start()
+        elif status in [NodeStatus.SOFTWARE_DOWNLOADED,
+                        NodeStatus.SOFTWARE_READY]:
             self.bitcoind_node.software.update()
         elif status == NodeStatus.LIBRARY_ERROR:
             # raise Exception

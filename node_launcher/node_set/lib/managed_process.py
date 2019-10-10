@@ -63,3 +63,10 @@ class ManagedProcess(QProcess):
         log.debug('process finish', binary=self.binary, exit_code=exit_code,
                   exit_status=exit_status)
         self.update_status(NodeStatus.STOPPED)
+
+    def start(self, **kwargs):
+        self.stop()
+        super().start(**kwargs)
+
+    def stop(self):
+        pass
