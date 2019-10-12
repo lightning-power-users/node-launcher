@@ -1,11 +1,19 @@
+import re
 from datetime import datetime
 
 import humanize
-from PySide2.QtCore import QTimer, Signal
+from PySide2.QtCore import QTimer, Signal, QObject
 from PySide2.QtWidgets import QSystemTrayIcon
 
 from node_launcher.node_set.lib.managed_process import ManagedProcess
 from node_launcher.node_set.lib.node_status import NodeStatus
+
+
+class LndSignals(QObject):
+    finished = Signal()
+    error = Signal(tuple)
+    result = Signal(object)
+    unprune = Signal(int)
 
 
 class LndProcess(ManagedProcess):
@@ -14,8 +22,10 @@ class LndProcess(ManagedProcess):
     def __init__(self, binary: str, args):
         super().__init__(binary, args)
 
+        self.signals = LndSignals()
         self.old_height = None
         self.old_timestamp = None
+        self.rescan_height = None
 
     def process_output_line(self, line: str):
         if 'Waiting for wallet encryption password' in line:
@@ -26,6 +36,11 @@ class LndProcess(ManagedProcess):
         elif 'Unable to synchronize wallet to chain' in line:
             self.terminate()
             self.restart_process()
+        elif 'Started rescan from block' in line:
+            self.rescan_height = int(re.search('height \d{6}', line)[0].split()[-1])
+        elif 'Unable to complete chain rescan: -1: Block not available (pruned data)' in line:
+            self.signals.unprune.emit(self.rescan_height)
+            self.terminate()
         elif 'Unable to complete chain rescan' in line:
             self.terminate()
             self.restart_process()
