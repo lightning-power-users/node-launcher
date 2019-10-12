@@ -50,9 +50,8 @@ class NodeSet(object):
                 self.lnd_node.software.update()
         elif bitcoind_status == NodeStatus.SYNCING:
             self.lnd_node.bitcoind_syncing = True
-            self.lnd_node.start_process()
-        elif bitcoind_status == NodeStatus.SYNCED:
             self.bitcoind_node.configuration['reindex'] = False
+            self.lnd_node.start_process()
         elif bitcoind_status == NodeStatus.STOPPED:
             self.lnd_node.stop()
             self.lnd_node.bitcoind_syncing = False

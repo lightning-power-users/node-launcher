@@ -89,7 +89,13 @@ class BitcoindNode(NetworkNode):
         additional_size *= 1.2
         additional_size /= 1048576
         new_prune_size = self.configuration['prune'] + int(additional_size)
-        if blockchain_info['prune_target_size'] / 1048576 >= new_prune_size:
+        old_prune_size = blockchain_info['prune_target_size'] / 1048576
+        log.debug('unprune decision',
+                  old_prune_size=old_prune_size,
+                  new_prune_size=new_prune_size,
+                  additional_size=additional_size
+                  )
+        if old_prune_size <= new_prune_size:
             self.configuration['prune'] = new_prune_size
             self.configuration['reindex'] = True
         self.restart = True
