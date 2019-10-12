@@ -69,3 +69,28 @@ class BitcoindNode(NetworkNode):
                 client.call('stop')
             except:
                 self.process.terminate()
+
+    def unprune(self, height: int):
+        log.debug('unprune')
+        client = Proxy(btc_conf_file=self.configuration.file.path,
+                       service_port=self.configuration.rpc_port)
+        blockchain_info = client.call('getblockchaininfo')
+        log.debug('blockchain_info', blockchain_info=blockchain_info)
+        if not self.configuration['prune'] \
+                or not blockchain_info['pruned'] \
+                or blockchain_info['pruneheight'] < height:
+            return
+
+        unpruned_blocks = blockchain_info['blocks'] - blockchain_info['pruneheight']
+        unpruned_blocks_size = blockchain_info['prune_target_size']
+        average_block_size = unpruned_blocks_size/unpruned_blocks
+        additional_blocks = blockchain_info['pruneheight'] - height
+        additional_size = average_block_size * additional_blocks
+        additional_size *= 1.2
+        additional_size /= 1048576
+        new_prune_size = self.configuration['prune'] + int(additional_size)
+        if blockchain_info['prune_target_size'] / 1048576 >= new_prune_size:
+            self.configuration['prune'] = new_prune_size
+            self.configuration['reindex'] = True
+        self.restart = True
+        self.stop()
