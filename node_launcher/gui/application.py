@@ -64,7 +64,9 @@ class Application(QApplication):
     def quit_app(self):
         log.debug('quit_app')
         self.system_tray.show_message(title='Stopping LND...')
-        self.node_set.lnd_node.stop()
+        response = self.node_set.lnd_node.stop()
+        if response is False:
+            self.node_set.lnd_node.process.kill()
         self.node_set.lnd_node.process.waitForFinished(-1)
 
         self.node_set.bitcoind_node.stop()

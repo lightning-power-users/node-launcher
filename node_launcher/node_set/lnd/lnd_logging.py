@@ -44,7 +44,9 @@ class LoggingLevel(object):
 
 DEFAULT_LOGGING_LEVELS = [
     (Subsystem.LTND, LoggingLevel.DEBUG),
-    (Subsystem.LNWL, LoggingLevel.INFO),
+    (Subsystem.LNWL, LoggingLevel.DEBUG),
+    (Subsystem.NTFN, LoggingLevel.DEBUG),
+    (Subsystem.BTCN, LoggingLevel.DEBUG),
     (Subsystem.PEER, LoggingLevel.WARN),
     (Subsystem.SRVR, LoggingLevel.WARN),
     (Subsystem.DISC, LoggingLevel.WARN),

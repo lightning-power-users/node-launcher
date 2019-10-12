@@ -1,5 +1,6 @@
 from PySide2.QtCore import QProcess
 
+from node_launcher.logging import log
 from node_launcher.node_set.lib.network_node import NetworkNode
 from node_launcher.node_set.lib.node_status import NodeStatus
 from node_launcher.node_set.lnd.lnd_threaded_client import LndThreadedClient
@@ -29,6 +30,7 @@ class LndNode(NetworkNode):
     def handle_status_change(self, new_status):
         if new_status == NodeStatus.CONFIGURATION_READY:
             self.client = LndThreadedClient(self.configuration)
+            self.client.signals.error.connect(self.handle_error)
             self.unlocker = LndUnlocker(configuration=self.configuration)
         elif new_status == NodeStatus.UNLOCK_READY:
             self.unlocker.auto_unlock_wallet()
@@ -40,9 +42,13 @@ class LndNode(NetworkNode):
         return self.bitcoind_syncing
 
     def stop(self):
+        log.debug('lnd stop', process_state=self.process.state())
         if self.process.state() == QProcess.Running:
             self.process.expecting_shutdown = True
             try:
                 self.client.stop()
             except:
                 self.process.kill()
+
+    def handle_error(self, error_tuple):
+        log.error('lnd_node handle_error')

@@ -1,6 +1,6 @@
 from PySide2.QtCore import QObject, QThreadPool
 
-from node_launcher.gui.components.thread_worker import Worker
+from node_launcher.gui.components.thread_worker import Worker, WorkerSignals
 from node_launcher.logging import log
 from node_launcher.node_set.lnd.lnd_logging import DEFAULT_LOGGING_LEVELS
 from .lnd_client import LndClient
@@ -12,6 +12,7 @@ class LndThreadedClient(QObject):
         self.configuration = configuration
         self.client = LndClient(self.configuration)
         self.threadpool = QThreadPool()
+        self.signals = WorkerSignals()
 
     def stop(self):
         self.run_command('stop')
@@ -43,8 +44,10 @@ class LndThreadedClient(QObject):
 
     def handle_finished(self):
         log.debug('LndThreadedClient call finished')
+        self.signals.finished.emit()
 
     def handle_error(self, error_tuple):
+        self.signals.error.emit(error_tuple)
         exctype, value, traceback = error_tuple
         log.debug(
             'LndThreadedClient call error',
@@ -58,6 +61,7 @@ class LndThreadedClient(QObject):
             'LndThreadedClient call result',
             result=result
         )
+        self.signals.result.emit(result)
 
     def handle_progress(self, percentage: int):
         log.debug(
