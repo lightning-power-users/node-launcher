@@ -9,7 +9,6 @@ from node_launcher.node_set.lib.network_node import NetworkNode
 from node_launcher.node_set.lib.node_status import NodeStatus
 from node_launcher.node_set.lib.software import Software
 from .bitcoind_process import BitcoindProcess
-from .bitcoind_software import BitcoindSoftware
 from .bitcoind_configuration import BitcoindConfiguration
 
 

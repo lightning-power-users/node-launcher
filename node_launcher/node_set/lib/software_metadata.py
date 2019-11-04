@@ -7,8 +7,7 @@ from node_launcher.constants import (
     IS_WINDOWS,
     NODE_LAUNCHER_DATA_PATH,
     NodeSoftwareName,
-    OPERATING_SYSTEM
-)
+    OperatingSystem)
 from node_launcher.node_set.lib.constants import SOFTWARE_METADATA
 from node_launcher.node_set.lib.os_metadata import OsMetadata
 
@@ -16,23 +15,28 @@ from node_launcher.node_set.lib.os_metadata import OsMetadata
 @dataclass
 class SoftwareMetadata:
     node_software_name: NodeSoftwareName
+    operating_system: OperatingSystem
     github_team: str = field(init=False)
     download_url: str = field(init=False)
     cli_name: str = field(init=False)
     os_metadata: OsMetadata = field(init=False)
 
     def __post_init__(self):
-        self.os_metadata = OsMetadata(node_software_name=self.node_software_name)
+        self.os_metadata = OsMetadata(
+            operating_system=self.operating_system,
+            node_software_name=self.node_software_name
+        )
         self.download_url = '/'.join([
             SOFTWARE_METADATA[self.node_software_name]['release_url'],
             self.download_destination_file_name
         ])
 
         self.downloaded_bin_path = os.path.join(self.version_path, 'bin')
+        self.cli_name = SOFTWARE_METADATA[self.node_software_name]['cli_name']
 
     @property
     def launcher_data_path(self) -> str:
-        data = NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM]
+        data = NODE_LAUNCHER_DATA_PATH[self.operating_system]
         return data
 
     @property
