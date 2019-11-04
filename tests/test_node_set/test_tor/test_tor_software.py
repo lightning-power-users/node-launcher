@@ -3,25 +3,24 @@ import shutil
 
 import pytest
 
-from node_launcher.constants import TOR_WEBSITE
+from node_launcher.constants import TOR, LINUX, OPERATING_SYSTEM
 from node_launcher.node_set.lib.node_status import SoftwareStatus
-from node_launcher.node_set.tor.tor_software import TorSoftware
+from node_launcher.node_set.lib.software import Software
 
 
 @pytest.fixture
 def tor_software():
-    tor_software = TorSoftware()
+    tor_software = Software(node_software_name=TOR,
+                            operating_system=OPERATING_SYSTEM)
     return tor_software
 
 
 @pytest.mark.software
 class TestTorSoftware(object):
     @pytest.mark.slow
-    def test_linux_update(self, tor_software, qtbot):
-        tor_software.compressed_suffix = '.tar.xz'
-        tor_software.download_name = f'tor-browser-linux64-{tor_software.release_version}_en-US'
-        tor_software.download_url = f'{TOR_WEBSITE}{tor_software.release_version}/' \
-            f'{tor_software.download_destination_file_name}'
+    def test_linux_update(self, qtbot):
+        tor_software = Software(node_software_name=TOR,
+                                operating_system=LINUX)
         shutil.rmtree(tor_software.version_path,
                       ignore_errors=True)
         tor_software.update()

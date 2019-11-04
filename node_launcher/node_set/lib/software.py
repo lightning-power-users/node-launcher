@@ -8,7 +8,7 @@ from zipfile import ZipFile, BadZipFile
 import requests
 from node_launcher.gui.qt import QThreadPool, QObject, Signal
 
-from node_launcher.constants import NodeSoftwareName
+from node_launcher.constants import NodeSoftwareName, OperatingSystem
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.logging import log
 from node_launcher.node_set.lib.software_metadata import SoftwareMetadata
@@ -23,7 +23,8 @@ class Software(QObject):
     status = Signal(str)
     download_progress = Signal(str)
 
-    def __init__(self, node_software_name: NodeSoftwareName):
+    def __init__(self, operating_system: OperatingSystem,
+                 node_software_name: NodeSoftwareName):
         super().__init__()
         self.node_software_name = node_software_name
         self.metadata = SoftwareMetadata(node_software_name)

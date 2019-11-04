@@ -50,6 +50,7 @@ TOR: NodeSoftwareName = NodeSoftwareName('tor')
 BITCOIND: NodeSoftwareName = NodeSoftwareName('bitcoind')
 LND: NodeSoftwareName = NodeSoftwareName('lnd')
 NODE_LAUNCHER: NodeSoftwareName = NodeSoftwareName('node-launcher')
+TEST_SOFTWARE: NodeSoftwareName = NodeSoftwareName('test-software')
 
 
 class Network(StringConstant):

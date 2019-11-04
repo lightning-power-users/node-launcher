@@ -2,6 +2,7 @@ from node_launcher.gui.qt import Signal, QObject, QProcess
 
 from node_launcher.logging import log
 from node_launcher.node_set.lib.node_status import NodeStatus
+from node_launcher.node_set.lib.software import Software
 
 
 class NetworkNode(QObject):
@@ -10,7 +11,7 @@ class NetworkNode(QObject):
 
     status = Signal(str)
 
-    def __init__(self, network: str, Software, Configuration, Process):
+    def __init__(self, network: str, software: Software, configuration, Process):
         super().__init__()
         self.network = network
         self.current_status = None

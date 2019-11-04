@@ -4,18 +4,14 @@ from shutil import make_archive
 
 import pytest
 
-from node_launcher.constants import IS_WINDOWS
-from node_launcher.node_set.lib.constants import (
-    DEFAULT_COMPRESSED_SUFFIX,
-    DEFAULT_WINDOWS_COMPRESSED_SUFFIX
-)
+from node_launcher.constants import IS_WINDOWS, TEST_SOFTWARE
 from node_launcher.node_set.lib.node_status import SoftwareStatus
 from node_launcher.node_set.lib.software import Software
 
 
 @pytest.fixture
 def software():
-    software = Software(software_name='test_software', release_version='0.1.0')
+    software = Software(node_software_name=TEST_SOFTWARE)
     software.download_name = f'TestSoftware_{software.release_version}'
     software.download_url = 'http://localhost'
     software.test_bin = os.path.join(software.downloaded_bin_path, 'test_bin')
