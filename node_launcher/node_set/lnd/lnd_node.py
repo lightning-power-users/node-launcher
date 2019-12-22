@@ -1,5 +1,6 @@
 from PySide2.QtCore import QProcess
 
+from node_launcher.constants import OperatingSystem, NodeSoftwareName, LND
 from node_launcher.logging import log
 from node_launcher.node_set.lib.network_node import NetworkNode
 from node_launcher.node_set.lib.node_status import NodeStatus
@@ -7,22 +8,16 @@ from node_launcher.node_set.lnd.lnd_threaded_client import LndThreadedClient
 from .lnd_configuration import LndConfiguration
 from .lnd_unlocker import LndUnlocker
 from .lnd_process import LndProcess
-from .lnd_software import LndSoftware
 
 
 class LndNode(NetworkNode):
     client: LndThreadedClient
     configuration: LndConfiguration
     process: LndProcess
-    software: LndSoftware
 
-    def __init__(self):
-        super().__init__(
-            network='lnd',
-            Software=LndSoftware,
-            Configuration=LndConfiguration,
-            Process=LndProcess
-        )
+    def __init__(self, operating_system: OperatingSystem):
+        super().__init__(operating_system=operating_system,
+                         node_software_name=LND)
         self.client = None
         self.unlocker = None
         self.bitcoind_syncing = False

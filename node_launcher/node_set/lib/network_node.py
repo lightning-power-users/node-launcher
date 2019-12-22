@@ -1,24 +1,47 @@
 from PySide2.QtCore import Signal, QObject, QProcess
 
+from node_launcher.constants import NodeSoftwareName, OperatingSystem, TOR, \
+    BITCOIND, LND
 from node_launcher.logging import log
+from node_launcher.node_set.bitcoind.bitcoind_configuration import \
+    BitcoindConfiguration
+from node_launcher.node_set.bitcoind.bitcoind_process import BitcoindProcess
+from node_launcher.node_set.lib.managed_process import ManagedProcess
 from node_launcher.node_set.lib.node_status import NodeStatus
 from node_launcher.node_set.lib.software import Software
+from node_launcher.node_set.lnd.lnd_configuration import LndConfiguration
+from node_launcher.node_set.lnd.lnd_process import LndProcess
+from node_launcher.node_set.tor.tor_configuration import TorConfiguration
 
 
 class NetworkNode(QObject):
+    node_software_name: NodeSoftwareName
     current_status: NodeStatus
-    network: str
 
     status = Signal(str)
 
-    def __init__(self, network: str, software: Software, configuration, Process):
+    def __init__(self, operating_system: OperatingSystem,
+                 node_software_name: NodeSoftwareName):
         super().__init__()
-        self.network = network
+        self.node_software_name = node_software_name
         self.current_status = None
 
-        self.software = Software()
-        self.configuration = Configuration()
-        self.process = Process(self.software.daemon, self.configuration.args)
+        self.software = Software(operating_system=operating_system,
+                                 node_software_name=node_software_name)
+
+        if node_software_name == TOR:
+            self.configuration = TorConfiguration()
+            self.process = ManagedProcess(self.software.daemon,
+                                          self.configuration.args)
+        elif node_software_name == BITCOIND:
+            self.configuration = BitcoindConfiguration()
+            self.process = BitcoindProcess(self.software.daemon,
+                                           self.configuration.args)
+        elif node_software_name == LND:
+            self.configuration = LndConfiguration()
+            self.process = LndProcess(self.software.daemon,
+                                      self.configuration.args)
+
         self.connect_events()
         self.restart = False
 
