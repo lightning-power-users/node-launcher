@@ -33,10 +33,6 @@ class LndNode(NetworkNode):
         elif new_status == NodeStatus.SYNCING:
             self.client.debug_level()
 
-    @property
-    def prerequisites_synced(self):
-        return self.bitcoind_syncing
-
     def stop(self):
         log.debug('lnd stop', process_state=self.process.state())
         if self.process.state() == QProcess.Running:
