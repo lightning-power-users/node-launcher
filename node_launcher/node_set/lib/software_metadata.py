@@ -31,7 +31,10 @@ class SoftwareMetadata:
             self.download_destination_file_name
         ])
 
-        self.downloaded_bin_path = os.path.join(self.version_path, 'bin')
+        if self.node_software_name == 'lnd':
+            self.downloaded_bin_path = self.version_path
+        else:
+            self.downloaded_bin_path = os.path.join(self.version_path, 'bin')
         self.cli_name = SOFTWARE_METADATA[self.node_software_name]['cli_name']
 
     @property
@@ -78,7 +81,9 @@ class SoftwareMetadata:
                 name = '-'.join(self.os_metadata.download_name.split('-')[0:2])
             else:
                 name = '-'.join(self.os_metadata.download_name.split('-')[:-1])
-                if name.count('.') == 3:
+                if name == 'bitcoin-0.19.0.1':
+                    return name
+                elif name.count('.') == 3:
                     name = '.'.join(name.split('.')[:-1])
             return name
 

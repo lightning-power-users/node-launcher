@@ -17,7 +17,7 @@ def bitcoind_node():
 
 
 class TestBitcoindNode(object):
-    @pytest.mark.slow
+    # @pytest.mark.slow
     def test_start(self, bitcoind_node: BitcoindNode, tor_node: TorNode, qtbot):
 
         def check_tor_synced():
@@ -38,9 +38,9 @@ class TestBitcoindNode(object):
 
         def check_synced():
             return bitcoind_node.current_status == NodeStatus.SYNCING
-        qtbot.waitUntil(check_synced, timeout=500000)
+        qtbot.waitUntil(check_synced, timeout=10)
         bitcoind_node.stop()
 
         def check_stopped():
             return bitcoind_node.current_status == NodeStatus.STOPPED
-        qtbot.waitUntil(check_stopped, timeout=500000)
+        qtbot.waitUntil(check_stopped, timeout=1)

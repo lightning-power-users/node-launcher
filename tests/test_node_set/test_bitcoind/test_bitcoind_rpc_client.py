@@ -2,6 +2,7 @@ import time
 
 import pytest
 
+from node_launcher.constants import OPERATING_SYSTEM
 from node_launcher.node_set.bitcoind.bitcoind_rpc_client import Proxy, JSONRPCError
 from node_launcher.node_set.lib.node_status import NodeStatus
 from node_launcher.node_set.bitcoind.bitcoind_node import BitcoindNode
@@ -10,12 +11,12 @@ from node_launcher.node_set.tor.tor_node import TorNode
 
 @pytest.fixture(scope='module')
 def tor_node():
-    return TorNode()
+    return TorNode(operating_system=OPERATING_SYSTEM)
 
 
 @pytest.fixture(scope='module')
 def bitcoind_node():
-    return BitcoindNode()
+    return BitcoindNode(operating_system=OPERATING_SYSTEM)
 
 
 @pytest.fixture(scope='module')
