@@ -11,7 +11,7 @@ class NodeManageDialog(QDialog):
     def __init__(self, node: NetworkNode):
         super().__init__()
 
-        self.network = node.network
+        self.node_software_name = node.node_software_name
         self.node = node
 
         self.layout = QGridLayout()
@@ -22,6 +22,6 @@ class NodeManageDialog(QDialog):
 
         self.tab_dialogs = []
 
-        for node_tab in node_tabs[self.network]:
+        for node_tab in node_tabs[self.node_software_name]:
             tab_dialog = node_tab['class'](self.node)
             self.tabs.addTab(tab_dialog, node_tab['title'])

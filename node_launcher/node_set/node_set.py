@@ -1,3 +1,4 @@
+from node_launcher.constants import OPERATING_SYSTEM
 from .bitcoind.bitcoind_node import BitcoindNode
 from .lib.node_status import NodeStatus
 from .lnd.lnd_node import LndNode
@@ -11,9 +12,9 @@ class NodeSet(object):
     tor_node: TorNode
 
     def __init__(self):
-        self.tor_node = TorNode()
-        self.bitcoind_node = BitcoindNode()
-        self.lnd_node = LndNode()
+        self.tor_node = TorNode(operating_system=OPERATING_SYSTEM)
+        self.bitcoind_node = BitcoindNode(operating_system=OPERATING_SYSTEM)
+        self.lnd_node = LndNode(operating_system=OPERATING_SYSTEM)
 
         self.tor_node.status.connect(
             self.handle_tor_node_status_change
@@ -33,8 +34,8 @@ class NodeSet(object):
         elif tor_status in [NodeStatus.SOFTWARE_DOWNLOADED,
                             NodeStatus.SOFTWARE_READY]:
             self.bitcoind_node.software.update()
+            self.tor_node
         elif tor_status == NodeStatus.LIBRARY_ERROR:
-            # raise Exception
             self.tor_node.software.start_update_worker()
         elif tor_status == NodeStatus.SYNCED:
             self.bitcoind_node.tor_synced = True

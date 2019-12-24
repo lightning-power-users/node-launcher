@@ -1,10 +1,10 @@
 from node_launcher.constants import LND, TOR, BITCOIND, WINDOWS, LINUX, DARWIN
 
-TARGET_TOR_RELEASE = '8.5.5'
-TARGET_WINDOWS_TOR_VERSION = '0.4.1.5'
+TARGET_TOR_RELEASE = '9.0.2'
+TARGET_WINDOWS_TOR_VERSION = '0.4.1.6'
 
-TARGET_BITCOIN_RELEASE = 'v0.18.1'
-TARGET_LND_RELEASE = 'v0.8.0-beta-rc2'
+TARGET_BITCOIN_RELEASE = 'v0.19.0.1'
+TARGET_LND_RELEASE = 'v0.8.2-beta'
 
 SOFTWARE_METADATA = {
     TOR: {
@@ -16,7 +16,7 @@ SOFTWARE_METADATA = {
         'cli_name': 'bitcoin-cli'
     },
     LND: {
-        'release_url': f'https://github.com/lightningnetwork/{LND}/releases/download/{TARGET_LND_RELEASE}',
+        'release_url': f'https://github.com/lightningnetwork/lnd/releases/download/{TARGET_LND_RELEASE}',
         'cli_name': 'lncli'
     }
 }

@@ -63,8 +63,8 @@ class NetworkNode(QObject):
         self.process.log_line.connect(self.handle_log_line)
 
     def update_status(self, new_status: NodeStatus):
-        log.debug(f'update_status {self.network} node',
-                  network=self.network,
+        log.debug(f'update_status {self.node_software_name} node',
+                  network=self.node_software_name,
                   old_status=self.current_status,
                   new_status=new_status)
         self.current_status = new_status
@@ -78,6 +78,9 @@ class NetworkNode(QObject):
         return True
 
     def start_process(self):
+        log.debug('Start process', node_software_name=self.node_software_name,
+                  current_status=self.current_status,
+                  prerequisites_synced=self.prerequisites_synced)
         software_ready = self.current_status == NodeStatus.SOFTWARE_READY
         if software_ready and self.prerequisites_synced:
             # Todo: run in threads so they don't block the GUI
