@@ -33,6 +33,10 @@ class LndNode(NetworkNode):
         elif new_status == NodeStatus.SYNCING:
             self.client.debug_level()
 
+    def handle_log_line(self, log_line: str):
+        if 'Unable to create chain control: unable to subscribe for zmq block events' in log_line:
+            self.restart = True
+
     def stop(self):
         log.debug('lnd stop', process_state=self.process.state())
         if self.process.state() == QProcess.Running:
