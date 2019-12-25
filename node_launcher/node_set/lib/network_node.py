@@ -81,7 +81,10 @@ class NetworkNode(QObject):
         log.debug('Start process', node_software_name=self.node_software_name,
                   current_status=self.current_status,
                   prerequisites_synced=self.prerequisites_synced)
-        software_ready = self.current_status == NodeStatus.SOFTWARE_READY
+        software_ready = self.current_status in [
+            NodeStatus.SOFTWARE_READY,
+            NodeStatus.STOPPED
+        ]
         if software_ready and self.prerequisites_synced:
             # Todo: run in threads so they don't block the GUI
             self.update_status(NodeStatus.LOADING_CONFIGURATION)

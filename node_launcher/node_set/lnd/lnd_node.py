@@ -1,6 +1,6 @@
 from PySide2.QtCore import QProcess
 
-from node_launcher.constants import OperatingSystem, NodeSoftwareName, LND
+from node_launcher.constants import OperatingSystem, LND
 from node_launcher.logging import log
 from node_launcher.node_set.lib.network_node import NetworkNode
 from node_launcher.node_set.lib.node_status import NodeStatus
@@ -31,6 +31,10 @@ class LndNode(NetworkNode):
             self.unlocker.auto_unlock_wallet()
         elif new_status == NodeStatus.SYNCING:
             self.client.debug_level()
+
+    def handle_log_line(self, log_line: str):
+        if 'Unable to create chain control: unable to subscribe for zmq block events' in log_line:
+            self.restart = True
 
     def stop(self):
         log.debug('lnd stop', process_state=self.process.state())

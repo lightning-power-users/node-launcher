@@ -20,7 +20,10 @@ class NodeSet(object):
             self.handle_tor_node_status_change
         )
         self.bitcoind_node.status.connect(
-            self.handle_bitcoin_node_status_change
+            self.handle_bitcoind_node_status_change
+        )
+        self.lnd_node.status.connect(
+            self.handle_lnd_node_status_change
         )
         self.lnd_node.process.signals.unprune.connect(self.handle_unprune)
 
@@ -34,7 +37,6 @@ class NodeSet(object):
         elif tor_status in [NodeStatus.SOFTWARE_DOWNLOADED,
                             NodeStatus.SOFTWARE_READY]:
             self.bitcoind_node.software.update()
-            self.tor_node
         elif tor_status == NodeStatus.LIBRARY_ERROR:
             self.tor_node.software.start_update_worker()
         elif tor_status == NodeStatus.SYNCED:
@@ -44,7 +46,7 @@ class NodeSet(object):
             self.lnd_node.stop()
             self.bitcoind_node.stop()
 
-    def handle_bitcoin_node_status_change(self, bitcoind_status):
+    def handle_bitcoind_node_status_change(self, bitcoind_status):
         if bitcoind_status in [NodeStatus.SOFTWARE_DOWNLOADED,
                                NodeStatus.SOFTWARE_READY]:
             if self.lnd_node.current_status is None:
@@ -60,6 +62,11 @@ class NodeSet(object):
             self.lnd_node.stop()
             self.bitcoind_node.software.update()
             self.bitcoind_node.start_process()
+
+    def handle_lnd_node_status_change(self, lnd_status):
+        if lnd_status == NodeStatus.STOPPED and self.lnd_node.restart:
+            self.lnd_node.restart = False
+            self.lnd_node.start_process()
 
     def handle_unprune(self, height: int):
         self.lnd_node.stop()
