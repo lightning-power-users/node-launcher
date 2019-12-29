@@ -73,7 +73,6 @@ class BitcoindConfiguration(Configuration):
         self['proxy'] = '127.0.0.1:9050'
         self['listen'] = True
         self['bind'] = '127.0.0.1'
-        self['debug'] = 'tor,http,zmq,rpc,estimatefee,reindex,prune,libevent'
         self['discover'] = True
 
         # noinspection PyBroadException
