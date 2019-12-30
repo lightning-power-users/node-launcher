@@ -16,6 +16,9 @@ class NodeSet(object):
         self.bitcoind_node = BitcoindNode(operating_system=OPERATING_SYSTEM)
         self.lnd_node = LndNode(operating_system=OPERATING_SYSTEM)
 
+        if self.bitcoind_node.configuration['prune']:
+            self.lnd_node.configuration.is_neutrino = True
+
         self.tor_node.status.connect(
             self.handle_tor_node_status_change
         )
@@ -41,7 +44,10 @@ class NodeSet(object):
             self.tor_node.software.start_update_worker()
         elif tor_status == NodeStatus.SYNCED:
             self.bitcoind_node.tor_synced = True
-            self.bitcoind_node.start_process()
+            if self.lnd_node.configuration.is_neutrino:
+                self.lnd_node.start_process()
+            else:
+                self.bitcoind_node.start_process()
         elif tor_status == NodeStatus.STOPPED:
             self.lnd_node.stop()
             self.bitcoind_node.stop()
