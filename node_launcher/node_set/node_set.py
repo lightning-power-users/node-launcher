@@ -16,9 +16,6 @@ class NodeSet(object):
         self.bitcoind_node = BitcoindNode(operating_system=OPERATING_SYSTEM)
         self.lnd_node = LndNode(operating_system=OPERATING_SYSTEM)
 
-        if self.bitcoind_node.configuration['prune']:
-            self.lnd_node.configuration.is_neutrino = True
-
         self.tor_node.status.connect(
             self.handle_tor_node_status_change
         )
@@ -28,7 +25,6 @@ class NodeSet(object):
         self.lnd_node.status.connect(
             self.handle_lnd_node_status_change
         )
-        self.lnd_node.process.signals.unprune.connect(self.handle_unprune)
 
     def start(self):
         log.debug('Starting node set')
@@ -39,41 +35,19 @@ class NodeSet(object):
             self.start()
         elif tor_status in [NodeStatus.SOFTWARE_DOWNLOADED,
                             NodeStatus.SOFTWARE_READY]:
-            self.bitcoind_node.software.update()
+            self.lnd_node.software.update()
         elif tor_status == NodeStatus.LIBRARY_ERROR:
             self.tor_node.software.start_update_worker()
         elif tor_status == NodeStatus.SYNCED:
-            self.bitcoind_node.tor_synced = True
-            if self.lnd_node.configuration.is_neutrino:
-                self.lnd_node.start_process()
-            else:
-                self.bitcoind_node.start_process()
+            self.lnd_node.start_process()
         elif tor_status == NodeStatus.STOPPED:
             self.lnd_node.stop()
-            self.bitcoind_node.stop()
 
     def handle_bitcoind_node_status_change(self, bitcoind_status):
-        if bitcoind_status in [NodeStatus.SOFTWARE_DOWNLOADED,
-                               NodeStatus.SOFTWARE_READY]:
-            if self.lnd_node.current_status is None:
-                self.lnd_node.software.update()
-        elif bitcoind_status == NodeStatus.SYNCING:
-            self.lnd_node.bitcoind_syncing = True
-            self.bitcoind_node.configuration['reindex'] = False
-            self.lnd_node.start_process()
-        elif bitcoind_status == NodeStatus.STOPPED:
-            self.lnd_node.stop()
-            self.lnd_node.bitcoind_syncing = False
-        elif bitcoind_status == NodeStatus.RESTART:
-            self.lnd_node.stop()
-            self.bitcoind_node.software.update()
-            self.bitcoind_node.start_process()
+        pass
 
     def handle_lnd_node_status_change(self, lnd_status):
         if lnd_status == NodeStatus.STOPPED and self.lnd_node.restart:
             self.lnd_node.restart = False
             self.lnd_node.start_process()
 
-    def handle_unprune(self, height: int):
-        self.lnd_node.stop()
-        self.bitcoind_node.unprune(height)
