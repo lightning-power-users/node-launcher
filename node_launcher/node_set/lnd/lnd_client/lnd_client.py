@@ -191,6 +191,14 @@ class LndClient(object):
         response = self.lnd_client.ConnectPeer(request, timeout=timeout)
         return response
 
+    def list_all(self):
+        return {
+            'peers': self.list_peers(),
+            'open_channels': self.list_channels(),
+            'pending_channels': self.list_pending_channels(),
+            'closed_channels': self.closed_channels()
+        }
+
     def list_peers(self) -> List[ln.Peer]:
         request = ln.ListPeersRequest()
         response = self.lnd_client.ListPeers(request)
