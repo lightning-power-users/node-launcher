@@ -1,15 +1,8 @@
-from PySide2 import QtGui
-from PySide2.QtCore import Qt, SIGNAL, QProcess, QByteArray, QTimer
+from PySide2.QtCore import Qt, QTimer
 from PySide2.QtGui import QCursor
-from PySide2.QtWidgets import QDialog, QGridLayout, QTextEdit, QLineEdit, \
-    QCompleter, QTableWidget, QTreeView, QTreeWidget, QTreeWidgetItem, QMenu
+from PySide2.QtWidgets import QAction, QDialog, QGridLayout, QMenu, QTreeWidget, \
+    QTreeWidgetItem
 
-from pygments import highlight
-from pygments.formatters.html import HtmlFormatter
-from pygments.lexers.data import JsonLexer
-
-from node_launcher.gui.models.tree_model import TreeModel
-from node_launcher.logging import log
 from node_launcher.node_set.lnd.lnd_node import LndNode
 from node_launcher.node_set.lnd.lnd_threaded_client import LndThreadedClient
 
@@ -45,10 +38,13 @@ class ChannelsDialog(QDialog):
 
     def handle_peers_list(self, data):
         for peer_data in data['peers']:
-            peer = QTreeWidgetItem()
-            peer.setText(0, str(peer_data.remote_pubkey))
-            peer.setText(1, 'Connected')
-            self.tree.addTopLevelItem(peer)
+            peers = self.tree.findItems(peer_data.pub_key,
+                                        Qt.MatchExactly | Qt.MatchRecursive, 0)
+            if not len(peers):
+                peer = QTreeWidgetItem()
+                peer.setText(0, str(peer_data.pub_key))
+                peer.setText(1, 'Connected')
+                self.tree.addTopLevelItem(peer)
 
         for open_channel_data in data['open_channels']:
             peers = self.tree.findItems(open_channel_data.remote_pubkey,
@@ -98,23 +94,33 @@ class ChannelsDialog(QDialog):
             channel.setText(1, 'Closed')
             channel.setText(2, str(closed_channel_data.capacity))
 
-    def open_menu(self, position):
+    def open_menu(self, event):
         indexes = self.tree.selectedIndexes()
         if len(indexes) > 0:
             level = 0
-            index = indexes[0]
+            index = child_index = indexes[0]
             while index.parent().isValid():
                 index = index.parent()
                 level += 1
         else:
             return
 
+        item = self.tree.itemFromIndex(child_index)
+
         menu = QMenu(self)
         if level == 0:
-            menu.addAction('Close all channels', self)
+            close_channels_action = QAction('Close all channels', self)
+            menu.addAction(close_channels_action)
         elif level == 1:
-            menu.addAction('Close channel', self)
-            renameAction.triggered.connect(lambda: self.renameSlot(event))
-            self.menu.addAction(renameAction)
+            close_channel_action = QAction('Close channel', self)
+            chan_id = int(item.data(0, 0))
+            close_channel_action.triggered.connect(lambda: self.close_channel(chan_id))
+            menu.addAction(close_channel_action)
 
         menu.popup(QCursor.pos())
+
+    def close_channel(self, chan_id: int):
+        client = LndThreadedClient(self.node.configuration)
+        client.signals.result.connect(self.handle_peers_list)
+
+        print(event)
