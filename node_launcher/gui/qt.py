@@ -39,7 +39,8 @@ from PyQt5.QtWidgets import (
     QCompleter,
     QMainWindow,
     QTableWidget,
-    QTableWidgetItem
+    QTableWidgetItem,
+    QAction
 )
 from PyQt5.QtGui import (
     QPixmap,
@@ -91,7 +92,8 @@ from PyQt5.QtGui import (
 #     QCompleter,
 #     QMainWindow,
 #     QTableWidget,
-#     QTableWidgetItem
+#     QTableWidgetItem,
+#     QAction
 # )
 # from PySide2.QtGui import (
 #     QPixmap,

@@ -1,8 +1,16 @@
 import webbrowser
 
-from node_launcher.gui.qt import QCoreApplication, QClipboard, QMenu
+from node_launcher.gui.qt import QCoreApplication, QClipboard, QMenu, QAction
 
-from .nodes_manage.nodes_manage import NodesManageDialog
+from node_launcher.gui.menu.menu_actions.nodes_menu.bitcoind_status_action import \
+    BitcoindStatusAction
+from node_launcher.gui.menu.menu_actions.nodes_menu.lnd_status_action import \
+    LndStatusAction
+from node_launcher.gui.menu.menu_actions.nodes_menu.node_manage_action import \
+    NodeManageAction
+from node_launcher.gui.menu.menu_actions.separator_action import SeparatorAction
+from node_launcher.gui.menu.menu_actions.nodes_menu.tor_status_action import \
+    TorStatusAction
 from node_launcher.gui.utilities import reveal
 from node_launcher.node_set import NodeSet
 
@@ -12,37 +20,21 @@ class Menu(QMenu):
         super().__init__()
         self.node_set = node_set
         self.system_tray = system_tray
+        self.cache = []
 
-        # Tor
-        self.tor_status_action = self.addAction('Tor: off')
-        self.tor_status_action.setEnabled(False)
-        self.node_set.tor_node.status.connect(
-            lambda line: self.tor_status_action.setText('Tor: ' + line.replace('_', ' '))
-        )
+        default_actions = [
+            TorStatusAction(self.node_set.tor_node),
+            BitcoindStatusAction(self.node_set.bitcoind_node),
+            LndStatusAction(self.node_set.lnd_node),
+            NodeManageAction(node_set=node_set, system_tray=system_tray),
+            SeparatorAction()
+        ]
 
-        # Bitcoind
-        self.bitcoind_status_action = self.addAction('Bitcoind: off')
-        self.bitcoind_status_action.setEnabled(False)
-        self.node_set.bitcoind_node.status.connect(
-            lambda line: self.bitcoind_status_action.setText('Bitcoind: ' + line.replace('_', ' '))
-        )
+        for action in default_actions:
+            self.add_action(action)
 
-        # LND
-        self.lnd_status_action = self.addAction('LND: off')
-        self.lnd_status_action.setEnabled(False)
-        self.node_set.lnd_node.status.connect(
-            lambda line: self.lnd_status_action.setText('LND: ' + line.replace('_', ' '))
-        )
 
-        self.nodes_manage_dialog = NodesManageDialog(
-            node_set=self.node_set,
-            system_tray=self.system_tray
-        )
-        self.node_manage_action = self.addAction('Manage Nodes')
-        self.node_manage_action.triggered.connect(
-            self.nodes_manage_dialog.show
-        )
-        self.addSeparator()
+        self.joule_url_action = self.addAction('Copy Node URL (REST)')
 
         # Joule
         self.joule_status_action = self.addAction('Joule Browser UI')
@@ -77,6 +69,10 @@ class Menu(QMenu):
         self.quit_action.triggered.connect(
             lambda _: QCoreApplication.exit(0)
         )
+
+    def add_action(self, action: QAction):
+        self.cache.append(action)
+        self.addAction(action)
 
     def copy_rest_url(self):
         QClipboard().setText(self.node_set.lnd_node.configuration.rest_url)
