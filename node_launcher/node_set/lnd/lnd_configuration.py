@@ -68,14 +68,9 @@ class LndConfiguration(Configuration):
         self.set_default_configuration('debuglevel', 'info')
 
         self['bitcoin.active'] = True
-        self['bitcoin.node'] = 'bitcoind'
-        bitcoind_conf = BitcoindConfiguration()
-        bitcoind_conf.load()
-        self['bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
-        self['bitcoind.rpcuser'] = bitcoind_conf['rpcuser']
-        self['bitcoind.rpcpass'] = bitcoind_conf['rpcpassword']
-        self['bitcoind.zmqpubrawblock'] = bitcoind_conf['zmqpubrawblock']
-        self['bitcoind.zmqpubrawtx'] = bitcoind_conf['zmqpubrawtx']
+
+        self['bitcoin.node'] = 'neutrino'
+        self['neutrino.connect'] = 'btcd-mainnet.lightning.computer'
 
         self.set_default_configuration('restlisten', f'127.0.0.1:{get_port(LND_DEFAULT_REST_PORT)}')
         self.rest_port = self['restlisten'].split(':')[-1]

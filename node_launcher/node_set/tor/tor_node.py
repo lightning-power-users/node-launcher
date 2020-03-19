@@ -1,8 +1,8 @@
 from _signal import SIGTERM
 
-from psutil import process_iter, AccessDenied
+from psutil import process_iter
 
-from node_launcher.constants import OperatingSystem, NodeSoftwareName
+from node_launcher.constants import OperatingSystem, TOR
 from node_launcher.logging import log
 from node_launcher.node_set.lib.managed_process import ManagedProcess
 from node_launcher.node_set.lib.network_node import NetworkNode
@@ -14,8 +14,9 @@ class TorNode(NetworkNode):
     configuration: TorConfiguration
     process: ManagedProcess
 
-    def __init__(self, operating_system: OperatingSystem, node_software_name: NodeSoftwareName):
-        super().__init__(operating_system=operating_system, node_software_name=node_software_name)
+    def __init__(self, operating_system: OperatingSystem):
+        super().__init__(operating_system=operating_system,
+                         node_software_name=TOR)
 
     def handle_log_line(self, log_line: str):
         if 'Bootstrapped 0%: Starting' in log_line:

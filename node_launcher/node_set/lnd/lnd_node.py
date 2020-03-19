@@ -2,11 +2,10 @@ from typing import Optional
 
 from PySide2.QtCore import QProcess
 
-from node_launcher.constants import OperatingSystem, NodeSoftwareName
+from node_launcher.constants import OperatingSystem, LND
 from node_launcher.logging import log
 from node_launcher.node_set.lib.network_node import NetworkNode
 from node_launcher.node_set.lib.node_status import NodeStatus
-from node_launcher.node_set.lib.software import Software
 from node_launcher.node_set.lnd.lnd_threaded_client import LndThreadedClient
 from .lnd_configuration import LndConfiguration
 from .lnd_unlocker import LndUnlocker
@@ -17,10 +16,10 @@ class LndNode(NetworkNode):
     client: Optional[LndThreadedClient]
     configuration: LndConfiguration
     process: LndProcess
-    software: Software
 
-    def __init__(self, operating_system: OperatingSystem, node_software_name: NodeSoftwareName):
-        super().__init__(operating_system=operating_system, node_software_name=node_software_name)
+    def __init__(self, operating_system: OperatingSystem):
+        super().__init__(operating_system=operating_system,
+                         node_software_name=LND)
         self.client = None
         self.unlocker = None
         self.bitcoind_syncing = False
@@ -35,9 +34,9 @@ class LndNode(NetworkNode):
         elif new_status == NodeStatus.SYNCING:
             self.client.debug_level()
 
-    @property
-    def prerequisites_synced(self):
-        return self.bitcoind_syncing
+    def handle_log_line(self, log_line: str):
+        if 'Unable to create chain control: unable to subscribe for zmq block events' in log_line:
+            self.restart = True
 
     def stop(self):
         log.debug('lnd stop', process_state=self.process.state())

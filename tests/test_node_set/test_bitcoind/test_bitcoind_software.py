@@ -3,14 +3,18 @@ import shutil
 
 import pytest
 
-from node_launcher.constants import TARGET_BITCOIN_RELEASE, IS_MACOS, IS_WINDOWS
+from node_launcher.constants import IS_MACOS, \
+    IS_WINDOWS, OPERATING_SYSTEM, BITCOIND
+from node_launcher.node_set.lib.constants import TARGET_BITCOIN_RELEASE
 from node_launcher.node_set.lib.node_status import SoftwareStatus
-from node_launcher.node_set.bitcoind.bitcoind_software import BitcoindSoftware
+
+from node_launcher.node_set.lib.software import Software
 
 
 @pytest.fixture
 def bitcoind_software():
-    bitcoind_software = BitcoindSoftware()
+    bitcoind_software = Software(operating_system=OPERATING_SYSTEM,
+                                 node_software_name=BITCOIND)
     return bitcoind_software
 
 
@@ -48,30 +52,30 @@ class TestBitcoindSoftware(object):
                               check_params_cb=check_status_order) as blocker:
             bitcoind_software.update()
 
-    def test_bitcoin_qt(self, bitcoind_software: BitcoindSoftware):
+    def test_bitcoin_qt(self, bitcoind_software: Software):
         assert os.path.isfile(bitcoind_software.bitcoin_qt)
 
-    def test_bitcoin_cli(self, bitcoind_software: BitcoindSoftware):
+    def test_bitcoin_cli(self, bitcoind_software: Software):
         assert os.path.isfile(bitcoind_software.bitcoin_cli)
 
-    def test_bitcoind(self, bitcoind_software: BitcoindSoftware):
+    def test_bitcoind(self, bitcoind_software: Software):
         assert os.path.isfile(bitcoind_software.bitcoind)
 
-    def test_release_version(self, bitcoind_software: BitcoindSoftware):
+    def test_release_version(self, bitcoind_software: Software):
         assert bitcoind_software.release_version == TARGET_BITCOIN_RELEASE.replace('v', '')
 
-    def test_binary_name(self, bitcoind_software: BitcoindSoftware):
+    def test_binary_name(self, bitcoind_software: Software):
         assert bitcoind_software.download_name
 
-    def test_binaries_directory(self, bitcoind_software: BitcoindSoftware):
+    def test_binaries_directory(self, bitcoind_software: Software):
         d = bitcoind_software.software_directory
         assert os.path.isdir(d)
 
-    def test_binary_directory(self, bitcoind_software: BitcoindSoftware):
+    def test_binary_directory(self, bitcoind_software: Software):
         d = bitcoind_software.version_path
         assert os.path.isdir(d)
 
-    def test_download_url(self, bitcoind_software: BitcoindSoftware):
+    def test_download_url(self, bitcoind_software: Software):
         url = bitcoind_software.download_url
         if IS_WINDOWS:
             assert url == 'https://bitcoincore.org/bin/bitcoin-core-0.18.1/bitcoin-0.18.1-win64.zip'

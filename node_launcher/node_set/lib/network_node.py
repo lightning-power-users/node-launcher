@@ -1,10 +1,10 @@
-from typing import Optional
-
 from PySide2.QtCore import Signal, QObject, QProcess
 
-from node_launcher.constants import NodeSoftwareName, OperatingSystem, LND, BITCOIND
+from node_launcher.constants import NodeSoftwareName, OperatingSystem, TOR, \
+    BITCOIND, LND
 from node_launcher.logging import log
-from node_launcher.node_set.bitcoind.bitcoind_configuration import BitcoindConfiguration
+from node_launcher.node_set.bitcoind.bitcoind_configuration import \
+    BitcoindConfiguration
 from node_launcher.node_set.bitcoind.bitcoind_process import BitcoindProcess
 from node_launcher.node_set.lib.managed_process import ManagedProcess
 from node_launcher.node_set.lib.node_status import NodeStatus
@@ -15,23 +15,32 @@ from node_launcher.node_set.tor.tor_configuration import TorConfiguration
 
 
 class NetworkNode(QObject):
-    current_status: Optional[NodeStatus]
+    node_software_name: NodeSoftwareName
+    current_status: NodeStatus
 
     status = Signal(str)
 
-    def __init__(self, operating_system: OperatingSystem, node_software_name: NodeSoftwareName):
+    def __init__(self, operating_system: OperatingSystem,
+                 node_software_name: NodeSoftwareName):
         super().__init__()
+        self.node_software_name = node_software_name
         self.current_status = None
-        self.software = Software(operating_system=operating_system, node_software_name=node_software_name)
-        if node_software_name == LND:
-            self.configuration = LndConfiguration()
-            self.process = LndProcess(self.software.daemon, self.configuration.args)
+
+        self.software = Software(operating_system=operating_system,
+                                 node_software_name=node_software_name)
+
+        if node_software_name == TOR:
+            self.configuration = TorConfiguration()
+            self.process = ManagedProcess(self.software.daemon,
+                                          self.configuration.args)
         elif node_software_name == BITCOIND:
             self.configuration = BitcoindConfiguration()
-            self.process = BitcoindProcess(self.software.daemon, self.configuration.args)
-        else:
-            self.configuration = TorConfiguration()
-            self.process = ManagedProcess(self.software.daemon, self.configuration.args)
+            self.process = BitcoindProcess(self.software.daemon,
+                                           self.configuration.args)
+        elif node_software_name == LND:
+            self.configuration = LndConfiguration()
+            self.process = LndProcess(self.software.daemon,
+                                      self.configuration.args)
 
         self.connect_events()
         self.restart = False
@@ -54,8 +63,8 @@ class NetworkNode(QObject):
         self.process.log_line.connect(self.handle_log_line)
 
     def update_status(self, new_status: NodeStatus):
-        log.debug(f'update_status {self.software.node_software_name} node',
-                  network=self.software.node_software_name,
+        log.debug(f'update_status {self.node_software_name} node',
+                  network=self.node_software_name,
                   old_status=self.current_status,
                   new_status=new_status)
         self.current_status = new_status
@@ -69,7 +78,13 @@ class NetworkNode(QObject):
         return True
 
     def start_process(self):
-        software_ready = self.current_status == NodeStatus.SOFTWARE_READY
+        log.debug('Start process', node_software_name=self.node_software_name,
+                  current_status=self.current_status,
+                  prerequisites_synced=self.prerequisites_synced)
+        software_ready = self.current_status in [
+            NodeStatus.SOFTWARE_READY,
+            NodeStatus.STOPPED
+        ]
         if software_ready and self.prerequisites_synced:
             # Todo: run in threads so they don't block the GUI
             self.update_status(NodeStatus.LOADING_CONFIGURATION)
