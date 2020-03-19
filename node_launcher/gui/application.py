@@ -2,7 +2,7 @@ from PySide2 import QtCore
 from PySide2.QtCore import QCoreApplication, Slot, Qt, QThreadPool
 from PySide2.QtWidgets import QApplication, QWidget, QMessageBox
 
-from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
+from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE, OPERATING_SYSTEM
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.system_tray import SystemTray
 from node_launcher.logging import log
@@ -20,7 +20,7 @@ class Application(QApplication):
         self.setQuitOnLastWindowClosed(False)
         self.aboutToQuit.connect(self.quit_app)
 
-        self.node_set = NodeSet()
+        self.node_set = NodeSet(operating_system=OPERATING_SYSTEM)
         self.system_tray = SystemTray(self.parent, self.node_set)
 
     def start(self):

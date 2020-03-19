@@ -13,7 +13,7 @@ node_tabs = {
             'class': ConfigurationDialog
         }
     ],
-    'bitcoin': [
+    'bitcoind': [
         {
             'title': 'Logs',
             'class': LogsDialog
