@@ -7,11 +7,12 @@ from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.data import JsonLexer
 
 from node_launcher.logging import log
+from node_launcher.node_set.lib.network_node import NetworkNode
 
 
 class ConsoleDialog(QDialog):
 
-    def __init__(self, node):
+    def __init__(self, node: NetworkNode):
         super().__init__()
 
         self.node = node
