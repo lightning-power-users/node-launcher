@@ -3,6 +3,7 @@ from _signal import SIGTERM
 from psutil import process_iter
 
 from node_launcher.gui.qt import QProcess
+from node_launcher.constants import OperatingSystem, NodeSoftwareName
 from node_launcher.logging import log
 from node_launcher.node_set.bitcoind.bitcoind_rpc_client import Proxy
 from node_launcher.node_set.lib.network_node import NetworkNode
@@ -17,13 +18,8 @@ class BitcoindNode(NetworkNode):
     process: BitcoindProcess
     software: Software
 
-    def __init__(self):
-        super().__init__(
-            network='bitcoin',
-            Software=BitcoindSoftware,
-            Configuration=BitcoindConfiguration,
-            Process=BitcoindProcess
-        )
+    def __init__(self, operating_system: OperatingSystem, node_software_name: NodeSoftwareName):
+        super().__init__(operating_system=operating_system, node_software_name=node_software_name)
         self.tor_synced = False
 
     def handle_log_line(self, log_line: str):

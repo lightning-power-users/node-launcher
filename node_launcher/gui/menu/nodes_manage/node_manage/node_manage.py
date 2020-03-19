@@ -11,7 +11,7 @@ class NodeManageDialog(QDialog):
     def __init__(self, node: NetworkNode):
         super().__init__()
 
-        self.network = node.network
+        self.network = node.software.node_software_name
         self.node = node
 
         self.layout = QGridLayout()

@@ -1,3 +1,4 @@
+from node_launcher.constants import TOR, OperatingSystem, BITCOIND, LND
 from .bitcoind.bitcoind_node import BitcoindNode
 from .lib.node_status import NodeStatus
 from .lnd.lnd_node import LndNode
@@ -10,10 +11,10 @@ class NodeSet(object):
     lnd_node: LndNode
     tor_node: TorNode
 
-    def __init__(self):
-        self.tor_node = TorNode()
-        self.bitcoind_node = BitcoindNode()
-        self.lnd_node = LndNode()
+    def __init__(self, operating_system: OperatingSystem):
+        self.tor_node = TorNode(operating_system=operating_system, node_software_name=TOR)
+        self.bitcoind_node = BitcoindNode(operating_system=operating_system, node_software_name=BITCOIND)
+        self.lnd_node = LndNode(operating_system=operating_system, node_software_name=LND)
 
         self.tor_node.status.connect(
             self.handle_tor_node_status_change
