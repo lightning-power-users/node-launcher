@@ -26,7 +26,3 @@ def get_port(starting_port: int):
             claimed_ports.append(port)
             return port
         port += 1
-
-
-def get_zmq_port():
-    return get_port(18500)
