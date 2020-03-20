@@ -29,7 +29,7 @@ class Application(QApplication):
         self.setQuitOnLastWindowClosed(False)
         self.aboutToQuit.connect(self.quit_app)
 
-        self.node_set = NodeSet(operating_system=OPERATING_SYSTEM)
+        self.node_set = NodeSet()
         self.system_tray = SystemTray(self.parent, self.node_set)
 
     def start(self):
