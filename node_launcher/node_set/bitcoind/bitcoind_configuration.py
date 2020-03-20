@@ -14,7 +14,6 @@ from node_launcher.logging import log
 from node_launcher.node_set.lib.configuration import Configuration
 from node_launcher.node_set.lib.get_random_password import get_random_password
 from node_launcher.node_set.lib.hard_drives import HardDrives
-from node_launcher.port_utilities import get_zmq_port
 from node_launcher.node_set.bitcoind.bitcoind_configuration_keys import keys_info as bitcoind_keys_info
 
 
@@ -64,11 +63,7 @@ class BitcoindConfiguration(Configuration):
         self.set_default_configuration('rpcuser', 'default_user')
         self.set_default_configuration('rpcpassword', get_random_password())
 
-        self.zmq_block_port = get_zmq_port()
-        self.zmq_tx_port = get_zmq_port()
-
-        self['zmqpubrawblock'] = f'tcp://127.0.0.1:{self.zmq_block_port}'
-        self['zmqpubrawtx'] = f'tcp://127.0.0.1:{self.zmq_tx_port}'
+        self['blockfilterindex'] = True
 
         self['proxy'] = '127.0.0.1:9050'
         self['listen'] = True
