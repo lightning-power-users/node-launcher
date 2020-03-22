@@ -27,8 +27,11 @@ class ChannelsDialog(QDialog):
         self.setLayout(self.layout)
 
         self.client = LndThreadedClient(self.node.configuration)
-        self.client.signals.result.connect(self.handle_peers_list)
         self.timer = QTimer()
+
+    def start_refresh(self):
+        self.client = LndThreadedClient(self.node.configuration)
+        self.client.signals.result.connect(self.handle_peers_list)
         self.timer.timeout.connect(self.recurring_timer)
         self.timer.setInterval(1000)
         self.timer.start()
