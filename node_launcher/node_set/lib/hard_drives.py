@@ -7,7 +7,7 @@ from typing import List
 import psutil as psutil
 
 from node_launcher.constants import (
-    AUTOPRUNE_GB,
+    MINIMUM_GB,
     BITCOIN_DATA_PATH,
     GIGABYTE,
     OPERATING_SYSTEM
@@ -17,34 +17,59 @@ from node_launcher.logging import log
 
 @dataclass
 class Partition(object):
-    mountpoint: str
-    gb_free: int
+    mount_point: str
+    capacity_gb: int
+    free_gb: int
+    has_bitcoin_dir: bool
+    bitcoin_dir_size: int
+    has_error: bool
 
 
 class HardDrives(object):
-    @staticmethod
-    def get_gb(path: str) -> int:
+    def analyze_partition(self, path: str) -> Partition:
+        has_bitcoin_dir = False
+        bitcoin_dir_size = 0
         try:
             capacity, used, free, percent = psutil.disk_usage(path)
         except:
             log.warning(
-                'get_gb',
+                'analyze_partition',
                 path=path,
                 exc_info=True
             )
-            return 0
+            return Partition(mount_point=path, free_gb=0, capacity_gb=0, has_bitcoin_dir=False, has_error=True,
+                             bitcoin_dir_size=bitcoin_dir_size)
 
         free_gb = math.floor(free / GIGABYTE)
+        capacity_gb = math.floor(capacity / GIGABYTE)
+
         log.info(
-            'get_gb',
+            'psutil',
             path=path,
             capacity=capacity,
+            capacity_gb=capacity_gb,
             used=used,
             free=free,
             percent=percent,
             free_gb=free_gb
         )
-        return free_gb
+        if self.is_default_partition(path):
+            default_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
+            if os.path.exists(default_datadir):
+                bitcoin_dir_size = self.get_dir_size(default_datadir)
+                log.info('default datadir path', default_datadir=default_datadir,
+                         bitcoin_dir_size=bitcoin_dir_size)
+                free_gb += bitcoin_dir_size
+                has_bitcoin_dir = True
+        else:
+            common_datadir = os.path.join(path, 'Bitcoin')
+            if os.path.exists(common_datadir):
+                bitcoin_dir_size = self.get_dir_size(common_datadir)
+                log.info('common datadir path', common_datadir=common_datadir, bitcoin_dir_size=bitcoin_dir_size)
+                free_gb += bitcoin_dir_size
+                has_bitcoin_dir = True
+        return Partition(mount_point=path, free_gb=free_gb, has_bitcoin_dir=has_bitcoin_dir, has_error=False,
+                         capacity_gb=capacity_gb, bitcoin_dir_size=bitcoin_dir_size)
 
     def list_partitions(self) -> List[Partition]:
         partitions = []
@@ -62,8 +87,8 @@ class HardDrives(object):
             partition_paths=partition_paths
         )
         for path in partition_paths:
-            free_gb = self.get_gb(path)
-            partitions.append(Partition(path, free_gb), )
+            partition = self.analyze_partition(path)
+            partitions.append(partition)
         return partitions
 
     def get_big_drive(self) -> Partition:
@@ -78,10 +103,10 @@ class HardDrives(object):
                 return partition
 
     @staticmethod
-    def is_default_partition(partition: Partition):
+    def is_default_partition(path: str):
         default_partition = os.path.join(BITCOIN_DATA_PATH[OPERATING_SYSTEM], os.pardir)
         default_partition = Path(default_partition).drive
-        partition = Path(partition.mountpoint).drive
+        partition = Path(path).drive
         return default_partition == partition
 
     @staticmethod
@@ -98,7 +123,7 @@ class HardDrives(object):
             )
             return False
         free_gb = math.floor(free / GIGABYTE)
-        should_prune = free_gb < AUTOPRUNE_GB
+        should_prune = free_gb < MINIMUM_GB
         log.info(
             'should_prune',
             input_directory=input_directory,
