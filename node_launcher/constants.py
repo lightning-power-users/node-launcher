@@ -137,8 +137,8 @@ AUTOPRUNE_GB = 150
 # Total Bitcoin (mainnet) data directory size minus blocks is ~3 GB
 # We are targeting 10 GB, so 10 - 3 = 7
 MAINNET_PRUNE = 7000
+MINIMUM_GB = 500
 
-TESTNET_PRUNE = 1000
 
 BITCOIN_TESTNET_PEER_PORT = 18333
 BITCOIN_MAINNET_PEER_PORT = 8333

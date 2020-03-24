@@ -4,9 +4,7 @@
 2. [Send a payment with the Joule Chrome extension](https://medium.com/@pierre_rochard/bitcoin-lightning-joule-chrome-extension-ac149bb05cb9)
 
 # Requirements
-1. ~300 GB of download bandwidth
-2. ~10 GB of disk space (~300 GB if you want the Bitcoin transaction index, makes for a faster LND)
-3. Windows 7+ or macOS 10.12.6+
+Windows 10 or macOS 10.15.3+
 
 Linux works but it is not packaged, follow the developer steps below to run it from the Linux command line. 
 
@@ -18,6 +16,10 @@ Please submit a pull request if you want to add Linux packaging! A .deb and .rpm
 Download and open the latest release for your operating system: 
 https://github.com/PierreRochard/node-launcher/releases
 
+# Requirements for full node
+1. 500 GB of download bandwidth
+2. 500 GB of free disk space
+
 # Node Launcher
 
 1. Creates a node launcher data directory 
@@ -25,8 +27,6 @@ https://github.com/PierreRochard/node-launcher/releases
     * Windows: `%localappdata%/Node\ Launcher/`
 2. Finds available ports for Bitcoin and LND, testnet and mainnet
 3. When launched, Bitcoin nodes use the `datadir` directory specified in `bitcoin.conf` (or the default data directory)
-4. If you don't have >300 GB of disk space free, Bitcoin nodes will fall back to pruned
-5. Pruning still requires downloading data, so make sure you can handle downloading ~300 GB of data
 
 ![macos](https://raw.githubusercontent.com/PierreRochard/node-launcher/master/macos.png)
 

@@ -7,8 +7,7 @@ from node_launcher.constants import (
     OPERATING_SYSTEM,
     BITCOIN_DATA_PATH,
     BITCOIN_MAINNET_PEER_PORT,
-    BITCOIN_MAINNET_RPC_PORT,
-    MAINNET_PRUNE
+    BITCOIN_MAINNET_RPC_PORT
 )
 from node_launcher.logging import log
 from node_launcher.node_set.lib.configuration import Configuration
@@ -176,13 +175,9 @@ class BitcoindConfiguration(Configuration):
             return self['rpcport']
         return BITCOIN_MAINNET_RPC_PORT
 
-    def set_prune(self, should_prune: bool):
-        if should_prune:
-            self['prune'] = MAINNET_PRUNE
-        else:
-            self['prune'] = 0
-
-        self['txindex'] = not should_prune
+    def set_prune(self):
+        self['prune'] = 0
+        self['txindex'] = 1
 
     def config_file_changed(self):
         # Refresh config file
