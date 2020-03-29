@@ -11,6 +11,7 @@ from node_launcher.node_set.lib.node_status import NodeStatus
 from node_launcher.node_set.lib.software import Software
 from .bitcoind_process import BitcoindProcess
 from .bitcoind_configuration import BitcoindConfiguration
+from ..lib.hard_drives import Partition
 
 
 class BitcoindNode(NetworkNode):
@@ -18,9 +19,10 @@ class BitcoindNode(NetworkNode):
     process: BitcoindProcess
     software: Software
 
-    def __init__(self, operating_system: OperatingSystem):
+    def __init__(self, operating_system: OperatingSystem, partition: Partition):
         super().__init__(operating_system=operating_system,
-                         node_software_name=BITCOIND)
+                         node_software_name=BITCOIND,
+                         bitcoind_partition=partition)
         self.tor_synced = False
 
     def handle_log_line(self, log_line: str):

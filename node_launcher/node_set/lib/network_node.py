@@ -5,6 +5,7 @@ from node_launcher.constants import NodeSoftwareName, OperatingSystem, TOR, BITC
 from node_launcher.logging import log
 from node_launcher.node_set.bitcoind.bitcoind_configuration import BitcoindConfiguration
 from node_launcher.node_set.bitcoind.bitcoind_process import BitcoindProcess
+from node_launcher.node_set.lib.hard_drives import Partition
 from node_launcher.node_set.lib.managed_process import ManagedProcess
 from node_launcher.node_set.lib.node_status import NodeStatus
 from node_launcher.node_set.lib.software import Software
@@ -20,7 +21,8 @@ class NetworkNode(QObject):
     status = Signal(str)
 
     def __init__(self, operating_system: OperatingSystem,
-                 node_software_name: NodeSoftwareName):
+                 node_software_name: NodeSoftwareName,
+                 bitcoind_partition: Optional[Partition]):
         super().__init__()
         self.node_software_name = node_software_name
         self.current_status = None
@@ -43,11 +45,11 @@ class NetworkNode(QObject):
             self.process = ManagedProcess(self.software.daemon,
                                           self.configuration.args)
         elif node_software_name == BITCOIND:
-            self.configuration = BitcoindConfiguration()
+            self.configuration = BitcoindConfiguration(partition=bitcoind_partition)
             self.process = BitcoindProcess(self.software.daemon,
                                            self.configuration.args)
         elif node_software_name == LND:
-            self.configuration = LndConfiguration()
+            self.configuration = LndConfiguration(bitcoind_partition=bitcoind_partition)
             self.process = LndProcess(self.software.daemon,
                                       self.configuration.args)
         self.connect_events()

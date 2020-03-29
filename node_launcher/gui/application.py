@@ -17,6 +17,7 @@ from node_launcher.gui.system_tray import SystemTray
 from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
 from node_launcher.launcher_software import LauncherSoftware
+from node_launcher.node_set.lib.hard_drives import HardDrives
 
 
 class Application(QApplication):
@@ -29,7 +30,8 @@ class Application(QApplication):
         self.setQuitOnLastWindowClosed(False)
         self.aboutToQuit.connect(self.quit_app)
 
-        self.node_set = NodeSet()
+        self.full_node_partition = HardDrives().get_full_node_partition()
+        self.node_set = NodeSet(full_node_partition=self.full_node_partition)
         self.system_tray = SystemTray(self.parent, self.node_set)
 
     def start(self):

@@ -16,7 +16,8 @@ class TorNode(NetworkNode):
 
     def __init__(self, operating_system: OperatingSystem):
         super().__init__(operating_system=operating_system,
-                         node_software_name=TOR)
+                         node_software_name=TOR,
+                         bitcoind_partition=None)
 
     def handle_log_line(self, log_line: str):
         if 'Bootstrapped 0%: Starting' in log_line:
