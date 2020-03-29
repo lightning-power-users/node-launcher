@@ -19,16 +19,18 @@ from node_launcher.node_set.bitcoind.bitcoind_configuration import (
     BitcoindConfiguration
 )
 from node_launcher.node_set.lib.configuration import Configuration
+from node_launcher.node_set.lib.hard_drives import Partition
 from node_launcher.port_utilities import get_port
 from node_launcher.node_set.lnd.lnd_configuration_keys import keys_info as lnd_keys_info
 
 
 class LndConfiguration(Configuration):
     
-    def __init__(self):
+    def __init__(self, bitcoind_partition: Partition):
         file_name = 'lnd.conf'
         lnd_dir_path = LND_DIR_PATH[OPERATING_SYSTEM]
         configuration_file_path = os.path.join(lnd_dir_path, file_name)
+        self.bitcoind_partition = bitcoind_partition
         super().__init__(name='lnd', path=configuration_file_path, keys_info=lnd_keys_info)
 
     @property
@@ -69,8 +71,18 @@ class LndConfiguration(Configuration):
 
         self['bitcoin.active'] = True
 
-        self['bitcoin.node'] = 'neutrino'
-        self['neutrino.connect'] = 'btcd-mainnet.lightning.computer'
+        if self.bitcoind_partition:
+            self['bitcoin.node'] = 'bitcoind'
+            bitcoind_conf = BitcoindConfiguration(partition=self.bitcoind_partition)
+            bitcoind_conf.load()
+            self['bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
+            self['bitcoind.rpcuser'] = bitcoind_conf['rpcuser']
+            self['bitcoind.rpcpass'] = bitcoind_conf['rpcpassword']
+            self['bitcoind.zmqpubrawblock'] = bitcoind_conf['zmqpubrawblock']
+            self['bitcoind.zmqpubrawtx'] = bitcoind_conf['zmqpubrawtx']
+        else:
+            self['bitcoin.node'] = 'neutrino'
+            self['neutrino.connect'] = 'btcd-mainnet.lightning.computer'
 
         self.set_default_configuration('restlisten', f'127.0.0.1:{get_port(LND_DEFAULT_REST_PORT)}')
         self.rest_port = self['restlisten'].split(':')[-1]
@@ -123,7 +135,7 @@ class LndConfiguration(Configuration):
         self.file_watcher.blockSignals(True)
         self.populate_cache()
         self.file_watcher.blockSignals(False)
-        bitcoind_conf = BitcoindConfiguration()
+        bitcoind_conf = BitcoindConfiguration(partition=self.bitcoind_partition)
         bitcoind_conf.load()
         self['bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
         self['bitcoind.rpcuser'] = bitcoind_conf['rpcuser']

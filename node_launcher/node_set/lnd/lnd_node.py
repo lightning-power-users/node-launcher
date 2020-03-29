@@ -10,6 +10,7 @@ from node_launcher.node_set.lnd.lnd_threaded_client import LndThreadedClient
 from .lnd_configuration import LndConfiguration
 from .lnd_unlocker import LndUnlocker
 from .lnd_process import LndProcess
+from ..lib.hard_drives import Partition
 
 
 class LndNode(NetworkNode):
@@ -17,9 +18,10 @@ class LndNode(NetworkNode):
     configuration: LndConfiguration
     process: LndProcess
 
-    def __init__(self, operating_system: OperatingSystem):
+    def __init__(self, operating_system: OperatingSystem, bitcoind_partition: Partition):
         super().__init__(operating_system=operating_system,
-                         node_software_name=LND)
+                         node_software_name=LND,
+                         bitcoind_partition=bitcoind_partition)
         self.client = None
         self.unlocker = None
         self.bitcoind_syncing = False

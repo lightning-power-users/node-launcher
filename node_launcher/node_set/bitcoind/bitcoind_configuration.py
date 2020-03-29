@@ -12,17 +12,18 @@ from node_launcher.constants import (
 from node_launcher.logging import log
 from node_launcher.node_set.lib.configuration import Configuration
 from node_launcher.node_set.lib.get_random_password import get_random_password
-from node_launcher.node_set.lib.hard_drives import HardDrives
+from node_launcher.node_set.lib.hard_drives import Partition
 from node_launcher.node_set.bitcoind.bitcoind_configuration_keys import keys_info as bitcoind_keys_info
+from node_launcher.port_utilities import get_zmq_port
 
 
 class BitcoindConfiguration(Configuration):
-    hard_drives: HardDrives
     zmq_block_port: int
     zmq_tx_port: int
+    partition: Partition
 
-    def __init__(self):
-        self.hard_drives = HardDrives()
+    def __init__(self, partition: Partition):
+        self.partition = partition
         file_name = 'bitcoin.conf'
         bitcoin_data_path = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
         configuration_file_path = os.path.join(bitcoin_data_path, file_name)
@@ -38,18 +39,9 @@ class BitcoindConfiguration(Configuration):
 
     def check(self):
         log.debug('datadir', datadir=self['datadir'])
-
-        if ('datadir' not in self
-                or not os.path.exists(self['datadir'])):
-            self.autoconfigure_datadir()
-
-        if os.path.exists(os.path.join(self['datadir'], 'blocks')):
-            if 'prune' not in self:
-                self.set_prune(False)
-        else:
-            if 'prune' not in self:
-                should_prune = self.hard_drives.should_prune(self['datadir'])
-                self.set_prune(should_prune)
+        self['datadir'] = self.partition.bitcoin_dir_path
+        self['prune'] = 0
+        self['txindex'] = 1
 
         wallet_paths = self.get_wallet_paths()
 
@@ -63,6 +55,12 @@ class BitcoindConfiguration(Configuration):
         self.set_default_configuration('rpcpassword', get_random_password())
 
         self['blockfilterindex'] = True
+
+        self.zmq_block_port = get_zmq_port()
+        self.zmq_tx_port = get_zmq_port()
+
+        self['zmqpubrawblock'] = f'tcp://127.0.0.1:{self.zmq_block_port}'
+        self['zmqpubrawtx'] = f'tcp://127.0.0.1:{self.zmq_tx_port}'
 
         self['proxy'] = '127.0.0.1:9050'
         self['listen'] = True
@@ -86,42 +84,6 @@ class BitcoindConfiguration(Configuration):
 
         # self.config_snapshot = self.snapshot.copy()
         # self.file_watcher.fileChanged.connect(self.config_file_changed)
-
-    def autoconfigure_datadir(self):
-        default_datadir = BITCOIN_DATA_PATH[OPERATING_SYSTEM]
-        big_drive = self.hard_drives.get_big_drive()
-        default_is_big_enough = not self.hard_drives.should_prune(
-            input_directory=default_datadir
-        )
-        default_is_biggest = self.hard_drives.is_default_partition(big_drive)
-        log.info(
-            'autoconfigure_datadir',
-            default_is_big_enough=default_is_big_enough,
-            default_is_biggest=default_is_biggest
-        )
-        if default_is_big_enough or default_is_biggest:
-            self['datadir'] = default_datadir
-            log.info(
-                'autoconfigure_datadir',
-                datadir=default_datadir
-            )
-            return
-
-        if not self.hard_drives.should_prune(big_drive.mountpoint):
-            datadir = os.path.join(big_drive.mountpoint, 'Bitcoin')
-            self['datadir'] = datadir
-            log.info(
-                'autoconfigure_datadir',
-                datadir=datadir
-            )
-            if not os.path.exists(self['datadir']):
-                os.mkdir(self['datadir'])
-        else:
-            self['datadir'] = default_datadir
-            log.info(
-                'autoconfigure_datadir',
-                datadir=default_datadir
-            )
 
     def get_wallet_paths(self):
         exclude_files = {
@@ -174,10 +136,6 @@ class BitcoindConfiguration(Configuration):
         if self['rpcport'] is not None:
             return self['rpcport']
         return BITCOIN_MAINNET_RPC_PORT
-
-    def set_prune(self):
-        self['prune'] = 0
-        self['txindex'] = 1
 
     def config_file_changed(self):
         # Refresh config file
