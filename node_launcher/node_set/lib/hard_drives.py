@@ -112,50 +112,12 @@ class HardDrives(object):
             else:
                 return None
 
-    def get_big_drive(self) -> Partition:
-        partitions = self.list_partitions()
-        max_free_space = max([p.gb_free for p in partitions])
-        for partition in partitions:
-            if partition.gb_free == max_free_space:
-                log.info(
-                    'get_big_drive',
-                    partition=partition
-                )
-                return partition
-
     @staticmethod
     def is_default_partition(path: str):
         default_partition = os.path.join(BITCOIN_DATA_PATH[OPERATING_SYSTEM], os.pardir)
         default_partition = Path(default_partition).drive
         partition = Path(path).drive
         return default_partition == partition
-
-    @staticmethod
-    def should_prune(input_directory: str) -> bool:
-        directory = os.path.realpath(input_directory)
-        try:
-            total, used, free, percent = psutil.disk_usage(directory)
-        except:
-            log.warning(
-                'should_prune_disk_usage',
-                input_directory=input_directory,
-                directory=directory,
-                exc_info=True
-            )
-            return False
-        free_gb = math.floor(free / GIGABYTE)
-        should_prune = free_gb < MINIMUM_GB
-        log.info(
-            'should_prune',
-            input_directory=input_directory,
-            total=total,
-            used=used,
-            free=free,
-            percent=percent,
-            free_gb=free_gb,
-            should_prune=should_prune
-        )
-        return should_prune
 
     def get_dir_size(self, start_path: str) -> int:
         total_size = 0
