@@ -42,6 +42,7 @@ class BitcoindConfiguration(Configuration):
         self['datadir'] = self.partition.bitcoin_dir_path
         self['prune'] = 0
         self['txindex'] = 1
+        self['reindex'] = 0
 
         wallet_paths = self.get_wallet_paths()
 

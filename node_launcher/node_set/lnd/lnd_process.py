@@ -13,7 +13,6 @@ class LndSignals(QObject):
     finished = Signal()
     error = Signal(tuple)
     result = Signal(object)
-    unprune = Signal(int)
 
 
 class LndProcess(ManagedProcess):
@@ -38,9 +37,6 @@ class LndProcess(ManagedProcess):
             self.restart_process()
         elif 'Started rescan from block' in line:
             self.rescan_height = int(re.search('height \d{6}', line)[0].split()[-1])
-        elif 'Unable to complete chain rescan: -1: Block not available (pruned data)' in line:
-            self.signals.unprune.emit(self.rescan_height)
-            self.terminate()
         elif 'Unable to complete chain rescan' in line:
             self.terminate()
             self.restart_process()

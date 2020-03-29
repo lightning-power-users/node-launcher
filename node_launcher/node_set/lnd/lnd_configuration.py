@@ -135,13 +135,15 @@ class LndConfiguration(Configuration):
         self.file_watcher.blockSignals(True)
         self.populate_cache()
         self.file_watcher.blockSignals(False)
-        bitcoind_conf = BitcoindConfiguration(partition=self.bitcoind_partition)
-        bitcoind_conf.load()
-        self['bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
-        self['bitcoind.rpcuser'] = bitcoind_conf['rpcuser']
-        self['bitcoind.rpcpass'] = bitcoind_conf['rpcpassword']
-        self['bitcoind.zmqpubrawblock'] = bitcoind_conf['zmqpubrawblock']
-        self['bitcoind.zmqpubrawtx'] = bitcoind_conf['zmqpubrawtx']
+        if self.bitcoind_partition:
+            self['bitcoin.node'] = 'bitcoind'
+            bitcoind_conf = BitcoindConfiguration(partition=self.bitcoind_partition)
+            bitcoind_conf.load()
+            self['bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
+            self['bitcoind.rpcuser'] = bitcoind_conf['rpcuser']
+            self['bitcoind.rpcpass'] = bitcoind_conf['rpcpassword']
+            self['bitcoind.zmqpubrawblock'] = bitcoind_conf['zmqpubrawblock']
+            self['bitcoind.zmqpubrawtx'] = bitcoind_conf['zmqpubrawtx']
 
     @property
     def node_port(self) -> int:

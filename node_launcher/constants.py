@@ -102,7 +102,7 @@ UPGRADE = 'Please download the latest version of the Node Launcher: ' \
 
 GIGABYTE = 1000000000
 
-MINIMUM_GB = 500
+MINIMUM_GB = 400
 
 
 BITCOIN_TESTNET_PEER_PORT = 18333
