@@ -5,7 +5,8 @@ from node_launcher.node_set import NodeSet
 
 class NodeManageAction(MenuAction):
     def __init__(self, node_set: NodeSet, system_tray):
-        super().__init__('Manage Nodes')
+        super().__init__(text='Manage Nodes')
+        self.setText('Manage Nodes')
         self.node_set = node_set
         self.system_tray = system_tray
         self.nodes_manage_dialog = NodesManageDialog(
