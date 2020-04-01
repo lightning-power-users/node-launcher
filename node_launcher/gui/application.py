@@ -46,7 +46,9 @@ class Application(QApplication):
 
     @staticmethod
     def check_version():
+        log.debug('Checking Node Launcher version')
         latest_version = LauncherSoftware().get_latest_release_version()
+        log.debug('Node Launcher', latest_version=latest_version, NODE_LAUNCHER_RELEASE=NODE_LAUNCHER_RELEASE)
         if latest_version is None:
             return
         latest_major, latest_minor, latest_bugfix = latest_version.split('.')

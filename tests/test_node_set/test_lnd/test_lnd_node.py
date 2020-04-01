@@ -40,7 +40,7 @@ class TestLndNode(object):
                           NodeStatus.SOFTWARE_READY]:
                 lnd_node.software.update()
             elif status == NodeStatus.SYNCING:
-                lnd_node.bitcoind_syncing = True
+                lnd_node.bitcoind_ready = True
                 lnd_node.start_process()
             elif status == NodeStatus.STOPPED:
                 tor_node.stop()
