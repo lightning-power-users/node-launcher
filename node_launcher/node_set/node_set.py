@@ -54,6 +54,7 @@ class NodeSet(object):
                 self.bitcoind_node.tor_synced = True
                 self.bitcoind_node.start_process()
             else:
+                self.lnd_node.tor_synced = True
                 self.lnd_node.start_process()
         elif tor_status == NodeStatus.STOPPED:
             self.lnd_node.stop()
@@ -65,12 +66,12 @@ class NodeSet(object):
                                NodeStatus.SOFTWARE_READY]:
             if self.lnd_node.current_status is None:
                 self.lnd_node.software.update()
-        elif bitcoind_status == NodeStatus.SYNCING:
-            self.lnd_node.bitcoind_syncing = True
+        elif bitcoind_status in [NodeStatus.SYNCING, NodeStatus.SYNCED]:
+            self.lnd_node.bitcoind_ready = True
             self.lnd_node.start_process()
         elif bitcoind_status == NodeStatus.STOPPED:
             self.lnd_node.stop()
-            self.lnd_node.bitcoind_syncing = False
+            self.lnd_node.bitcoind_ready = False
         elif bitcoind_status == NodeStatus.RESTART:
             self.lnd_node.stop()
             self.bitcoind_node.software.update()

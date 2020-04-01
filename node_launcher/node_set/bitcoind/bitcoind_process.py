@@ -16,8 +16,9 @@ class BitcoindProcess(ManagedProcess):
         self.timestamp_changes = []
 
     def process_output_line(self, line: str):
-        if 'mapBlockIndex.size() = ' in line:
-            self.update_status(NodeStatus.SYNCING)
+        if 'dnsseed thread exit' in line:
+            if not self.current_status == NodeStatus.SYNCED:
+                self.update_status(NodeStatus.SYNCING)
         elif 'Leaving InitialBlockDownload' in line:
             self.update_status(NodeStatus.SYNCED)
         elif 'progress=1.000000' in line:

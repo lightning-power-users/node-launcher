@@ -22,9 +22,11 @@ class LndNode(NetworkNode):
         super().__init__(operating_system=operating_system,
                          node_software_name=LND,
                          bitcoind_partition=bitcoind_partition)
+        self.bitcoind_partition = bitcoind_partition
         self.client = None
         self.unlocker = None
-        self.bitcoind_syncing = False
+        self.bitcoind_ready = False
+        self.tor_synced = False
 
     def handle_status_change(self, new_status):
         if new_status == NodeStatus.CONFIGURATION_READY:
@@ -39,6 +41,13 @@ class LndNode(NetworkNode):
     def handle_log_line(self, log_line: str):
         if 'Unable to create chain control: unable to subscribe for zmq block events' in log_line:
             self.restart = True
+
+    @property
+    def prerequisites_synced(self):
+        if self.bitcoind_partition:
+            return self.bitcoind_ready
+        else:
+            return self.tor_synced
 
     def stop(self):
         log.debug('lnd stop', process_state=self.process.state())
