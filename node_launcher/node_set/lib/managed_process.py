@@ -33,6 +33,8 @@ class ManagedProcess(QProcess):
             self.setProcessEnvironment(env)
 
     def update_status(self, new_status: NodeStatus):
+        if new_status == self.current_status:
+            return
         log.debug('update_status',
                   binary=self.binary,
                   new_status=new_status,

@@ -73,7 +73,6 @@ class NetworkNode(QObject):
                   new_status=new_status)
         self.current_status = new_status
         self.status.emit(str(new_status))
-        self.start_process()
         if new_status == NodeStatus.STOPPED and self.restart:
             self.update_status(NodeStatus.RESTART)
 

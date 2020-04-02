@@ -41,8 +41,8 @@ class NodeSet(object):
     def handle_tor_node_status_change(self, tor_status):
         if tor_status == NodeStatus.RESTART:
             self.start()
-        elif tor_status in [NodeStatus.SOFTWARE_DOWNLOADED,
-                            NodeStatus.SOFTWARE_READY]:
+        elif tor_status == NodeStatus.SOFTWARE_READY:
+            self.tor_node.start_process()
             if self.full_node_partition:
                 self.bitcoind_node.software.update()
             else:

@@ -27,6 +27,7 @@ class LndNode(NetworkNode):
         self.unlocker = None
         self.bitcoind_ready = False
         self.tor_synced = False
+        self.restart = False
 
     def handle_status_change(self, new_status):
         if new_status == NodeStatus.CONFIGURATION_READY:
