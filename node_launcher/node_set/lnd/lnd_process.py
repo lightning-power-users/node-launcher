@@ -35,6 +35,8 @@ class LndProcess(ManagedProcess):
         elif 'Unable to synchronize wallet to chain' in line:
             self.terminate()
             self.restart_process()
+        elif 'Error during rescan: rescan block subscription was canceled' in line:
+            self.restart_process()
         elif 'Started rescan from block' in line:
             self.rescan_height = int(re.search('height \d{6}', line)[0].split()[-1])
         elif 'Unable to complete chain rescan' in line:

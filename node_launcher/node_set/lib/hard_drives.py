@@ -123,6 +123,7 @@ class HardDrives(object):
     def get_full_node_partition(self) -> Optional[Partition]:
         partitions = self.list_partitions()
         for partition in partitions:
+            log.debug('get_full_node_partition', partition=partition)
             if partition.can_full_node and partition.has_bitcoin_dir:
                 return partition
             elif partition.can_full_node and partition.is_default_partition:
@@ -130,4 +131,5 @@ class HardDrives(object):
             elif partition.can_full_node:
                 return partition
             else:
-                return None
+                continue
+        return None

@@ -33,8 +33,9 @@ class NodesManageDialog(QDialog):
         self.tabs.addTab(self.tor_tab, 'Tor')
 
         # Initializing bitcoind tab
-        self.bitcoind_tab = NodeManageDialog(self.node_set.bitcoind_node)
-        self.tabs.addTab(self.bitcoind_tab, 'Bitcoind')
+        if self.node_set.bitcoind_node:
+            self.bitcoind_tab = NodeManageDialog(self.node_set.bitcoind_node)
+            self.tabs.addTab(self.bitcoind_tab, 'Bitcoind')
 
         # Initializing lnd tab
         self.lnd_tab = NodeManageDialog(self.node_set.lnd_node)
