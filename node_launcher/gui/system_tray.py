@@ -14,9 +14,10 @@ class SystemTray(QSystemTrayIcon):
         self.menu = Menu(node_set=node_set, system_tray=self)
         self.setContextMenu(self.menu)
 
-        self.node_set.bitcoind_node.process.notification.connect(
-            self.show_message
-        )
+        if self.node_set.bitcoind_node:
+            self.node_set.bitcoind_node.process.notification.connect(
+                self.show_message
+            )
 
         self.node_set.lnd_node.process.notification.connect(
             self.show_message

@@ -21,15 +21,18 @@ class NodeSet(object):
         self.tor_node = TorNode(operating_system=OPERATING_SYSTEM)
         if self.full_node_partition:
             self.bitcoind_node = BitcoindNode(operating_system=OPERATING_SYSTEM, partition=self.full_node_partition)
+        else:
+            self.bitcoind_node = None
 
         self.lnd_node = LndNode(operating_system=OPERATING_SYSTEM, bitcoind_partition=self.full_node_partition)
 
         self.tor_node.status.connect(
             self.handle_tor_node_status_change
         )
-        self.bitcoind_node.status.connect(
-            self.handle_bitcoind_node_status_change
-        )
+        if self.bitcoind_node:
+            self.bitcoind_node.status.connect(
+                self.handle_bitcoind_node_status_change
+            )
         self.lnd_node.status.connect(
             self.handle_lnd_node_status_change
         )
