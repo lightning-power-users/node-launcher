@@ -1,6 +1,7 @@
 colorama
 dataclasses
 pydbus
+google-api-core
 googleapis-common-protos
 google-api-core
 grpcio
