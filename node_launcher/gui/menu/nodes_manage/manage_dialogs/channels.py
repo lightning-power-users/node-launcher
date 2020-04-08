@@ -1,14 +1,16 @@
-from PySide2.QtCore import Qt, QTimer
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QCursor
 from PySide2.QtWidgets import QAction, QDialog, QGridLayout, QMenu, QTreeWidget, \
     QTreeWidgetItem
 
+from node_launcher.node_set.lib.node_status import NodeStatus
 from node_launcher.node_set.lnd.lnd_node import LndNode
 from node_launcher.node_set.lnd.lnd_threaded_client import LndThreadedClient
 
 
 class ChannelsDialog(QDialog):
     node: LndNode
+    client: LndThreadedClient
 
     def __init__(self, node: LndNode):
         super().__init__()
@@ -26,20 +28,22 @@ class ChannelsDialog(QDialog):
 
         self.setLayout(self.layout)
 
+        self.node.status.connect(
+            self.handle_lnd_node_status_change
+        )
+
         self.client = LndThreadedClient(self.node.configuration)
-        self.timer = QTimer()
+        self.client.signals.result.connect(self.handle_list)
+        self.client.signals.error.connect(self.handle_error)
 
-    def start_refresh(self):
-        self.client = LndThreadedClient(self.node.configuration)
-        self.client.signals.result.connect(self.handle_peers_list)
-        self.timer.timeout.connect(self.recurring_timer)
-        self.timer.setInterval(1000)
-        self.timer.start()
+    def handle_lnd_node_status_change(self, status):
+        if status == NodeStatus.SYNCED:
+            self.client.list_all()
 
-    def recurring_timer(self):
-        self.client.list_peers()
+    def handle_error(self):
+        self.client.list_all()
 
-    def handle_peers_list(self, data):
+    def handle_list(self, data):
         for peer_data in data['peers']:
             peers = self.tree.findItems(peer_data.pub_key,
                                         Qt.MatchExactly | Qt.MatchRecursive, 0)

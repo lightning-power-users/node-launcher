@@ -169,13 +169,13 @@ class LndClient(object):
 
     def get_info(self) -> ln.GetInfoResponse:
         request = ln.GetInfoRequest()
-        response = self.lnd_client.GetInfo(request, timeout=1)
+        response = self.lnd_client.GetInfo(request)
         return response
 
     def get_node_info(self, pub_key: str) -> ln.NodeInfo:
         request = ln.NodeInfoRequest()
         request.pub_key = pub_key
-        response = self.lnd_client.GetNodeInfo(request, timeout=30)
+        response = self.lnd_client.GetNodeInfo(request)
         return response
 
     def get_chan_info(self, chan_id: int) -> ln.ChannelEdge:
@@ -210,12 +210,12 @@ class LndClient(object):
         request.inactive_only = False
         request.public_only = False
         request.private_only = False
-        response = self.lnd_client.ListChannels(request, timeout=30)
+        response = self.lnd_client.ListChannels(request)
         return response.channels
 
     def list_pending_channels(self) -> List[PendingChannels]:
         request = ln.PendingChannelsRequest()
-        response = self.lnd_client.PendingChannels(request, timeout=5)
+        response = self.lnd_client.PendingChannels(request)
         pending_channels = []
         pending_types = [
             'pending_open_channels',
