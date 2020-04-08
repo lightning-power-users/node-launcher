@@ -38,8 +38,10 @@ class LndNode(NetworkNode):
         elif new_status == NodeStatus.SYNCING:
             self.client.debug_level()
 
-    def handle_log_line(self, log_line: str):
-        if 'Unable to create chain control: unable to subscribe for zmq block events' in log_line:
+    def handle_log_line(self, line: str):
+        if 'Unable to create chain control: unable to subscribe for zmq block events' in line:
+            self.restart = True
+        elif 'Unable to start server: unable to fetch filter: unable to fetch cfilter' in line:
             self.restart = True
 
     @property

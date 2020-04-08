@@ -45,7 +45,8 @@ class LndConfiguration(Configuration):
             ]
 
         arg_list += [
-            '--bitcoin.mainnet'
+            '--bitcoin.mainnet',
+            '--profile=9736'
         ]
         return arg_list
 
