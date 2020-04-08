@@ -4,12 +4,14 @@ from PySide2.QtWidgets import QSystemTrayIcon, QWidget
 from .assets.asset_access import asset_access
 from .menu.menu import Menu
 from node_launcher.node_set import NodeSet
+from ..logging import log
 
 
 class SystemTray(QSystemTrayIcon):
     def __init__(self, parent: QWidget, node_set: NodeSet):
         super(SystemTray, self).__init__(parent=parent)
         self.node_set = node_set
+        self.setVisible(True)
         self.set_red()
         self.menu = Menu(node_set=node_set, system_tray=self)
         self.setContextMenu(self.menu)
@@ -48,4 +50,5 @@ class SystemTray(QSystemTrayIcon):
                      icon=QSystemTrayIcon.Information,
                      timeout: int = 10):
         milliseconds_timeout_hint = timeout * 1000
+        log.debug('show_message', title=title, message=message, timeout=timeout)
         self.showMessage(title, message, icon, milliseconds_timeout_hint)
