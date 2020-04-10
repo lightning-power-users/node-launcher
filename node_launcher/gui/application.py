@@ -73,9 +73,10 @@ class Application(QApplication):
             self.node_set.lnd_node.process.kill()
         self.node_set.lnd_node.process.waitForFinished(-1)
 
-        self.node_set.bitcoind_node.stop()
-        self.system_tray.show_message(title='Stopping bitcoind...')
-        self.node_set.bitcoind_node.process.waitForFinished(-1)
+        if self.node_set.bitcoind_node:
+            self.node_set.bitcoind_node.stop()
+            self.system_tray.show_message(title='Stopping bitcoind...')
+            self.node_set.bitcoind_node.process.waitForFinished(-1)
 
         self.node_set.tor_node.process.kill()
         self.node_set.tor_node.process.waitForFinished(-1)
