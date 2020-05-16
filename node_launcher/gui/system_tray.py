@@ -10,7 +10,6 @@ class SystemTray(QSystemTrayIcon):
     def __init__(self, parent: QWidget, node_set: NodeSet):
         super(SystemTray, self).__init__(parent=parent)
         self.node_set = node_set
-        self.setVisible(True)
         self.set_red()
         self.menu = Menu(node_set=node_set, system_tray=self)
         self.setContextMenu(self.menu)
