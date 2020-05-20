@@ -6,7 +6,7 @@ from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE, OPERATING_SY
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.system_tray import SystemTray
 from node_launcher.logging import log
-from node_launcher.node_set import NodeSet
+from node_launcher.node_set import LocalNodeSet
 from node_launcher.launcher_software import LauncherSoftware
 from node_launcher.node_set.lib.hard_drives import HardDrives
 
@@ -22,8 +22,9 @@ class Application(QApplication):
         self.aboutToQuit.connect(self.quit_app)
 
         self.full_node_partition = HardDrives().get_full_node_partition()
-        self.node_set = NodeSet(full_node_partition=self.full_node_partition)
-        self.system_tray = SystemTray(self.parent, self.node_set)
+        self.local_node_set = LocalNodeSet(full_node_partition=self.full_node_partition)
+        self.remote_node_sets = LocalNodeSet.get_remote_node_sets()
+        self.system_tray = SystemTray(self.parent, self.local_node_set)
 
     def start(self):
         threadpool = QThreadPool()
@@ -31,9 +32,10 @@ class Application(QApplication):
         threadpool.start(worker)
 
         self.system_tray.show()
-        self.node_set.start()
+        self.local_node_set.start()
         status = self.exec_()
         return status
+
 
     @staticmethod
     def check_version():
@@ -68,18 +70,18 @@ class Application(QApplication):
     def quit_app(self):
         log.debug('quit_app')
         self.system_tray.show_message(title='Stopping LND...')
-        response = self.node_set.lnd_node.stop()
+        response = self.local_node_set.lnd_node.stop()
         if response is False:
-            self.node_set.lnd_node.process.kill()
-        self.node_set.lnd_node.process.waitForFinished(-1)
+            self.local_node_set.lnd_node.process.kill()
+        self.local_node_set.lnd_node.process.waitForFinished(-1)
 
-        if self.node_set.bitcoind_node:
-            self.node_set.bitcoind_node.stop()
+        if self.local_node_set.bitcoind_node:
+            self.local_node_set.bitcoind_node.stop()
             self.system_tray.show_message(title='Stopping bitcoind...')
-            self.node_set.bitcoind_node.process.waitForFinished(-1)
+            self.local_node_set.bitcoind_node.process.waitForFinished(-1)
 
-        self.node_set.tor_node.process.kill()
-        self.node_set.tor_node.process.waitForFinished(-1)
+        self.local_node_set.tor_node.process.kill()
+        self.local_node_set.tor_node.process.waitForFinished(-1)
 
         self.system_tray.show_message(title='Exiting Node Launcher', timeout=1)
 

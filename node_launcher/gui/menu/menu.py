@@ -14,11 +14,11 @@ from node_launcher.gui.menu.menu_actions.separator_action import SeparatorAction
 from node_launcher.gui.menu.menu_actions.nodes_menu.tor_status_action import \
     TorStatusAction
 from node_launcher.gui.utilities import reveal
-from node_launcher.node_set import NodeSet
+from node_launcher.node_set import LocalNodeSet
 
 
 class Menu(QMenu):
-    def __init__(self, node_set: NodeSet, system_tray):
+    def __init__(self, node_set: LocalNodeSet, system_tray):
         super().__init__()
         self.node_set = node_set
         self.system_tray = system_tray

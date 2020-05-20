@@ -9,7 +9,7 @@ from .tor.tor_node import TorNode
 from node_launcher.logging import log
 
 
-class NodeSet(object):
+class LocalNodeSet(object):
     tor_node: TorNode
     bitcoind_node: Optional[BitcoindNode]
     lnd_node: LndNode
@@ -84,4 +84,3 @@ class NodeSet(object):
         if lnd_status == NodeStatus.STOPPED and self.lnd_node.restart:
             self.lnd_node.restart = False
             self.lnd_node.start_process()
-

@@ -2,14 +2,14 @@
 from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QTabWidget, QDialog, QVBoxLayout
 
-from node_launcher.node_set import NodeSet
+from node_launcher.node_set import LocalNodeSet
 
 from .node_manage.node_manage import NodeManageDialog
 
 
 class NodesManageDialog(QDialog):
 
-    def __init__(self, node_set: NodeSet, system_tray):
+    def __init__(self, node_set: LocalNodeSet, system_tray):
         # noinspection PyUnresolvedReferences
         super().__init__(
             f=Qt.WindowMinimizeButtonHint|Qt.WindowMaximizeButtonHint|Qt.WindowCloseButtonHint

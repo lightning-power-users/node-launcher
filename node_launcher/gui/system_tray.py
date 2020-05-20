@@ -3,12 +3,12 @@ from PySide2.QtWidgets import QSystemTrayIcon, QWidget
 
 from .assets.asset_access import asset_access
 from .menu.menu import Menu
-from node_launcher.node_set import NodeSet
+from node_launcher.node_set import LocalNodeSet
 from ..logging import log
 
 
 class SystemTray(QSystemTrayIcon):
-    def __init__(self, parent: QWidget, node_set: NodeSet):
+    def __init__(self, parent: QWidget, node_set: LocalNodeSet):
         super(SystemTray, self).__init__(parent=parent)
         self.node_set = node_set
         self.set_red()
