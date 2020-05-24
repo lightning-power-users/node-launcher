@@ -129,5 +129,3 @@ class ChannelsDialog(QDialog):
     def close_channel(self, chan_id: int):
         client = LndThreadedClient(self.node.configuration)
         client.signals.result.connect(self.handle_peers_list)
-
-        print(event)

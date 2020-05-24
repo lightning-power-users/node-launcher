@@ -12,3 +12,7 @@ class TorStatusAction(MenuAction):
     def update_text(self, line):
         new_text = 'Tor: ' + line.replace('_', ' ')
         self.setText(new_text)
+        if line == 'synced':
+            self.setVisible(False)
+        if line != 'synced' and not self.isVisible():
+            self.setVisible(True)

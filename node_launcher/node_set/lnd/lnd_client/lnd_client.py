@@ -35,6 +35,18 @@ class PendingChannels(DefaultModel):
             return None
 
 
+class LndBalances(object):
+    # Ordered by liquidity
+    active_off_chain_balance: int = 0
+    pending_htlc_balance: int = 0
+    confirmed_on_chain_balance: int = 0
+    timelocked_on_chain_balance: int = 0
+    unconfirmed_off_chain_balance: int = 0
+    unconfirmed_on_chain_balance: int = 0
+    inactive_off_chain_balance: int = 0
+    reserve_off_chain_balance: int = 0
+
+
 class LndClient(object):
     def __init__(self, lnd_configuration=None,
                  lnddir: str = LND_DIR_PATH[OPERATING_SYSTEM],
@@ -44,7 +56,10 @@ class LndClient(object):
         self._lnddir = lnddir
         self._grpc_port = grpc_port
         self._grpc_host = grpc_host
-        self._macaroon_path = macaroon_path
+        if macaroon_path is not None:
+            self._macaroon_path = macaroon_path
+        else:
+            self._macaroon_path = lnddir
         self._lnd_client = None
         self._wallet_unlocker = None
 
@@ -191,6 +206,85 @@ class LndClient(object):
         response = self.lnd_client.ConnectPeer(request, timeout=timeout)
         return response
 
+    def channel_balance(self) -> ln.ChannelBalanceResponse:
+        request = ln.ChannelBalanceRequest()
+        response = self.lnd_client.ChannelBalance(request)
+        return response
+
+    def wallet_balance(self) -> ln.WalletBalanceResponse:
+        request = ln.WalletBalanceRequest()
+        response = self.lnd_client.WalletBalance(request)
+        return response
+
+    def list_unspent(self) -> ln.ListUnspentResponse:
+        request = ln.ListUnspentRequest(min_confs=0, max_confs=10000000)
+        response = self.lnd_client.ListUnspent(request)
+        return response
+
+    def get_lnd_balances(self) -> LndBalances:
+        log.debug('get_lnd_balances')
+        b = LndBalances()
+
+        open_channels = self.list_channels()
+        log.debug('open_channels', count=len(open_channels))
+        for oc in open_channels:
+            if oc.active:
+                b.active_off_chain_balance += oc.local_balance
+            else:
+                b.inactive_off_chain_balance += oc.local_balance
+            b.reserve_off_chain_balance += oc.local_chan_reserve_sat
+            b.pending_htlc_balance += oc.unsettled_balance
+
+        channel_balance = self.channel_balance()
+        log.debug('channel_balance', channel_balance=channel_balance)
+        log.debug('calculated',
+                  active_off_chain_balance=b.active_off_chain_balance,
+                  inactive_off_chain_balance=b.inactive_off_chain_balance,
+                  total_off_chain_balance=b.active_off_chain_balance+b.inactive_off_chain_balance,
+                  reserve_off_chain_balance=b.reserve_off_chain_balance,
+                  pending_htlc_balance=b.pending_htlc_balance,
+                  )
+        assert b.active_off_chain_balance + b.inactive_off_chain_balance == channel_balance.balance
+
+        pending_channels = self.pending_channels()
+        for pc in pending_channels.pending_open_channels:
+            b.unconfirmed_off_chain_balance += pc.channel.local_balance
+            b.reserve_off_chain_balance += pc.channel.local_chan_reserve_sat
+        for pc in pending_channels.waiting_close_channels:
+            b.unconfirmed_on_chain_balance += pc.channel.local_balance
+        for pc in pending_channels.pending_force_closing_channels:
+            b.timelocked_on_chain_balance += pc.channel.limbo_balance
+
+        log.debug('calculated',
+                  unconfirmed_off_chain_balance=b.unconfirmed_off_chain_balance)
+        assert b.timelocked_on_chain_balance == pending_channels.total_limbo_balance
+        assert b.unconfirmed_off_chain_balance == channel_balance.pending_open_balance
+
+        wallet_balance = self.wallet_balance()
+        b.confirmed_on_chain_balance = wallet_balance.confirmed_balance
+        log.debug('wallet_balance',
+                  confirmed_balance=wallet_balance.confirmed_balance,
+                  unconfirmed_balance=wallet_balance.unconfirmed_balance)
+        log.debug('calculated',
+                  unconfirmed_on_chain_balance=b.unconfirmed_on_chain_balance,
+                  timelocked_on_chain_balance=b.timelocked_on_chain_balance,
+                  total_unspendable_on_chain_balance=b.unconfirmed_on_chain_balance+b.timelocked_on_chain_balance)
+
+        utxos = self.list_unspent().utxos
+        total_on_chain = 0
+        for utxo in utxos:
+            total_on_chain += utxo.amount_sat
+            print(utxo.outpoint.txid_str)
+
+        log.debug('utxo calculated', total_on_chain=total_on_chain)
+        log.debug('channel and balance calculated',
+                  total=b.unconfirmed_on_chain_balance + b.confirmed_on_chain_balance,
+                  unconfirmed=b.unconfirmed_on_chain_balance,
+                  confirmed=b.confirmed_on_chain_balance)
+        assert total_on_chain == b.unconfirmed_on_chain_balance + b.confirmed_on_chain_balance
+
+        return b
+
     def list_all(self):
         return {
             'peers': self.list_peers(),
@@ -213,13 +307,17 @@ class LndClient(object):
         response = self.lnd_client.ListChannels(request)
         return response.channels
 
-    def list_pending_channels(self) -> List[PendingChannels]:
+    def pending_channels(self) -> ln.PendingChannelsResponse:
         request = ln.PendingChannelsRequest()
         response = self.lnd_client.PendingChannels(request)
+        return response
+
+    def list_pending_channels(self) -> List[PendingChannels]:
+        response = self.pending_channels()
         pending_channels = []
         pending_types = [
             'pending_open_channels',
-            'pending_closing_channels',
+            # 'pending_closing_channels', DEPRECATED
             'pending_force_closing_channels',
             'waiting_close_channels'
         ]
