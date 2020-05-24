@@ -35,7 +35,6 @@ class Menu(QMenu):
         for action in default_actions:
             self.add_action(action)
 
-
         self.joule_url_action = self.addAction('Copy Node URL (REST)')
 
         # Joule

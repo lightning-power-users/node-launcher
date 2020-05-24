@@ -11,4 +11,7 @@ class LndStatusAction(MenuAction):
 
     def update_text(self, line):
         new_text = 'LND: ' + line.replace('_', ' ')
-        self.setText(new_text)
+        if line != 'synced':
+            self.setText(new_text)
+        else:
+            self.lnd_node.client
