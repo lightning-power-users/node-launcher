@@ -46,8 +46,37 @@ class LndBalances(object):
     inactive_off_chain_balance: int = 0
     reserve_off_chain_balance: int = 0
 
+    def total_offchain(self):
+        return (
+            self.active_off_chain_balance
+            + self.pending_htlc_balance
+            + self.unconfirmed_off_chain_balance
+            + self.inactive_off_chain_balance
+        )
+
+    def total_onchain(self):
+        return (
+            self.confirmed_on_chain_balance
+            + self.timelocked_on_chain_balance
+            + self.unconfirmed_on_chain_balance
+        )
+
+    def total_balance(self):
+        return (
+            self.active_off_chain_balance
+            + self.pending_htlc_balance
+            + self.confirmed_on_chain_balance
+            + self.timelocked_on_chain_balance
+            + self.unconfirmed_off_chain_balance
+            + self.unconfirmed_on_chain_balance
+            + self.inactive_off_chain_balance
+        )
+
     def __repr__(self):
-        return 
+        return f'Total: {self.total_balance()} \n' \
+               f'Reserve: {self.reserve_off_chain_balance} \n' \
+               f'Offchain: {self.total_offchain()} \n' \
+               f'Onchain: {self.total_onchain()} \n'
 
 
 class LndClient(object):
