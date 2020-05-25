@@ -3,7 +3,7 @@ from PySide2.QtGui import QCursor
 from PySide2.QtWidgets import QAction, QDialog, QGridLayout, QMenu, QTreeWidget, \
     QTreeWidgetItem
 
-from node_launcher.node_set.lib.node_status import NodeStatus
+from node_launcher.node_set.lnd.lnd_client import LndClient
 from node_launcher.node_set.lnd.lnd_node import LndNode
 from node_launcher.node_set.lnd.lnd_threaded_client import LndThreadedClient
 
@@ -12,10 +12,8 @@ class ChannelsDialog(QDialog):
     node: LndNode
     client: LndThreadedClient
 
-    def __init__(self, node: LndNode):
+    def __init__(self, lnd_client: LndClient):
         super().__init__()
-
-        self.node = node
 
         self.layout = QGridLayout()
 
@@ -28,17 +26,11 @@ class ChannelsDialog(QDialog):
 
         self.setLayout(self.layout)
 
-        self.node.status.connect(
-            self.handle_lnd_node_status_change
-        )
-
-        self.client = LndThreadedClient(self.node.configuration)
+        self.client = LndThreadedClient(lnd_client=lnd_client)
         self.client.signals.result.connect(self.handle_list)
         self.client.signals.error.connect(self.handle_error)
 
-    def handle_lnd_node_status_change(self, status):
-        if status == NodeStatus.SYNCED:
-            self.client.list_all()
+        self.client.list_all()
 
     def handle_error(self):
         self.client.list_all()
@@ -127,5 +119,5 @@ class ChannelsDialog(QDialog):
         menu.popup(QCursor.pos())
 
     def close_channel(self, chan_id: int):
-        client = LndThreadedClient(self.node.configuration)
+        client = LndThreadedClient(lnd_client=self.client)
         client.signals.result.connect(self.handle_peers_list)
