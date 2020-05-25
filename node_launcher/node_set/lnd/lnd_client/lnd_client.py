@@ -46,6 +46,9 @@ class LndBalances(object):
     inactive_off_chain_balance: int = 0
     reserve_off_chain_balance: int = 0
 
+    def __repr__(self):
+        return 
+
 
 class LndClient(object):
     def __init__(self, lnd_configuration=None,
@@ -253,7 +256,7 @@ class LndClient(object):
         for pc in pending_channels.waiting_close_channels:
             b.unconfirmed_on_chain_balance += pc.channel.local_balance
         for pc in pending_channels.pending_force_closing_channels:
-            b.timelocked_on_chain_balance += pc.channel.limbo_balance
+            b.timelocked_on_chain_balance += pc.limbo_balance
 
         log.debug('calculated',
                   unconfirmed_off_chain_balance=b.unconfirmed_off_chain_balance)
@@ -274,7 +277,6 @@ class LndClient(object):
         total_on_chain = 0
         for utxo in utxos:
             total_on_chain += utxo.amount_sat
-            print(utxo.outpoint.txid_str)
 
         log.debug('utxo calculated', total_on_chain=total_on_chain)
         log.debug('channel and balance calculated',
