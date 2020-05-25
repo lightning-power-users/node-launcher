@@ -7,10 +7,13 @@ from .lnd_client import LndClient
 
 
 class LndThreadedClient(QObject):
-    def __init__(self, configuration):
+    def __init__(self, configuration=None, lnd_client=None):
         super().__init__()
         self.configuration = configuration
-        self.client = LndClient(self.configuration)
+        if lnd_client is not None:
+            self.client = lnd_client
+        else:
+            self.client = LndClient(lnd_configuration=configuration)
         self.threadpool = QThreadPool()
         self.signals = WorkerSignals()
 
@@ -31,7 +34,9 @@ class LndThreadedClient(QObject):
         worker = Worker(
             fn=self.client_work,
             command=command,
-            configuration=self.configuration,
+            client=LndClient(lnddir=self.client.lnddir,
+                             grpc_host=self.client.grpc_host,
+                             grpc_port=self.client.grpc_port),
             **kwargs
         )
         worker.signals.finished.connect(self.handle_finished)
@@ -41,8 +46,7 @@ class LndThreadedClient(QObject):
         self.threadpool.start(worker)
 
     @staticmethod
-    def client_work(command, configuration, **kwargs):
-        client = LndClient(configuration)
+    def client_work(command, client, **kwargs):
         return getattr(client, command)(**kwargs)
 
     def handle_finished(self):
@@ -61,8 +65,7 @@ class LndThreadedClient(QObject):
 
     def handle_result(self, result):
         log.debug(
-            'LndThreadedClient call result',
-            result=result
+            'LndThreadedClient call result emit',
         )
         self.signals.result.emit(result)
 
