@@ -40,6 +40,7 @@ class LndOutputWidget(OutputWidget):
             self.system_tray.menu.lnd_status_action.setText(
                 'LND unlocking wallet'
             )
+            self.system_tray.set_blue()
             QTimer.singleShot(100, self.auto_unlock_wallet)
         elif 'Unable to synchronize wallet to chain' in line:
             self.process.terminate()
@@ -47,9 +48,10 @@ class LndOutputWidget(OutputWidget):
             self.system_tray.menu.lnd_status_action.setText(
                 'LND syncing'
             )
+            self.system_tray.set_blue()
         elif 'Unable to complete chain rescan' in line:
             self.process.terminate()
-        elif 'Starting HTLC Switch' in line:
+        elif 'Initializing peer network bootstrappers!' in line:
             self.system_tray.set_green()
             self.system_tray.menu.lnd_status_action.setText(
                 'LND synced'
@@ -78,7 +80,11 @@ class LndOutputWidget(OutputWidget):
 
             self.old_height = new_height
             self.old_timestamp = new_timestamp
-
+        elif 'Syncing channel graph from height' in line:
+            self.system_tray.menu.lnd_status_action.setText(
+                'LND syncing'
+            )
+            self.system_tray.set_blue()
         elif 'Shutdown complete' in line:
             self.system_tray.menu.lnd_status_action.setText(
                 'LND has shutdown'
