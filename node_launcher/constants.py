@@ -3,10 +3,19 @@ from os.path import expanduser
 import platform
 from typing import Dict
 
-NODE_LAUNCHER_RELEASE = '.'.join(map(str, (6, 0, 6)))
+NODE_LAUNCHER_RELEASE = '.'.join(
+    map(
+        str,
+        (
+            6,
+            0,
+            7
+        )
+    )
+)
 
-TARGET_BITCOIN_RELEASE = 'v0.18.1'
-TARGET_LND_RELEASE = 'v0.7.1-beta'
+TARGET_BITCOIN_RELEASE = 'v0.21.1'
+TARGET_LND_RELEASE = 'v0.13.1-beta'
 
 
 class StringConstant(object):
@@ -55,7 +64,6 @@ LOCALAPPDATA = os.path.abspath(os.environ.get('LOCALAPPDATA', ''))
 APPDATA = os.path.abspath(os.environ.get('APPDATA', ''))
 PROGRAMS = os.environ.get('Programw6432', '')
 
-
 NODE_LAUNCHER_DATA_PATH: Dict[OperatingSystem, str] = {
     DARWIN: expanduser('~/Library/Application Support/Node Launcher/'),
     LINUX: expanduser('~/.node_launcher'),
@@ -80,22 +88,25 @@ BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
 }
 
 UPGRADE = 'Please download the latest version of the Node Launcher: ' \
-                    '<a href="https://github.com/PierreRochard/node-launcher/releases/">' \
-                    'https://github.com/PierreRochard/node-launcher/releases' \
-                    '</a>'
+          '<a href="https://github.com/PierreRochard/node-launcher/releases/">' \
+          'https://github.com/PierreRochard/node-launcher/releases' \
+          '</a>'
 
 GIGABYTE = 1000000000
 
 if IS_WINDOWS:
     from keyring.backends.Windows import WinVaultKeyring
+
     keyring = WinVaultKeyring()
 
 if IS_MACOS:
-    from keyring.backends.OS_X import Keyring
+    from keyring.backends.macOS import Keyring
+
     keyring = Keyring()
 
 if IS_LINUX:
     from keyring.backends.SecretService import Keyring
+
     keyring = Keyring()
 
 AUTOPRUNE_GB = 150

@@ -43,6 +43,10 @@ class LndOutputWidget(OutputWidget):
             QTimer.singleShot(100, self.auto_unlock_wallet)
         elif 'Unable to synchronize wallet to chain' in line:
             self.process.terminate()
+        elif 'Started rescan from block' in line:
+            self.system_tray.menu.lnd_status_action.setText(
+                'LND syncing'
+            )
         elif 'Unable to complete chain rescan' in line:
             self.process.terminate()
         elif 'Starting HTLC Switch' in line:
@@ -75,6 +79,11 @@ class LndOutputWidget(OutputWidget):
             self.old_height = new_height
             self.old_timestamp = new_timestamp
 
+        elif 'Shutdown complete' in line:
+            self.system_tray.menu.lnd_status_action.setText(
+                'LND has shutdown'
+            )
+
     def restart_process(self):
         QTimer.singleShot(3000, self.process.start)
 
@@ -89,6 +98,10 @@ class LndOutputWidget(OutputWidget):
         except _Rendezvous as e:
             details = e.details()
             return details
+
+    @property
+    def keyring_service_name(self):
+        return f'lnd_{self.node_set.bitcoin.network}_wallet_password'
 
     def generate_seed(self, new_seed_password: str):
         try:
@@ -134,15 +147,14 @@ class LndOutputWidget(OutputWidget):
         # User needs to create a new wallet
         elif 'wallet not found' in details:
             new_wallet_password = get_random_password()
-            keyring_service_name = keyring_user_name = f'lnd_wallet_password'
             log.info(
                 'create_wallet',
-                keyring_service_name=keyring_service_name,
-                keyring_user_name=keyring_user_name
+                keyring_service_name=self.keyring_service_name,
+                keyring_user_name=self.keyring_service_name
             )
             keyring.set_password(
-                service=keyring_service_name,
-                username=keyring_user_name,
+                service=self.keyring_service_name,
+                username=self.keyring_service_name,
                 password=new_wallet_password
             )
             seed = self.generate_seed(new_wallet_password)
@@ -160,6 +172,10 @@ class LndOutputWidget(OutputWidget):
                 username=self.node_set.bitcoin.file['rpcuser'],
                 password=new_wallet_password
             )
+        elif 'invalid passphrase for master public key' in details:
+            self.system_tray.menu.lnd_status_action.setText(
+                'Invalid LND Password'
+            )
         else:
             log.warning(
                 'unlock_wallet failed',
@@ -167,25 +183,38 @@ class LndOutputWidget(OutputWidget):
                 exc_info=True
             )
 
+    def get_password(self):
+        passwords = []
+        for service_name in [self.keyring_service_name, 'lnd_wallet_password']:
+            for user_name in [self.keyring_service_name, self.node_set.bitcoin.file['rpcuser'], 'lnd_wallet_password']:
+                log.info(
+                    'auto_unlock_wallet_get_password',
+                    keyring_service_name=service_name,
+                    keyring_user_name=user_name
+                )
+                password = keyring.get_password(
+                    service=service_name,
+                    username=user_name,
+                )
+                if password is not None:
+                    log.info(
+                        'Successfully got password from',
+                        keyring_service_name=service_name,
+                        keyring_user_name=user_name
+                    )
+                    passwords += [password]
+        return passwords
+
     def auto_unlock_wallet(self):
-        keyring_service_name = f'lnd_{self.node_set.bitcoin.network}_wallet_password'
-        keyring_user_name = self.node_set.bitcoin.file['rpcuser']
-        log.info(
-            'auto_unlock_wallet_get_password',
-            keyring_service_name=keyring_service_name,
-            keyring_user_name=keyring_user_name
-        )
-        password = keyring.get_password(
-            service=keyring_service_name,
-            username=keyring_user_name,
-        )
-        worker = Worker(
-            fn=self.unlock_wallet,
-            lnd=self.node_set.lnd,
-            password=password
-        )
-        worker.signals.result.connect(self.handle_unlock_wallet)
-        self.threadpool.start(worker)
+        for password in self.get_password():
+            worker = Worker(
+                fn=self.unlock_wallet,
+                lnd=self.node_set.lnd,
+                password=password
+            )
+            worker.signals.result.connect(self.handle_unlock_wallet)
+            worker.signals.error.connect(self.handle_unlock_wallet)
+            self.threadpool.start(worker)
 
     def show(self):
         self.showMaximized()

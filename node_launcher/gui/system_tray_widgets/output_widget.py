@@ -19,11 +19,14 @@ class OutputWidget(QDialog):
         self.setLayout(self.layout)
 
     def handle_output(self):
-        while self.process.canReadLine():
-            line_bytes: QByteArray = self.process.readLine()
-            line_str = line_bytes.data().decode('utf-8').strip()
-            self.output.append(line_str)
-            self.process_output_line(line_str)
+        try:
+            while self.process.canReadLine():
+                line_bytes: QByteArray = self.process.readLine()
+                line_str = line_bytes.data().decode('utf-8').strip()
+                self.output.append(line_str)
+                self.process_output_line(line_str)
+        except RuntimeError:
+            return None
 
     def handle_error(self):
         output: QByteArray = self.process.readAllStandardError()

@@ -1,5 +1,6 @@
 import time
 
+import grpc
 from PySide2.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject, QTimer
 
 import traceback, sys
@@ -68,6 +69,8 @@ class Worker(QRunnable):
         # Retrieve args/kwargs here; and fire processing using them
         try:
             result = self.fn(*self.args, **self.kwargs)
+        except grpc.RpcError as e:
+            self.signals.error.emit(e.args[0].details)
         except:
             traceback.print_exc()
             exctype, value = sys.exc_info()[:2]
