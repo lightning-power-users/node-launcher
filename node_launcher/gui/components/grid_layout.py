@@ -1,5 +1,4 @@
-from PySide2 import QtWidgets
-from PySide2.QtWidgets import QWidget
+from node_launcher.gui.qt import QtWidgets, QWidget
 
 
 class QGridLayout(QtWidgets.QGridLayout):

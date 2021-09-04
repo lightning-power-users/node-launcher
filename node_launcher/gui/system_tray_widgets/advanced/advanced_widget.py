@@ -1,5 +1,4 @@
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QWidget
+from node_launcher.gui.qt import Qt, QWidget
 
 from .configuration_files_layout import ConfigurationFilesLayout
 from .ports_layout import PortsLayout

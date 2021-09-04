@@ -1,5 +1,4 @@
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QLabel
+from node_launcher.gui.qt import QLabel
 
 
 class WarningText(QLabel):

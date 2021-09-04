@@ -1,6 +1,15 @@
-from PySide2 import QtCore
-from PySide2.QtCore import QCoreApplication, Slot, QTimer, Qt
-from PySide2.QtWidgets import QApplication, QWidget, QMessageBox
+import sys
+
+from node_launcher.gui.qt import (
+    QtCore,
+    QCoreApplication,
+    Slot,
+    QTimer,
+    Qt,
+    QApplication,
+    QWidget,
+    QMessageBox
+)
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
 from node_launcher.gui.system_tray import SystemTray
@@ -10,7 +19,7 @@ from node_launcher.services.launcher_software import LauncherSoftware
 
 class Application(QApplication):
     def __init__(self):
-        super().__init__()
+        super().__init__(sys.argv)
 
         self.node_set = NodeSet()
         self.parent = QWidget()

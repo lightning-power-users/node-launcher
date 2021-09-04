@@ -3,7 +3,7 @@ from datetime import datetime
 # noinspection PyPackageRequirements
 from grpc._channel import _Rendezvous
 import humanize
-from PySide2.QtCore import QThreadPool, Qt, QTimer
+from node_launcher.gui.qt import QThreadPool, Qt, QTimer
 
 from node_launcher.constants import keyring
 from node_launcher.gui.components.thread_worker import Worker

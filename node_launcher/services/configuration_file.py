@@ -4,7 +4,7 @@ from typing import List, Any
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
 from node_launcher.logging import log
-from PySide2.QtCore import QFileSystemWatcher
+from node_launcher.gui.qt import QFileSystemWatcher
 
 
 class ConfigurationFile(dict):

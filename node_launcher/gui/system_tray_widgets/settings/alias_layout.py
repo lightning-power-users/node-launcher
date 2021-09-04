@@ -1,6 +1,4 @@
-from PySide2.QtGui import QPalette, QColor
-from PySide2.QtWidgets import QColorDialog, QLineEdit, QLabel, QPushButton
-from PySide2.QtCore import Signal
+from node_launcher.gui.qt import QPalette, QColor, QColorDialog, QLineEdit, QLabel, QPushButton, Signal
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 

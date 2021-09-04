@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QLabel
+from node_launcher.gui.qt import QLabel
 
 
 class SectionName(QLabel):

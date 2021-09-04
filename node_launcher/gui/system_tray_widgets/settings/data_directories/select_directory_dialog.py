@@ -1,7 +1,6 @@
 import os
 
-from PySide2.QtCore import Signal
-from PySide2.QtWidgets import QFileDialog, QWidget, QErrorMessage
+from node_launcher.gui.qt import Signal, QFileDialog, QWidget, QErrorMessage
 
 
 class SelectDirectoryDialog(QFileDialog):

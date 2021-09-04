@@ -1,16 +1,18 @@
 from typing import List
 
-from PySide2.QtCore import SIGNAL, QProcess, QByteArray, Qt
-from PySide2.QtWidgets import QTextEdit, QLineEdit, QCompleter, QDialog
 from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.data import JsonLexer
 
+from node_launcher.gui.qt import (
+    SIGNAL, QProcess, QByteArray, Qt, QTextEdit, QLineEdit, QCompleter, QDialog
+)
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.logging import log
 
 
 class ConsoleDialog(QDialog):
+
     def __init__(self, title: str,
                  program: str,
                  args: List[str],
@@ -35,12 +37,8 @@ class ConsoleDialog(QDialog):
         self.layout.addWidget(self.output)
         self.layout.addWidget(self.input)
         self.setLayout(self.layout)
-
-        self.connect(self.input, SIGNAL("returnPressed(void)"),
-                     self.execute_user_command)
-
-        self.connect(self.completer, SIGNAL("activated(const QString&)"),
-                     self.input.clear, Qt.QueuedConnection)
+        self.input.returnPressed.connect(self.execute_user_command)
+        self.completer.activated.connect(self.input.clear)
 
     def execute_user_command(self):
         cmd = str(self.input.text())

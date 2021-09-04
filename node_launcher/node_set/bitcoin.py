@@ -2,7 +2,7 @@ import os
 from typing import List
 
 import psutil
-from PySide2.QtCore import QProcess
+from node_launcher.gui.qt import QProcess
 
 from node_launcher.constants import (BITCOIN_DATA_PATH,
                                      BITCOIN_MAINNET_PEER_PORT,

@@ -1,5 +1,4 @@
-from PySide2.QtCore import Qt, Signal
-from PySide2.QtWidgets import QWidget, QLabel, QCheckBox, QVBoxLayout
+from node_launcher.gui.qt import Qt, Signal, QWidget, QLabel, QCheckBox, QVBoxLayout
 
 from node_launcher.constants import Network
 from .data_directories.data_directory_box import DataDirectoryBox

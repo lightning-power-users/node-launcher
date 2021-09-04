@@ -1,5 +1,4 @@
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QDialog, QTabWidget, QDialogButtonBox, QVBoxLayout
+from node_launcher.gui.qt import Qt, QDialog, QTabWidget, QDialogButtonBox, QVBoxLayout
 
 from .bitcoin_tab import BitcoinTab
 from .lnd_tab import LndTab

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import humanize
-from PySide2.QtCore import QProcess, QThreadPool, Qt
+from node_launcher.gui.qt import QProcess, QThreadPool, Qt
 
 from node_launcher.gui.system_tray_widgets.output_widget import OutputWidget
 from node_launcher.node_set import NodeSet

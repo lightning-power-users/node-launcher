@@ -1,4 +1,4 @@
-from PySide2 import QtWidgets
+from node_launcher.gui.qt import QtWidgets
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.section_name import SectionName

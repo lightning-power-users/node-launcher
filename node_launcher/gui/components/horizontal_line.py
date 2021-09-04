@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QFrame
+from node_launcher.gui.qt import QFrame
 
 
 class HorizontalLine(QFrame):

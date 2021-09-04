@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import (
+from node_launcher.gui.qt import (
     QGridLayout,
     QGroupBox,
     QPushButton

@@ -1,8 +1,6 @@
 import webbrowser
 
-from PySide2 import QtWidgets
-from PySide2.QtGui import QPixmap
-from PySide2.QtWidgets import QLabel
+from node_launcher.gui.qt import QtWidgets, QPixmap, QLabel
 
 from node_launcher.services.lndconnect import get_deprecated_lndconnect_url, \
     get_qrcode_img

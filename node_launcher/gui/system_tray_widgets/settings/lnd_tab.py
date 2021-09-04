@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QWidget
+from node_launcher.gui.qt import QWidget
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 from .alias_layout import AliasLayout

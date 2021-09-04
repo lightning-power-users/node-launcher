@@ -1,4 +1,4 @@
-from PySide2.QtCore import QTimer
+from node_launcher.gui.qt import QTimer
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.section_name import SectionName
 from node_launcher.node_set import NodeSet

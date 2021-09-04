@@ -1,6 +1,4 @@
-from PySide2.QtCore import QCoreApplication
-from PySide2.QtGui import QKeySequence, QClipboard
-from PySide2.QtWidgets import QMenu
+from node_launcher.gui.qt import QCoreApplication, QKeySequence, QClipboard, QMenu
 
 from node_launcher.constants import BITCOIN_CLI_COMMANDS, LNCLI_COMMANDS
 from node_launcher.gui.system_tray_widgets import (

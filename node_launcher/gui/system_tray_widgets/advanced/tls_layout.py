@@ -1,6 +1,6 @@
 from pprint import pformat
 
-from PySide2.QtWidgets import QPushButton, QMessageBox
+from node_launcher.gui.qt import QPushButton, QMessageBox
 
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.components.section_name import SectionName

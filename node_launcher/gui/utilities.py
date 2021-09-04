@@ -2,7 +2,7 @@ import os
 import subprocess
 
 from pathlib import Path
-from PySide2.QtWidgets import QErrorMessage
+from node_launcher.gui.qt import QErrorMessage
 
 from node_launcher.constants import IS_MACOS, IS_LINUX, IS_WINDOWS, OPERATING_SYSTEM
 

@@ -7,10 +7,7 @@ a = Analysis(
     ['run.py'],
     pathex=['/Users/pierre/src/node-launcher'],
     binaries=[],
-    datas=[
-        ('node_launcher/assets/*.png', 'assets')
-    ] + collect_data_files('shiboken2', include_py_files=True, subdir='support')
-    + collect_data_files('PySide2', include_py_files=True, subdir='support'),
+    datas=[('node_launcher/assets/*.png', 'assets')],
     hiddenimports=['setuptools'],
     hookspath=[],
     runtime_hooks=[],

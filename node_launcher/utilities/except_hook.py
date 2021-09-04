@@ -2,8 +2,7 @@ import sys
 import traceback
 from io import StringIO
 
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QMessageBox
+from node_launcher.gui.qt import Qt, QMessageBox
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
 
@@ -36,7 +35,7 @@ Error information:'''
 
 
 if __name__ == '__main__':
-    from PySide2 import QtWidgets
+    from node_launcher.gui.qt import QtWidgets
     sys.excepthook = except_hook
 
     app = QtWidgets.QApplication([])

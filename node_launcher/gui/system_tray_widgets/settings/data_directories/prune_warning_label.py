@@ -1,6 +1,4 @@
-from PySide2.QtCore import Qt
-from PySide2.QtGui import QFont
-from PySide2.QtWidgets import QLabel
+from node_launcher.gui.qt import Qt, QFont, QLabel
 
 
 class PruneWarningLabel(QLabel):

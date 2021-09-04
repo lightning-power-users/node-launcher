@@ -1,5 +1,4 @@
-from PySide2.QtCore import QByteArray, QProcess
-from PySide2.QtWidgets import QDialog, QGridLayout, QTextEdit
+from node_launcher.gui.qt import QByteArray, QProcess, QDialog, QGridLayout, QTextEdit
 
 from node_launcher.node_set import NodeSet
 

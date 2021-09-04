@@ -3,7 +3,7 @@ import socket
 import ssl
 from typing import List
 
-from PySide2.QtCore import QProcess
+from node_launcher.gui.qt import QProcess
 
 from node_launcher.constants import (
     IS_WINDOWS,

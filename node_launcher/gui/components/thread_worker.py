@@ -1,12 +1,13 @@
 import time
+import traceback
+import sys
 
 import grpc
-from PySide2.QtCore import QRunnable, Slot, QThreadPool, Signal, QObject, QTimer
 
-import traceback, sys
-
-from PySide2.QtWidgets import QMainWindow, QVBoxLayout, QLabel, QPushButton, \
-    QWidget, QApplication
+from node_launcher.gui.qt import (
+    QMainWindow, QVBoxLayout, QLabel, QPushButton,
+    QWidget, QApplication, QRunnable, Slot, QThreadPool, Signal, QObject, QTimer
+)
 
 
 class WorkerSignals(QObject):
