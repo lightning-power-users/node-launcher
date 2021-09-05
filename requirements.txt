@@ -2,6 +2,7 @@ colorama
 dataclasses
 pydbus
 googleapis-common-protos
+google-api-core
 grpcio
 grpcio-tools
 humanize
