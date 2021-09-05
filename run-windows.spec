@@ -8,7 +8,7 @@ a = Analysis(['run.py'],
              pathex=['C:\\Users\\pierre\\PycharmProjects\\node-launcher'],
              binaries=[],
              datas=[
-                 ('node_launcher/assets/*.png', 'assets')
+                 ('node_launcher/gui/assets/*.png', 'assets')
              ],
              hiddenimports=['setuptools', 'pypiwin32', 'win32timezone'],
              hookspath=[],

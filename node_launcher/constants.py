@@ -7,15 +7,20 @@ NODE_LAUNCHER_RELEASE = '.'.join(
     map(
         str,
         (
-            6,
+            7,
             0,
-            7
+            0
         )
     )
 )
 
 TARGET_BITCOIN_RELEASE = 'v0.21.1'
 TARGET_LND_RELEASE = 'v0.13.1-beta'
+
+TARGET_TOR_RELEASE = '10.5.5'
+TARGET_WINDOWS_TOR_VERSION = '0.4.5.10'
+TOR_WEBSITE = 'http://www.torproject.org/dist/torbrowser/'
+
 
 
 class StringConstant(object):
@@ -29,7 +34,7 @@ class StringConstant(object):
         return hash(self.name)
 
     def __eq__(self, other):
-        return other.name == self.name
+        return str(other) == self.name
 
     def __ne__(self, other):
         return str(other).lower() != self.name
@@ -86,6 +91,14 @@ BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
     LINUX: expanduser('~/.bitcoin'),
     WINDOWS: os.path.join(APPDATA, 'Bitcoin')
 }
+
+TOR_DIR_PATH: Dict[OperatingSystem, str] = {
+    DARWIN: '/var/tmp/dist/tor/etc/tor/',
+    LINUX: '/var/tmp/dist/tor/etc/tor/',
+    WINDOWS: os.path.join(APPDATA, 'tor'),
+}
+
+TOR_SERVICE_PATH = os.path.join(NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM], 'tor-service')
 
 UPGRADE = 'Please download the latest version of the Node Launcher: ' \
           '<a href="https://github.com/PierreRochard/node-launcher/releases/">' \

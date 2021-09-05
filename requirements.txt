@@ -1,10 +1,11 @@
 colorama
 dataclasses
+pydbus
 googleapis-common-protos
 grpcio
 grpcio-tools
-jinja2
 humanize
+jinja2
 keyring
 pillow
 protobuf
@@ -16,6 +17,8 @@ PyTest
 pytest-qt
 qrcode
 requests
+requests-mock
+secretstorage
 structlog
 webassets
 wtforms

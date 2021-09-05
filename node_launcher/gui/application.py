@@ -4,56 +4,46 @@ from node_launcher.gui.qt import (
     QtCore,
     QCoreApplication,
     Slot,
-    QTimer,
     Qt,
     QApplication,
     QWidget,
-    QMessageBox
+    QMessageBox,
+    QThreadPool
 )
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
+from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.system_tray import SystemTray
+from node_launcher.logging import log
 from node_launcher.node_set import NodeSet
-from node_launcher.services.launcher_software import LauncherSoftware
+from node_launcher.launcher_software import LauncherSoftware
 
 
 class Application(QApplication):
     def __init__(self):
         super().__init__(sys.argv)
 
-        self.node_set = NodeSet()
         self.parent = QWidget()
         self.parent.hide()
         self.parent.setWindowFlags(self.parent.windowFlags() & ~QtCore.Qt.Tool)
-
-        self.system_tray = SystemTray(self.parent, self.node_set)
-
         self.setQuitOnLastWindowClosed(False)
-
         self.aboutToQuit.connect(self.quit_app)
 
+        self.node_set = NodeSet()
+        self.system_tray = SystemTray(self.parent, self.node_set)
+
+    def start(self):
+        threadpool = QThreadPool()
+        worker = Worker(fn=self.check_version)
+        threadpool.start(worker)
+
         self.system_tray.show()
+        self.node_set.start()
+        status = self.exec_()
+        return status
 
-        self.system_tray.showMessage(
-            'Nodes starting...',
-            'Bitcoin and Lightning are syncing'
-        )
-
-        self.node_set.bitcoin.file.file_watcher.fileChanged.connect(self.check_restart_required)
-        self.node_set.lnd.file.file_watcher.fileChanged.connect(self.check_restart_required)
-
-        self.timer = QTimer(self)
-        self.timer.start(1000)
-        self.timer.timeout.connect(self.check_restart_required)
-        self.timer.singleShot(1000, self.check_version)
-
-    def check_restart_required(self):
-        if self.node_set.bitcoin.restart_required or self.node_set.lnd.restart_required:
-            pass
-        else:
-            pass
-
-    def check_version(self):
+    @staticmethod
+    def check_version():
         latest_version = LauncherSoftware().get_latest_release_version()
         if latest_version is None:
             return
@@ -81,10 +71,18 @@ class Application(QApplication):
 
     @Slot()
     def quit_app(self):
-        self.node_set.lnd.process.terminate()
-        self.node_set.lnd.process.waitForFinished(2000)
-        self.node_set.bitcoin.process.terminate()
-        self.node_set.bitcoin.process.waitForFinished(20000)
-        self.node_set.bitcoin.process.kill()
+        log.debug('quit_app')
+        self.system_tray.show_message(title='Stopping LND...')
+        self.node_set.lnd_node.stop()
+        self.node_set.lnd_node.process.waitForFinished(-1)
+
+        self.node_set.bitcoind_node.stop()
+        self.system_tray.show_message(title='Stopping bitcoind...')
+        self.node_set.bitcoind_node.process.waitForFinished(-1)
+
+        self.node_set.tor_node.process.kill()
+        self.node_set.tor_node.process.waitForFinished(-1)
+
+        self.system_tray.show_message(title='Exiting Node Launcher', timeout=1)
 
         QCoreApplication.exit(0)

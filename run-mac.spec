@@ -7,7 +7,9 @@ a = Analysis(
     ['run.py'],
     pathex=['/Users/pierre/src/node-launcher'],
     binaries=[],
-    datas=[('node_launcher/assets/*.png', 'assets')],
+    datas=[
+        ('node_launcher/gui/assets/*.png', 'assets')
+        ],
     hiddenimports=['setuptools'],
     hookspath=[],
     runtime_hooks=[],

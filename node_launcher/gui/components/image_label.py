@@ -1,6 +1,6 @@
 from node_launcher.gui.qt import QtWidgets, Qt, QPixmap
 
-from node_launcher.assets.asset_access import asset_access
+from node_launcher.gui.assets import asset_access
 
 
 class ImageLabel(QtWidgets.QLabel):
