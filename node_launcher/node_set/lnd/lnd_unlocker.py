@@ -14,26 +14,44 @@ class LndUnlocker(QObject):
         self.configuration = configuration
         self.client = LndClient(self.configuration)
         self.keyring = SystemKeyring()
+        self.threadpool = QThreadPool()
+
+    @property
+    def keyring_service_name(self):
+        return f'lnd_mainnet_wallet_password'
+
+    def get_password(self):
+        passwords = []
+        for service_name in [self.keyring_service_name, 'lnd_wallet_password']:
+            for user_name in [self.keyring_service_name, self.configuration['bitcoind.rpcuser'], 'lnd_wallet_password']:
+                log.info(
+                    'auto_unlock_wallet_get_password',
+                    keyring_service_name=service_name,
+                    keyring_user_name=user_name
+                )
+                password = self.keyring.get_password(
+                    service=service_name,
+                    username=user_name,
+                )
+                if password is not None:
+                    log.info(
+                        'Successfully got password from',
+                        keyring_service_name=service_name,
+                        keyring_user_name=user_name
+                    )
+                    passwords += [password]
+        return passwords
 
     def auto_unlock_wallet(self):
-        keyring_service_name = f'lnd_mainnet_wallet_password'
-        keyring_user_name = self.configuration['bitcoind.rpcuser']
-        log.info(
-            'auto_unlock_wallet_get_password',
-            keyring_service_name=keyring_service_name,
-            keyring_user_name=keyring_user_name
-        )
-        password = self.keyring.get_password(
-            service=keyring_service_name,
-            username=keyring_user_name,
-        )
-        worker = Worker(
-            fn=self.unlock_wallet,
-            configuration=self.configuration,
-            password=password
-        )
-        worker.signals.result.connect(self.handle_unlock_wallet)
-        QThreadPool().start(worker)
+        for password in self.get_password():
+            worker = Worker(
+                fn=self.unlock_wallet,
+                configuration=self.configuration,
+                password=password
+            )
+            worker.signals.result.connect(self.handle_unlock_wallet)
+            worker.signals.error.connect(self.handle_unlock_wallet)
+            self.threadpool.start(worker)
 
     @staticmethod
     def unlock_wallet(configuration, password: str):
@@ -90,15 +108,14 @@ class LndUnlocker(QObject):
         # User needs to create a new wallet
         elif 'wallet not found' in details:
             new_wallet_password = get_random_password()
-            keyring_service_name = keyring_user_name = f'lnd_wallet_password'
             log.info(
                 'create_wallet',
-                keyring_service_name=keyring_service_name,
-                keyring_user_name=keyring_user_name
+                keyring_service_name=self.keyring_service_name,
+                keyring_user_name=self.keyring_service_name
             )
             self.keyring.set_password(
-                service=keyring_service_name,
-                username=keyring_user_name,
+                service=self.keyring_service_name,
+                username=self.keyring_service_name,
                 password=new_wallet_password
             )
             seed = self.generate_seed(new_wallet_password)
@@ -112,9 +129,13 @@ class LndUnlocker(QObject):
                 log.error('initialize_wallet error', exc_info=True)
                 raise
             self.keyring.set_password(
-                service=f'lnd_mainnet_wallet_password',
-                username=self.configuration['bitcoind.rpcuser'],
+                service=self.keyring_service_name,
+                username=self.keyring_service_name,
                 password=new_wallet_password
+            )
+        elif 'invalid passphrase for master public key' in details:
+            self.system_tray.menu.lnd_status_action.setText(
+                'Invalid LND Password'
             )
         else:
             log.warning(
