@@ -1,5 +1,6 @@
 colorama
 dataclasses
+google-api-core
 googleapis-common-protos
 grpcio
 grpcio-tools
