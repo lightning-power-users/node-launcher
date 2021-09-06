@@ -13,7 +13,9 @@ from PyQt5.QtCore import (
     QThreadPool,
     QRunnable,
     QObject,
-    QProcessEnvironment
+    QProcessEnvironment,
+    QAbstractItemModel,
+    QModelIndex
 )
 from PyQt5.QtWidgets import (
     QErrorMessage,
@@ -40,7 +42,9 @@ from PyQt5.QtWidgets import (
     QMainWindow,
     QTableWidget,
     QTableWidgetItem,
-    QAction
+    QAction,
+    QTreeWidget,
+    QTreeWidgetItem
 )
 from PyQt5.QtGui import (
     QPixmap,
@@ -49,7 +53,8 @@ from PyQt5.QtGui import (
     QKeySequence,
     QPalette,
     QColor,
-    QIcon
+    QIcon,
+    QCursor
 )
 # # PySide2
 # from PySide2 import QtGui, QtWidgets, QtCore
@@ -66,7 +71,8 @@ from PyQt5.QtGui import (
 #     QRunnable,
 #     QObject,
 #     SIGNAL,
-#     QProcessEnvironment
+#     QProcessEnvironment,
+# QAbstractItemModel, QModelIndex
 # )
 # from PySide2.QtWidgets import (
 #     QErrorMessage,
@@ -93,7 +99,9 @@ from PyQt5.QtGui import (
 #     QMainWindow,
 #     QTableWidget,
 #     QTableWidgetItem,
-#     QAction
+#     QAction,
+#     QTreeWidget,
+#     QTreeWidgetItem
 # )
 # from PySide2.QtGui import (
 #     QPixmap,
@@ -102,5 +110,6 @@ from PyQt5.QtGui import (
 #     QKeySequence,
 #     QPalette,
 #     QColor,
-#     QIcon
+#     QIcon,
+#     QCursor
 # )

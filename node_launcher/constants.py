@@ -14,13 +14,6 @@ NODE_LAUNCHER_RELEASE = '.'.join(
     )
 )
 
-TARGET_BITCOIN_RELEASE = 'v0.21.1'
-TARGET_LND_RELEASE = 'v0.13.1-beta'
-
-TARGET_TOR_RELEASE = '10.5.5'
-TARGET_WINDOWS_TOR_VERSION = '0.4.5.10'
-TOR_WEBSITE = 'http://www.torproject.org/dist/torbrowser/'
-
 
 class StringConstant(object):
     def __init__(self, name: str):

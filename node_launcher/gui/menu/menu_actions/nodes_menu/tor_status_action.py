@@ -3,8 +3,8 @@ from node_launcher.node_set.tor.tor_node import TorNode
 
 
 class TorStatusAction(MenuAction):
-    def __init__(self, tor_node: TorNode):
-        super().__init__('Tor: off')
+    def __init__(self, tor_node: TorNode, parent):
+        super().__init__(text='Tor: off', parent=parent)
         self.setEnabled(False)
         self.tor_node = tor_node
         self.tor_node.status.connect(self.update_text)

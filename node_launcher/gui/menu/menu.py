@@ -16,16 +16,16 @@ from node_launcher.node_set import NodeSet
 
 
 class Menu(QMenu):
-    def __init__(self, node_set: NodeSet, system_tray):
+    def __init__(self, node_set: NodeSet, system_tray, parent):
         super().__init__()
         self.node_set = node_set
         self.system_tray = system_tray
         self.cache = []
 
         default_actions = [
-            TorStatusAction(self.node_set.tor_node),
-            BitcoindStatusAction(self.node_set.bitcoind_node),
-            LndStatusAction(self.node_set.lnd_node),
+            TorStatusAction(self.node_set.tor_node, parent=parent),
+            BitcoindStatusAction(self.node_set.bitcoind_node, parent=parent),
+            LndStatusAction(self.node_set.lnd_node, parent=parent),
             NodeManageAction(node_set=node_set, system_tray=system_tray),
             SeparatorAction()
         ]

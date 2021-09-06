@@ -153,7 +153,7 @@ class Configuration(QObject):
             if added_configuration is not None:
 
                 if signal:
-                    self.configuration_changed.emit(None, added_configuration)
+                    self.configuration_changed.emit(added_configuration, added_configuration)
 
                 self.save()
 

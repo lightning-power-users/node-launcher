@@ -1,6 +1,4 @@
-from PySide2.QtCore import Qt
-from PySide2.QtGui import QCursor
-from PySide2.QtWidgets import QAction, QDialog, QGridLayout, QMenu, QTreeWidget, \
+from node_launcher.gui.qt import Qt, QCursor, QAction, QDialog, QGridLayout, QMenu, QTreeWidget, \
     QTreeWidgetItem
 
 from node_launcher.node_set.lnd.lnd_client import LndClient
@@ -12,7 +10,7 @@ class ChannelsDialog(QDialog):
     node: LndNode
     client: LndThreadedClient
 
-    def __init__(self, lnd_client: LndClient):
+    def __init__(self, node: LndNode = None, client: LndClient = None):
         super().__init__()
 
         self.layout = QGridLayout()
@@ -25,12 +23,13 @@ class ChannelsDialog(QDialog):
         self.layout.addWidget(self.tree)
 
         self.setLayout(self.layout)
-
-        self.client = LndThreadedClient(lnd_client=lnd_client)
+        if node:
+            client = node.client
+        self.client = LndThreadedClient(lnd_client=client)
         self.client.signals.result.connect(self.handle_list)
         self.client.signals.error.connect(self.handle_error)
 
-        self.client.list_all()
+        # self.client.list_all()
 
     def handle_error(self):
         self.client.list_all()

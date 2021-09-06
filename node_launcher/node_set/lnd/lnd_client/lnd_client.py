@@ -48,28 +48,28 @@ class LndBalances(object):
 
     def total_offchain(self):
         return (
-            self.active_off_chain_balance
-            + self.pending_htlc_balance
-            + self.unconfirmed_off_chain_balance
-            + self.inactive_off_chain_balance
+                self.active_off_chain_balance
+                + self.pending_htlc_balance
+                + self.unconfirmed_off_chain_balance
+                + self.inactive_off_chain_balance
         )
 
     def total_onchain(self):
         return (
-            self.confirmed_on_chain_balance
-            + self.timelocked_on_chain_balance
-            + self.unconfirmed_on_chain_balance
+                self.confirmed_on_chain_balance
+                + self.timelocked_on_chain_balance
+                + self.unconfirmed_on_chain_balance
         )
 
     def total_balance(self):
         return (
-            self.active_off_chain_balance
-            + self.pending_htlc_balance
-            + self.confirmed_on_chain_balance
-            + self.timelocked_on_chain_balance
-            + self.unconfirmed_off_chain_balance
-            + self.unconfirmed_on_chain_balance
-            + self.inactive_off_chain_balance
+                self.active_off_chain_balance
+                + self.pending_htlc_balance
+                + self.confirmed_on_chain_balance
+                + self.timelocked_on_chain_balance
+                + self.unconfirmed_off_chain_balance
+                + self.unconfirmed_on_chain_balance
+                + self.inactive_off_chain_balance
         )
 
     def __repr__(self):
@@ -91,7 +91,14 @@ class LndClient(object):
         if macaroon_path is not None:
             self._macaroon_path = macaroon_path
         else:
-            self._macaroon_path = lnddir
+            self._macaroon_path = os.path.join(
+                lnddir,
+                'data',
+                'chain',
+                'bitcoin',
+                'mainnet'
+            )
+
         self._lnd_client = None
         self._wallet_unlocker = None
 
@@ -272,7 +279,7 @@ class LndClient(object):
         log.debug('calculated',
                   active_off_chain_balance=b.active_off_chain_balance,
                   inactive_off_chain_balance=b.inactive_off_chain_balance,
-                  total_off_chain_balance=b.active_off_chain_balance+b.inactive_off_chain_balance,
+                  total_off_chain_balance=b.active_off_chain_balance + b.inactive_off_chain_balance,
                   reserve_off_chain_balance=b.reserve_off_chain_balance,
                   pending_htlc_balance=b.pending_htlc_balance,
                   )
@@ -300,7 +307,7 @@ class LndClient(object):
         log.debug('calculated',
                   unconfirmed_on_chain_balance=b.unconfirmed_on_chain_balance,
                   timelocked_on_chain_balance=b.timelocked_on_chain_balance,
-                  total_unspendable_on_chain_balance=b.unconfirmed_on_chain_balance+b.timelocked_on_chain_balance)
+                  total_unspendable_on_chain_balance=b.unconfirmed_on_chain_balance + b.timelocked_on_chain_balance)
 
         utxos = self.list_unspent().utxos
         total_on_chain = 0

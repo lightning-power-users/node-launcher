@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QMenu
+from node_launcher.gui.qt import QMenu
 
 
 class NodesMenu(QMenu):

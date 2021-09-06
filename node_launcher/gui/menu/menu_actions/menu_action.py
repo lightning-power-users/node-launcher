@@ -1,7 +1,9 @@
-from PySide2.QtGui import QIcon
-from PySide2.QtWidgets import QAction
+from node_launcher.gui.qt import QIcon, QAction
 
 
 class MenuAction(QAction):
     def __init__(self, text: str, icon: QIcon = None, parent=None):
-        super().__init__(icon, text, parent)
+        if icon is not None:
+            super().__init__(icon, parent)
+        else:
+            super().__init__(text, parent)

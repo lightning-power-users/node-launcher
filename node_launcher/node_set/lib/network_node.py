@@ -28,10 +28,10 @@ class NetworkNode(QObject):
         self.current_status = None
         self.software = Software(operating_system=operating_system, node_software_name=node_software_name)
         if node_software_name == LND:
-            self.configuration = LndConfiguration()
+            self.configuration = LndConfiguration(bitcoind_partition=bitcoind_partition)
             self.process = LndProcess(self.software.daemon, self.configuration.args)
         elif node_software_name == BITCOIND:
-            self.configuration = BitcoindConfiguration()
+            self.configuration = BitcoindConfiguration(partition=bitcoind_partition)
             self.process = BitcoindProcess(self.software.daemon, self.configuration.args)
         else:
             self.configuration = TorConfiguration()

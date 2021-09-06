@@ -36,5 +36,5 @@ if __name__ == '__main__':
                            grpc_host=args.host,
                            grpc_port=args.port)
 
-    app = ChannelApplication(lnd_client=lnd_client)
+    app = ChannelApplication(client=lnd_client)
     sys.exit(app.start())

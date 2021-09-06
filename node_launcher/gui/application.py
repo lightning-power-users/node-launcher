@@ -33,11 +33,11 @@ class Application(QApplication):
         self.full_node_partition = HardDrives().get_full_node_partition()
         self.node_set = NodeSet(full_node_partition=self.full_node_partition)
         self.system_tray = SystemTray(self.parent, self.node_set)
+        self.threadpool = QThreadPool()
 
     def start(self):
-        threadpool = QThreadPool()
         worker = Worker(fn=self.check_version)
-        threadpool.start(worker)
+        self.threadpool.start(worker)
 
         self.system_tray.show()
         self.node_set.start()

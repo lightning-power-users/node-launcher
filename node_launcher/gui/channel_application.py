@@ -1,23 +1,20 @@
-from PySide2 import QtCore
-from PySide2.QtCore import QCoreApplication, Slot, Qt, QThreadPool
-from PySide2.QtWidgets import QApplication, QWidget, QMessageBox
+import sys
 
-from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
-from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.menu.nodes_manage.manage_dialogs.channels import \
     ChannelsDialog
-from node_launcher.gui.system_tray import SystemTray
+from node_launcher.gui.qt import QCoreApplication, Slot, QApplication
 from node_launcher.logging import log
-from node_launcher.node_set import NodeSet
-from node_launcher.launcher_software import LauncherSoftware
 from node_launcher.node_set.lnd.lnd_client import LndClient
+from node_launcher.node_set.lnd.lnd_node import LndNode
 
 
 class ChannelApplication(QApplication):
-    def __init__(self, lnd_client: LndClient):
-        super().__init__()
+    def __init__(self, node: LndNode = None, client: LndClient = None):
+        super().__init__(sys.argv)
         self.aboutToQuit.connect(self.quit_app)
-        self.channels_dialog = ChannelsDialog(lnd_client=lnd_client)
+        if node is not None:
+            client = node.client
+        self.channels_dialog = ChannelsDialog(client=client)
 
     def start(self):
         self.channels_dialog.show()

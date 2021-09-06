@@ -27,7 +27,7 @@ class Software(QObject):
                  node_software_name: NodeSoftwareName):
         super().__init__()
         self.node_software_name = node_software_name
-        self.metadata = SoftwareMetadata(node_software_name)
+        self.metadata = SoftwareMetadata(node_software_name, operating_system=operating_system)
         self.threadpool = QThreadPool()
 
     def update_status(self, new_status: SoftwareStatus):

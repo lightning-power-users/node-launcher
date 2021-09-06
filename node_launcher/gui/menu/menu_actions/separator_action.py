@@ -1,4 +1,4 @@
-from PySide2.QtWidgets import QAction
+from node_launcher.gui.qt import QAction
 
 
 class SeparatorAction(QAction):

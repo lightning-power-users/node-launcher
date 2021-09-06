@@ -5,8 +5,8 @@ from node_launcher.node_set.bitcoind.bitcoind_node import BitcoindNode
 
 
 class BitcoindStatusAction(MenuAction):
-    def __init__(self, bitcoind_node: Optional[BitcoindNode]):
-        super().__init__('Bitcoind: off')
+    def __init__(self, bitcoind_node: Optional[BitcoindNode], parent):
+        super().__init__(text='Bitcoind: off', parent=parent)
         self.setEnabled(False)
         self.bitcoind_node = bitcoind_node
         if self.bitcoind_node:

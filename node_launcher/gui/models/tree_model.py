@@ -1,6 +1,6 @@
 from typing import List, Any
 
-from PySide2.QtCore import QAbstractItemModel, QModelIndex, Qt
+from node_launcher.gui.qt import QAbstractItemModel, QModelIndex, Qt
 
 from node_launcher.gui.models.tree_item import TreeItem
 
