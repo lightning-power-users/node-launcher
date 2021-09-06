@@ -40,12 +40,12 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import (
     QPixmap,
-    QClipboard,
     QFont,
     QKeySequence,
     QPalette,
     QColor,
-    QIcon
+    QIcon,
+    QGuiApplication
 )
     # # PySide2
     # from PySide2 import QtGui, QtWidgets, QtCore

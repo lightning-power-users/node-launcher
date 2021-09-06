@@ -9,7 +9,7 @@ NODE_LAUNCHER_RELEASE = '.'.join(
         (
             6,
             0,
-            8
+            9
         )
     )
 )

@@ -1,4 +1,4 @@
-from node_launcher.gui.qt import QCoreApplication, QKeySequence, QClipboard, QMenu
+from node_launcher.gui.qt import QCoreApplication, QKeySequence, QMenu, QGuiApplication
 
 from node_launcher.constants import BITCOIN_CLI_COMMANDS, LNCLI_COMMANDS
 from node_launcher.gui.system_tray_widgets import (
@@ -13,8 +13,8 @@ from node_launcher.node_set import NodeSet
 
 
 class Menu(QMenu):
-    def __init__(self, node_set: NodeSet, system_tray):
-        super().__init__()
+    def __init__(self, node_set: NodeSet, system_tray, parent):
+        super().__init__(parent=parent)
         self.node_set = node_set
         self.system_tray = system_tray
 
@@ -81,7 +81,7 @@ class Menu(QMenu):
         self.joule_macaroons_action = self.addAction('Show Macaroons')
 
         self.joule_url_action.triggered.connect(
-            lambda: QClipboard().setText(self.node_set.lnd.rest_url)
+            lambda: QGuiApplication.clipboard().setText(self.node_set.lnd.rest_url)
         )
 
         self.joule_macaroons_action.triggered.connect(

@@ -1,4 +1,4 @@
-from node_launcher.gui.qt import QTimer, QClipboard, QVBoxLayout, QPushButton
+from node_launcher.gui.qt import QTimer, QGuiApplication, QVBoxLayout, QPushButton
 
 
 class CopyButton(QVBoxLayout):
@@ -13,7 +13,7 @@ class CopyButton(QVBoxLayout):
         self.timer = QTimer(self.parentWidget())
 
     def copy(self):
-        QClipboard().setText(self.copy_text)
+        QGuiApplication.clipboard().setText(self.copy_text)
         self.button.setText('Copied!')
         self.button.repaint()
         self.timer.singleShot(1000, self.remove_text)
