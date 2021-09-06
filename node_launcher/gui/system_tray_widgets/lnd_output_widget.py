@@ -121,7 +121,7 @@ class LndOutputWidget(OutputWidget):
 
         seed = generate_seed_response.cipher_seed_mnemonic
 
-        keyring_service_name = f'lnd_seed'
+        keyring_service_name = f'lnd_seed_{self.node_set.bitcoin.network}'
         keyring_user_name = ''.join(seed[0:2])
         log.info(
             'generate_seed',
@@ -212,7 +212,8 @@ class LndOutputWidget(OutputWidget):
         return passwords
 
     def auto_unlock_wallet(self):
-        for password in self.get_password():
+        passwords = self.get_password()
+        for password in passwords:
             worker = Worker(
                 fn=self.unlock_wallet,
                 lnd=self.node_set.lnd,
@@ -221,6 +222,8 @@ class LndOutputWidget(OutputWidget):
             worker.signals.result.connect(self.handle_unlock_wallet)
             worker.signals.error.connect(self.handle_unlock_wallet)
             self.threadpool.start(worker)
+        if len(passwords) == 0:
+            self.handle_unlock_wallet('wallet not found')
 
     def show(self):
         self.showMaximized()
