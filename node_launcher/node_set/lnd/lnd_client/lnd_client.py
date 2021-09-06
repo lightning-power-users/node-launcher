@@ -316,13 +316,19 @@ class LndClient(object):
 
         return b
 
-    def list_all(self):
-        return {
-            'peers': self.list_peers(),
-            'open_channels': self.list_channels(),
-            'pending_channels': self.list_pending_channels(),
-            'closed_channels': self.closed_channels()
-        }
+    def list_all_peers(self):
+        peers = {}
+        for peer in self.list_peers():
+            peers[peer.pub_key] = (peer, [])
+        all_channels = [c for c in self.list_channels()]\
+                       + self.list_pending_channels() \
+                       + [c for c in self.closed_channels()]
+        for channel in all_channels:
+            try:
+                peers[channel.remote_pubkey][1].append(channel)
+            except KeyError:
+                peers[channel.remote_pubkey] = (None, [channel])
+        return peers
 
     def list_peers(self) -> List[ln.Peer]:
         request = ln.ListPeersRequest()

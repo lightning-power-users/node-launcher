@@ -24,8 +24,8 @@ class LndThreadedClient(QObject):
         level_spec = ','.join(['='.join([str(i[0]).upper(), str(i[1])]) for i in DEFAULT_LOGGING_LEVELS])
         self.run_command('debug_level', level_spec=level_spec)
 
-    def list_all(self):
-        self.run_command('list_all')
+    def list_all_peers(self):
+        self.run_command('list_all_peers')
 
     def run_command(self, command: str, **kwargs):
         log.debug('LndThreadedClient call',

@@ -1,15 +1,9 @@
-from PySide2 import QtCore
-from PySide2.QtCore import QCoreApplication, Slot, Qt, QThreadPool
-from PySide2.QtWidgets import QApplication, QWidget, QMessageBox
+from PySide2.QtCore import QCoreApplication, Slot
+from PySide2.QtWidgets import QApplication
 
-from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
-from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.menu.nodes_manage.manage_dialogs.channels import \
     ChannelsDialog
-from node_launcher.gui.system_tray import SystemTray
 from node_launcher.logging import log
-from node_launcher.node_set import NodeSet
-from node_launcher.launcher_software import LauncherSoftware
 from node_launcher.node_set.lnd.lnd_client import LndClient
 
 

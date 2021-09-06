@@ -3,10 +3,11 @@ from PySide2.QtGui import QCursor
 from PySide2.QtWidgets import QAction, QDialog, QGridLayout, QMenu, QTreeWidget, \
     QTreeWidgetItem
 
-from node_launcher.node_set.lnd.lnd_client import LndClient
+from node_launcher.logging import log
+
+from node_launcher.node_set.lnd.lnd_client.lnd_client import LndClient, ln
 from node_launcher.node_set.lnd.lnd_node import LndNode
 from node_launcher.node_set.lnd.lnd_threaded_client import LndThreadedClient
-
 
 class ChannelsDialog(QDialog):
     node: LndNode
@@ -19,7 +20,13 @@ class ChannelsDialog(QDialog):
 
         self.tree = QTreeWidget()
         self.tree.setColumnCount(3)
-        self.tree.setHeaderLabels(['ID', 'Status', 'Capacity'])
+        self.tree.setHeaderLabels(
+            [
+                'Identifier',
+                'Status',
+                'Capacity'
+            ]
+        )
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self.open_menu)
         self.layout.addWidget(self.tree)
@@ -30,68 +37,50 @@ class ChannelsDialog(QDialog):
         self.client.signals.result.connect(self.handle_list)
         self.client.signals.error.connect(self.handle_error)
 
-        self.client.list_all()
+        self.client.list_all_peers()
 
     def handle_error(self):
-        self.client.list_all()
+        self.client.list_all_peers()
 
     def handle_list(self, data):
-        for peer_data in data['peers']:
-            peers = self.tree.findItems(peer_data.pub_key,
+        for pubkey in data.keys():
+            new_peer_data, new_channels_data = data[pubkey]
+            peers = self.tree.findItems(pubkey,
                                         Qt.MatchExactly | Qt.MatchRecursive, 0)
             if not len(peers):
                 peer = QTreeWidgetItem()
-                peer.setText(0, str(peer_data.pub_key))
+                peer.setText(0, str(pubkey))
+                self.tree.addTopLevelItem(peer)
+            else:
+                peer = peers[0]
+
+            if new_peer_data is not None:
                 peer.setText(1, 'Connected')
-                self.tree.addTopLevelItem(peer)
-
-        for open_channel_data in data['open_channels']:
-            peers = self.tree.findItems(open_channel_data.remote_pubkey,
-                                        Qt.MatchExactly | Qt.MatchRecursive, 0)
-            if not len(peers):
-                peer = QTreeWidgetItem()
-                peer.setText(0, str(open_channel_data.remote_pubkey))
+            else:
                 peer.setText(1, 'Disconnected')
-                self.tree.addTopLevelItem(peer)
-            else:
-                peer = peers[0]
 
-            channels = self.tree.findItems(str(open_channel_data.chan_id),
-                                           Qt.MatchExactly | Qt.MatchRecursive,
-                                           0)
-            if not len(channels):
-                channel = QTreeWidgetItem()
-                channel.setText(0, str(open_channel_data.chan_id))
-                peer.addChild(channel)
-            else:
-                channel = channels[0]
+            for channel_data in new_channels_data:
+                if isinstance(channel_data, ln.ChannelCloseSummary):
+                    identifier = channel_data.channel_point
+                else:
+                    log.debug('channel_data',
+                              channel_data_type=type(channel_data))
+                    continue
+                channels = self.tree.findItems(identifier,
+                                               Qt.MatchExactly | Qt.MatchRecursive,
+                                               0)
 
-            channel.setText(1, 'Open')
-            channel.setText(2, str(open_channel_data.capacity))
 
-        for closed_channel_data in data['closed_channels']:
-            peers = self.tree.findItems(closed_channel_data.remote_pubkey,
-                                        Qt.MatchExactly | Qt.MatchRecursive, 0)
-            if not len(peers):
-                peer = QTreeWidgetItem()
-                peer.setText(0, str(closed_channel_data.remote_pubkey))
-                peer.setText(1, 'Disconnected')
-                self.tree.addTopLevelItem(peer)
-            else:
-                peer = peers[0]
+                if not len(channels):
+                    channel = QTreeWidgetItem()
+                    channel.setText(0, str(channel_data.chan_id))
+                    peer.addChild(channel)
+                else:
+                    channel = channels[0]
 
-            channels = self.tree.findItems(str(closed_channel_data.chan_id),
-                                           Qt.MatchExactly | Qt.MatchRecursive,
-                                           0)
-            if not len(channels):
-                channel = QTreeWidgetItem()
-                channel.setText(0, str(closed_channel_data.chan_id))
-                peer.addChild(channel)
-            else:
-                channel = channels[0]
+                channel.setText(1, 'Open')
+                channel.setText(2, str(channel_data.capacity))
 
-            channel.setText(1, 'Closed')
-            channel.setText(2, str(closed_channel_data.capacity))
 
     def open_menu(self, event):
         indexes = self.tree.selectedIndexes()
