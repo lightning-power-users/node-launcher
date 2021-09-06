@@ -1,7 +1,6 @@
 from grpc._channel import _Rendezvous
 
-from node_launcher.gui.components.thread_worker import Worker
-from node_launcher.gui.qt import QThreadPool, QObject
+from node_launcher.gui.qt import QObject
 from node_launcher.logging import log
 from node_launcher.node_set.lib.get_random_password import get_random_password
 from node_launcher.node_set.lnd.lnd_client import LndClient
@@ -14,14 +13,12 @@ class LndUnlocker(QObject):
         self.configuration = configuration
         self.client = LndClient(self.configuration)
         self.keyring = SystemKeyring()
-        self.threadpool = QThreadPool()
 
     @property
     def keyring_service_name(self):
         return f'lnd_mainnet_wallet_password'
 
     def get_password(self):
-        passwords = []
         for service_name in [self.keyring_service_name, 'lnd_wallet_password']:
             for user_name in [self.keyring_service_name, self.configuration['bitcoind.rpcuser'], 'lnd_wallet_password']:
                 log.info(
@@ -39,19 +36,16 @@ class LndUnlocker(QObject):
                         keyring_service_name=service_name,
                         keyring_user_name=user_name
                     )
-                    passwords += [password]
-        return passwords
+                    yield password
 
     def auto_unlock_wallet(self):
         for password in self.get_password():
-            worker = Worker(
-                fn=self.unlock_wallet,
+            error = self.unlock_wallet(
                 configuration=self.configuration,
                 password=password
             )
-            worker.signals.result.connect(self.handle_unlock_wallet)
-            worker.signals.error.connect(self.handle_unlock_wallet)
-            self.threadpool.start(worker)
+            if error is None:
+                break
 
     @staticmethod
     def unlock_wallet(configuration, password: str):

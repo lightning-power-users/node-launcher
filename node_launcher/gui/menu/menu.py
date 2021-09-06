@@ -26,7 +26,7 @@ class Menu(QMenu):
             TorStatusAction(self.node_set.tor_node, parent=parent),
             BitcoindStatusAction(self.node_set.bitcoind_node, parent=parent),
             LndStatusAction(self.node_set.lnd_node, parent=parent),
-            NodeManageAction(node_set=node_set, system_tray=system_tray),
+            NodeManageAction(node_set=node_set, system_tray=system_tray, parent=parent),
             SeparatorAction()
         ]
 

@@ -20,6 +20,8 @@ from .v0131beta import walletunlocker_pb2 as wallet_unlocker, walletunlocker_pb2
 
 
 os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
+os.environ['GRPC_VERBOSITY'] = 'DEBUG'
+os.environ['GRPC_TRACE'] = 'all'
 
 
 class DefaultModel(dict):
@@ -111,13 +113,10 @@ class LndClient(object):
         ]
 
     def reset(self):
-        self._lnd_client = None
         self._wallet_unlocker = None
 
     @property
     def lnd_client(self):
-        if self._lnd_client is not None:
-            return self._lnd_client
         auth_credentials = grpc.metadata_call_credentials(
             self.metadata_callback)
 
@@ -130,8 +129,7 @@ class LndClient(object):
             credentials,
             options=self.grpc_options
         )
-        self._lnd_client = lnrpc.LightningStub(grpc_channel)
-        return self._lnd_client
+        return lnrpc.LightningStub(grpc_channel)
 
     @property
     def tls_cert_key(self) -> bytes:

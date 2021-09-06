@@ -7,10 +7,11 @@ class SystemKeyring(KeyringBackend):
     backend: KeyringBackend
 
     def __init__(self):
+        super().__init__()
         if IS_WINDOWS:
             from keyring.backends.Windows import WinVaultKeyring as Keyring
         elif IS_MACOS:
-            from keyring.backends.OS_X import Keyring
+            from keyring.backends.macOS import Keyring
         elif IS_LINUX:
             from keyring.backends.SecretService import Keyring
         else:

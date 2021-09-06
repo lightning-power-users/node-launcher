@@ -8,8 +8,8 @@ from node_launcher.node_set.lib.network_node import NetworkNode
 
 class NodeManageDialog(QDialog):
 
-    def __init__(self, node: NetworkNode):
-        super().__init__()
+    def __init__(self, node: NetworkNode, parent):
+        super().__init__(parent=parent)
 
         self.network = node.software.node_software_name
         self.node_software_name = node.node_software_name
