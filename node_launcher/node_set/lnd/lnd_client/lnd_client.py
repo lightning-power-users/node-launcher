@@ -1,6 +1,6 @@
 import codecs
 import os
-from typing import List
+from typing import List, Optional
 
 # noinspection PyPackageRequirements
 import grpc
@@ -14,8 +14,10 @@ from grpc._plugin_wrapping import (_AuthMetadataContext,
 
 from node_launcher.constants import LND_DIR_PATH, OPERATING_SYSTEM
 from node_launcher.logging import log
-from . import rpc_pb2 as ln
-from . import rpc_pb2_grpc as lnrpc
+from .v0131beta import rpc_pb2 as ln
+from .v0131beta import rpc_pb2_grpc as lnrpc
+from .v0131beta import walletunlocker_pb2 as wallet_unlocker, walletunlocker_pb2_grpc as wallet_unlocker_rpc
+
 
 os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
 
@@ -101,6 +103,7 @@ class LndClient(object):
 
         self._lnd_client = None
         self._wallet_unlocker = None
+        self._wallet_unlocker_stub: Optional[wallet_unlocker_rpc.WalletUnlockerStub] = None
 
         self.grpc_options = [
             ('grpc.max_receive_message_length', 33554432),
@@ -131,16 +134,25 @@ class LndClient(object):
         return self._lnd_client
 
     @property
-    def wallet_unlocker(self):
-        if self._wallet_unlocker is not None:
-            return self._wallet_unlocker
+    def tls_cert_key(self) -> bytes:
+        with open(self.tls_cert_path, 'rb') as r:
+            tls_cert_key = r.read()
+            assert tls_cert_key.startswith(b'-----BEGIN CERTIFICATE-----')
+            return tls_cert_key
 
-        grpc_channel = grpc.secure_channel(
-            f'{self.grpc_host}:{self.grpc_port}',
-            credentials=self.get_cert_credentials()
-        )
-        self._wallet_unlocker = lnrpc.WalletUnlockerStub(grpc_channel)
-        return self._wallet_unlocker
+    @property
+    def grpc_address(self) -> str:
+        address = str(self.grpc_host) + ':' + str(self.grpc_port)
+        log.info(f'gRPC client using address {address}')
+        return address
+
+    @property
+    def wallet_unlocker_stub(self) -> wallet_unlocker_rpc.WalletUnlockerStub:
+        if self._wallet_unlocker_stub is None:
+            ssl_creds = grpc.ssl_channel_credentials(self.tls_cert_key)
+            _w_channel = grpc.secure_channel(self.grpc_address, ssl_creds)
+            self._wallet_unlocker_stub = wallet_unlocker_rpc.WalletUnlockerStub(_w_channel)
+        return self._wallet_unlocker_stub
 
     @property
     def lnddir(self) -> str:
@@ -194,31 +206,31 @@ class LndClient(object):
         # noinspection PyCallingNonCallable
         callback([('macaroon', macaroon)], None)
 
-    def generate_seed(self, seed_password: str = None) -> ln.GenSeedResponse:
-        request = ln.GenSeedRequest()
+    def generate_seed(self, seed_password: str = None) -> wallet_unlocker.GenSeedResponse:
+        request = wallet_unlocker.GenSeedRequest()
         if seed_password is not None:
             request.aezeed_passphrase = seed_password.encode('latin1')
-        response = self.wallet_unlocker.GenSeed(request)
+        response = self.wallet_unlocker_stub.GenSeed(request)
         return response
 
     def initialize_wallet(self, wallet_password: str,
                           seed: List[str],
                           seed_password: str = None,
-                          recovery_window: int = None) -> ln.InitWalletResponse:
-        request = ln.InitWalletRequest()
+                          recovery_window: int = None) -> wallet_unlocker.InitWalletResponse:
+        request = wallet_unlocker.InitWalletRequest()
         request.wallet_password = wallet_password.encode('latin1')
         request.cipher_seed_mnemonic.extend(seed)
         if seed_password is not None:
             request.aezeed_passphrase = seed_password.encode('latin1')
         if recovery_window is not None:
             request.recovery_window = recovery_window
-        response = self.wallet_unlocker.InitWallet(request)
+        response = self.wallet_unlocker_stub.InitWallet(request)
         return response
 
-    def unlock(self, wallet_password: str) -> ln.UnlockWalletResponse:
-        request = ln.UnlockWalletRequest()
+    def unlock(self, wallet_password: str) -> wallet_unlocker.UnlockWalletResponse:
+        request = wallet_unlocker.UnlockWalletRequest()
         request.wallet_password = wallet_password.encode('latin1')
-        response = self.wallet_unlocker.UnlockWallet(request)
+        response = self.wallet_unlocker_stub.UnlockWallet(request)
         return response
 
     def get_info(self) -> ln.GetInfoResponse:
