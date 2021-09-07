@@ -6,7 +6,7 @@
 # Requirements
 1. ~300 GB of download bandwidth
 2. ~10 GB of disk space (~300 GB if you want the Bitcoin transaction index, makes for a faster LND)
-3. Windows 7+ or macOS 10.12.6+
+3. Windows 7+ or macOS > 10.14.6 (Mojave, released in 2018)
 
 Linux works but it is not packaged, follow the developer steps below to run it from the Linux command line. 
 
