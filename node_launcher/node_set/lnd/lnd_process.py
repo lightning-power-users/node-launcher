@@ -42,6 +42,10 @@ class LndProcess(ManagedProcess):
         elif 'Unable to complete chain rescan' in line:
             self.terminate()
             self.restart_process()
+        elif 'unable to create chain control' in line:
+            self.terminate()
+            self.waitForFinished(-1)
+            self.start()
         elif 'Starting HTLC Switch' in line:
             self.set_icon_color.emit('green')
             self.update_status(NodeStatus.SYNCED)
@@ -71,5 +75,9 @@ class LndProcess(ManagedProcess):
             self.old_height = new_height
             self.old_timestamp = new_timestamp
 
-    def restart_process(self):
-        QTimer.singleShot(3000, self.start)
+    def delayed_start(self, **kwargs):
+        self.stop()
+        super().start(**kwargs)
+
+    def start(self):
+        QTimer.singleShot(4000, self.delayed_start)

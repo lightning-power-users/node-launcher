@@ -45,10 +45,6 @@ class BitcoindNode(NetworkNode):
         ]
         return ' '.join(command)
 
-    @property
-    def prerequisites_synced(self):
-        return self.tor_synced
-
     def stop(self):
         if self.process.state() == QProcess.Running:
             self.process.expecting_shutdown = True

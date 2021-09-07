@@ -18,9 +18,7 @@ class BitcoindProcess(ManagedProcess):
         if 'dnsseed thread exit' in line:
             if not self.current_status == NodeStatus.SYNCED:
                 self.update_status(NodeStatus.SYNCING)
-        elif 'Leaving InitialBlockDownload' in line:
-            self.update_status(NodeStatus.SYNCED)
-        elif 'progress=1.000000' in line:
+        elif 'init message: Done loading' in line:
             self.update_status(NodeStatus.SYNCED)
         elif 'Shutdown: done' in line:
             if self.expecting_shutdown:

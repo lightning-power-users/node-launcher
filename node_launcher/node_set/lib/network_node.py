@@ -88,19 +88,17 @@ class NetworkNode(QObject):
 
     def start_process(self):
         log.debug('Start process', node_software_name=self.node_software_name,
-                  current_status=self.current_status,
-                  prerequisites_synced=self.prerequisites_synced)
+                  current_status=self.current_status)
         if self.process.state() == QProcess.Running:
             log.debug('Process already running')
             return
 
-        if self.prerequisites_synced:
-            # Todo: run in threads so they don't block the GUI
-            self.update_status(NodeStatus.LOADING_CONFIGURATION)
-            self.configuration.load()
-            self.update_status(NodeStatus.CHECKING_CONFIGURATION)
-            self.configuration.check()
-            self.update_status(NodeStatus.CONFIGURATION_READY)
-            self.update_status(NodeStatus.STARTING_PROCESS)
-            self.process.start()
-            self.update_status(NodeStatus.PROCESS_STARTED)
+        # Todo: run in threads so they don't block the GUI
+        self.update_status(NodeStatus.LOADING_CONFIGURATION)
+        self.configuration.load()
+        self.update_status(NodeStatus.CHECKING_CONFIGURATION)
+        self.configuration.check()
+        self.update_status(NodeStatus.CONFIGURATION_READY)
+        self.update_status(NodeStatus.STARTING_PROCESS)
+        self.process.start()
+        self.update_status(NodeStatus.PROCESS_STARTED)

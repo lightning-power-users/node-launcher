@@ -1,13 +1,8 @@
-import webbrowser
-
 from node_launcher.gui.qt import QCoreApplication, QGuiApplication, QMenu, QAction
-
 from node_launcher.gui.menu.menu_actions.nodes_menu.bitcoind_status_action import \
     BitcoindStatusAction
 from node_launcher.gui.menu.menu_actions.nodes_menu.lnd_status_action import \
     LndStatusAction
-from node_launcher.gui.menu.menu_actions.nodes_menu.node_manage_action import \
-    NodeManageAction
 from node_launcher.gui.menu.menu_actions.separator_action import SeparatorAction
 from node_launcher.gui.menu.menu_actions.nodes_menu.tor_status_action import \
     TorStatusAction
@@ -26,14 +21,11 @@ class Menu(QMenu):
             TorStatusAction(self.node_set.tor_node, parent=parent),
             BitcoindStatusAction(self.node_set.bitcoind_node, parent=parent),
             LndStatusAction(self.node_set.lnd_node, parent=parent),
-            NodeManageAction(node_set=node_set, system_tray=system_tray, parent=parent),
             SeparatorAction()
         ]
 
         for action in default_actions:
             self.add_action(action)
-
-        self.joule_url_action = self.addAction('Copy Node URL (REST)')
 
         # Joule
         self.joule_status_action = self.addAction('Joule Browser UI')
@@ -44,24 +36,7 @@ class Menu(QMenu):
         self.joule_macaroons_action.triggered.connect(self.reveal_macaroon_path)
 
         self.addSeparator()
-
-        # Zap
-        self.zap_status_action = self.addAction('Zap Desktop UI')
-        self.zap_status_action.setEnabled(False)
-        self.zap_open_action = self.addAction('Open Zap Desktop')
-        self.zap_open_action.triggered.connect(
-            lambda: webbrowser.open(self.node_set.lnd_node.configuration.lndconnect_url)
-        )
-        # Todo: reenable when Zap mobile supports Tor
-        # self.zap_qr_code_label = ZapQrcodeLabel(
-        #     configuration=self.node_set.lnd_node.configuration
-        # )
-        # self.show_zap_qrcode_action = self.addAction('Pair Zap Mobile')
-        # self.show_zap_qrcode_action.triggered.connect(
-        #     self.zap_qr_code_label.show
-        # )
-
-        self.addSeparator()
+        # Todo: add debug
 
         # Quit
         self.quit_action = self.addAction('Quit')

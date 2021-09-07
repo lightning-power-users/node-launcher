@@ -28,13 +28,11 @@ class NodeSet(object):
         self.bitcoind_node.status.connect(
             self.handle_bitcoind_node_status_change
         )
-        self.lnd_node.status.connect(
-            self.handle_lnd_node_status_change
-        )
 
     def start(self):
         log.debug('Starting node set')
         self.tor_node.start_process()
+        self.bitcoind_node.start_process()
 
     def handle_tor_node_status_change(self, tor_status):
         if tor_status == NodeStatus.RESTART:
@@ -43,28 +41,10 @@ class NodeSet(object):
             self.tor_node.software.start_update_worker()
         elif tor_status == NodeStatus.SYNCED:
             self.bitcoind_node.tor_synced = True
-            self.bitcoind_node.start_process()
-        elif tor_status == NodeStatus.STOPPED:
-            self.lnd_node.stop()
-            self.bitcoind_node.stop()
 
     def handle_bitcoind_node_status_change(self, bitcoind_status):
-        if bitcoind_status in [NodeStatus.SYNCING, NodeStatus.SYNCED]:
-            self.lnd_node.bitcoind_ready = True
-            self.lnd_node.start_process()
-        elif bitcoind_status == NodeStatus.SYNCED:
-            self.lnd_node.bitcoind_syncing = True
+        if bitcoind_status == NodeStatus.SYNCED:
             self.bitcoind_node.configuration['reindex'] = False
             self.lnd_node.start_process()
-        elif bitcoind_status == NodeStatus.STOPPED:
-            self.lnd_node.stop()
-            self.lnd_node.bitcoind_ready = False
-        elif bitcoind_status == NodeStatus.RESTART:
-            self.lnd_node.stop()
-            self.bitcoind_node.start_process()
 
-    def handle_lnd_node_status_change(self, lnd_status):
-        if lnd_status == NodeStatus.STOPPED and self.lnd_node.restart:
-            self.lnd_node.restart = False
-            self.lnd_node.start_process()
 
