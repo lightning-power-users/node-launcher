@@ -48,7 +48,7 @@ from PyQt5.QtWidgets import (
 )
 from PyQt5.QtGui import (
     QPixmap,
-    QClipboard,
+    QGuiApplication,
     QFont,
     QKeySequence,
     QPalette,
@@ -105,7 +105,7 @@ from PyQt5.QtGui import (
 # )
 # from PySide2.QtGui import (
 #     QPixmap,
-#     QClipboard,
+#     QGuiApplication,
 #     QFont,
 #     QKeySequence,
 #     QPalette,

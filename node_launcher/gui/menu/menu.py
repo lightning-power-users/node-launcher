@@ -1,6 +1,6 @@
 import webbrowser
 
-from node_launcher.gui.qt import QCoreApplication, QClipboard, QMenu, QAction
+from node_launcher.gui.qt import QCoreApplication, QGuiApplication, QMenu, QAction
 
 from node_launcher.gui.menu.menu_actions.nodes_menu.bitcoind_status_action import \
     BitcoindStatusAction
@@ -74,7 +74,7 @@ class Menu(QMenu):
         self.addAction(action)
 
     def copy_rest_url(self):
-        QClipboard().setText(self.node_set.lnd_node.configuration.rest_url)
+        QGuiApplication.clipboard().setText(self.node_set.lnd_node.configuration.rest_url)
 
     def reveal_macaroon_path(self):
         reveal(self.node_set.lnd_node.configuration.macaroon_path)

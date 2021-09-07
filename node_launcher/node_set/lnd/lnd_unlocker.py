@@ -45,7 +45,8 @@ class LndUnlocker(QObject):
                 password=password
             )
             if error is None:
-                break
+                return
+        self.handle_unlock_wallet('wallet not found')
 
     @staticmethod
     def unlock_wallet(configuration, password: str):
@@ -70,22 +71,21 @@ class LndUnlocker(QObject):
 
         seed = generate_seed_response.cipher_seed_mnemonic
 
-        keyring_service_name = f'lnd_seed'
         keyring_user_name = ''.join(seed[0:2])
         log.info(
             'generate_seed',
-            keyring_service_name=keyring_service_name,
+            keyring_service_name=self.keyring_service_name,
             keyring_user_name=keyring_user_name
         )
 
         self.keyring.set_password(
-            service=keyring_service_name,
+            service=self.keyring_service_name,
             username=keyring_user_name,
             password=' '.join(seed)
         )
 
         self.keyring.set_password(
-            service=f'{keyring_service_name}_seed_password',
+            service=f'{self.keyring_service_name}_seed_password',
             username=keyring_user_name,
             password=new_seed_password
         )
