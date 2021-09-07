@@ -67,39 +67,34 @@ IS_MACOS = OPERATING_SYSTEM == DARWIN
 IS_LINUX = OPERATING_SYSTEM == LINUX
 IS_WINDOWS = OPERATING_SYSTEM == WINDOWS
 
-# Only relevant for Windows
-LOCALAPPDATA = os.path.abspath(os.environ.get('LOCALAPPDATA', ''))
-APPDATA = os.path.abspath(os.environ.get('APPDATA', ''))
-PROGRAMS = os.environ.get('Programw6432', '')
+NODE_LAUNCHER_DATA_PATH: Dict[OperatingSystem, str] = {}
+TOR_DIR_PATH: Dict[OperatingSystem, str] = {}
+BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {}
+LND_DIR_PATH: Dict[OperatingSystem, str] = {}
 
-NODE_LAUNCHER_DATA_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: expanduser('~/Library/Application Support/Node Launcher/'),
-    LINUX: expanduser('~/.node_launcher'),
-    WINDOWS: os.path.join(LOCALAPPDATA, 'Node Launcher')
-}
+if IS_WINDOWS:
+    LOCALAPPDATA = os.path.abspath(os.environ.get('LOCALAPPDATA', ''))
+    APPDATA = os.path.abspath(os.environ.get('APPDATA', ''))
+    PROGRAMS = os.environ.get('Programw6432', '')
+    NODE_LAUNCHER_DATA_PATH[WINDOWS] = os.path.join(LOCALAPPDATA, 'Node Launcher')
+    TOR_DIR_PATH[WINDOWS] = os.path.join(APPDATA, 'tor')
+    BITCOIN_DATA_PATH[WINDOWS] = os.path.join(APPDATA, 'Bitcoin')
+    LND_DIR_PATH[WINDOWS] = os.path.join(LOCALAPPDATA, 'Lnd')
+elif IS_LINUX:
+    NODE_LAUNCHER_DATA_PATH[LINUX] = expanduser('~/.node_launcher')
+    TOR_DIR_PATH[LINUX] = '/var/tmp/dist/tor/etc/tor/'
+    BITCOIN_DATA_PATH[LINUX] = expanduser('~/.bitcoin')
+    LND_DIR_PATH[LINUX] = expanduser('~/.lnd/')
+elif IS_MACOS:
+    NODE_LAUNCHER_DATA_PATH[DARWIN] = expanduser('~/Library/Application Support/Node Launcher/')
+    TOR_DIR_PATH[DARWIN] = '/var/tmp/dist/tor/etc/tor/'
+    BITCOIN_DATA_PATH[DARWIN] = expanduser('~/Library/Application Support/Bitcoin/')
+    LND_DIR_PATH[DARWIN] = expanduser('~/Library/Application Support/Lnd/')
 
 try:
     os.mkdir(os.path.join(NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM]))
 except FileExistsError:
     pass
-
-LND_DIR_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: expanduser('~/Library/Application Support/Lnd/'),
-    LINUX: expanduser('~/.lnd/'),
-    WINDOWS: os.path.join(LOCALAPPDATA, 'Lnd')
-}
-
-BITCOIN_DATA_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: expanduser('~/Library/Application Support/Bitcoin/'),
-    LINUX: expanduser('~/.bitcoin'),
-    WINDOWS: os.path.join(APPDATA, 'Bitcoin')
-}
-
-TOR_DIR_PATH: Dict[OperatingSystem, str] = {
-    DARWIN: '/var/tmp/dist/tor/etc/tor/',
-    LINUX: '/var/tmp/dist/tor/etc/tor/',
-    WINDOWS: os.path.join(APPDATA, 'tor'),
-}
 
 TOR_SERVICE_PATH = os.path.join(NODE_LAUNCHER_DATA_PATH[OPERATING_SYSTEM], 'tor-service')
 
@@ -131,7 +126,7 @@ AUTOPRUNE_GB = 150
 # We are targeting 10 GB, so 10 - 3 = 7
 MAINNET_PRUNE = 7000
 
-MINIMUM_GB = 400
+MINIMUM_GB = 10
 
 
 BITCOIN_TESTNET_PEER_PORT = 18333

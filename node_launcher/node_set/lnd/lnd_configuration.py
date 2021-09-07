@@ -14,7 +14,7 @@ from node_launcher.constants import (
     LND_DIR_PATH,
     OPERATING_SYSTEM,
     TOR_SERVICE_PATH)
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from node_launcher.node_set.bitcoind.bitcoind_configuration import (
     BitcoindConfiguration
 )

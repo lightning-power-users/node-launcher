@@ -12,7 +12,7 @@ from node_launcher.constants import (
     GIGABYTE,
     OPERATING_SYSTEM
 )
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 
 
 @dataclass
@@ -109,7 +109,11 @@ class HardDrives(object):
                 exc_info=True
             )
             return partitions
-        partition_paths = [p.mountpoint for p in ps if 'removable' not in p.opts]
+        partition_paths = [
+            p.mountpoint for p in ps
+            if 'removable' not in p.opts
+               and not p.mountpoint.startswith('/System/Volumes')
+        ]
         log.info(
             'partition_paths',
             partition_paths=partition_paths

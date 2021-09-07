@@ -9,7 +9,7 @@ from node_launcher.constants import (
     BITCOIN_MAINNET_PEER_PORT,
     BITCOIN_MAINNET_RPC_PORT
 )
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from node_launcher.node_set.lib.configuration import Configuration
 from node_launcher.node_set.lib.get_random_password import get_random_password
 from node_launcher.node_set.lib.hard_drives import Partition

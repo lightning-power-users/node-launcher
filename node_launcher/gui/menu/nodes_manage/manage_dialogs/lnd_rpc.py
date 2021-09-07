@@ -5,7 +5,7 @@ from google.protobuf.json_format import MessageToDict
 from node_launcher.gui.components.grid_layout import QGridLayout
 from node_launcher.gui.qt import Qt, QCursor, QAction, QDialog, QMenu, QTreeWidget, \
     QTreeWidgetItem, QGroupBox, QPushButton
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 
 from node_launcher.node_set.lnd.lnd_client import LndClient
 from node_launcher.node_set.lnd.lnd_client.v0131beta.rpc_pb2_grpc import LightningStub, LightningServicer, Lightning

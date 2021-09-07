@@ -7,7 +7,7 @@ from pygments import highlight
 from pygments.formatters.html import HtmlFormatter
 from pygments.lexers.data import JsonLexer
 
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from node_launcher.node_set.lib.network_node import NetworkNode
 
 

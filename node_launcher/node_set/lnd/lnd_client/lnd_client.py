@@ -13,15 +13,15 @@ from grpc._plugin_wrapping import (_AuthMetadataContext,
                                    _AuthMetadataPluginCallback)
 
 from node_launcher.constants import LND_DIR_PATH, OPERATING_SYSTEM
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from .v0131beta import rpc_pb2 as ln
 from .v0131beta import rpc_pb2_grpc as lnrpc
 from .v0131beta import walletunlocker_pb2 as wallet_unlocker, walletunlocker_pb2_grpc as wallet_unlocker_rpc
 
 
 os.environ['GRPC_SSL_CIPHER_SUITES'] = 'HIGH+ECDSA'
-os.environ['GRPC_VERBOSITY'] = 'DEBUG'
-os.environ['GRPC_TRACE'] = 'all'
+# os.environ['GRPC_VERBOSITY'] = 'DEBUG'
+# os.environ['GRPC_TRACE'] = 'all'
 
 
 class DefaultModel(dict):

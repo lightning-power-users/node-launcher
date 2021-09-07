@@ -10,7 +10,7 @@ from node_launcher.gui.qt import QThreadPool, QObject, Signal
 
 from node_launcher.constants import NodeSoftwareName, OperatingSystem
 from node_launcher.gui.components.thread_worker import Worker
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from node_launcher.node_set.lib.software_metadata import SoftwareMetadata
 from .node_status import SoftwareStatus
 

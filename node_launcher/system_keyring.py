@@ -1,4 +1,5 @@
-from keyring.backend import KeyringBackend
+from keyring.backend import KeyringBackend, log
+from keyring.errors import KeyringLocked
 
 from node_launcher.constants import IS_WINDOWS, IS_MACOS, IS_LINUX
 
@@ -23,7 +24,12 @@ class SystemKeyring(KeyringBackend):
         return self.backend.set_password(service, username, password)
 
     def get_password(self, service, username):
-        return self.backend.get_password(service, username)
+        try:
+            password = self.backend.get_password(service, username)
+        except KeyringLocked:
+            log.debug('Keyring locked error')
+            password = None
+        return password
 
     def delete_password(self, service, username):
         return self.backend.delete_password(service, username)

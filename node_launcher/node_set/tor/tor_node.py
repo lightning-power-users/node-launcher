@@ -3,7 +3,7 @@ from _signal import SIGTERM
 from psutil import process_iter
 
 from node_launcher.constants import OperatingSystem, TOR
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from node_launcher.node_set.lib.managed_process import ManagedProcess
 from node_launcher.node_set.lib.network_node import NetworkNode
 from node_launcher.node_set.lib.node_status import NodeStatus

@@ -6,7 +6,12 @@ block_cipher = None
 a = Analysis(
     ['run.py'],
     pathex=['/Users/pierre/src/node-launcher'],
-    binaries=[],
+    binaries=[
+        ('node_launcher/node_set/lib/bin/tor.real', 'node_launcher/node_set/lib/bin/'),
+        ('node_launcher/node_set/lib/bin/libevent-2.1.7.dylib', 'node_launcher/node_set/lib/bin/'),
+        ('node_launcher/node_set/lib/bin/bitcoind', 'node_launcher/node_set/lib/bin/'),
+        ('node_launcher/node_set/lib/bin/lnd', 'node_launcher/node_set/lib/bin/')
+    ],
     datas=[
         ('node_launcher/gui/assets/*.png', 'assets')
         ],

@@ -62,10 +62,10 @@ class SoftwareMetadata:
                             self.uncompressed_directory_name)
         return path
 
-
     @property
     def static_bin_path(self) -> str:
-        path = os.path.join(self.launcher_data_path, 'bin')
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(current_directory, 'bin')
         return path
 
     def executable_path(self, name):

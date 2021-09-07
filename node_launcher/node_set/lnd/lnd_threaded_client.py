@@ -1,7 +1,7 @@
 from node_launcher.gui.qt import QObject, QThreadPool
 
 from node_launcher.gui.components.thread_worker import Worker, WorkerSignals
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from node_launcher.node_set.lnd.lnd_logging import DEFAULT_LOGGING_LEVELS
 from .lnd_client import LndClient
 

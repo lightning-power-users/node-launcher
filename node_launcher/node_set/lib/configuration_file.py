@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Tuple
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from node_launcher.gui.qt import QFileSystemWatcher, QObject
 
 from node_launcher.node_set.lib.configuration_property import ConfigurationProperty

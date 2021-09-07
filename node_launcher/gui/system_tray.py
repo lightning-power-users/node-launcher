@@ -3,7 +3,7 @@ from node_launcher.gui.qt import QIcon, QPixmap, QSystemTrayIcon, QWidget
 from .assets.asset_access import asset_access
 from .menu.menu import Menu
 from node_launcher.node_set import NodeSet
-from ..logging import log
+from node_launcher.app_logging import log
 
 
 class SystemTray(QSystemTrayIcon):

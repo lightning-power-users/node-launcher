@@ -3,7 +3,7 @@ import sys
 from node_launcher.gui.menu.nodes_manage.manage_dialogs.channels import \
     ChannelsDialog
 from node_launcher.gui.qt import QCoreApplication, Slot, QApplication
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from node_launcher.node_set.lnd.lnd_client import LndClient
 from node_launcher.node_set.lnd.lnd_node import LndNode
 

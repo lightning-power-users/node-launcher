@@ -4,7 +4,7 @@ from psutil import process_iter
 
 from node_launcher.gui.qt import QProcess
 from node_launcher.constants import OperatingSystem, BITCOIND
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from node_launcher.node_set.bitcoind.bitcoind_rpc_client import Proxy
 from node_launcher.node_set.lib.network_node import NetworkNode
 from node_launcher.node_set.lib.node_status import NodeStatus

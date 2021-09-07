@@ -1,7 +1,7 @@
 from grpc._channel import _Rendezvous
 
 from node_launcher.gui.qt import QObject
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from node_launcher.node_set.lib.get_random_password import get_random_password
 from node_launcher.node_set.lnd.lnd_client import LndClient
 from node_launcher.system_keyring import SystemKeyring

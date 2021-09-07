@@ -14,7 +14,7 @@ from node_launcher.gui.qt import (
 from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE, OPERATING_SYSTEM
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.system_tray import SystemTray
-from node_launcher.logging import log
+from node_launcher.app_logging import log
 from node_launcher.node_set import NodeSet
 from node_launcher.launcher_software import LauncherSoftware
 from node_launcher.node_set.lib.hard_drives import HardDrives
