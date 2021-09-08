@@ -9,10 +9,8 @@ class BitcoindStatusAction(MenuAction):
         super().__init__(text='Bitcoind: off', parent=parent)
         self.setEnabled(False)
         self.bitcoind_node = bitcoind_node
-        if self.bitcoind_node:
-            self.bitcoind_node.status.connect(self.update_text)
-        else:
-            self.setVisible(False)
+        self.bitcoind_node.status.connect(self.update_text)
+        self.setVisible(False)
 
     def update_text(self, line):
         new_text = 'Bitcoind: ' + line.replace('_', ' ')
