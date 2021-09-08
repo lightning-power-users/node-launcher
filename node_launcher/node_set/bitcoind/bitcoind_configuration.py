@@ -51,8 +51,6 @@ class BitcoindConfiguration(Configuration):
             if 'prune' not in self:
                 should_prune = not self.partition.can_archive
                 self.set_prune(should_prune)
-
-        self['txindex'] = 1
         self['reindex'] = 0
 
         self.set_default_configuration('server', True)
@@ -62,7 +60,7 @@ class BitcoindConfiguration(Configuration):
         self.set_default_configuration('rpcuser', 'default_user')
         self.set_default_configuration('rpcpassword', get_random_password())
 
-        self['blockfilterindex'] = True
+        self['coinstatsindex'] = True
 
         self.zmq_block_port = get_zmq_port()
         self.zmq_tx_port = get_zmq_port()
@@ -96,7 +94,7 @@ class BitcoindConfiguration(Configuration):
         else:
             self['prune'] = 0
         self['txindex'] = not should_prune
-
+        self['blockfilterindex'] = not should_prune
     @property
     def node_port(self):
         custom_port = self['port']

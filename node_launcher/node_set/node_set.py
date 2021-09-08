@@ -43,7 +43,7 @@ class NodeSet(object):
             self.bitcoind_node.tor_synced = True
 
     def handle_bitcoind_node_status_change(self, bitcoind_status):
-        if bitcoind_status == NodeStatus.SYNCED:
+        if bitcoind_status == NodeStatus.SYNCING:
             self.bitcoind_node.configuration['reindex'] = False
             self.lnd_node.start_process()
 

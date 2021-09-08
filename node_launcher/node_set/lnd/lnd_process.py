@@ -25,6 +25,7 @@ class LndProcess(ManagedProcess):
         self.old_height = None
         self.old_timestamp = None
         self.rescan_height = None
+        self.old_status = None
 
     def process_output_line(self, line: str):
         if 'Waiting for wallet encryption password' in line:
@@ -67,10 +68,9 @@ class LndProcess(ManagedProcess):
                     timestamp_change = new_timestamp - self.old_timestamp
                     total_left = 600000 - new_height
                     time_left = (total_left / change) * timestamp_change
-                    humanized = humanize.naturaltime(-time_left)
-                    self.sync_progress.emit(
-                        f'Syncing, {humanized} remaining'
-                    )
+                    humanized = humanize.naturaltime(-time_left, future=True)
+                    description = f'syncing, ready {humanized}'
+                    self.update_status(NodeStatus.SYNCING, description)
             self.old_height = new_height
             self.old_timestamp = new_timestamp
 

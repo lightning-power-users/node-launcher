@@ -6,7 +6,9 @@ block_cipher = None
 
 a = Analysis(['run.py'],
              pathex=['C:\\Users\\pierre\\PycharmProjects\\node-launcher'],
-             binaries=[],
+             binaries=[
+                 ('node_launcher/node_set/lib/bin/*', 'node_launcher/node_set/lib/bin/')
+             ],
              datas=[
                  ('node_launcher/gui/assets/*.png', 'assets')
              ],

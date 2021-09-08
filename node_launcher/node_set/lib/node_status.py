@@ -2,7 +2,9 @@ from node_launcher.constants import StringConstant
 
 
 class Status(StringConstant):
-    pass
+    def __init__(self, name: str, description: str):
+        super().__init__(name)
+        self.description = description
 
 
 class NodeStatus(object):

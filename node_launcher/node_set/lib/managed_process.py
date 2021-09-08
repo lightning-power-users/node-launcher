@@ -8,8 +8,7 @@ from node_launcher.node_set.lib.node_status import NodeStatus
 
 
 class ManagedProcess(QProcess):
-    status = Signal(str)
-    sync_progress = Signal(str)
+    status = Signal(NodeStatus, str)
     notification = Signal(str, str, QSystemTrayIcon.MessageIcon)
     log_line = Signal(str)
 
@@ -31,15 +30,17 @@ class ManagedProcess(QProcess):
             env.insert('LD_LIBRARY_PATH', os.path.abspath(os.path.join(binary, os.pardir)))
             self.setProcessEnvironment(env)
 
-    def update_status(self, new_status: NodeStatus):
+    def update_status(self, new_status: NodeStatus, description: str = None):
         if new_status == self.current_status:
             return
+        if description is None:
+            description = str(new_status)
         log.debug('update_status',
                   binary=self.binary,
                   new_status=new_status,
                   current_status=self.current_status)
         self.current_status = new_status
-        self.status.emit(str(new_status))
+        self.status.emit(new_status, description)
 
     def process_output_line(self, line):
         pass

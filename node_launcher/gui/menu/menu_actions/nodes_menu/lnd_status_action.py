@@ -1,4 +1,5 @@
 from node_launcher.gui.menu.menu_actions.menu_action import MenuAction
+from node_launcher.node_set.lib.node_status import NodeStatus
 from node_launcher.node_set.lnd.lnd_node import LndNode
 
 
@@ -8,10 +9,9 @@ class LndStatusAction(MenuAction):
         self.setEnabled(False)
         self.lnd_node = lnd_node
         self.lnd_node.status.connect(self.update_text)
-        self.lnd_node.process.sync_progress.connect(self.update_text)
         self.setVisible(False)
 
-    def update_text(self, line):
-        new_text = 'LND: ' + line.replace('_', ' ')
+    def update_status(self, new_status: NodeStatus):
+        new_text = 'LND: ' + new_status.description
         self.setText(new_text)
         self.setVisible(True)

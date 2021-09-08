@@ -21,8 +21,8 @@ class BitcoindProcess(ManagedProcess):
         if 'dnsseed thread exit' in line:
             if not self.current_status == NodeStatus.SYNCED:
                 self.update_status(NodeStatus.SYNCING)
-        elif 'init message: Done loading' in line:
-            self.update_status(NodeStatus.SYNCED)
+        # elif 'init message: Done loading' in line:
+        #     self.update_status(NodeStatus.SYNCED)
         elif 'Shutdown: done' in line:
             if self.expecting_shutdown:
                 return
@@ -59,12 +59,10 @@ class BitcoindProcess(ManagedProcess):
                                 if len(self.timestamp_changes) > 100:
                                     self.timestamp_changes.pop(0)
                                 average_time_left = sum(self.timestamp_changes) / len(self.timestamp_changes)
-                                humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
-                                self.status.emit(f'Syncing, {humanized} remaining')
-                        else:
-                            if round(new_progress * 100) == 100:
-                                continue
-                            self.status.emit(f'{new_progress * 100:.2f}% synced')
+                                humanized = humanize.naturaltime(-timedelta(seconds=average_time_left), future=True)
+                                new_status = NodeStatus.SYNCING
+                                new_status.description = f'syncing, ready {humanized}'
+                                self.update_status(new_status)
                         self.old_progress = new_progress
                         self.old_timestamp = new_timestamp
         elif 'Bitcoin Core is probably already running' in line:

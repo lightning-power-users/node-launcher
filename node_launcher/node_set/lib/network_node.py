@@ -16,9 +16,11 @@ from node_launcher.node_set.tor.tor_configuration import TorConfiguration
 
 class NetworkNode(QObject):
     node_software_name: NodeSoftwareName
-    current_status: Optional[NodeStatus]
 
-    status = Signal(str)
+    current_status: Optional[NodeStatus]
+    current_status_description: Optional[str]
+
+    status = Signal(NodeStatus, str)
 
     def __init__(self, operating_system: OperatingSystem,
                  node_software_name: NodeSoftwareName,
@@ -26,6 +28,7 @@ class NetworkNode(QObject):
         super().__init__()
         self.node_software_name = node_software_name
         self.current_status = None
+        self.current_status_description = None
         self.software = Software(operating_system=operating_system, node_software_name=node_software_name)
         if node_software_name == LND:
             self.configuration = LndConfiguration(bitcoind_partition=bitcoind_partition)
@@ -72,11 +75,13 @@ class NetworkNode(QObject):
         self.process.status.connect(self.update_status)
         self.process.log_line.connect(self.handle_log_line)
 
-    def update_status(self, new_status: NodeStatus):
+    def update_status(self, new_status: NodeStatus, new_description: str = None):
         log.debug(f'update_status {self.node_software_name} node',
                   network=self.node_software_name,
                   old_status=self.current_status,
-                  new_status=new_status)
+                  old_status_description=self.current_status_description,
+                  new_status=new_status,
+                  new_status_description=new_status)
         self.current_status = new_status
         self.status.emit(str(new_status))
         if new_status == NodeStatus.STOPPED and self.restart:
