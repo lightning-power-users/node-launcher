@@ -1,17 +1,11 @@
 from typing import List, Optional
 
-from node_launcher.gui.qt import Signal, QObject
 from node_launcher.node_set.lib.configuration_file import ConfigurationFile
 from node_launcher.node_set.lib.configuration_property import ConfigurationProperty
 
 
-class Configuration(QObject):
-
-    configuration_changed = Signal(ConfigurationProperty, ConfigurationProperty)
-
+class Configuration(object):
     def __init__(self, name: str, path: str, assign_op: str = '=', keys_info=None):
-        super().__init__()
-
         self._name = name
         self._file = ConfigurationFile(path=path, assign_op=assign_op)
         self._configurations: List[ConfigurationProperty] = []
@@ -94,7 +88,7 @@ class Configuration(QObject):
     def __delitem__(self, key):
         return self.remove_configuration_by_name(key)
 
-    def remove_configuration_by_name(self, name: str, signal: bool = True) -> List[ConfigurationProperty]:
+    def remove_configuration_by_name(self, name: str) -> List[ConfigurationProperty]:
         new_configurations: List[ConfigurationProperty] = []
         removed_configurations = []
         for configuration in self._configurations:
@@ -102,18 +96,11 @@ class Configuration(QObject):
                 new_configurations.append(configuration)
             else:
                 removed_configurations.append(configuration)
-
         self._configurations = new_configurations
-
-        if signal:
-            for configuration in removed_configurations:
-                self.configuration_changed.emit(configuration, None)
-
         self.save()
-
         return removed_configurations
 
-    def remove_configuration_by_identifier(self, identifier: str, signal: bool = True) -> Optional[ConfigurationProperty]:
+    def remove_configuration_by_identifier(self, identifier: str) -> Optional[ConfigurationProperty]:
         new_configurations: List[ConfigurationProperty] = []
         removed_configuration: ConfigurationProperty = None
         for configuration in self._configurations:
@@ -121,14 +108,8 @@ class Configuration(QObject):
                 new_configurations.append(configuration)
             else:
                 removed_configuration = configuration
-
         self._configurations = new_configurations
-
-        if signal and removed_configuration:
-            self.configuration_changed.emit(removed_configuration, None)
-
         self.save()
-
         return removed_configuration
 
     # Add / Modify
@@ -145,89 +126,50 @@ class Configuration(QObject):
         else:
             return self.replace_configuration(key, value)
 
-    def set_default_configuration(self, name: str, value, signal: bool = True) -> List[ConfigurationProperty]:
+    def set_default_configuration(self, name: str, value) -> List[ConfigurationProperty]:
         existing_configurations = self.get_configurations_by_name(name)
-
         if not existing_configurations:
             added_configuration = self.append_configuration(name, value)
             if added_configuration is not None:
-
-                if signal:
-                    self.configuration_changed.emit(added_configuration, added_configuration)
-
                 self.save()
-
                 return [added_configuration]
-
         return existing_configurations
 
-    def edit_configuration(self, identifier: str, value, signal: bool = True) -> Optional[ConfigurationProperty]:
+    def edit_configuration(self, identifier: str, value) -> Optional[ConfigurationProperty]:
         for configuration in self._configurations:
             if configuration.identifier == identifier:
-
                 if not self._is_valid_configuration(configuration.name, value):
                     return None
-
-                old_configuration = configuration.copy()
                 configuration.value = value
-
-                if signal:
-                    self.configuration_changed.emit(old_configuration, configuration)
-
                 self.save()
-
                 return configuration
-
         return None
 
-    def replace_configuration(self, name: str, value, signal: bool = True) -> Optional[ConfigurationProperty]:
-
-        removed_configurations = self.remove_configuration_by_name(name, signal=False)
-
+    def replace_configuration(self, name: str, value) -> Optional[ConfigurationProperty]:
+        removed_configurations = self.remove_configuration_by_name(name)
         identifier = None
         if len(removed_configurations) > 0:
             identifier = removed_configurations[0].identifier
-
-        added_configuration = self.append_configuration(name, value, identifier, signal=False)
-
-        if added_configuration is not None:
-            if signal:
-                for i in range(len(removed_configurations)):
-                    if i == 0:
-                        self.configuration_changed.emit(removed_configurations[0], added_configuration)
-                    else:
-                        self.configuration_changed.emit(removed_configurations[i], None)
-        else:
+        added_configuration = self.append_configuration(name, value, identifier)
+        if added_configuration is None:
             for configuration in removed_configurations:
                 self.append_configuration(configuration.name, configuration.value, configuration.identifier, False)
-
         self.save()
-
         return added_configuration
 
-    def append_configuration(self, name: str, value, identifier=None, signal: bool = True) -> Optional[ConfigurationProperty]:
-
+    def append_configuration(self, name: str, value, identifier=None) -> Optional[ConfigurationProperty]:
         if isinstance(value, bool):
             value = 1 if value else 0
-
         if isinstance(value, str):
             try:
                 value = int(value)
             except ValueError:
                 pass
-
         if not self._is_valid_configuration(name, value):
             return None
-
         if identifier is None:
             identifier = self._generate_identifier()
-
         configuration = ConfigurationProperty(identifier, name, value)
         self._configurations.append(configuration)
-
-        # if signal:
-        #     self.configuration_changed.emit(None, configuration)
-
         self.save()
-
         return configuration

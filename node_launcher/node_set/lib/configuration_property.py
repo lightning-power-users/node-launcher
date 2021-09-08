@@ -1,5 +1,5 @@
 
-class ConfigurationProperty:
+class ConfigurationProperty(object):
 
     def __init__(self, identifier: str, name: str, value):
         self.identifier: str = identifier

@@ -5,14 +5,11 @@ from typing import List, Tuple
 
 from node_launcher.constants import NODE_LAUNCHER_RELEASE
 from node_launcher.app_logging import log
-from node_launcher.gui.qt import QFileSystemWatcher, QObject
 
 from node_launcher.node_set.lib.configuration_property import ConfigurationProperty
 
 
-class ConfigurationFile(QObject):
-    file_watcher: QFileSystemWatcher
-
+class ConfigurationFile(object):
     def __init__(self, path: str, assign_op: str = '='):
         super().__init__()
         self.path = path

@@ -10,7 +10,7 @@ from node_launcher.constants import (
     MINIMUM_GB,
     BITCOIN_DATA_PATH,
     GIGABYTE,
-    OPERATING_SYSTEM
+    OPERATING_SYSTEM, MAXIMUM_GB
 )
 from node_launcher.app_logging import log
 
@@ -23,6 +23,7 @@ class Partition(object):
     has_bitcoin_dir: bool
     bitcoin_dir_size: int
     has_error: bool
+    can_archive: bool
     can_full_node: bool
     is_default_partition: bool
     bitcoin_dir_path: Optional[str]
@@ -74,7 +75,7 @@ class HardDrives(object):
             )
             return Partition(mount_point=path, free_gb_incl_bitcoin_dir=0, capacity_gb=0, has_bitcoin_dir=False,
                              has_error=True, bitcoin_dir_size=bitcoin_dir_size,
-                             is_default_partition=is_default_partition, can_full_node=False, bitcoin_dir_path=None)
+                             is_default_partition=is_default_partition, can_full_node=False, can_archive=False, bitcoin_dir_path=None)
 
         capacity, used, free, percent = [math.floor(n / GIGABYTE) for n in psutil_disk_usage]
         free_incl_bitcoin_dir = free
@@ -94,9 +95,11 @@ class HardDrives(object):
             has_bitcoin_dir = True
 
         can_full_node = free_incl_bitcoin_dir > MINIMUM_GB
+        can_archive = free_incl_bitcoin_dir < MAXIMUM_GB
         return Partition(mount_point=path, free_gb_incl_bitcoin_dir=free_incl_bitcoin_dir,
                          has_bitcoin_dir=has_bitcoin_dir, has_error=False,
                          capacity_gb=capacity, bitcoin_dir_size=bitcoin_dir_size, can_full_node=can_full_node,
+                         can_archive=can_archive,
                          is_default_partition=is_default_partition, bitcoin_dir_path=bitcoin_dir_path)
 
     def list_partitions(self) -> List[Partition]:

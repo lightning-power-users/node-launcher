@@ -7,7 +7,7 @@ from node_launcher.constants import (
     OPERATING_SYSTEM,
     BITCOIN_DATA_PATH,
     BITCOIN_MAINNET_PEER_PORT,
-    BITCOIN_MAINNET_RPC_PORT
+    BITCOIN_MAINNET_RPC_PORT, MAINNET_PRUNE
 )
 from node_launcher.app_logging import log
 from node_launcher.node_set.lib.configuration import Configuration
@@ -39,16 +39,23 @@ class BitcoindConfiguration(Configuration):
 
     def check(self):
         log.debug('datadir', datadir=self['datadir'])
-        self['datadir'] = self.partition.bitcoin_dir_path
-        self['prune'] = 0
+
+        if ('datadir' not in self
+                or not os.path.exists(self['datadir'])):
+            self['datadir'] = self.partition.bitcoin_dir_path
+
+        if os.path.exists(os.path.join(self['datadir'], 'blocks')):
+            if 'prune' not in self:
+                self.set_prune(False)
+        else:
+            if 'prune' not in self:
+                should_prune = not self.partition.can_archive
+                self.set_prune(should_prune)
+
         self['txindex'] = 1
         self['reindex'] = 0
 
-        wallet_paths = self.get_wallet_paths()
-
         self.set_default_configuration('server', True)
-
-        self.set_default_configuration('disablewallet', not wallet_paths)
 
         self.set_default_configuration('timeout', 6000)
 
@@ -83,47 +90,12 @@ class BitcoindConfiguration(Configuration):
             )
             self['dbcache'] = 1000
 
-        # self.config_snapshot = self.snapshot.copy()
-        # self.file_watcher.fileChanged.connect(self.config_file_changed)
-
-    def get_wallet_paths(self):
-        exclude_files = {
-            'addr.dat',
-            'banlist.dat',
-            'fee_estimates.dat',
-            'mempool.dat',
-            'peers.dat'
-        }
-        candidate_paths = []
-        datadir = self['datadir']
-        wallet_dir = self['main.walletdir']
-        wallets = self['main.wallet']
-        for file in os.listdir(datadir):
-            if file not in exclude_files:
-                path = os.path.join(datadir, file)
-                candidate_paths.append(path)
-        default_walletdir = os.path.join(datadir, 'wallets')
-        if os.path.exists(default_walletdir):
-            for file in os.listdir(default_walletdir):
-                if file not in exclude_files:
-                    candidate_paths.append(
-                        os.path.join(default_walletdir, file))
-        if wallet_dir is not None:
-            for file in os.listdir(wallet_dir):
-                if file not in exclude_files:
-                    candidate_paths += os.path.join(
-                        os.path.join(wallet_dir, file))
-        dat_files = [f for f in candidate_paths if f.endswith('.dat')
-                     and not f.startswith('blk')]
-        dat_files = set(dat_files)
-        wallet_paths = set(dat_files - exclude_files)
-        if wallets is not None:
-            if isinstance(wallets, list):
-                for wallet in wallets:
-                    wallet_paths.add(wallet)
-            else:
-                wallet_paths.add(wallets)
-        return wallet_paths
+    def set_prune(self, should_prune: bool):
+        if should_prune:
+            self['prune'] = MAINNET_PRUNE
+        else:
+            self['prune'] = 0
+        self['txindex'] = not should_prune
 
     @property
     def node_port(self):
@@ -137,72 +109,3 @@ class BitcoindConfiguration(Configuration):
         if self['rpcport'] is not None:
             return self['rpcport']
         return BITCOIN_MAINNET_RPC_PORT
-
-    def config_file_changed(self):
-        # Refresh config file
-        self.file_watcher.blockSignals(True)
-        self.initialize_cache_and_model_repository()
-        self.file_watcher.blockSignals(False)
-        if self['zmqpubrawblock']:
-            self.zmq_block_port = int(self['zmqpubrawblock'].split(':')[-1])
-        if self['zmqpubrawtx']:
-            self.zmq_tx_port = int(self['zmqpubrawtx'].split(':')[-1])
-        # Some text editors do not modify the file, they delete and replace the file
-        # Check if file is still in file_watcher list of files, if not add back
-        files_watched = self.file_watcher.files()
-        if len(files_watched) == 0:
-            self.file_watcher.addPath(self.path)
-
-    @property
-    def restart_required(self):
-        old_config = self.config_snapshot.copy()
-        new_config = self.snapshot
-
-        # First check that both config files are still on the same network
-        old_config_network = 'testnet' in old_config.keys()
-        new_config_network = 'testnet' in new_config.keys()
-
-        if (old_config_network == new_config_network) and self.running:
-            common_fields = [
-                'rpcuser', 'rpcpassword', 'disablewallet', 'datadir', 'disablewallet',
-                'zmqpubrawblock', 'zmqpubrawtx', 'prune', 'txindex', 'timeout'
-            ]
-
-            for field in common_fields:
-
-                # First check if field is found in both configs
-                found_in_old_config = field in old_config.keys()
-                found_in_new_config = field in new_config.keys()
-                if found_in_old_config != found_in_new_config:
-                    return True
-
-                # Now check that values are the same
-                if found_in_old_config:
-                    if old_config[field] != new_config[field]:
-                        return True
-
-            else:
-                # Only check mainnet fields if currently running mainnet
-                mainnet_fields = [
-                    'rpcport', 'port'
-                ]
-
-                for field in mainnet_fields:
-                    # First check if field is found in both configs
-                    found_in_old_config = field in old_config.keys()
-                    found_in_new_config = field in new_config.keys()
-                    if found_in_old_config != found_in_new_config:
-                        return True
-
-                    # Now check that values are the same
-                    if found_in_old_config:
-                        if old_config[field] != new_config[field]:
-                            return True
-
-            return False
-        elif self.running:
-            # Network has changed and the node is running - Restart is required
-            return True
-
-        return False
-
