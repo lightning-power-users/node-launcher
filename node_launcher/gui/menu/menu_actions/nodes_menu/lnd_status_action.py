@@ -8,6 +8,7 @@ class LndStatusAction(MenuAction):
         self.setEnabled(False)
         self.lnd_node = lnd_node
         self.lnd_node.status.connect(self.update_text)
+        self.lnd_node.process.sync_progress.connect(self.update_text)
         self.setVisible(False)
 
     def update_text(self, line):

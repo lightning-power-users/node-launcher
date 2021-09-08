@@ -14,6 +14,9 @@ class BitcoindProcess(ManagedProcess):
 
         self.timestamp_changes = []
 
+        self.our_block_height = 0
+        self.max_peer_block_height = 0
+
     def process_output_line(self, line: str):
         if 'dnsseed thread exit' in line:
             if not self.current_status == NodeStatus.SYNCED:
@@ -29,12 +32,18 @@ class BitcoindProcess(ManagedProcess):
                 'Please check Bitcoin Output',
                 QSystemTrayIcon.Critical
             )
+        elif 'New outbound peer connected' in line:
+            peer_block_height = int(line.split(':')[-1].split(',')[-2].split('=')[-1])
+            if peer_block_height > self.max_peer_block_height:
+                self.max_peer_block_height = peer_block_height
         elif 'UpdateTip' in line:
             line_segments = line.split(' ')
             timestamp = line_segments[0]
             for line_segment in line_segments:
-                if 'progress' in line_segment:
-                    new_progress = round(float(line_segment.split('=')[-1]), 4)
+                if 'height' in line_segment:
+                    self.our_block_height = int(line_segment.split('=')[-1])
+                elif 'progress' in line_segment:
+                    new_progress = round(float(line_segment.split('=')[-1]), 6)
                     new_timestamp = datetime.strptime(
                         timestamp,
                         '%Y-%m-%dT%H:%M:%SZ'
@@ -51,7 +60,7 @@ class BitcoindProcess(ManagedProcess):
                                     self.timestamp_changes.pop(0)
                                 average_time_left = sum(self.timestamp_changes) / len(self.timestamp_changes)
                                 humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
-                                self.status.emit(f'{new_progress * 100:.2f}% synced, ETA: {humanized}')
+                                self.status.emit(f'Syncing, {humanized} remaining')
                         else:
                             if round(new_progress * 100) == 100:
                                 continue

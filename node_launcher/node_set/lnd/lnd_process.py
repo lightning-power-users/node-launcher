@@ -54,9 +54,9 @@ class LndProcess(ManagedProcess):
                 'Open Joule or Zap',
                 QSystemTrayIcon.Information
             )
-        elif 'Caught up to height' in line:
-            new_height = int(line.split(' ')[-1])
-            timestamp = line.split('[INF]')[0].strip()
+        elif 'Filtering blocks' in line:
+            new_height = int(line.split(' ')[5])
+            timestamp = line.split(' ')[0]
             new_timestamp = datetime.strptime(
                 timestamp,
                 '%Y-%m-%d %H:%M:%S.%f'
@@ -69,9 +69,8 @@ class LndProcess(ManagedProcess):
                     time_left = (total_left / change) * timestamp_change
                     humanized = humanize.naturaltime(-time_left)
                     self.sync_progress.emit(
-                        f'ETA: {humanized}, caught up to height {new_height}'
+                        f'Syncing, {humanized} remaining'
                     )
-
             self.old_height = new_height
             self.old_timestamp = new_timestamp
 
