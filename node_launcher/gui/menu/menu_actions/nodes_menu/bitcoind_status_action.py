@@ -9,14 +9,18 @@ class BitcoindStatusAction(MenuAction):
         super().__init__(text='Bitcoind: off', parent=parent)
         self.setEnabled(False)
         self.bitcoind_node = bitcoind_node
-        self.bitcoind_node.status.connect(self.update_text)
+        self.bitcoind_node.status.connect(self.update_status)
         self.setVisible(False)
 
-    def update_text(self, line):
-        new_text = 'Bitcoind: ' + line.replace('_', ' ')
-        self.setText(new_text)
-
+    def update_status(self, line: str):
         if line == 'synced':
             self.setVisible(False)
-        if line != 'synced' and not self.isVisible():
+            return
+        new_text = 'Bitcoind: '
+        if line == 'syncing':
+            new_text += self.bitcoind_node.process.current_description
+        else:
+            new_text += line.replace('_', ' ')
+        self.setText(new_text)
+        if not self.isVisible():
             self.setVisible(True)

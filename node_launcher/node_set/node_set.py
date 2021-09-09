@@ -28,6 +28,9 @@ class NodeSet(object):
         self.bitcoind_node.status.connect(
             self.handle_bitcoind_node_status_change
         )
+        self.lnd_node.status.connect(
+            self.handle_lnd_node_status_change
+        )
 
     def start(self):
         log.debug('Starting node set')
@@ -47,4 +50,6 @@ class NodeSet(object):
             self.bitcoind_node.configuration['reindex'] = False
             self.lnd_node.start_process()
 
-
+    def handle_lnd_node_status_change(self, lnd_status):
+        if lnd_status == NodeStatus.BITCOIND_SYNCED:
+            self.bitcoind_node.process.update_status(NodeStatus.SYNCED)

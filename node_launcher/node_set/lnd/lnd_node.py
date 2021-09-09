@@ -42,6 +42,8 @@ class LndNode(NetworkNode):
             self.restart = True
         elif 'Unable to start server: unable to fetch filter: unable to fetch cfilter' in line:
             self.restart = True
+        elif 'Chain backend synced to tip!' in line:
+            self.update_status(NodeStatus.BITCOIND_SYNCED)
 
     @property
     def prerequisites_synced(self):

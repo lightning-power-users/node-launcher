@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 
 from node_launcher.gui.qt import QProcess, QByteArray, Signal, QProcessEnvironment, QSystemTrayIcon
 from node_launcher.constants import IS_LINUX
@@ -8,9 +9,12 @@ from node_launcher.node_set.lib.node_status import NodeStatus
 
 
 class ManagedProcess(QProcess):
-    status = Signal(NodeStatus, str)
+    status = Signal(str)
+    status_description = Signal(str)
     notification = Signal(str, str, QSystemTrayIcon.MessageIcon)
     log_line = Signal(str)
+    current_status: Optional[str] = None
+    current_description: Optional [str] = None
 
     def __init__(self, binary: str, args):
         super().__init__()
@@ -24,23 +28,29 @@ class ManagedProcess(QProcess):
         self.finished.connect(self.handle_process_finish)
         self.expecting_shutdown = False
         self.current_status = None
+        self.current_description = None
 
         if IS_LINUX:
             env = QProcessEnvironment.systemEnvironment()
             env.insert('LD_LIBRARY_PATH', os.path.abspath(os.path.join(binary, os.pardir)))
             self.setProcessEnvironment(env)
 
-    def update_status(self, new_status: NodeStatus, description: str = None):
+    def update_status(self, new_status: NodeStatus, new_description: str = None):
         if new_status == self.current_status:
             return
-        if description is None:
-            description = str(new_status)
         log.debug('update_status',
                   binary=self.binary,
                   new_status=new_status,
+                  new_description=new_description,
                   current_status=self.current_status)
+        if new_description is None:
+            new_description = str(new_status)
+        if new_description == self.current_description:
+            return
         self.current_status = new_status
-        self.status.emit(new_status, description)
+        self.current_description = new_description
+        self.status.emit(str(new_status))
+        self.status_description.emit(new_description)
 
     def process_output_line(self, line):
         pass

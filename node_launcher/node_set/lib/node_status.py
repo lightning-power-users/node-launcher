@@ -24,6 +24,7 @@ class NodeStatus(object):
 
     UNLOCK_READY = StringConstant('UNLOCK_READY')
     SYNCING = StringConstant('SYNCING')
+    BITCOIND_SYNCED = StringConstant('BITCOIND_SYNCED')
     SYNCED = StringConstant('SYNCED')
 
     STOPPED = StringConstant('STOPPED')

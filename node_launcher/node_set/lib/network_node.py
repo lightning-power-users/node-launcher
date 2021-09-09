@@ -20,7 +20,7 @@ class NetworkNode(QObject):
     current_status: Optional[NodeStatus]
     current_status_description: Optional[str]
 
-    status = Signal(NodeStatus, str)
+    status = Signal(str)
 
     def __init__(self, operating_system: OperatingSystem,
                  node_software_name: NodeSoftwareName,
@@ -82,7 +82,10 @@ class NetworkNode(QObject):
                   old_status_description=self.current_status_description,
                   new_status=new_status,
                   new_status_description=new_status)
+        if not new_description:
+            new_description = str(new_status)
         self.current_status = new_status
+        self.current_status_description = new_description
         self.status.emit(str(new_status))
         if new_status == NodeStatus.STOPPED and self.restart:
             self.update_status(NodeStatus.RESTART)

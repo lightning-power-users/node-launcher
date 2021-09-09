@@ -9,19 +9,12 @@ from node_launcher.node_set.lib.managed_process import ManagedProcess
 from node_launcher.node_set.lib.node_status import NodeStatus
 
 
-class LndSignals(QObject):
-    finished = Signal()
-    error = Signal(tuple)
-    result = Signal(object)
-
-
 class LndProcess(ManagedProcess):
     set_icon_color = Signal(str)
 
     def __init__(self, binary: str, args):
         super().__init__(binary, args)
 
-        self.signals = LndSignals()
         self.old_height = None
         self.old_timestamp = None
         self.rescan_height = None
