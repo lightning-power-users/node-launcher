@@ -16,6 +16,6 @@ class LndStatusAction(MenuAction):
         if line == 'syncing':
             new_text += self.lnd_node.process.current_description
         else:
-            new_text += line
+            new_text +=  line.replace('_', ' ')
         self.setText(new_text)
         self.setVisible(True)

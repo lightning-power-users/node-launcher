@@ -45,7 +45,7 @@ class LndProcess(ManagedProcess):
             self.update_status(NodeStatus.SYNCED)
             self.notification.emit(
                 'LND is ready',
-                'Open Joule or Zap',
+                'Open Joule',
                 QSystemTrayIcon.Information
             )
         elif 'Filtering blocks' in line:
