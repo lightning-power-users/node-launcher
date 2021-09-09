@@ -23,5 +23,5 @@ class TorConfiguration(Configuration):
         self['CookieAuthentication'] = True
         self['CookieAuthFileGroupReadable'] = True
         self['DataDirectoryGroupReadable'] = True
-        self['HiddenServiceDir'] = os.path.join(TOR_SERVICE_PATH, 'bitcoind')
+        self['HiddenServiceDir'] = TOR_SERVICE_PATH
         self['HiddenServicePort'] = '8333 127.0.0.1:8334'

@@ -201,7 +201,7 @@ class Software(QObject):
             )
             file_names = [
                 'tor.real',
-                'libevent-2.1.6.dylib'
+                'libevent-2.1.7.dylib'
             ]
             os.makedirs(self.metadata.downloaded_bin_path, exist_ok=True)
             for file_name in file_names:
