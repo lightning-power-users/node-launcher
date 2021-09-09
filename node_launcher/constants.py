@@ -40,7 +40,7 @@ class NodeSoftwareName(StringConstant):
 
 
 TOR: NodeSoftwareName = NodeSoftwareName('tor')
-BITCOIND: NodeSoftwareName = NodeSoftwareName('bitcoind')
+BITCOIND: NodeSoftwareName = NodeSoftwareName('bitcoin')
 LND: NodeSoftwareName = NodeSoftwareName('lnd')
 NODE_LAUNCHER: NodeSoftwareName = NodeSoftwareName('node-launcher')
 TEST_SOFTWARE: NodeSoftwareName = NodeSoftwareName('test-software')
