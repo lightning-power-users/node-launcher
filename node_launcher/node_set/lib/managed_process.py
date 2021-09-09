@@ -36,7 +36,7 @@ class ManagedProcess(QProcess):
             self.setProcessEnvironment(env)
 
     def update_status(self, new_status: NodeStatus, new_description: str = None):
-        if new_status == self.current_status:
+        if new_status == self.current_status and new_description is None:
             return
         log.debug('update_status',
                   binary=self.binary,
@@ -47,7 +47,7 @@ class ManagedProcess(QProcess):
             new_description = str(new_status)
         if new_description == self.current_description:
             return
-        self.current_status = new_status
+        self.current_status = str(new_status)
         self.current_description = new_description
         self.status.emit(str(new_status))
         self.status_description.emit(new_description)

@@ -50,17 +50,18 @@ class BitcoindProcess(ManagedProcess):
                     if new_progress != self.old_progress:
                         if self.old_progress is not None:
                             change = new_progress - self.old_progress
-                            if change:
-                                timestamp_change = new_timestamp - self.old_timestamp
+                            timestamp_change = new_timestamp - self.old_timestamp
+                            if change and timestamp_change:
                                 total_left = 1 - new_progress
                                 time_left = ((total_left / change) * timestamp_change).seconds
                                 self.timestamp_changes.append(time_left)
                                 if len(self.timestamp_changes) > 100:
                                     self.timestamp_changes.pop(0)
                                 average_time_left = sum(self.timestamp_changes) / len(self.timestamp_changes)
-                                if average_time_left < 60:
+                                if new_progress > 0.99:
                                     self.update_status(NodeStatus.SYNCED)
-                                humanized = humanize.naturaltime(-timedelta(seconds=average_time_left), future=True)
+                                    return
+                                humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
                                 self.update_status(NodeStatus.SYNCING, f'syncing, ready {humanized}')
                         self.old_progress = new_progress
                         self.old_timestamp = new_timestamp
