@@ -13,9 +13,9 @@ class LndStatusAction(MenuAction):
 
     def update_status(self, line: str):
         new_text = 'LND: '
-        if line == 'syncing':
+        if line == NodeStatus.SYNCING or line == NodeStatus.BITCOIND_SYNCED:
             new_text += self.lnd_node.process.current_description
         else:
-            new_text +=  line.replace('_', ' ')
+            new_text += line.replace('_', ' ')
         self.setText(new_text)
         self.setVisible(True)
