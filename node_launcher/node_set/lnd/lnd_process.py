@@ -59,7 +59,7 @@ class LndProcess(ManagedProcess):
                 change = new_height - self.old_height
                 if change:
                     timestamp_change = new_timestamp - self.old_timestamp
-                    total_left = 600000 - new_height
+                    total_left = 700000 - new_height
                     time_left = (total_left / change) * timestamp_change
                     humanized = humanize.naturaltime(-time_left, future=True)
                     description = f'syncing, ready {humanized}'
