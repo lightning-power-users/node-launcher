@@ -1,4 +1,4 @@
-from node_launcher.gui.qt import QIcon, QPixmap, QSystemTrayIcon, QWidget
+from node_launcher.gui.qt import QIcon, QPixmap, QImage, QSystemTrayIcon, QWidget
 
 from .assets.asset_access import asset_access
 from .menu.menu import Menu
@@ -39,8 +39,9 @@ class SystemTray(QSystemTrayIcon):
 
     def set_icon(self, number: int):
         path = asset_access.get_asset_full_path(self.get_path(number))
-        pixmap = QPixmap(path)
-        icon = QIcon(pixmap)
+        qimage = QImage(path)
+        qimage.invertPixels()
+        icon = QIcon(QPixmap.fromImage(qimage))
         self.setIcon(icon)
 
     def set_zero(self):

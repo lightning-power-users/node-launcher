@@ -54,7 +54,8 @@ from PyQt5.QtGui import (
     QPalette,
     QColor,
     QIcon,
-    QCursor
+    QCursor,
+    QImage
 )
 # # PySide2
 # from PySide2 import QtGui, QtWidgets, QtCore

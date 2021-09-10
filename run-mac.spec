@@ -2,8 +2,6 @@
 
 from PyInstaller.utils.hooks import collect_data_files
 
-from node_launcher.constants import NODE_LAUNCHER_RELEASE
-
 block_cipher = None
 
 a = Analysis(
@@ -61,7 +59,7 @@ exe = EXE(
 app = BUNDLE(
     exe,
     name='Node Launcher.app',
-    version=NODE_LAUNCHER_RELEASE,
+    version='7.0.0',
     icon='AppIcon.icns',
     bundle_identifier=None,
     info_plist={
