@@ -1,6 +1,8 @@
 import os
 import sys
 
+from node_launcher.app_logging import log
+
 
 class AssetAccess(object):
 
@@ -8,17 +10,19 @@ class AssetAccess(object):
     def assets_directory(self):
         if getattr(sys, 'frozen', False):
             # noinspection PyUnresolvedReferences,PyProtectedMember
-            return os.path.join(sys._MEIPASS, 'assets')
+            assets_directory = os.path.join(sys._MEIPASS, 'node_launcher/gui/assets/')
         else:
             class_file_path = os.path.realpath(__file__)
             directory_path = os.path.join(class_file_path, os.path.pardir)
-            abs_directory_path = os.path.abspath(directory_path)
-            return abs_directory_path
+            assets_directory = os.path.abspath(directory_path)
+        log.debug('Getting assets directory', assets_directory=assets_directory)
+        return assets_directory
 
     def get_asset_full_path(self, asset_name: str) -> str:
         asset_path = os.path.join(self.assets_directory, asset_name)
         if not os.path.isfile(asset_path):
-            raise Exception(f'{asset_path} not found')
+            log.error(f'{asset_path} not found')
+            return None
         return asset_path
 
 

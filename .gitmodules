@@ -1,0 +1,3 @@
+[submodule "node_launcher/gui/assets/Bitcoin-Icons"]
+	path = node_launcher/gui/assets/Bitcoin-Icons
+	url = https://github.com/BitcoinDesign/Bitcoin-Icons

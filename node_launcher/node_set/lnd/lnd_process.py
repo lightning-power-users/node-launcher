@@ -10,7 +10,6 @@ from node_launcher.node_set.lib.node_status import NodeStatus
 
 
 class LndProcess(ManagedProcess):
-    set_icon_color = Signal(str)
 
     def __init__(self, binary: str, args):
         super().__init__(binary, args)
@@ -24,7 +23,6 @@ class LndProcess(ManagedProcess):
         if 'Waiting for wallet encryption password' in line:
             self.update_status(NodeStatus.UNLOCK_READY)
         elif 'Waiting for chain backend to finish sync' in line:
-            self.set_icon_color.emit('blue')
             self.update_status(NodeStatus.SYNCING)
         elif 'Unable to synchronize wallet to chain' in line:
             self.terminate()
@@ -41,10 +39,9 @@ class LndProcess(ManagedProcess):
             self.waitForFinished(-1)
             self.start()
         elif 'Starting HTLC Switch' in line:
-            self.set_icon_color.emit('green')
             self.update_status(NodeStatus.SYNCED)
             self.notification.emit(
-                'LND is ready',
+                'Nodes are ready',
                 'Open Joule',
                 QSystemTrayIcon.Information
             )

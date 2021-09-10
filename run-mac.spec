@@ -1,5 +1,8 @@
 # -*- mode: python -*-
+
 from PyInstaller.utils.hooks import collect_data_files
+
+from node_launcher.constants import NODE_LAUNCHER_RELEASE
 
 block_cipher = None
 
@@ -12,7 +15,7 @@ a = Analysis(
         ('node_launcher/node_set/lib/bin/lnd', 'node_launcher/node_set/lib/bin/')
     ],
     datas=[
-        ('node_launcher/gui/assets/*.png', 'assets')
+        ('node_launcher/gui/assets/Bitcoin-Icons/png/filled/node*.png', 'node_launcher/gui/assets/Bitcoin-Icons/png/filled/'),
         ],
     hiddenimports=['setuptools'],
     hookspath=[],
@@ -23,6 +26,15 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False
 )
+
+# Strip out parts of Qt that we never use. Reduces binary size by tens of MBs. see #4815
+qt_bins2remove=('qtweb', 'qt3d', 'qtgame', 'qtdesigner', 'qtquick', 'qtlocation', 'qttest', 'qtxml')
+print("Removing Qt binaries:", *qt_bins2remove)
+for x in a.binaries.copy():
+    for r in qt_bins2remove:
+        if x[0].lower().startswith(r):
+            a.binaries.remove(x)
+            print('----> Removed x =', x)
 
 pyz = PYZ(
     a.pure,
@@ -49,6 +61,7 @@ exe = EXE(
 app = BUNDLE(
     exe,
     name='Node Launcher.app',
+    version=NODE_LAUNCHER_RELEASE,
     icon='AppIcon.icns',
     bundle_identifier=None,
     info_plist={
