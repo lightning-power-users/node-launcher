@@ -111,37 +111,6 @@ class LndConfiguration(Configuration):
         with open(hostname_file, 'r') as f:
             self['externalip'] = f.readline().strip()
 
-    def config_file_changed(self):
-        # Refresh config file
-        self.file_watcher.blockSignals(True)
-        self.populate_cache()
-        self.file_watcher.blockSignals(False)
-        if self['restlisten'] is not None:
-            self.rest_port = int(self['restlisten'].split(':')[-1])
-        if self['rpclisten'] is not None:
-            self.grpc_port = int(self['rpclisten'].split(':')[-1])
-
-        # Some text editors do not modify the file, they delete and replace the file
-        # Check if file is still in file_watcher list of files, if not add back
-        files_watched = self.file_watcher.files()
-        if len(files_watched) == 0:
-            self.file_watcher.addPath(self.file.path)
-
-    def bitcoin_config_file_changed(self):
-        # Refresh config file
-        self.file_watcher.blockSignals(True)
-        self.populate_cache()
-        self.file_watcher.blockSignals(False)
-        if self.bitcoind_partition:
-            self['bitcoin.node'] = 'bitcoind'
-            bitcoind_conf = BitcoindConfiguration(partition=self.bitcoind_partition)
-            bitcoind_conf.load()
-            self['bitcoind.rpchost'] = f'127.0.0.1:{bitcoind_conf.rpc_port}'
-            self['bitcoind.rpcuser'] = bitcoind_conf['rpcuser']
-            self['bitcoind.rpcpass'] = bitcoind_conf['rpcpassword']
-            self['bitcoind.zmqpubrawblock'] = bitcoind_conf['zmqpubrawblock']
-            self['bitcoind.zmqpubrawtx'] = bitcoind_conf['zmqpubrawtx']
-
     @property
     def node_port(self) -> int:
         self.set_default_configuration('listen', f'127.0.0.1:{get_port(LND_DEFAULT_PEER_PORT)}')
@@ -173,34 +142,6 @@ class LndConfiguration(Configuration):
     @property
     def grpc_url(self) -> str:
         return f'127.0.0.1:{self.grpc_port}'
-
-    @property
-    def restart_required(self):
-        if self.running:
-            # Did bitcoin details change
-            if self.restart_required:
-                return True and self.running
-
-            old_config = self.config_snapshot.copy()
-            new_config = self.snapshot
-
-            fields = [
-                'restlisten', 'listen', 'rpclisten'
-            ]
-
-            for field in fields:
-                # First check if field is found in both configs
-                found_in_old_config = field in old_config.keys()
-                found_in_new_config = field in new_config.keys()
-                if found_in_old_config != found_in_new_config:
-                    return True
-
-                # Now check that values are the same
-                if found_in_old_config:
-                    if old_config[field] != new_config[field]:
-                        return True
-
-        return False
 
     @staticmethod
     def base64URL_from_base64(s):

@@ -1,7 +1,7 @@
 
 from functools import partial
 
-from node_launcher.utilities.validators import is_binary, is_address_with_port, is_address, is_port, \
+from node_launcher.node_set.lib.validators import is_binary, is_address_with_port, is_address, is_port, \
     is_positive_integer, is_non_empty, is_user_and_pass, is_ip_or_subnet, is_folder_path, is_ratio, \
     is_non_negative_integer, is_integer_in_range, is_tcp_address_with_port
 

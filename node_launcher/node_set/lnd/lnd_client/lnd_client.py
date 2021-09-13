@@ -2,15 +2,8 @@ import codecs
 import os
 from typing import List, Optional
 
-# noinspection PyPackageRequirements
 import grpc
-# noinspection PyProtectedMember,PyPackageRequirements
 from google.protobuf.json_format import MessageToDict
-# noinspection PyProtectedMember
-from google.rpc.code_pb2 import UNAVAILABLE
-from grpc._channel import _Rendezvous
-from grpc._plugin_wrapping import (_AuthMetadataContext,
-                                   _AuthMetadataPluginCallback)
 
 from node_launcher.constants import LND_DIR_PATH, OPERATING_SYSTEM
 from node_launcher.app_logging import log
@@ -195,8 +188,8 @@ class LndClient(object):
 
     # noinspection PyUnusedLocal
     def metadata_callback(self,
-                          context: _AuthMetadataPluginCallback,
-                          callback: _AuthMetadataContext):
+                          context: grpc.AuthMetadataPluginCallback,
+                          callback: grpc.AuthMetadataContext):
         admin_macaroon_path = os.path.join(self.macaroon_path, 'admin.macaroon')
         with open(admin_macaroon_path, 'rb') as f:
             macaroon_bytes = f.read()
@@ -420,12 +413,8 @@ class LndClient(object):
 
     def stop(self):
         request = ln.StopRequest()
-        try:
-            response = self.lnd_client.StopDaemon(request)
-            log.debug('lnd stop response', response=response)
-        except _Rendezvous:
-            log.error('stop lnd error', exc_info=True)
-            raise
+        response = self.lnd_client.StopDaemon(request)
+        log.debug('lnd stop response', response=response)
 
     def debug_level(self, show: bool = None, level_spec: str = None):
         request = ln.DebugLevelRequest()

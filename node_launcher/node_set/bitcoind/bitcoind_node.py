@@ -41,7 +41,7 @@ class BitcoindNode(NetworkNode):
     def bitcoin_cli(self) -> str:
         command = [
             f'"{self.software.bitcoin_cli}"',
-            f'-conf="{self.configuration.path}"',
+            f'-conf="{self.configuration.file.path}"',
         ]
         return ' '.join(command)
 

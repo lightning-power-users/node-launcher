@@ -57,6 +57,7 @@ class ManagedProcess(QProcess):
 
     def handle_output(self):
         while self.canReadLine():
+            # noinspection PyTypeChecker
             line_bytes: QByteArray = self.readLine()
             try:
                 line_str = line_bytes.data().decode('utf-8').strip()

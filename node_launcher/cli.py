@@ -1,6 +1,7 @@
 import sys
 from typing import Optional
 
+from node_launcher.except_hook import except_hook
 from node_launcher.gui.qt import QObject
 from node_launcher.app_logging import log
 from node_launcher.constants import OPERATING_SYSTEM
@@ -51,7 +52,7 @@ class CLI(QObject):
 
 if __name__ == '__main__':
 
-    # sys.excepthook = except_hook
+    sys.excepthook = except_hook
 
     log.info(
         'constants',

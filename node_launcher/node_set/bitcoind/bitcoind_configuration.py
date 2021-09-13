@@ -95,6 +95,7 @@ class BitcoindConfiguration(Configuration):
             self['prune'] = 0
         self['txindex'] = not should_prune
         self['blockfilterindex'] = not should_prune
+
     @property
     def node_port(self):
         custom_port = self['port']
