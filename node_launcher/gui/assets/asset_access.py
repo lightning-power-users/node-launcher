@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import Optional
 
 from node_launcher.app_logging import log
 
@@ -18,7 +19,7 @@ class AssetAccess(object):
         log.debug('Getting assets directory', assets_directory=assets_directory)
         return assets_directory
 
-    def get_asset_full_path(self, asset_name: str) -> str:
+    def get_asset_full_path(self, asset_name: str) -> Optional[str]:
         asset_path = os.path.join(self.assets_directory, asset_name)
         if not os.path.isfile(asset_path):
             log.error(f'{asset_path} not found')
