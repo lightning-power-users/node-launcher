@@ -1,7 +1,6 @@
 from node_launcher.gui.qt import QIcon, QPixmap, QImage, QSystemTrayIcon, QWidget
-
-from .assets.asset_access import asset_access
-from .menu.menu import Menu
+from node_launcher.gui.assets.asset_access import asset_access
+from node_launcher.gui.menu.menu import Menu
 from node_launcher.node_set import NodeSet
 from node_launcher.app_logging import log
 
@@ -27,7 +26,8 @@ class SystemTray(QSystemTrayIcon):
             self.set_icon
         )
 
-    def get_path(self, number: int):
+    @staticmethod
+    def get_path(number: int):
         base_path = 'Bitcoin-Icons/png/filled/node'
         if number == 1:
             word = 'connection'
@@ -39,9 +39,9 @@ class SystemTray(QSystemTrayIcon):
 
     def set_icon(self, number: int):
         path = asset_access.get_asset_full_path(self.get_path(number))
-        qimage = QImage(path)
-        qimage.invertPixels()
-        icon = QIcon(QPixmap.fromImage(qimage))
+        image = QImage(path)
+        image.invertPixels()
+        icon = QIcon(QPixmap.fromImage(image))
         self.setIcon(icon)
 
     def set_zero(self):

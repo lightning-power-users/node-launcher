@@ -6,7 +6,7 @@ from node_launcher.gui.menu.menu_actions.nodes_menu.lnd_status_action import \
 from node_launcher.gui.menu.menu_actions.separator_action import SeparatorAction
 from node_launcher.gui.menu.menu_actions.nodes_menu.tor_status_action import \
     TorStatusAction
-from node_launcher.gui.utilities import reveal
+from node_launcher.gui.reveal_directory import reveal_directory
 from node_launcher.node_set import NodeSet
 
 
@@ -52,4 +52,4 @@ class Menu(QMenu):
         QGuiApplication.clipboard().setText(self.node_set.lnd_node.configuration.rest_url)
 
     def reveal_macaroon_path(self):
-        reveal(self.node_set.lnd_node.configuration.macaroon_path)
+        reveal_directory(self.node_set.lnd_node.configuration.macaroon_path)

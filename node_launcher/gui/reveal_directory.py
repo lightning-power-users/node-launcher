@@ -1,13 +1,12 @@
 import os
 import subprocess
-
 from pathlib import Path
-from node_launcher.gui.qt import QErrorMessage
 
+from node_launcher.gui.qt import QErrorMessage
 from node_launcher.constants import IS_MACOS, IS_LINUX, IS_WINDOWS, OPERATING_SYSTEM
 
 
-def reveal(path: str):
+def reveal_directory(path: str):
     try:
         if IS_MACOS:
             contents = os.listdir(path)

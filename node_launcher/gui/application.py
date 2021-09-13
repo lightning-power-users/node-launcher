@@ -11,7 +11,7 @@ from node_launcher.gui.qt import (
     QThreadPool
 )
 
-from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE, OPERATING_SYSTEM
+from node_launcher.constants import NODE_LAUNCHER_RELEASE, UPGRADE
 from node_launcher.gui.components.thread_worker import Worker
 from node_launcher.gui.system_tray import SystemTray
 from node_launcher.app_logging import log
