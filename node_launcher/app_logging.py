@@ -19,20 +19,14 @@ logging.config.dictConfig({
     'formatters': {
         'plain': {
             '()': structlog.stdlib.ProcessorFormatter,
-            'processor': structlog.dev.ConsoleRenderer(colors=False),
+            'processor': structlog.dev.ConsoleRenderer(),
             'foreign_pre_chain': pre_chain,
-        },
-        'colored': {
-            '()': structlog.stdlib.ProcessorFormatter,
-            'processor': structlog.dev.ConsoleRenderer(colors=True),
-            'foreign_pre_chain': pre_chain,
-        },
+        }
     },
     'handlers': {
         'default': {
             'level': 'DEBUG',
             'class': 'logging.StreamHandler',
-            'formatter': 'colored',
         },
         'file': {
             'level': 'DEBUG',

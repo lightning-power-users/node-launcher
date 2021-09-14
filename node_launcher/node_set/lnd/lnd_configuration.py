@@ -4,8 +4,6 @@ import socket
 import ssl
 from typing import List
 
-import qrcode
-
 from node_launcher.constants import (
     IS_WINDOWS,
     LND_DEFAULT_GRPC_PORT,
@@ -172,6 +170,7 @@ class LndConfiguration(Configuration):
 
     @property
     def lndconnect_qrcode(self):
+        import qrcode
         img = qrcode.make(self.lndconnect_mobile_url)
         return img
 
