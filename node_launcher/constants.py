@@ -5,12 +5,12 @@ from typing import Dict
 
 NODE_LAUNCHER_RELEASE = '.'.join(map(str, (7, 1, 0)))
 
-TARGET_TOR_RELEASE = '8.5.4'
-TARGET_WINDOWS_TOR_VERSION = '0.4.0.5'
-TOR_WEBSITE = 'http://www.torproject.org/dist/torbrowser/'
+TARGET_TOR_RELEASE = '10.0.12'
+TARGET_WINDOWS_TOR_VERSION = '0.4.5.6'
+TOR_WEBSITE = 'https://www.torproject.org/dist/torbrowser/'
 
-TARGET_BITCOIN_RELEASE = 'v0.18.1'
-TARGET_LND_RELEASE = 'v0.7.1-beta'
+TARGET_BITCOIN_RELEASE = 'v0.21.0'
+TARGET_LND_RELEASE = 'v0.12.1-beta'
 
 
 class StringConstant(object):
