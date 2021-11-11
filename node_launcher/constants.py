@@ -10,7 +10,7 @@ TARGET_WINDOWS_TOR_VERSION = '0.4.0.5'
 TOR_WEBSITE = 'http://www.torproject.org/dist/torbrowser/'
 
 TARGET_BITCOIN_RELEASE = 'v0.18.1'
-TARGET_LND_RELEASE = 'v0.7.1-beta'
+TARGET_LND_RELEASE = 'v0.8.1-beta'
 
 
 class StringConstant(object):
