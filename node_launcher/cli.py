@@ -24,30 +24,11 @@ class CLI(QObject):
         self.bitcoind_node = BitcoindNode(operating_system=OPERATING_SYSTEM, partition=self.full_node_partition)
         self.lnd_node = LndNode(operating_system=OPERATING_SYSTEM, bitcoind_partition=self.full_node_partition)
 
-        self.tor_node.status.connect(
-            self.handle_tor_node_status_change
-        )
-        self.bitcoind_node.status.connect(
-            self.handle_bitcoind_node_status_change
-        )
-        self.lnd_node.status.connect(
-            self.handle_lnd_node_status_change
-        )
-
     def start(self):
         self.tor_node.software.update()
+        self.bitcoind_node.software.update()
+        self.lnd_node.software.update()
 
-    def handle_tor_node_status_change(self, tor_status):
-        if tor_status == NodeStatus.SOFTWARE_READY:
-            self.bitcoind_node.software.update()
-
-    def handle_bitcoind_node_status_change(self, bitcoind_status):
-        if bitcoind_status == NodeStatus.SOFTWARE_READY:
-            self.lnd_node.software.update()
-
-    def handle_lnd_node_status_change(self, lnd_status):
-        if lnd_status == NodeStatus.SOFTWARE_READY:
-            sys.exit(0)
 
 
 if __name__ == '__main__':
