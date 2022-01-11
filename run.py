@@ -1,8 +1,10 @@
+import os
 import sys
 
 from node_launcher.constants import (
     OPERATING_SYSTEM, NODE_LAUNCHER_RELEASE
 )
+from node_launcher.except_hook import except_hook
 from node_launcher.gui.application import Application
 from node_launcher.app_logging import log
 from node_launcher.node_set.lib.constants import (
@@ -11,7 +13,8 @@ from node_launcher.node_set.lib.constants import (
 )
 
 if __name__ == '__main__':
-    # sys.excepthook = except_hook
+    if not os.environ.get('NODE_LAUNCHER_EXCEPT_HOOK'):
+        sys.excepthook = except_hook
 
     log.info(
         'constants',
