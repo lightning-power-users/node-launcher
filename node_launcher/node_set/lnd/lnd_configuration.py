@@ -100,10 +100,6 @@ class LndConfiguration(Configuration):
             'bitcoin',
             'mainnet'
         )
-        # self.config_snapshot = self.snapshot.copy()
-        # self.file_watcher.fileChanged.connect(self.config_file_changed)
-        # self.file_watcher.fileChanged.connect(
-        #     self.bitcoin_config_file_changed)
 
         hostname_file = os.path.join(TOR_SERVICE_PATH, 'hostname')
         with open(hostname_file, 'r') as f:
@@ -166,7 +162,7 @@ class LndConfiguration(Configuration):
         host = self.grpc_url.split(':')[0]
         port = self.grpc_url.split(':')[1]
         return f'lndconnect://{host}:{port}' \
-            f'?cert={self.tls_cert_path}&macaroon={self.admin_macaroon_path}'
+               f'?cert={self.tls_cert_path}&macaroon={self.admin_macaroon_path}'
 
     @property
     def lndconnect_qrcode(self):
