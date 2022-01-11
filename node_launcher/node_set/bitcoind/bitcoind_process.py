@@ -18,7 +18,7 @@ class BitcoindProcess(ManagedProcess):
         self.max_peer_block_height = 0
 
     def process_output_line(self, line: str):
-        if 'init message: Starting network threads...' in line:
+        if 'init message: Starting network threads' in line:
             self.update_status(NodeStatus.SYNCING)
         # elif 'init message: Done loading' in line:
         #     self.update_status(NodeStatus.SYNCED)
@@ -62,11 +62,8 @@ class BitcoindProcess(ManagedProcess):
                                     self.update_status(NodeStatus.SYNCED)
                                     return
                                 humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
-                                self.update_status(NodeStatus.SYNCING, f'syncing, ready {humanized}')
                     self.old_progress = new_progress
                     self.old_timestamp = new_timestamp
-        elif 'Syncing coinstatsindex with block chain' in line:
-            self.update_status(NodeStatus.SYNCING)
         elif 'Bitcoin Core is probably already running' in line:
             self.update_status(NodeStatus.RUNTIME_ERROR)
             self.notification.emit(
