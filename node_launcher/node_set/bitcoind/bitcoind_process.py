@@ -63,8 +63,10 @@ class BitcoindProcess(ManagedProcess):
                                     return
                                 humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
                                 self.update_status(NodeStatus.SYNCING, f'syncing, ready {humanized}')
-                        self.old_progress = new_progress
-                        self.old_timestamp = new_timestamp
+                    self.old_progress = new_progress
+                    self.old_timestamp = new_timestamp
+        elif 'Syncing coinstatsindex with block chain' in line:
+            self.update_status(NodeStatus.SYNCING)
         elif 'Bitcoin Core is probably already running' in line:
             self.update_status(NodeStatus.RUNTIME_ERROR)
             self.notification.emit(
