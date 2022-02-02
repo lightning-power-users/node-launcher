@@ -1,4 +1,5 @@
 from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5.QtWidgets import QVBoxLayout, QLabel
 from PyQt5.QtCore import (
     QCoreApplication,
     pyqtSignal as Signal,
@@ -43,7 +44,10 @@ from PyQt5.QtWidgets import (
     QTableWidgetItem,
     QAction,
     QTreeWidget,
-    QTreeWidgetItem
+    QTreeWidgetItem,
+    QProgressBar,
+    QWidgetAction,
+
 )
 from PyQt5.QtGui import (
     QPixmap,

@@ -1,15 +1,22 @@
 import re
+from dataclasses import dataclass
 from datetime import datetime
 
 import humanize
-from node_launcher.gui.qt import QObject, QTimer, Signal, QSystemTrayIcon
-
+from node_launcher.gui.qt import QTimer, Signal, QSystemTrayIcon
 
 from node_launcher.node_set.lib.managed_process import ManagedProcess
 from node_launcher.node_set.lib.node_status import NodeStatus
 
 
+@dataclass
+class ProgressBarStatus(object):
+    percentage: int
+    humanized_eta: str
+
+
 class LndProcess(ManagedProcess):
+    set_progress_bar = Signal(ProgressBarStatus)
 
     def __init__(self, binary: str, args):
         super().__init__(binary, args)
@@ -45,9 +52,11 @@ class LndProcess(ManagedProcess):
                 'Open Joule',
                 QSystemTrayIcon.Information
             )
-        elif 'Filtering blocks' in line:
-            new_height = int(line.split(' ')[5])
-            timestamp = line.split(' ')[0]
+        elif 'Filtering block' in line:
+            line_parts = line.split(' ')
+            height_line_part = line_parts[6]
+            new_height = int(height_line_part)
+            timestamp = ' '.join(line_parts[0:1])
             new_timestamp = datetime.strptime(
                 timestamp,
                 '%Y-%m-%d %H:%M:%S.%f'
@@ -56,11 +65,12 @@ class LndProcess(ManagedProcess):
                 change = new_height - self.old_height
                 if change:
                     timestamp_change = new_timestamp - self.old_timestamp
-                    total_left = 700000 - new_height
+                    total_left = 800000 - new_height
                     time_left = (total_left / change) * timestamp_change
                     humanized = humanize.naturaltime(-time_left, future=True)
                     description = f'syncing, ready {humanized}'
                     self.update_status(NodeStatus.SYNCING, description)
+                    self.set_progress_bar.emit(ProgressBarStatus(percentage=50, humanized_eta=humanized))
             self.old_height = new_height
             self.old_timestamp = new_timestamp
 
