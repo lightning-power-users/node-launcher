@@ -80,3 +80,4 @@ class LndProcess(ManagedProcess):
 
     def start(self):
         QTimer.singleShot(4000, self.delayed_start)
+

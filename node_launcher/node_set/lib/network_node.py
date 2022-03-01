@@ -18,7 +18,6 @@ class NetworkNode(QObject):
     node_software_name: NodeSoftwareName
 
     current_status: Optional[NodeStatus]
-    current_status_description: Optional[str]
 
     status = Signal(str)
 
@@ -28,7 +27,6 @@ class NetworkNode(QObject):
         super().__init__()
         self.node_software_name = node_software_name
         self.current_status = None
-        self.current_status_description = None
         self.software = Software(operating_system=operating_system, node_software_name=node_software_name)
         if node_software_name == LND:
             self.configuration = LndConfiguration(bitcoind_partition=bitcoind_partition)
@@ -79,13 +77,10 @@ class NetworkNode(QObject):
         log.debug(f'update_status {self.node_software_name} node',
                   network=self.node_software_name,
                   old_status=self.current_status,
-                  old_status_description=self.current_status_description,
-                  new_status=new_status,
-                  new_status_description=new_status)
+                  new_status=new_status)
         if not new_description:
             new_description = str(new_status)
         self.current_status = new_status
-        self.current_status_description = new_description
         self.status.emit(str(new_status))
         if new_status == NodeStatus.STOPPED and self.restart:
             self.update_status(NodeStatus.RESTART)

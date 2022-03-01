@@ -1,20 +1,20 @@
 import os
 from typing import Optional
 
-from node_launcher.gui.qt import QProcess, QByteArray, Signal, QProcessEnvironment, QSystemTrayIcon
-from node_launcher.constants import IS_LINUX
-
 from node_launcher.app_logging import log
+from node_launcher.constants import IS_LINUX
+from node_launcher.gui.qt import QProcess, QByteArray, Signal, QProcessEnvironment, QSystemTrayIcon
 from node_launcher.node_set.lib.node_status import NodeStatus
 
 
 class ManagedProcess(QProcess):
     status = Signal(str)
-    status_description = Signal(str)
     notification = Signal(str, str, QSystemTrayIcon.MessageIcon)
     log_line = Signal(str)
     current_status: Optional[str] = None
-    current_description: Optional [str] = None
+
+    remaining_time_signal = Signal(str)
+    percentage_progress_signal = Signal(int)
 
     def __init__(self, binary: str, args):
         super().__init__()
@@ -35,22 +35,15 @@ class ManagedProcess(QProcess):
             env.insert('LD_LIBRARY_PATH', os.path.abspath(os.path.join(binary, os.pardir)))
             self.setProcessEnvironment(env)
 
-    def update_status(self, new_status: NodeStatus, new_description: str = None):
-        if new_status == self.current_status and new_description is None:
+    def update_status(self, new_status: NodeStatus):
+        if new_status == self.current_status:
             return
         log.debug('update_status',
                   binary=self.binary,
                   new_status=new_status,
-                  new_description=new_description,
                   current_status=self.current_status)
-        if new_description is None:
-            new_description = str(new_status)
-        if new_description == self.current_description:
-            return
         self.current_status = str(new_status)
-        self.current_description = new_description
         self.status.emit(str(new_status))
-        self.status_description.emit(new_description)
 
     def process_output_line(self, line):
         pass

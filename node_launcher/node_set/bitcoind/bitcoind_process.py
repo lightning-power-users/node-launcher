@@ -1,4 +1,7 @@
+import re
 from datetime import datetime, timedelta
+from decimal import Decimal
+
 import humanize
 
 from node_launcher.gui.qt import QSystemTrayIcon
@@ -14,14 +17,9 @@ class BitcoindProcess(ManagedProcess):
 
         self.timestamp_changes = []
 
-        self.our_block_height = 0
-        self.max_peer_block_height = 0
-
     def process_output_line(self, line: str):
-        if 'init message: Starting network threads' in line:
-            self.update_status(NodeStatus.SYNCING)
-        # elif 'init message: Done loading' in line:
-        #     self.update_status(NodeStatus.SYNCED)
+        if 'Bitcoin Core version' in line:
+            self.update_status(NodeStatus.PROCESS_STARTED)
         elif 'Shutdown: done' in line:
             if self.expecting_shutdown:
                 return
@@ -31,39 +29,6 @@ class BitcoindProcess(ManagedProcess):
                 'Please check Bitcoin Output',
                 QSystemTrayIcon.Critical
             )
-        elif 'New outbound peer connected' in line:
-            peer_block_height = int(line.split(':')[-1].split(',')[-2].split('=')[-1])
-            if peer_block_height > self.max_peer_block_height:
-                self.max_peer_block_height = peer_block_height
-        elif 'UpdateTip' in line:
-            line_segments = line.split(' ')
-            timestamp = line_segments[0]
-            for line_segment in line_segments:
-                if 'height' in line_segment:
-                    self.our_block_height = int(line_segment.split('=')[-1])
-                elif 'progress' in line_segment:
-                    new_progress = round(float(line_segment.split('=')[-1]), 6)
-                    new_timestamp = datetime.strptime(
-                        timestamp,
-                        '%Y-%m-%dT%H:%M:%SZ'
-                    )
-                    if new_progress != self.old_progress:
-                        if self.old_progress is not None:
-                            change = new_progress - self.old_progress
-                            timestamp_change = new_timestamp - self.old_timestamp
-                            if change and timestamp_change:
-                                total_left = 1 - new_progress
-                                time_left = ((total_left / change) * timestamp_change).seconds
-                                self.timestamp_changes.append(time_left)
-                                if len(self.timestamp_changes) > 100:
-                                    self.timestamp_changes.pop(0)
-                                average_time_left = sum(self.timestamp_changes) / len(self.timestamp_changes)
-                                if new_progress > 0.99:
-                                    self.update_status(NodeStatus.SYNCED)
-                                    return
-                                humanized = humanize.naturaltime(-timedelta(seconds=average_time_left))
-                    self.old_progress = new_progress
-                    self.old_timestamp = new_timestamp
         elif 'Bitcoin Core is probably already running' in line:
             self.update_status(NodeStatus.RUNTIME_ERROR)
             self.notification.emit(
@@ -71,3 +36,38 @@ class BitcoindProcess(ManagedProcess):
                 'Bitcoin Core is already running',
                 QSystemTrayIcon.Critical
             )
+
+        match = re.search(r'progress=\d.\d\d\d\d\d\d', line)
+        if not match:
+            return
+        self.update_status(NodeStatus.PROCESS_STARTED)
+        line_segments = line.split(' ')
+        timestamp_string = line_segments[0]
+        parsed_timestamp = datetime.strptime(
+            timestamp_string,
+            '%Y-%m-%dT%H:%M:%SZ'
+        )
+        new_progress = Decimal(match.group().split('=')[-1])
+        if new_progress > Decimal('0.99'):
+            self.update_status(NodeStatus.SYNCED)
+            return
+        if not self.old_progress or new_progress == self.old_progress:
+            self.old_progress = new_progress
+            self.old_timestamp = parsed_timestamp
+            return
+        change = new_progress - self.old_progress
+        timestamp_change = parsed_timestamp - self.old_timestamp
+        if not change or not timestamp_change:
+            return
+        total_left = 1 - new_progress
+        remaining_time = ((total_left / change) * timestamp_change.seconds)
+        self.timestamp_changes.append(remaining_time)
+        if len(self.timestamp_changes) > 10:
+            self.timestamp_changes.pop(0)
+        average_remaining_time = sum(self.timestamp_changes) / len(self.timestamp_changes)
+        humanized_remaining_time = humanize.naturaltime(-timedelta(seconds=int(average_remaining_time)))
+        self.remaining_time_signal.emit(humanized_remaining_time)
+        percentage_progress = int(new_progress*100)
+        self.percentage_progress_signal.emit(percentage_progress)
+        self.old_progress = new_progress
+        self.old_timestamp = parsed_timestamp
