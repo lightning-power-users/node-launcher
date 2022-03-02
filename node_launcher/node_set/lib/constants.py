@@ -1,6 +1,6 @@
 from node_launcher.constants import LND, TOR, BITCOIND, WINDOWS, LINUX, DARWIN
 
-TARGET_TOR_RELEASE = '11.0.4'
+TARGET_TOR_RELEASE = '11.0.6'
 TARGET_WINDOWS_TOR_VERSION = '0.4.6.9'
 
 TARGET_BITCOIN_RELEASE = 'v22.0'
@@ -50,7 +50,7 @@ OS_SOFTWARE_METADATA = {
             'daemon_name': 'bitcoind'
         },
         LINUX: {
-            'compressed_suffix': '.tar.xz',
+            'compressed_suffix': '.tar.gz',
             'download_name': f'bitcoin-{TARGET_BITCOIN_RELEASE.replace("v", "")}-x86_64-linux-gnu',
             'release_version': TARGET_BITCOIN_RELEASE.replace('v', ''),
             'daemon_name': 'bitcoind'

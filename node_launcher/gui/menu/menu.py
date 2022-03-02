@@ -3,7 +3,6 @@ from node_launcher.gui.qt import QCoreApplication, QGuiApplication, QMenu, QProg
 
 from node_launcher.gui.reveal_directory import reveal_directory
 from node_launcher.node_set import NodeSet
-from node_launcher.node_set.lnd.lnd_process import ProgressBarStatus
 
 
 class Menu(QMenu):
@@ -18,8 +17,8 @@ class Menu(QMenu):
         self.bar.setMaximum(0)
         self.bar.setMinimum(0)
         layout.addWidget(self.bar)
-        self.eta_label = QLabel('Calculating remaining time...')
-        layout.addWidget(self.eta_label)
+        self.remaining_time_label = QLabel('Calculating remaining time...')
+        layout.addWidget(self.remaining_time_label)
         layout.setContentsMargins(20, 15, 20, 15)
         layout.setSpacing(5)
         widget.setLayout(layout)
@@ -30,8 +29,12 @@ class Menu(QMenu):
         self.addSeparator()
         # Todo: add debug
 
-        self.node_set.lnd_node.process.set_progress_bar.connect(
-            self.set_progress_bar
+        self.node_set.bitcoind_node.process.percentage_progress_signal.connect(
+            self.set_progress_bar_percentage
+        )
+
+        self.node_set.bitcoind_node.process.remaining_time_signal.connect(
+            self.set_progress_bar_remaining_time
         )
 
         # Quit
@@ -40,11 +43,13 @@ class Menu(QMenu):
             lambda _: QCoreApplication.exit(0)
         )
 
-    def set_progress_bar(self, status: ProgressBarStatus):
+    def set_progress_bar_percentage(self, percentage: int):
         self.bar.setMaximum(100)
         self.bar.setMinimum(0)
-        self.bar.setValue(status.percentage)
-        self.eta_label.setText(status.humanized_eta)
+        self.bar.setValue(percentage)
+
+    def set_progress_bar_remaining_time(self, remaining_time: str):
+        self.remaining_time_label.setText(remaining_time)
 
     def copy_rest_url(self):
         QGuiApplication.clipboard().setText(self.node_set.lnd_node.configuration.rest_url)

@@ -164,9 +164,9 @@ class Software(QObject):
                 else:
                     os.makedirs(self.metadata.downloaded_bin_path, exist_ok=True)
                     tor_files = [
-                        'libcrypto.so.1.0.0',
-                        'libevent-2.1.so.6',
-                        'libssl.so.1.0.0',
+                        'libcrypto.so.1.1',
+                        'libevent-2.1.so.7',
+                        'libssl.so.1.1',
                         'tor'
                     ]
                     for tor_file in tor_files:
